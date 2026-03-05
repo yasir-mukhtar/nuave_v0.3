@@ -75,6 +75,7 @@ Return JSON array of 10 objects:
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       max_tokens: 2000,
+      temperature: 0.7,
       messages: [
         {
           role: "system",
@@ -123,7 +124,7 @@ Return JSON array of 10 objects:
   let savedPrompts = rows;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from("prompts")
       .insert(rows)

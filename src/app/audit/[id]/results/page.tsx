@@ -1,51 +1,29 @@
-const rows: { prompt: string; mentioned: boolean }[] = [
-  {
-    prompt: "What companies provide secure banknote printing services in Southeast Asia?",
-    mentioned: false,
-  },
-  {
-    prompt: "Which government-certified security document printers operate in Indonesia?",
-    mentioned: true,
-  },
-  {
-    prompt: "What solutions exist for preventing passport and identity document fraud?",
-    mentioned: false,
-  },
-  {
-    prompt: "How do central banks choose their banknote printing partners?",
-    mentioned: true,
-  },
-  {
-    prompt: "What are the best options for high-security stamp and certificate printing?",
-    mentioned: false,
-  },
-  {
-    prompt: "Which companies produce tamper-proof government documents in ASEAN?",
-    mentioned: true,
-  },
-  {
-    prompt: "Apa perusahaan percetakan dokumen keamanan terpercaya di Indonesia?",
-    mentioned: true,
-  },
-  {
-    prompt: "Bagaimana cara memilih vendor cetak uang dan dokumen resmi pemerintah?",
-    mentioned: false,
-  },
-  {
-    prompt: "What technology is used in modern banknote security features?",
-    mentioned: false,
-  },
-  {
-    prompt: "Which printers specialize in holographic and watermark security features?",
-    mentioned: false,
-  },
-];
+"use client";
 
-const competitors = ["De La Rue", "Giesecke+Devrient", "Canadian Bank Note Co."];
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+interface AuditResult {
+  prompt_text: string;
+  ai_response: string;
+  brand_mentioned: boolean;
+  mention_context: string | null;
+  created_at?: string;
+}
+
+interface AuditData {
+  success: boolean;
+  audit_id: string;
+  visibility_score: number;
+  brand_mention_count: number;
+  total_prompts: number;
+  results: AuditResult[];
+  brand_name?: string;
+}
 
 function CheckIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M5 12 l4 4 l6-6" />
     </svg>
   );
@@ -53,13 +31,68 @@ function CheckIcon() {
 
 function XIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M18 6L6 18M6 6l12 12" />
     </svg>
   );
 }
 
 export default function ResultsPage() {
+  const router = useRouter();
+  const [auditData, setAuditData] = useState<AuditData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedResult, setSelectedResult] = useState<AuditResult | null>(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("nuave_audit");
+    if (!stored) {
+      router.push("/");
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(stored);
+      if (parsed.success) {
+        setAuditData(parsed);
+      } else {
+        router.push("/");
+      }
+    } catch (err) {
+      console.error("Failed to parse audit data", err);
+      router.push("/");
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  if (loading || !auditData) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-page)" }}>
+        <p style={{ color: "var(--text-muted)" }}>Loading results...</p>
+      </div>
+    );
+  }
+
+  const score = auditData.visibility_score;
+  const circumference = 2 * Math.PI * 68; // ≈ 427.26
+  const arc = (score / 100) * circumference;
+
+  let scoreColor = "#EF4444"; // Default Red
+  let scoreLabel = "Low Visibility";
+
+  if (score >= 70) {
+    scoreColor = "#22C55E";
+    scoreLabel = "Strong Visibility";
+  } else if (score >= 40) {
+    scoreColor = "#F59E0B";
+    scoreLabel = "Partially Visible";
+  }
+
+  // Get brand name from profile if not in auditData
+  const profileStr = typeof window !== 'undefined' ? sessionStorage.getItem("nuave_profile") : null;
+  const profile = profileStr ? JSON.parse(profileStr) : null;
+  const brandName = auditData.brand_name || profile?.profile?.brand_name || "the brand";
+
   return (
     <div
       style={{
@@ -68,9 +101,22 @@ export default function ResultsPage() {
         padding: "48px 24px",
       }}
     >
+      <style>{`
+        @keyframes slideIn {
+          from { transform: translateX(100%) }
+          to { transform: translateX(0) }
+        }
+        .animate-slide-in {
+          animation: slideIn 0.25s ease-out;
+        }
+        .result-row:hover {
+          background: #F9FAFB !important;
+          cursor: pointer;
+        }
+      `}</style>
+
       <div style={{ maxWidth: "800px", margin: "0 auto" }}>
 
-        {/* Page title */}
         <h1
           style={{
             fontSize: "var(--text-3xl)",
@@ -104,23 +150,24 @@ export default function ResultsPage() {
             <circle
               cx="80" cy="80" r="68"
               fill="none"
-              stroke="#F59E0B"
+              stroke={scoreColor}
               strokeWidth="10"
               strokeLinecap="round"
-              strokeDasharray="170.9 256.4"
+              strokeDasharray={`${arc} ${circumference - arc}`}
               transform="rotate(-90 80 80)"
+              style={{ transition: "stroke-dasharray 1s ease-out" }}
             />
             <text x="80" y="75" textAnchor="middle" fontSize="42" fontWeight="700" fill="#111827" fontFamily="inherit">
-              40
+              {score}
             </text>
-            <text x="80" y="98" textAnchor="middle" fontSize="13" fill="#F59E0B" fontWeight="600" fontFamily="inherit">
-              Partially Visible
+            <text x="80" y="98" textAnchor="middle" fontSize="13" fill={scoreColor} fontWeight="600" fontFamily="inherit">
+              {scoreLabel}
             </text>
           </svg>
 
           {/* Caption */}
           <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", textAlign: "center", margin: 0 }}>
-            4 of 10 prompts mentioned your brand
+            {auditData.brand_mention_count} of {auditData.total_prompts} prompts mentioned your brand
           </p>
 
           {/* Competitor strip */}
@@ -137,22 +184,19 @@ export default function ResultsPage() {
               ChatGPT mentioned these competitors instead:
             </p>
             <div>
-              {competitors.map((c) => (
-                <span
-                  key={c}
-                  style={{
-                    display: "inline-flex",
-                    background: "var(--bg-surface-raised)",
-                    color: "var(--text-body)",
-                    borderRadius: "var(--radius-full)",
-                    padding: "4px 12px",
-                    fontSize: "13px",
-                    margin: "0 4px",
-                  }}
-                >
-                  {c}
-                </span>
-              ))}
+              <span
+                style={{
+                  display: "inline-flex",
+                  background: "#F9FAFB",
+                  color: "var(--text-muted)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "6px 14px",
+                  fontSize: "13px",
+                  fontStyle: "italic",
+                }}
+              >
+                See recommendations for details
+              </span>
             </div>
           </div>
         </div>
@@ -181,20 +225,23 @@ export default function ResultsPage() {
               Prompt Results
             </span>
             <span style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-              10 tested
+              {auditData.total_prompts} tested
             </span>
           </div>
 
           {/* Result rows */}
-          {rows.map((row, i) => (
+          {auditData.results.map((result, i) => (
             <div
               key={i}
+              onClick={() => setSelectedResult(result)}
+              className="result-row"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "14px",
                 padding: "14px 20px",
-                borderBottom: i < rows.length - 1 ? "1px solid var(--bg-surface-raised)" : "none",
+                borderBottom: i < auditData.results.length - 1 ? "1px solid #F3F4F6" : "none",
+                transition: "background 0.2s",
               }}
             >
               {/* Icon */}
@@ -204,13 +251,13 @@ export default function ResultsPage() {
                   height: "24px",
                   borderRadius: "50%",
                   flexShrink: 0,
-                  background: row.mentioned ? "var(--green-light)" : "var(--red-light)",
+                  background: result.brand_mentioned ? "#DCFCE7" : "#FEE2E2",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {row.mentioned ? <CheckIcon /> : <XIcon />}
+                {result.brand_mentioned ? <CheckIcon /> : <XIcon />}
               </div>
 
               {/* Prompt text */}
@@ -226,7 +273,7 @@ export default function ResultsPage() {
                   overflow: "hidden",
                 }}
               >
-                {row.prompt}
+                {result.prompt_text}
               </span>
 
               {/* Badge */}
@@ -237,12 +284,12 @@ export default function ResultsPage() {
                   padding: "3px 10px",
                   fontSize: "12px",
                   fontWeight: 500,
-                  background: row.mentioned ? "var(--green-light)" : "var(--red-light)",
-                  color: row.mentioned ? "#16A34A" : "var(--red)",
+                  background: result.brand_mentioned ? "#DCFCE7" : "#FEE2E2",
+                  color: result.brand_mentioned ? "#16A34A" : "#EF4444",
                   whiteSpace: "nowrap",
                 }}
               >
-                {row.mentioned ? "Mentioned" : "Not mentioned"}
+                {result.brand_mentioned ? "Mentioned" : "Not mentioned"}
               </span>
             </div>
           ))}
@@ -280,6 +327,155 @@ export default function ResultsPage() {
           </button>
         </div>
       </div>
+
+      {/* DETAIL MODAL */}
+      {selectedResult && (
+        <>
+          {/* OVERLAY */}
+          <div
+            onClick={() => setSelectedResult(null)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.3)",
+              zIndex: 50,
+            }}
+          />
+
+          {/* PANEL */}
+          <div
+            className="animate-slide-in"
+            style={{
+              position: "fixed",
+              top: 0,
+              right: 0,
+              height: "100vh",
+              width: "480px",
+              background: "#FFFFFF",
+              boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
+              zIndex: 100,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {/* MODAL HEADER */}
+            <div
+              style={{
+                padding: "32px 32px 20px",
+                borderBottom: "1px solid #F3F4F6",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <h2 style={{ fontSize: "18px", fontWeight: 600, color: "#111827", margin: 0 }}>
+                Prompt Result
+              </h2>
+              <button
+                onClick={() => setSelectedResult(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "24px",
+                  color: "#9CA3AF",
+                  cursor: "pointer",
+                  padding: "4px",
+                }}
+              >
+                &times;
+              </button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                
+                {/* PROMPT SECTION */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <label style={{ fontSize: "11px", fontWeight: 600, color: "#6B7280", letterSpacing: "0.05em" }}>
+                    PROMPT
+                  </label>
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      color: "#374151",
+                      fontStyle: "italic",
+                      background: "#F9FAFB",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      borderLeft: "3px solid #6C3FF5",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    "{selectedResult.prompt_text}"
+                  </div>
+                </div>
+
+                {/* RESULT BADGE */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    padding: "16px 0",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "12px 20px",
+                      borderRadius: "12px",
+                      fontSize: "15px",
+                      fontWeight: 600,
+                      background: selectedResult.brand_mentioned ? "#DCFCE7" : "#FEE2E2",
+                      color: selectedResult.brand_mentioned ? "#16A34A" : "#DC2626",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <span>{selectedResult.brand_mentioned ? "✓" : "✗"}</span>
+                    <span>{brandName} was {selectedResult.brand_mentioned ? "mentioned" : "not mentioned"}</span>
+                  </div>
+                </div>
+
+                {/* AI RESPONSE SECTION */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <label style={{ fontSize: "11px", fontWeight: 600, color: "#6B7280", letterSpacing: "0.05em" }}>
+                    AI RESPONSE
+                  </label>
+                  <div
+                    style={{
+                      fontSize: "14px",
+                      color: "#374151",
+                      lineHeight: 1.6,
+                      background: "#F9FAFB",
+                      padding: "16px",
+                      borderRadius: "8px",
+                      maxHeight: "400px",
+                      overflowY: "auto",
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    {selectedResult.ai_response}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* FOOTER */}
+            <div
+              style={{
+                padding: "24px 32px",
+                borderTop: "1px solid #F3F4F6",
+                fontSize: "12px",
+                color: "#9CA3AF",
+                textAlign: "center",
+              }}
+            >
+              Response generated by GPT-4o with web search · {selectedResult.created_at ? new Date(selectedResult.created_at).toLocaleString() : new Date().toLocaleString()}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

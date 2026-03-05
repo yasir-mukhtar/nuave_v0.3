@@ -1,17 +1,15 @@
 "use client";
 
-const prompts = [
-  "What companies provide secure banknote printing services in Southeast Asia?",
-  "Which government-certified security document printers operate in Indonesia?",
-  "What solutions exist for preventing passport and identity document fraud?",
-  "How do central banks choose their banknote printing partners?",
-  "What are the best options for high-security stamp and certificate printing?",
-  "Which companies produce tamper-proof government documents in ASEAN?",
-  "Apa perusahaan percetakan dokumen keamanan terpercaya di Indonesia?",
-  "Bagaimana cara memilih vendor cetak uang dan dokumen resmi pemerintah?",
-  "What technology is used in modern banknote security features?",
-  "Which printers specialize in holographic and watermark security features?",
-];
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+interface Prompt {
+  id: string;
+  prompt_text: string;
+  stage: string;
+  language: string;
+  workspace_id?: string;
+}
 
 function PencilIcon() {
   return (
@@ -50,6 +48,90 @@ function ProgressBar({ active }: { active: number }) {
 }
 
 export default function PromptsPage() {
+  const router = useRouter();
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedPrompts = sessionStorage.getItem("nuave_prompts");
+    if (!storedPrompts) {
+      router.push("/");
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(storedPrompts);
+      if (parsed.success && Array.isArray(parsed.prompts)) {
+        setPrompts(parsed.prompts);
+      } else {
+        router.push("/");
+      }
+    } catch (err) {
+      console.error("Failed to parse prompts from sessionStorage", err);
+      router.push("/");
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  const handleRunAudit = () => {
+    setError(null);
+
+    try {
+      const profileStr = sessionStorage.getItem("nuave_profile");
+      const profileData = profileStr ? JSON.parse(profileStr) : null;
+      
+      const workspace_id = profileData?.workspace_id || crypto.randomUUID();
+      const brand_name = profileData?.profile?.brand_name || "";
+
+      const { prompts: storedPrompts } = JSON.parse(
+        sessionStorage.getItem("nuave_prompts") || '{"prompts":[]}'
+      );
+
+      // Start audit in background (don't await)
+      fetch("/api/run-audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          workspace_id, 
+          prompts: storedPrompts,
+          brand_name 
+        }),
+      }).then(async (res) => {
+        const data = await res.json();
+        if (data.success) {
+          sessionStorage.setItem("nuave_audit", JSON.stringify(data));
+        }
+      }).catch(err => {
+        console.error("Audit error:", err);
+      });
+
+      // Immediately redirect to running screen
+      router.push("/audit/temp/running");
+      
+    } catch (err: any) {
+      console.error("Audit error:", err);
+      setError(err.message || "An unexpected error occurred during the audit.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--bg-page)",
+        }}
+      >
+        <p style={{ color: "var(--text-muted)" }}>Loading prompts...</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <style>{`
@@ -80,7 +162,6 @@ export default function PromptsPage() {
         }}
       >
         <div style={{ maxWidth: "680px", margin: "0 auto" }}>
-
           {/* Top bar */}
           <div
             style={{
@@ -92,6 +173,7 @@ export default function PromptsPage() {
           >
             <button
               className="back-btn"
+              onClick={() => router.back()}
               style={{
                 fontSize: "14px",
                 color: "var(--text-muted)",
@@ -147,11 +229,27 @@ export default function PromptsPage() {
             </p>
           </div>
 
+          {error && (
+            <div
+              style={{
+                background: "#FEF2F2",
+                border: "1px solid #FECACA",
+                borderRadius: "var(--radius-md)",
+                padding: "12px 16px",
+                marginBottom: "24px",
+                color: "#991B1B",
+                fontSize: "var(--text-sm)",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           {/* Prompt list */}
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {prompts.map((prompt, i) => (
+            {prompts.map((prompt, index) => (
               <div
-                key={i}
+                key={prompt.id || index}
                 className="prompt-row"
                 style={{
                   background: "#ffffff",
@@ -172,7 +270,7 @@ export default function PromptsPage() {
                     flex: 1,
                   }}
                 >
-                  {prompt}
+                  {prompt.prompt_text}
                 </span>
                 <button
                   className="pencil-btn"
@@ -211,6 +309,7 @@ export default function PromptsPage() {
         }}
       >
         <button
+          onClick={handleRunAudit}
           style={{
             fontSize: "var(--text-base)",
             fontWeight: 600,
@@ -220,6 +319,7 @@ export default function PromptsPage() {
             borderRadius: "var(--radius-md)",
             padding: "10px 24px",
             cursor: "pointer",
+            transition: "all 0.2s",
           }}
         >
           Show results →

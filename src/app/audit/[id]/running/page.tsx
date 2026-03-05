@@ -1,190 +1,169 @@
 "use client";
 
-const prompts = [
-  "What companies provide secure banknote printing services in Southeast Asia?",
-  "Which government-certified security document printers operate in Indonesia?",
-  "What solutions exist for preventing passport and identity document fraud?",
-  "How do central banks choose their banknote printing partners?",
-  "What are the best options for high-security stamp and certificate printing?",
-  "Which companies produce tamper-proof government documents in ASEAN?",
-  "Apa perusahaan percetakan dokumen keamanan terpercaya di Indonesia?",
-  "Bagaimana cara memilih vendor cetak uang dan dokumen resmi pemerintah?",
-  "What technology is used in modern banknote security features?",
-  "Which printers specialize in holographic and watermark security features?",
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+
+const statusMessages = [
+  "Testing awareness queries...",
+  "Testing consideration queries...",
+  "Testing decision queries...",
+  "Analyzing brand mentions...",
+  "Calculating your visibility score...",
 ];
 
-const DONE_COUNT = 7;
-const ACTIVE_INDEX = 7; // 0-based, row 8
-
-function getRowState(index: number): "done" | "active" | "pending" {
-  if (index < DONE_COUNT) return "done";
-  if (index === ACTIVE_INDEX) return "active";
-  return "pending";
-}
-
 export default function AuditRunningPage() {
+  const router = useRouter();
+  const params = useParams();
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [progressIndex, setProgressIndex] = useState(0);
+
+  // 1. Initial check and redirect
+  useEffect(() => {
+    const checkAudit = () => {
+      const stored = sessionStorage.getItem("nuave_audit");
+      if (stored) {
+        try {
+          const data = JSON.parse(stored);
+          if (data.audit_id) {
+            router.push(`/audit/${data.audit_id}/results`);
+            return true;
+          }
+        } catch (err) {
+          console.error("Failed to parse audit data", err);
+        }
+      }
+      return false;
+    };
+
+    if (checkAudit()) return;
+
+    // 2. Polling for results every 2 seconds
+    const pollInterval = setInterval(() => {
+      if (checkAudit()) {
+        clearInterval(pollInterval);
+      }
+    }, 2000);
+
+    return () => clearInterval(pollInterval);
+  }, [router]);
+
+  // 3. Cycling status messages every 3 seconds
+  useEffect(() => {
+    const messageInterval = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % statusMessages.length);
+    }, 3000);
+
+    return () => clearInterval(messageInterval);
+  }, []);
+
+  // 4. Progress dots every 3 seconds (matching 30s total estimate for 10 dots)
+  useEffect(() => {
+    const dotInterval = setInterval(() => {
+      setProgressIndex((prev) => (prev < 10 ? prev + 1 : prev));
+    }, 3000);
+
+    return () => clearInterval(dotInterval);
+  }, []);
+
   return (
     <>
       <style>{`
         @keyframes pulse {
-          0%, 100% { opacity: 0.8; transform: scale(1); }
-          50%       { opacity: 0.2; transform: scale(1.06); }
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(1.05); }
         }
-        @keyframes dotPulse {
-          from { opacity: 1; }
-          to   { opacity: 0.3; }
+        .pulsing-circle {
+          animation: pulse 1.5s ease-in-out infinite;
         }
       `}</style>
 
       <div
         style={{
-          minHeight: "100vh",
-          background: "var(--bg-page)",
+          position: "fixed",
+          inset: 0,
+          background: "#ffffff",
+          zIndex: 9999,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          padding: "40px 24px",
+          fontFamily: "var(--font-geist-sans), sans-serif",
         }}
       >
         <div
           style={{
-            maxWidth: "480px",
-            width: "100%",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "32px",
+            maxWidth: "400px",
+            width: "100%",
+            textAlign: "center",
+            gap: "40px",
           }}
         >
-          {/* 1. Pulsing circle */}
-          <div style={{ position: "relative", width: "200px", height: "200px" }}>
-            {/* Outer ring */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                border: "3px solid var(--purple)",
-                animation: "pulse 2s ease-in-out infinite",
-              }}
-            />
-            {/* Inner icon */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--purple)",
-              }}
-            >
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            </div>
-          </div>
-
-          {/* 2. Text block */}
+          {/* TOP SECTION - Animated pulsing circle */}
           <div
+            className="pulsing-circle"
             style={{
-              textAlign: "center",
+              width: "200px",
+              height: "200px",
+              borderRadius: "50%",
+              border: "3px solid #6C3FF5",
               display: "flex",
-              flexDirection: "column",
-              gap: "8px",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "64px",
             }}
           >
-            <h1
-              style={{
-                fontSize: "var(--text-xl)",
-                fontWeight: 700,
-                color: "var(--text-heading)",
-                margin: 0,
-              }}
-            >
-              Testing your brand visibility...
-            </h1>
+            🧠
+          </div>
+
+          {/* MIDDLE SECTION - Status text */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <h1
+                style={{
+                  fontSize: "24px",
+                  fontWeight: 700,
+                  color: "#111827",
+                  margin: 0,
+                }}
+              >
+                Asking ChatGPT your questions...
+              </h1>
+              <p style={{ fontSize: "16px", color: "#6B7280", margin: 0 }}>
+                This takes about 30 seconds
+              </p>
+            </div>
+            
             <p
+              key={messageIndex}
               style={{
-                fontSize: "var(--text-base)",
-                color: "var(--text-muted)",
+                fontSize: "14px",
+                fontWeight: 500,
+                color: "#6C3FF5",
                 margin: 0,
+                height: "20px",
               }}
             >
-              Asking ChatGPT 10 targeted questions about your brand
-            </p>
-            <p
-              style={{
-                fontSize: "var(--text-sm)",
-                color: "var(--text-placeholder)",
-                margin: "4px 0 0",
-              }}
-            >
-              7 / 10 prompts completed
+              {statusMessages[messageIndex]}
             </p>
           </div>
 
-          {/* 3. Prompt mini-list */}
-          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "6px" }}>
-            {prompts.map((prompt, i) => {
-              const state = getRowState(i);
-              return (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    height: "36px",
-                    padding: "0 4px",
-                  }}
-                >
-                  {/* Status dot */}
-                  <div
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      flexShrink: 0,
-                      background:
-                        state === "done"
-                          ? "var(--green)"
-                          : state === "active"
-                          ? "var(--purple)"
-                          : "var(--border-default)",
-                      animation: state === "active" ? "dotPulse 1s ease-in-out infinite alternate" : "none",
-                    }}
-                  />
-                  {/* Prompt text */}
-                  <span
-                    style={{
-                      fontSize: "var(--text-sm)",
-                      fontWeight: state === "active" ? 500 : 400,
-                      color:
-                        state === "done"
-                          ? "var(--text-muted)"
-                          : state === "active"
-                          ? "var(--text-body)"
-                          : "var(--text-placeholder)",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      flex: 1,
-                    }}
-                  >
-                    {prompt}
-                  </span>
-                </div>
-              );
-            })}
+          {/* BOTTOM SECTION - Progress dots */}
+          <div style={{ display: "flex", gap: "8px" }}>
+            {[...Array(10)].map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: "12px",
+                  height: "12px",
+                  borderRadius: "50%",
+                  background: i < progressIndex ? "#6C3FF5" : "#E5E7EB",
+                  transition: "background 0.3s ease",
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
