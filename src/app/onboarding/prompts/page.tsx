@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { IconPencil, IconArrowLeft, IconRefresh, IconArrowRight } from '@tabler/icons-react';
 
 interface Prompt {
   id: string;
@@ -9,24 +10,6 @@ interface Prompt {
   stage: string;
   language: string;
   workspace_id?: string;
-}
-
-function PencilIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-    </svg>
-  );
 }
 
 function ProgressBar({ active }: { active: number }) {
@@ -100,8 +83,9 @@ export default function PromptsPage() {
         }),
       }).then(async (res) => {
         const data = await res.json();
-        if (data.success) {
-          sessionStorage.setItem("nuave_audit", JSON.stringify(data));
+        if (data.audit_id) {
+          // Save the audit_id immediately for the running screen
+          sessionStorage.setItem("nuave_pending_audit_id", data.audit_id);
         }
       }).catch(err => {
         console.error("Audit error:", err);
@@ -182,9 +166,12 @@ export default function PromptsPage() {
                 cursor: "pointer",
                 padding: 0,
                 transition: "color var(--transition-fast)",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
               }}
             >
-              ← Back
+              <IconArrowLeft size={18} stroke={1.5} /> Back
             </button>
 
             <ProgressBar active={4} />
@@ -199,9 +186,12 @@ export default function PromptsPage() {
                 cursor: "pointer",
                 padding: 0,
                 transition: "color var(--transition-fast)",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
               }}
             >
-              ↺ Regenerate
+              <IconRefresh size={18} stroke={1.5} /> Regenerate
             </button>
           </div>
 
@@ -284,7 +274,7 @@ export default function PromptsPage() {
                     alignItems: "center",
                   }}
                 >
-                  <PencilIcon />
+                  <IconPencil size={18} stroke={1.5} />
                 </button>
               </div>
             ))}
@@ -311,6 +301,9 @@ export default function PromptsPage() {
         <button
           onClick={handleRunAudit}
           style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
             fontSize: "var(--text-base)",
             fontWeight: 600,
             color: "#ffffff",
@@ -322,7 +315,7 @@ export default function PromptsPage() {
             transition: "all 0.2s",
           }}
         >
-          Show results →
+          Show results <IconArrowRight size={18} stroke={1.5} />
         </button>
       </div>
     </>

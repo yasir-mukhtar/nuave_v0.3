@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       brandName = workspace?.brand_name || 'the brand';
     }
 
-    // Ensure workspace record exists (Foreign Key Constraint Fix)
+    // Ensure workspace record exists
     const { data: existingWorkspace } = await supabase
       .from('workspaces')
       .select('id')
@@ -80,17 +80,62 @@ export async function POST(req: NextRequest) {
 
     auditId = audit.id;
 
-    // STEP 3 — Run each prompt sequentially through GPT-4o
-    const results = [];
-    let totalBrandMentionCount = 0;
+    // STEP 2 — Start background processing
+    const backgroundProcess = processAuditInBackground(
+      auditId,
+      workspace_id,
+      prompts,
+      brandName
+    );
 
-    // Detection preparation
+    // Use waitUntil if available (Edge Runtime)
+    if (typeof (globalThis as any).EdgeRuntime !== 'undefined') {
+      // @ts-ignore
+      globalThis.waitUntil?.(backgroundProcess);
+    }
+
+    // STEP 3 — Return response immediately
+    return NextResponse.json({
+      success: true,
+      audit_id: auditId,
+      status: 'running'
+    });
+
+  } catch (error: any) {
+    console.error('Audit Runner API Error:', error);
+    
+    if (auditId) {
+      await supabase
+        .from('audits')
+        .update({ status: 'failed' })
+        .eq('id', auditId);
+    }
+
+    return NextResponse.json(
+      { success: false, error: error.message || 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+
+async function processAuditInBackground(
+  auditId: string,
+  workspaceId: string,
+  prompts: PromptRequest[],
+  brandName: string
+) {
+  const supabase = createSupabaseAdminClient();
+  let totalBrandMentionCount = 0;
+
+  try {
     const brandLower = brandName.trim().toLowerCase();
     const brandNoSpaces = brandLower.replace(/\s+/g, '');
 
-    for (const prompt of prompts) {
+    for (let i = 0; i < prompts.length; i++) {
+      const prompt = prompts[i];
+      
       // 500ms delay between calls
-      if (results.length > 0) {
+      if (i > 0) {
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
@@ -115,45 +160,37 @@ export async function POST(req: NextRequest) {
               search_context_size: "medium"
             }]
           })
-        })
-        const data = await response.json()
+        });
+
+        const data = await response.json();
 
         // Extract text from output array
-        let responseText = ''
+        let responseText = '';
         if (data.output && Array.isArray(data.output)) {
           for (const item of data.output) {
             if (item.type === 'message' && item.content) {
               for (const content of item.content) {
                 if (content.type === 'output_text' && content.text) {
-                  responseText = content.text
-                  break
+                  responseText = content.text;
+                  break;
                 }
               }
             }
           }
         }
 
-        console.log('Response length:', responseText.length)
-
         const responseLower = responseText.toLowerCase();
 
-        // 1. Basic case-insensitive check
+        // Brand mention detection logic
         let brandMentioned = responseLower.includes(brandLower);
-        
-        // 2. Check for variation without spaces (e.g., "Webflow" vs "Web flow")
         if (!brandMentioned && brandLower.includes(' ')) {
           brandMentioned = responseLower.includes(brandNoSpaces);
         }
-
-        console.log('Checking for brand:', brandName);
-        console.log('Response preview:', responseText.substring(0, 200));
-        console.log('Brand mentioned:', brandMentioned);
 
         let mentionContext = null;
         if (brandMentioned) {
           totalBrandMentionCount++;
           
-          // Find the index for context extraction
           let index = responseLower.indexOf(brandLower);
           let matchLength = brandLower.length;
 
@@ -163,17 +200,15 @@ export async function POST(req: NextRequest) {
           }
 
           if (index !== -1) {
-            // Extract 200 chars around the mention (100 before, 100 after)
             const start = Math.max(0, index - 100);
             const end = Math.min(responseText.length, index + matchLength + 100);
             mentionContext = responseText.substring(start, end);
           }
         }
 
-        // Validate prompt.id as UUID before inserting
         const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(prompt.id);
 
-        const { data: resultRecord, error: resultError } = await supabase
+        await supabase
           .from('audit_results')
           .insert({
             audit_id: auditId,
@@ -185,38 +220,19 @@ export async function POST(req: NextRequest) {
             mention_sentiment: 'positive', 
             competitor_mentions: [],
             position_rank: null
-          })
-          .select()
-          .single();
+          });
 
-        if (resultError) {
-          console.error(`Failed to insert audit result for prompt ${prompt.id}:`, resultError);
-        }
-
-        results.push(resultRecord || {
-          prompt_id: prompt.id,
-          prompt_text: prompt.prompt_text,
-          ai_response: responseText,
-          brand_mentioned: brandMentioned,
-          mention_context: mentionContext
-        });
-
-      } catch (promptError: any) {
+      } catch (promptError) {
         console.error(`Error processing prompt ${prompt.id}:`, promptError);
-        results.push({
-          prompt_id: prompt.id,
-          prompt_text: prompt.prompt_text,
-          error: promptError.message || 'Error calling AI'
-        });
       }
     }
 
-    // STEP 4 — Update audit record when complete
+    // Update audit record when complete
     const visibilityScore = prompts.length > 0 
       ? Math.round((totalBrandMentionCount / prompts.length) * 100) 
       : 0;
 
-    const { error: updateError } = await supabase
+    await supabase
       .from('audits')
       .update({
         status: 'complete',
@@ -226,33 +242,11 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', auditId);
 
-    if (updateError) {
-      console.error('Failed to update audit record completion status:', updateError);
-    }
-
-    // STEP 5 — Return response
-    return NextResponse.json({
-      success: true,
-      audit_id: auditId,
-      visibility_score: visibilityScore,
-      brand_mention_count: totalBrandMentionCount,
-      total_prompts: prompts.length,
-      results: results
-    });
-
-  } catch (error: any) {
-    console.error('Audit Runner API Error:', error);
-    
-    if (auditId) {
-      await supabase
-        .from('audits')
-        .update({ status: 'failed' })
-        .eq('id', auditId);
-    }
-
-    return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error('Background audit process failed:', error);
+    await supabase
+      .from('audits')
+      .update({ status: 'failed' })
+      .eq('id', auditId);
   }
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { IconBrain, IconAlertTriangle } from '@tabler/icons-react';
 
 const statusMessages = [
   "Testing awareness queries...",
@@ -16,38 +17,65 @@ export default function AuditRunningPage() {
   const params = useParams();
   const [messageIndex, setMessageIndex] = useState(0);
   const [progressIndex, setProgressIndex] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
-  // 1. Initial check and redirect
   useEffect(() => {
-    const checkAudit = () => {
-      const stored = sessionStorage.getItem("nuave_audit");
-      if (stored) {
-        try {
-          const data = JSON.parse(stored);
-          if (data.audit_id) {
-            router.push(`/audit/${data.audit_id}/results`);
-            return true;
-          }
-        } catch (err) {
-          console.error("Failed to parse audit data", err);
+    let auditId = params.id as string;
+    
+    // Polling function to get audit_id if missing or poll status
+    const pollStatus = async (id: string) => {
+      try {
+        const res = await fetch(`/api/audit/${id}/status`);
+        const data = await res.json();
+        
+        if (data.status === 'complete') {
+          // Save full results to sessionStorage for results page
+          sessionStorage.setItem('nuave_audit', JSON.stringify(data));
+          router.push(`/audit/${id}/results`);
+          return true; // Stop polling
         }
+        
+        if (data.status === 'failed') {
+          setError('Audit failed. Please try again.');
+          return true; // Stop polling
+        }
+      } catch (err) {
+        console.error('Polling error:', err);
       }
-      return false;
+      return false; // Continue polling
     };
 
-    if (checkAudit()) return;
+    let intervalId: NodeJS.Timeout;
 
-    // 2. Polling for results every 2 seconds
-    const pollInterval = setInterval(() => {
-      if (checkAudit()) {
-        clearInterval(pollInterval);
-      }
-    }, 2000);
+    const startPolling = (id: string) => {
+      intervalId = setInterval(async () => {
+        const shouldStop = await pollStatus(id);
+        if (shouldStop) clearInterval(intervalId);
+      }, 3000);
+    };
 
-    return () => clearInterval(pollInterval);
-  }, [router]);
+    // 1. Resolve auditId
+    if (auditId === 'temp') {
+      const checkPendingId = () => {
+        const pendingId = sessionStorage.getItem('nuave_pending_audit_id');
+        if (pendingId) {
+          startPolling(pendingId);
+        } else {
+          // Retry in 2 seconds if not found yet
+          setTimeout(checkPendingId, 2000);
+        }
+      };
+      checkPendingId();
+    } else if (auditId) {
+      startPolling(auditId);
+    }
 
-  // 3. Cycling status messages every 3 seconds
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [router, params.id]);
+
+  // Cycling status messages every 3 seconds
   useEffect(() => {
     const messageInterval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % statusMessages.length);
@@ -56,7 +84,7 @@ export default function AuditRunningPage() {
     return () => clearInterval(messageInterval);
   }, []);
 
-  // 4. Progress dots every 3 seconds (matching 30s total estimate for 10 dots)
+  // Progress dots every 3 seconds (matching 30s total estimate for 10 dots)
   useEffect(() => {
     const dotInterval = setInterval(() => {
       setProgressIndex((prev) => (prev < 10 ? prev + 1 : prev));
@@ -74,6 +102,15 @@ export default function AuditRunningPage() {
         }
         .pulsing-circle {
           animation: pulse 1.5s ease-in-out infinite;
+        }
+        @media (max-width: 768px) {
+          .pulsing-circle {
+            width: 150px !important;
+            height: 150px !important;
+          }
+          .status-container {
+            padding: 0 24px !important;
+          }
         }
       `}</style>
 
@@ -112,14 +149,17 @@ export default function AuditRunningPage() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "64px",
             }}
           >
-            🧠
+            {error ? (
+              <IconAlertTriangle size={64} stroke={1.5} color="#EF4444" />
+            ) : (
+              <IconBrain size={64} stroke={1.5} color="#6C3FF5" />
+            )}
           </div>
 
           {/* MIDDLE SECTION - Status text */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div className="status-container" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               <h1
                 style={{
@@ -129,42 +169,52 @@ export default function AuditRunningPage() {
                   margin: 0,
                 }}
               >
-                Asking ChatGPT your questions...
+                {error ? "Something went wrong" : "Asking ChatGPT your questions..."}
               </h1>
               <p style={{ fontSize: "16px", color: "#6B7280", margin: 0 }}>
-                This takes about 30 seconds
+                {error ? "We couldn't complete your audit." : "This takes about 30 seconds"}
               </p>
             </div>
             
-            <p
-              key={messageIndex}
-              style={{
-                fontSize: "14px",
-                fontWeight: 500,
-                color: "#6C3FF5",
-                margin: 0,
-                height: "20px",
-              }}
-            >
-              {statusMessages[messageIndex]}
-            </p>
+            {!error && (
+              <p
+                key={messageIndex}
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "#6C3FF5",
+                  margin: 0,
+                  height: "20px",
+                }}
+              >
+                {statusMessages[messageIndex]}
+              </p>
+            )}
+
+            {error && (
+              <p style={{ color: '#EF4444', marginTop: '16px', fontSize: '14px' }}>
+                {error} <a href="/" style={{ color: '#6C3FF5', fontWeight: 600, textDecoration: 'none' }}>Try again</a>
+              </p>
+            )}
           </div>
 
           {/* BOTTOM SECTION - Progress dots */}
-          <div style={{ display: "flex", gap: "8px" }}>
-            {[...Array(10)].map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  borderRadius: "50%",
-                  background: i < progressIndex ? "#6C3FF5" : "#E5E7EB",
-                  transition: "background 0.3s ease",
-                }}
-              />
-            ))}
-          </div>
+          {!error && (
+            <div style={{ display: "flex", gap: "8px" }}>
+              {[...Array(10)].map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    borderRadius: "50%",
+                    background: i < progressIndex ? "#6C3FF5" : "#E5E7EB",
+                    transition: "background 0.3s ease",
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

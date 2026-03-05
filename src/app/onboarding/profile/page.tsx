@@ -2,15 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-function PencilIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-    </svg>
-  );
-}
+import { IconPencil, IconX, IconPlus, IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
 
 function ProgressBar({ active }: { active: number }) {
   return (
@@ -49,16 +41,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        fontSize: "13px",
-        fontWeight: 500,
-        color: "var(--text-body)",
-        marginBottom: "6px",
-      }}
-    >
+    <label className="field-label" style={{ marginBottom: "6px" }}>
       {children}
-    </div>
+    </label>
   );
 }
 
@@ -83,14 +68,14 @@ function PurpleChip({ label, showX = true }: { label: string; showX?: boolean })
             background: "none",
             border: "none",
             color: "var(--purple)",
-            fontSize: "14px",
             marginLeft: "6px",
             cursor: "pointer",
             padding: 0,
-            lineHeight: 1,
+            display: "flex",
+            alignItems: "center",
           }}
         >
-          ×
+          <IconX size={14} stroke={2} />
         </button>
       )}
     </span>
@@ -117,14 +102,14 @@ function GrayChip({ label }: { label: string }) {
           background: "none",
           border: "none",
           color: "var(--text-muted)",
-          fontSize: "14px",
           marginLeft: "6px",
           cursor: "pointer",
           padding: 0,
-          lineHeight: 1,
+          display: "flex",
+          alignItems: "center",
         }}
       >
-        ×
+        <IconX size={14} stroke={2} />
       </button>
     </span>
   );
@@ -144,9 +129,10 @@ function AddChip() {
         fontWeight: 500,
         border: "1px dashed var(--border-strong)",
         cursor: "pointer",
+        gap: "4px",
       }}
     >
-      + Add
+      <IconPlus size={14} stroke={2} /> Add
     </button>
   );
 }
@@ -243,6 +229,7 @@ export default function ProfilePage() {
           }}
         >
           <button
+            onClick={() => router.back()}
             style={{
               fontSize: "14px",
               color: "var(--text-muted)",
@@ -250,9 +237,12 @@ export default function ProfilePage() {
               border: "none",
               cursor: "pointer",
               padding: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
             }}
           >
-            ← Back
+            <IconArrowLeft size={18} stroke={1.5} /> Back
           </button>
           <ProgressBar active={3} />
           <div style={{ width: "56px" }} />
@@ -323,7 +313,7 @@ export default function ProfilePage() {
                     alignItems: "center",
                   }}
                 >
-                  <PencilIcon />
+                  <IconPencil size={18} stroke={1.5} />
                 </button>
               </div>
             </div>
@@ -403,6 +393,9 @@ export default function ProfilePage() {
                 onClick={handleGeneratePrompts}
                 disabled={loading}
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
                   fontSize: "var(--text-base)",
                   fontWeight: 600,
                   color: "#ffffff",
@@ -414,7 +407,11 @@ export default function ProfilePage() {
                   opacity: loading ? 0.7 : 1,
                 }}
               >
-                {loading ? "Generating…" : "Generate Prompts →"}
+                {loading ? "Generating…" : (
+                  <>
+                    Generate Prompts <IconArrowRight size={18} stroke={1.5} />
+                  </>
+                )}
               </button>
             </div>
           </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { IconCheck, IconX, IconArrowRight } from '@tabler/icons-react';
 
 interface AuditResult {
   prompt_text: string;
@@ -12,6 +13,7 @@ interface AuditResult {
 }
 
 interface AuditData {
+  status?: string;
   success: boolean;
   audit_id: string;
   visibility_score: number;
@@ -21,51 +23,68 @@ interface AuditData {
   brand_name?: string;
 }
 
-function CheckIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12 l4 4 l6-6" />
-    </svg>
-  );
-}
-
-function XIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 6L6 18M6 6l12 12" />
-    </svg>
-  );
-}
-
 export default function ResultsPage() {
   const router = useRouter();
+  const params = useParams();
+  const auditId = params.id as string;
   const [auditData, setAuditData] = useState<AuditData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedResult, setSelectedResult] = useState<AuditResult | null>(null);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("nuave_audit");
-    if (!stored) {
+    if (!auditId) {
       router.push("/");
       return;
     }
 
-    try {
-      const parsed = JSON.parse(stored);
-      if (parsed.success) {
-        setAuditData(parsed);
-      } else {
-        router.push("/");
+    async function fetchAuditData() {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Try sessionStorage first
+        const cached = sessionStorage.getItem('nuave_audit')
+        if (cached) {
+          const data = JSON.parse(cached)
+          // Only use it if it's the correct ID and status is complete
+          if (data.audit_id === auditId && data.status === 'complete') {
+            setAuditData(data)
+            setLoading(false)
+            return
+          }
+        }
+        
+        // Fall back to API
+        const res = await fetch(`/api/audit/${auditId}/status`)
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to fetch audit data');
+        }
+        
+        const data = await res.json()
+        if (data.status === 'complete') {
+          setAuditData(data)
+          // Cache full result
+          sessionStorage.setItem('nuave_audit', JSON.stringify(data))
+        } else if (data.status === 'failed') {
+          throw new Error('Audit failed to complete.');
+        } else {
+          // Still running, redirect back to running screen
+          router.push(`/audit/${auditId}/running`);
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch audit data", err);
+        setError(err.message || "Something went wrong.");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to parse audit data", err);
-      router.push("/");
-    } finally {
-      setLoading(false);
     }
-  }, [router]);
 
-  if (loading || !auditData) {
+    fetchAuditData();
+  }, [router, auditId]);
+
+  if (loading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-page)" }}>
         <p style={{ color: "var(--text-muted)" }}>Loading results...</p>
@@ -73,7 +92,30 @@ export default function ResultsPage() {
     );
   }
 
-  const score = auditData.visibility_score;
+  if (error || !auditData) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg-page)", gap: "16px" }}>
+        <p style={{ color: "#EF4444" }}>{error || "Audit not found."}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          style={{
+            fontSize: "14px",
+            fontWeight: 600,
+            color: "var(--purple)",
+            background: "transparent",
+            border: "1px solid var(--purple)",
+            borderRadius: "var(--radius-md)",
+            padding: "8px 16px",
+            cursor: "pointer",
+          }}
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  const score = auditData.visibility_score || 0;
   const circumference = 2 * Math.PI * 68; // ≈ 427.26
   const arc = (score / 100) * circumference;
 
@@ -106,12 +148,28 @@ export default function ResultsPage() {
           from { transform: translateX(100%) }
           to { transform: translateX(0) }
         }
+        @keyframes slideUp {
+          from { transform: translateY(100%) }
+          to { transform: translateY(0) }
+        }
         .animate-slide-in {
           animation: slideIn 0.25s ease-out;
         }
         .result-row:hover {
           background: #F9FAFB !important;
           cursor: pointer;
+        }
+        @media (max-width: 768px) {
+          .modal-panel {
+            width: 100vw !important;
+            height: 85vh !important;
+            bottom: 0 !important;
+            top: auto !important;
+            right: 0 !important;
+            left: 0 !important;
+            border-radius: 16px 16px 0 0 !important;
+            animation: slideUp 0.3s ease-out !important;
+          }
         }
       `}</style>
 
@@ -240,7 +298,7 @@ export default function ResultsPage() {
                 alignItems: "center",
                 gap: "14px",
                 padding: "14px 20px",
-                borderBottom: i < auditData.results.length - 1 ? "1px solid #F3F4F6" : "none",
+                borderBottom: i < (auditData.results?.length || 0) - 1 ? "1px solid #F3F4F6" : "none",
                 transition: "background 0.2s",
               }}
             >
@@ -257,7 +315,11 @@ export default function ResultsPage() {
                   justifyContent: "center",
                 }}
               >
-                {result.brand_mentioned ? <CheckIcon /> : <XIcon />}
+                {result.brand_mentioned ? (
+                  <IconCheck size={14} stroke={2.5} color="#22C55E" />
+                ) : (
+                  <IconX size={14} stroke={2.5} color="#EF4444" />
+                )}
               </div>
 
               {/* Prompt text */}
@@ -321,9 +383,12 @@ export default function ResultsPage() {
               borderRadius: "var(--radius-md)",
               padding: "10px 20px",
               cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
             }}
           >
-            See recommendations →
+            See recommendations <IconArrowRight size={18} stroke={1.5} />
           </button>
         </div>
       </div>
@@ -344,7 +409,7 @@ export default function ResultsPage() {
 
           {/* PANEL */}
           <div
-            className="animate-slide-in"
+            className="animate-slide-in modal-panel"
             style={{
               position: "fixed",
               top: 0,
@@ -377,13 +442,14 @@ export default function ResultsPage() {
                 style={{
                   background: "none",
                   border: "none",
-                  fontSize: "24px",
                   color: "#9CA3AF",
                   cursor: "pointer",
                   padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
                 }}
               >
-                &times;
+                <IconX size={24} stroke={1.5} />
               </button>
             </div>
 
@@ -392,7 +458,7 @@ export default function ResultsPage() {
                 
                 {/* PROMPT SECTION */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <label style={{ fontSize: "11px", fontWeight: 600, color: "#6B7280", letterSpacing: "0.05em" }}>
+                  <label style={{ letterSpacing: "0.05em" }}>
                     PROMPT
                   </label>
                   <div
@@ -432,14 +498,14 @@ export default function ResultsPage() {
                       gap: "8px",
                     }}
                   >
-                    <span>{selectedResult.brand_mentioned ? "✓" : "✗"}</span>
+                    <span>{selectedResult.brand_mentioned ? <IconCheck size={18} stroke={2.5} /> : <IconX size={18} stroke={2.5} />}</span>
                     <span>{brandName} was {selectedResult.brand_mentioned ? "mentioned" : "not mentioned"}</span>
                   </div>
                 </div>
 
                 {/* AI RESPONSE SECTION */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <label style={{ fontSize: "11px", fontWeight: 600, color: "#6B7280", letterSpacing: "0.05em" }}>
+                  <label style={{ letterSpacing: "0.05em" }}>
                     AI RESPONSE
                   </label>
                   <div

@@ -1,0 +1,25 @@
+Make the Nuave app mobile responsive.
+
+Add to globals.css at the bottom:
+
+@media (max-width: 768px) {
+  .card { padding: 16px; border-radius: 10px; }
+  .card-row { padding: 12px; min-height: 56px; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+}
+
+In src/app/page.tsx:
+- Hero padding: 24px 16px on mobile
+- headline: clamp(1.75rem, 5vw, 3rem)
+- form card: margin 0 16px
+
+In src/app/audit/[id]/results/page.tsx:
+- Modal on mobile: full width, bottom sheet
+  width: 100vw, bottom: 0, height: 85vh
+  border-radius: 16px 16px 0 0
+  animation: slideUp (from bottom)
+
+In src/app/audit/[id]/running/page.tsx:
+- Circle: 150px on mobile
+- Text: padding 0 24px

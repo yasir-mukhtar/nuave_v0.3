@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { IconCheck, IconArrowRight } from '@tabler/icons-react';
 
 export default function Home() {
   const router = useRouter();
@@ -82,7 +83,7 @@ export default function Home() {
             style={{
               fontSize: "14px",
               fontWeight: 500,
-              color: "var(--text-body)",
+              color: "#374151",
               background: "transparent",
               border: "1px solid var(--border-default)",
               borderRadius: "var(--radius-md)",
@@ -102,26 +103,21 @@ export default function Home() {
               borderRadius: "var(--radius-md)",
               padding: "7px 16px",
               cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
             }}
           >
-            Start free audit →
+            Start free audit <IconArrowRight size={18} stroke={1.5} />
           </button>
         </div>
       </header>
 
       {/* Hero */}
-      <section
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          paddingTop: "56px",
-        }}
-      >
+      <section className="hero-section">
         <div
           style={{
-            maxWidth: "560px",
+            maxWidth: "600px",
             width: "100%",
             textAlign: "center",
             display: "flex",
@@ -148,10 +144,8 @@ export default function Home() {
 
           {/* Headline */}
           <h1
+            className="display-heading"
             style={{
-              fontSize: "var(--text-4xl)",
-              fontWeight: 700,
-              color: "var(--text-heading)",
               lineHeight: 1.1,
               letterSpacing: "-0.02em",
               margin: 0,
@@ -164,7 +158,7 @@ export default function Home() {
           <p
             style={{
               fontSize: "var(--text-lg)",
-              color: "var(--text-muted)",
+              color: "#6B7280",
               maxWidth: "440px",
               lineHeight: 1.6,
               margin: 0,
@@ -175,63 +169,41 @@ export default function Home() {
           </p>
 
           {/* Form card */}
-          <div
-            style={{
-              background: "#ffffff",
-              border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-lg)",
-              padding: "24px",
-              boxShadow: "var(--shadow-card)",
-              width: "100%",
-            }}
-          >
-            <input
-              type="text"
-              placeholder="Brand or company name"
-              value={brandName}
-              onChange={(e) => setBrandName(e.target.value)}
-              style={{
-                display: "block",
-                width: "100%",
-                fontSize: "var(--text-sm)",
-                color: "var(--text-body)",
-                background: "#ffffff",
-                border: "1px solid var(--border-default)",
-                borderRadius: "var(--radius-md)",
-                padding: "10px 14px",
-                marginBottom: "10px",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-            <input
-              type="url"
-              placeholder="https://yourwebsite.com"
-              value={websiteUrl}
-              onChange={(e) => setWebsiteUrl(e.target.value)}
-              style={{
-                display: "block",
-                width: "100%",
-                fontSize: "var(--text-sm)",
-                color: "var(--text-body)",
-                background: "#ffffff",
-                border: "1px solid var(--border-default)",
-                borderRadius: "var(--radius-md)",
-                padding: "10px 14px",
-                marginBottom: "14px",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
+          <div className="card card-container" style={{ width: "100%", gap: "16px" }}>
+            <div className="form-field">
+              <label>Brand Name</label>
+              <input
+                className="input-large"
+                type="text"
+                placeholder="e.g. Nuave"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+              />
+            </div>
+
+            <div className="form-field">
+              <label>Website URL</label>
+              <input
+                className="input-large"
+                type="url"
+                placeholder="e.g. https://nuave.id"
+                value={websiteUrl}
+                onChange={(e) => setWebsiteUrl(e.target.value)}
+              />
+            </div>
+
             {error && (
-              <p style={{ fontSize: "13px", color: "#e53e3e", marginBottom: "10px" }}>{error}</p>
+              <p style={{ fontSize: "13px", color: "#e53e3e", margin: 0 }}>{error}</p>
             )}
             <button
               type="button"
               onClick={handleSubmit}
               disabled={loading}
               style={{
-                display: "block",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
                 width: "100%",
                 fontSize: "var(--text-base)",
                 fontWeight: 600,
@@ -244,14 +216,26 @@ export default function Home() {
                 opacity: loading ? 0.7 : 1,
               }}
             >
-              {loading ? "Analyzing…" : "Start Free Audit →"}
+              {loading ? "Analyzing…" : (
+                <>
+                  Start Free Audit <IconArrowRight size={18} stroke={1.5} />
+                </>
+              )}
             </button>
           </div>
 
           {/* Trust line */}
-          <p style={{ fontSize: "13px", color: "var(--text-placeholder)", margin: 0 }}>
-            ✓ Free&nbsp;&nbsp;✓ No sign up required&nbsp;&nbsp;✓ Results in 60 seconds
-          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#9CA3AF" }}>
+              <IconCheck size={16} stroke={2} color="var(--purple)" /> Free
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#9CA3AF" }}>
+              <IconCheck size={16} stroke={2} color="var(--purple)" /> No sign up required
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#9CA3AF" }}>
+              <IconCheck size={16} stroke={2} color="var(--purple)" /> Results in 60 seconds
+            </div>
+          </div>
         </div>
       </section>
     </>

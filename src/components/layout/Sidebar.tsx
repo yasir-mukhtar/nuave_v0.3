@@ -2,6 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { 
+  IconLayoutDashboard, 
+  IconList, 
+  IconFileDescription, 
+  IconSettings, 
+  IconCoins 
+} from '@tabler/icons-react';
 
 type SidebarProps = {
   credits: number;
@@ -10,10 +17,10 @@ type SidebarProps = {
 };
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Prompts", href: "/prompts" },
-  { label: "Content", href: "/content" },
-  { label: "Settings", href: "/settings" },
+  { label: "Dashboard", href: "/dashboard", icon: IconLayoutDashboard },
+  { label: "Prompts", href: "/prompts", icon: IconList },
+  { label: "Content", href: "/content", icon: IconFileDescription },
+  { label: "Settings", href: "/settings", icon: IconSettings },
 ];
 
 function getInitials(name: string) {
@@ -23,181 +30,6 @@ function getInitials(name: string) {
   const last = parts[parts.length - 1]?.[0] ?? "";
   const initials = (first + last).toUpperCase();
   return initials || "YM";
-}
-
-function CoinIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="9"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M12 7v10M9.5 9.5h3.5a2 2 0 0 1 0 4H10"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-type NavIconProps = {
-  active?: boolean;
-};
-
-function DashboardIcon({ active }: NavIconProps) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <rect
-        x="3"
-        y="3"
-        width="8"
-        height="8"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <rect
-        x="13"
-        y="3"
-        width="8"
-        height="5"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <rect
-        x="13"
-        y="10"
-        width="8"
-        height="11"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <rect
-        x="3"
-        y="13"
-        width="8"
-        height="8"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
-}
-
-function PromptsIcon({ active }: NavIconProps) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <rect
-        x="4"
-        y="4"
-        width="16"
-        height="14"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M8 9h8M8 13h5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ContentIcon({ active }: NavIconProps) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <rect
-        x="4"
-        y="3"
-        width="16"
-        height="18"
-        rx="2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M8 8h8M8 12h6M8 16h4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function SettingsIcon({ active }: NavIconProps) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M19.4 9a1 1 0 0 0 .2-1.1l-1.2-2.1a1 1 0 0 0-1.1-.5l-1.4.4a6 6 0 0 0-1.8-1l-.3-1.4A1 1 0 0 0 12 2h-2.4a1 1 0 0 0-1 .8L8.3 4.2a6 6 0 0 0-1.8 1L5.1 4.3a1 1 0 0 0-1.1.5L2.8 6.9a1 1 0 0 0 .2 1.1l1.1 1a6 6 0 0 0-.1 2l-1.1 1a1 1 0 0 0-.2 1.1l1.2 2.1a1 1 0 0 0 1.1.5l1.4-.4a6 6 0 0 0 1.8 1l.3 1.4a1 1 0 0 0 1 .8H12a1 1 0 0 0 1-.8l.3-1.4a6 6 0 0 0 1.8-1l1.4.4a1 1 0 0 0 1.1-.5l1.2-2.1a1 1 0 0 0-.2-1.1l-1.1-1a6 6 0 0 0 .1-2l1.1-1Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 }
 
 export function Sidebar({ credits, userName, workspaceName }: SidebarProps) {
@@ -256,6 +88,7 @@ export function Sidebar({ credits, userName, workspaceName }: SidebarProps) {
         }}
       >
         {navItems.map((item) => {
+          const Icon = item.icon;
           const isActive =
             item.href === "/"
               ? pathname === "/"
@@ -300,14 +133,7 @@ export function Sidebar({ credits, userName, workspaceName }: SidebarProps) {
                     : baseColor;
                 }}
               >
-                {item.label === "Dashboard" && (
-                  <DashboardIcon active={isActive} />
-                )}
-                {item.label === "Prompts" && <PromptsIcon active={isActive} />}
-                {item.label === "Content" && <ContentIcon active={isActive} />}
-                {item.label === "Settings" && (
-                  <SettingsIcon active={isActive} />
-                )}
+                <Icon size={18} stroke={1.5} />
                 <span
                   style={{
                     fontSize: "var(--text-sm)",
@@ -393,11 +219,10 @@ export function Sidebar({ credits, userName, workspaceName }: SidebarProps) {
             fontWeight: 500,
           }}
         >
-          <CoinIcon />
+          <IconCoins size={14} stroke={1.5} />
           <span>{credits} credits</span>
         </div>
       </div>
     </aside>
   );
 }
-

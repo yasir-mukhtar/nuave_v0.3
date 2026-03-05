@@ -1,5 +1,7 @@
 "use client";
 
+import { IconCheck, IconLoader2 } from '@tabler/icons-react';
+
 const steps = [
   { state: "done", label: "Scraping website" },
   { state: "done", label: "Detecting language", subtitle: "Detected: Indonesian" },
@@ -9,36 +11,15 @@ const steps = [
   { state: "pending", label: "Creating company profile" },
 ] as const;
 
-function CheckIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12 l4 4 l6-6" />
-    </svg>
-  );
-}
-
-function SpinnerIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ animation: "spin 0.9s linear infinite" }}>
-      <circle
-        cx="12"
-        cy="12"
-        r="9"
-        stroke="var(--purple)"
-        strokeWidth="2.5"
-        strokeDasharray="40 60"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 export default function AnalyzePage() {
   return (
     <>
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+          animation: spin 1s linear infinite;
         }
       `}</style>
 
@@ -128,8 +109,8 @@ export default function AnalyzePage() {
                       boxSizing: "border-box",
                     }}
                   >
-                    {isDone && <CheckIcon />}
-                    {isActive && <SpinnerIcon />}
+                    {isDone && <IconCheck size={16} stroke={2.5} color="var(--green)" />}
+                    {isActive && <IconLoader2 size={18} stroke={2.5} color="var(--purple)" className="animate-spin" />}
                   </div>
 
                   {/* Label + subtitle */}
