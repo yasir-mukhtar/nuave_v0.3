@@ -1,1 +1,14 @@
-/* Intentionally left blank for clean slate */
+@import "../styles/tokens.css";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-body);
+  font-family: "Geist", system-ui, sans-serif;
+}
+

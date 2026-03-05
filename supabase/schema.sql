@@ -132,9 +132,20 @@ create policy "Users can update own profile"
 -- WORKSPACES
 alter table public.workspaces enable row level security;
 
-create policy "Workspace owner select/update/delete"
+create policy "Workspace owner select"
   on public.workspaces
-  for select, update, delete
+  for select
+  using (user_id = auth.uid());
+
+create policy "Workspace owner update"
+  on public.workspaces
+  for update
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+create policy "Workspace owner delete"
+  on public.workspaces
+  for delete
   using (user_id = auth.uid());
 
 create policy "Workspace owner insert"
