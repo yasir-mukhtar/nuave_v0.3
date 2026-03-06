@@ -258,6 +258,13 @@ export default function Home() {
         </a>
         {" · "}
         <a
+          href="/terms"
+          style={{ color: "#9CA3AF", textDecoration: "underline" }}
+        >
+          Syarat & Ketentuan
+        </a>
+        {" · "}
+        <a
           href="mailto:privacy@nuave.id"
           style={{ color: "#9CA3AF", textDecoration: "underline" }}
         >
