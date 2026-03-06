@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { IconCheck, IconX, IconArrowRight } from '@tabler/icons-react';
+import { 
+  IconCheck, 
+  IconX, 
+  IconArrowRight, 
+  IconCircleCheck, 
+  IconCircleX, 
+  IconCircleCheckFilled, 
+  IconCircleXFilled 
+} from '@tabler/icons-react';
 
 interface AuditResult {
   prompt_text: string;
@@ -135,6 +143,101 @@ export default function ResultsPage() {
   const profile = profileStr ? JSON.parse(profileStr) : null;
   const brandName = auditData.brand_name || profile?.profile?.brand_name || "the brand";
 
+  function highlightBrand(text: string, brand: string) {
+    if (!brand || !text) return [<span key={0}>{text}</span>];
+    const regex = new RegExp(`(${brand})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <mark key={i} style={{
+          background: '#EDE9FF',
+          color: '#6C3FF5',
+          fontWeight: 500,
+          borderRadius: '3px',
+          padding: '0 2px',
+          fontStyle: 'normal'
+        }}>{part}</mark>
+      ) : <span key={i}>{part}</span>
+    );
+  }
+
+  function renderInline(text: string) {
+    // Bold: **text**
+    const parts = text.split(/(\*\*.*?\*\*)/);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={i} style={{ fontWeight: 600 }}>
+            {highlightBrand(part.slice(2, -2), brandName)}
+          </strong>
+        );
+      }
+      return <span key={i}>{highlightBrand(part, brandName)}</span>;
+    });
+  }
+
+  function renderMarkdown(text: string) {
+    const lines = text.split('\n');
+    return lines.map((line, i) => {
+      // H3 headings (### or ##)
+      if (line.match(/^#{1,3}\s/)) {
+        const content = line.replace(/^#{1,3}\s/, '');
+        return (
+          <p key={i} style={{
+            fontWeight: 600,
+            fontSize: '14px',
+            color: '#111827',
+            marginTop: '12px',
+            marginBottom: '4px'
+          }}>
+            {renderInline(content)}
+          </p>
+        );
+      }
+      // Bullet points
+      if (line.match(/^[\-\*•]\s/)) {
+        const content = line.replace(/^[\-\*•]\s/, '');
+        return (
+          <div key={i} style={{
+            display: 'flex',
+            gap: '8px',
+            marginBottom: '4px',
+            fontSize: '14px',
+            color: '#374151'
+          }}>
+            <span style={{ color: '#6C3FF5', flexShrink: 0 }}>•</span>
+            <span>{renderInline(content)}</span>
+          </div>
+        );
+      }
+      // Horizontal rule
+      if (line.match(/^---/)) {
+        return (
+          <hr key={i} style={{
+            border: 'none',
+            borderTop: '1px solid #E5E7EB',
+            margin: '12px 0'
+          }} />
+        );
+      }
+      // Empty line
+      if (line.trim() === '') {
+        return <div key={i} style={{ height: '8px' }} />;
+      }
+      // Normal paragraph
+      return (
+        <p key={i} style={{
+          fontSize: '14px',
+          color: '#374151',
+          lineHeight: '1.7',
+          marginBottom: '4px'
+        }}>
+          {renderInline(line)}
+        </p>
+      );
+    });
+  }
+
   return (
     <div
       style={{
@@ -144,16 +247,16 @@ export default function ResultsPage() {
       }}
     >
       <style>{`
-        @keyframes slideIn {
-          from { transform: translateX(100%) }
-          to { transform: translateX(0) }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateX(20px); }
+          to { opacity: 1; transform: translateX(0); }
         }
         @keyframes slideUp {
           from { transform: translateY(100%) }
           to { transform: translateY(0) }
         }
-        .animate-slide-in {
-          animation: slideIn 0.25s ease-out;
+        .animate-modal-in {
+          animation: fadeIn 0.2s ease-out;
         }
         .result-row:hover {
           background: #F9FAFB !important;
@@ -167,7 +270,9 @@ export default function ResultsPage() {
             top: auto !important;
             right: 0 !important;
             left: 0 !important;
+            transform: none !important;
             border-radius: 16px 16px 0 0 !important;
+            padding: 24px !important;
             animation: slideUp 0.3s ease-out !important;
           }
         }
@@ -402,39 +507,42 @@ export default function ResultsPage() {
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0,0,0,0.3)",
-              zIndex: 50,
+              background: "rgba(0,0,0,0.2)",
+              zIndex: 49,
             }}
           />
 
           {/* PANEL */}
           <div
-            className="animate-slide-in modal-panel"
+            className="animate-modal-in modal-panel"
             style={{
-              position: "fixed",
-              top: 0,
-              right: 0,
-              height: "100vh",
-              width: "480px",
-              background: "#FFFFFF",
-              boxShadow: "-4px 0 24px rgba(0,0,0,0.1)",
-              zIndex: 100,
               display: "flex",
               flexDirection: "column",
+              position: "fixed",
+              top: "24px",
+              right: "24px",
+              bottom: "24px",
+              width: "480px",
+              background: "#FFFFFF",
+              borderRadius: "16px",
+              border: "1px solid #E5E7EB",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
               overflow: "hidden",
+              zIndex: 50,
             }}
           >
-            {/* MODAL HEADER */}
+            {/* ZONE 1 — HEADER (fixed) */}
             <div
               style={{
-                padding: "32px 32px 20px",
-                borderBottom: "1px solid #F3F4F6",
+                flexShrink: 0,
+                padding: "20px 24px 16px 24px",
+                borderBottom: "1px solid #E5E7EB",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
               }}
             >
-              <h2 style={{ fontSize: "18px", fontWeight: 600, color: "#111827", margin: 0 }}>
+              <h2 style={{ fontSize: "16px", fontWeight: 600, color: "#111827", margin: 0 }}>
                 Prompt Result
               </h2>
               <button
@@ -442,102 +550,97 @@ export default function ResultsPage() {
                 style={{
                   background: "none",
                   border: "none",
-                  color: "#9CA3AF",
+                  color: "#6B7280",
                   cursor: "pointer",
                   padding: "4px",
                   display: "flex",
                   alignItems: "center",
                 }}
               >
-                <IconX size={24} stroke={1.5} />
+                <IconX size={18} stroke={1.5} />
               </button>
             </div>
 
-            <div style={{ flex: 1, overflowY: "auto", padding: "32px" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {/* ZONE 2 — SCROLLABLE CONTENT AREA */}
+            <div 
+              style={{ 
+                flex: 1, 
+                overflowY: "auto", 
+                padding: "20px 24px",
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column" }}>
                 
-                {/* PROMPT SECTION */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <label style={{ letterSpacing: "0.05em" }}>
-                    PROMPT
-                  </label>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#374151",
-                      fontStyle: "italic",
-                      background: "#F9FAFB",
-                      padding: "12px",
-                      borderRadius: "8px",
-                      borderLeft: "3px solid #6C3FF5",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    "{selectedResult.prompt_text}"
-                  </div>
+                {/* USER PROMPT BUBBLE */}
+                <div
+                  style={{
+                    marginLeft: "auto",
+                    background: "#6C3FF5",
+                    color: "white",
+                    borderRadius: "18px 18px 4px 18px",
+                    padding: "10px 14px",
+                    maxWidth: "85%",
+                    fontSize: "14px",
+                    display: "inline-block",
+                    marginBottom: "12px",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                  }}
+                >
+                  {selectedResult.prompt_text}
                 </div>
 
-                {/* RESULT BADGE */}
+                {/* MENTION STATUS BADGE */}
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "center",
-                    padding: "16px 0",
+                    justifyContent: "flex-end",
+                    marginBottom: "16px",
                   }}
                 >
                   <div
                     style={{
-                      padding: "12px 20px",
-                      borderRadius: "12px",
-                      fontSize: "15px",
-                      fontWeight: 600,
-                      background: selectedResult.brand_mentioned ? "#DCFCE7" : "#FEE2E2",
-                      color: selectedResult.brand_mentioned ? "#16A34A" : "#DC2626",
-                      display: "flex",
+                      display: "inline-flex",
                       alignItems: "center",
-                      gap: "8px",
+                      gap: "6px",
+                      background: "#F4F4F4",
+                      borderRadius: "999px",
+                      padding: "6px 12px 6px 6px",
                     }}
                   >
-                    <span>{selectedResult.brand_mentioned ? <IconCheck size={18} stroke={2.5} /> : <IconX size={18} stroke={2.5} />}</span>
-                    <span>{brandName} was {selectedResult.brand_mentioned ? "mentioned" : "not mentioned"}</span>
+                    {selectedResult.brand_mentioned ? (
+                      <IconCircleCheckFilled size={20} color="#16A34A" />
+                    ) : (
+                      <IconCircleXFilled size={20} color="#DC2626" />
+                    )}
+                    <span style={{ fontSize: "13px", fontWeight: 500, color: "#111827" }}>
+                      {brandName} was {selectedResult.brand_mentioned ? "mentioned" : "not mentioned"}
+                    </span>
                   </div>
                 </div>
 
-                {/* AI RESPONSE SECTION */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <label style={{ letterSpacing: "0.05em" }}>
-                    AI RESPONSE
-                  </label>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "#374151",
-                      lineHeight: 1.6,
-                      background: "#F9FAFB",
-                      padding: "16px",
-                      borderRadius: "8px",
-                      maxHeight: "400px",
-                      overflowY: "auto",
-                      whiteSpace: "pre-wrap",
-                    }}
-                  >
-                    {selectedResult.ai_response}
-                  </div>
+                {/* AI RESPONSE (RICH TEXT) */}
+                <div
+                  style={{
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {renderMarkdown(selectedResult.ai_response)}
                 </div>
               </div>
             </div>
 
-            {/* FOOTER */}
+            {/* ZONE 3 — FOOTER (fixed) */}
             <div
               style={{
-                padding: "24px 32px",
-                borderTop: "1px solid #F3F4F6",
-                fontSize: "12px",
+                flexShrink: 0,
+                padding: "12px 24px",
+                borderTop: "1px solid #E5E7EB",
+                fontSize: "11px",
                 color: "#9CA3AF",
                 textAlign: "center",
               }}
             >
-              Response generated by GPT-4o with web search · {selectedResult.created_at ? new Date(selectedResult.created_at).toLocaleString() : new Date().toLocaleString()}
+              Response by GPT-4o with web search · {selectedResult.created_at ? new Date(selectedResult.created_at).toLocaleString() : new Date().toLocaleString()}
             </div>
           </div>
         </>
