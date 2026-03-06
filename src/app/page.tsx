@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { IconCheck, IconArrowRight } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const router = useRouter();
@@ -239,38 +240,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer
-        style={{
-          textAlign: "center",
-          padding: "24px 16px",
-          fontSize: "13px",
-          color: "#9CA3AF",
-          borderTop: "1px solid var(--border-default)",
-          marginTop: "48px",
-        }}
-      >
-        <a
-          href="/privacy"
-          style={{ color: "#9CA3AF", textDecoration: "underline" }}
-        >
-          Privacy Policy
-        </a>
-        {" · "}
-        <a
-          href="/terms"
-          style={{ color: "#9CA3AF", textDecoration: "underline" }}
-        >
-          Syarat & Ketentuan
-        </a>
-        {" · "}
-        <a
-          href="mailto:privacy@nuave.id"
-          style={{ color: "#9CA3AF", textDecoration: "underline" }}
-        >
-          Contact
-        </a>
-      </footer>
+      <Footer />
     </>
   );
 }

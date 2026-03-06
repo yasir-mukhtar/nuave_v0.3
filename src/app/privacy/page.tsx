@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 export default function PrivacyPage() {
   const CONTACT_EMAIL = "privacy@nuave.id";
@@ -275,12 +276,7 @@ export default function PrivacyPage() {
 
       </main>
 
-      {/* Footer */}
-      <footer style={{ textAlign: "center", padding: "24px 16px", fontSize: "13px", color: "var(--text-muted)", borderTop: "1px solid var(--border-default)", marginTop: "48px" }}>
-        <a href="/privacy" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>Privacy Policy</a>
-        {" · "}
-        <a href="mailto:privacy@nuave.id" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>Contact</a>
-      </footer>
+      <Footer />
 
     </div>
   );
