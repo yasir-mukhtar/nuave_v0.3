@@ -238,6 +238,32 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer
+        style={{
+          textAlign: "center",
+          padding: "24px 16px",
+          fontSize: "13px",
+          color: "#9CA3AF",
+          borderTop: "1px solid var(--border-default)",
+          marginTop: "48px",
+        }}
+      >
+        <a
+          href="/privacy"
+          style={{ color: "#9CA3AF", textDecoration: "underline" }}
+        >
+          Privacy Policy
+        </a>
+        {" · "}
+        <a
+          href="mailto:privacy@nuave.id"
+          style={{ color: "#9CA3AF", textDecoration: "underline" }}
+        >
+          Contact
+        </a>
+      </footer>
     </>
   );
 }
