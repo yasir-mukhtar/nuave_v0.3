@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { IconCheck, IconArrowRight } from '@tabler/icons-react';
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function Home() {
   const router = useRouter();
@@ -13,29 +14,28 @@ export default function Home() {
 
   async function handleSubmit() {
     console.log('handleSubmit called');
-    console.log('brandName:', brandName);
-    console.log('websiteUrl:', websiteUrl);
     setError(null);
     setLoading(true);
+
     try {
-      const res = await fetch("/api/scrape", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ website_url: websiteUrl, brand_name: brandName }),
-      });
-      const data = await res.json();
-      console.log('API response status:', res.status);
-      console.log('API response data:', data);
-      if (!res.ok) {
-        setError(data.error ?? "Something went wrong.");
-        return;
+      // 1. Save input to sessionStorage
+      sessionStorage.setItem('nuave_pending_brand', brandName);
+      sessionStorage.setItem('nuave_pending_url', websiteUrl);
+
+      // 2. Check if user is already logged in
+      const supabase = createSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session) {
+        // 3. If session exists -> go straight to scrape flow
+        router.push('/onboarding/analyze');
+      } else {
+        // 4. If no session -> redirect to auth
+        router.push('/auth');
       }
-      console.log('Saving to sessionStorage and redirecting...');
-      sessionStorage.setItem("nuave_profile", JSON.stringify(data));
-      router.push("/onboarding/profile");
     } catch (err) {
-      console.log('Fetch error:', err);
-      setError("Network error. Please try again.");
+      console.error('Submit error:', err);
+      setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }

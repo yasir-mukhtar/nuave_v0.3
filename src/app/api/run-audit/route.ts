@@ -80,6 +80,13 @@ export async function POST(req: NextRequest) {
 
     auditId = audit.id;
 
+    if (!auditId) {
+      return NextResponse.json(
+        { success: false, error: 'Failed to create audit' },
+        { status: 500 }
+      );
+    }
+
     // STEP 2 — Start background processing
     const backgroundProcess = processAuditInBackground(
       auditId,

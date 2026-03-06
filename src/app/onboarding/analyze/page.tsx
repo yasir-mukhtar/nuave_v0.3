@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { IconCheck, IconLoader2 } from '@tabler/icons-react';
 
 const steps = [
@@ -12,6 +14,47 @@ const steps = [
 ] as const;
 
 export default function AnalyzePage() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const brand = sessionStorage.getItem('nuave_pending_brand');
+    const url = sessionStorage.getItem('nuave_pending_url');
+
+    if (!brand || !url) {
+      router.push('/');
+      return;
+    }
+
+    async function triggerScrape() {
+      try {
+        const res = await fetch('/api/scrape', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ website_url: url, brand_name: brand })
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Failed to analyze website');
+        }
+
+        const data = await res.json();
+        sessionStorage.setItem('nuave_profile', JSON.stringify(data));
+        
+        // Clear pending items
+        sessionStorage.removeItem('nuave_pending_brand');
+        sessionStorage.removeItem('nuave_pending_url');
+        
+        router.push('/onboarding/profile');
+      } catch (err: any) {
+        console.error('Scrape error:', err);
+        setError(err.message || 'An error occurred during analysis');
+      }
+    }
+
+    triggerScrape();
+  }, [router]);
   return (
     <>
       <style>{`
