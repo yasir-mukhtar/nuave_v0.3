@@ -145,6 +145,7 @@ interface Profile {
   competitors: string[];
   target_audience?: string;
   language?: string;
+  website_url?: string;
 }
 
 export default function ProfilePage() {
@@ -161,7 +162,14 @@ export default function ProfilePage() {
       return;
     }
     const data = JSON.parse(stored);
-    setProfile(data.profile);
+    
+    // Get website_url from pending data if not in profile
+    const pendingUrl = sessionStorage.getItem('nuave_pending_url');
+    
+    setProfile({
+      ...data.profile,
+      website_url: data.profile.website_url || pendingUrl || ""
+    });
     setWorkspaceId(data.workspace_id);
   }, []);
 

@@ -7,6 +7,7 @@ import {
   IconCopy, 
   IconArrowLeft 
 } from '@tabler/icons-react';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 interface Recommendation {
   id: string;
@@ -27,24 +28,50 @@ export default function RecommendationsPage() {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'web_copy' | 'content_gap' | 'structure'>('all');
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
-  const [credits, setCredits] = useState<number | string>('—');
+  const [credits, setCredits] = useState<number | null>(null);
   const [brandName, setBrandName] = useState('Brand');
 
   useEffect(() => {
-    // Load credits from local storage
-    const storedCredits = localStorage.getItem('nuave_credits');
-    if (storedCredits) setCredits(parseInt(storedCredits, 10));
+    const supabase = createSupabaseBrowserClient();
 
-    // Get brand name from session storage
-    const profileStr = sessionStorage.getItem('nuave_profile');
-    if (profileStr) {
+    async function fetchUserData() {
       try {
-        const profile = JSON.parse(profileStr);
-        setBrandName(profile.profile?.brand_name || 'Brand');
-      } catch (e) {
-        console.error('Error parsing profile:', e);
+        const res = await fetch('/api/user/credits')
+        const { credits } = await res.json()
+        if (credits !== null) setCredits(credits)
+      } catch (err) {
+        console.error('Failed to fetch user credits:', err)
       }
     }
+
+    async function fetchBrandName() {
+      // Try session storage first
+      const profileStr = sessionStorage.getItem('nuave_profile');
+      if (profileStr) {
+        try {
+          const profile = JSON.parse(profileStr);
+          if (profile.profile?.brand_name) {
+            setBrandName(profile.profile.brand_name);
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // Fetch from DB if not in session
+      if (auditId) {
+        const { data } = await supabase
+          .from('audits')
+          .select('workspaces(brand_name)')
+          .eq('id', auditId)
+          .single();
+        
+        const brand = (data?.workspaces as any)?.brand_name;
+        if (brand) setBrandName(brand);
+      }
+    }
+
+    fetchUserData();
+    fetchBrandName();
 
     async function fetchRecommendations() {
       if (!auditId) return;
@@ -219,7 +246,7 @@ export default function RecommendationsPage() {
           fontWeight: 600,
           color: '#374151'
         }}>
-          {credits} credits
+          {credits !== null ? credits : '—'} credits
         </div>
       </div>
 

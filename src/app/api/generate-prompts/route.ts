@@ -125,6 +125,7 @@ Return JSON array of 10 objects:
 
   try {
     const supabase = await createSupabaseServerClient();
+    
     const { data, error } = await supabase
       .from("prompts")
       .insert(rows)

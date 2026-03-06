@@ -16,10 +16,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { workspace_id, prompts, brand_name: requestBrandName } = body as {
+    const { workspace_id, prompts, brand_name: requestBrandName, website_url, profile } = body as {
       workspace_id: string;
       prompts: PromptRequest[];
       brand_name?: string;
+      website_url?: string;
+      profile?: any;
     };
 
     if (!workspace_id || !prompts || !Array.isArray(prompts)) {
@@ -56,9 +58,24 @@ export async function POST(req: NextRequest) {
         .insert({
           id: workspace_id,
           brand_name: brandName,
-          website_url: '',
+          website_url: website_url || '',
           user_id: null
         });
+    }
+
+    // Always update workspace with the latest profile data if available
+    if (profile) {
+      await supabase
+        .from('workspaces')
+        .update({
+          company_overview: profile.company_overview,
+          industry: profile.industry,
+          differentiators: profile.differentiators,
+          target_audience: profile.target_audience,
+          competitors: profile.competitors,
+          website_url: website_url || profile.website_url || '',
+        })
+        .eq('id', workspace_id);
     }
 
     // STEP 1 — Create audit record in Supabase

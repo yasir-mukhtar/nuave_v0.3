@@ -479,6 +479,7 @@ export default function ResultsPage() {
             Save report
           </button>
           <button
+            onClick={() => router.push(`/audit/${auditId}/recommendations`)}
             style={{
               fontSize: "var(--text-sm)",
               fontWeight: 600,
