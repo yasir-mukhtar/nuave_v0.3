@@ -21,6 +21,9 @@ interface GeneratedPrompt {
 }
 
 export async function POST(request: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   let body: { workspace_id: string; profile: Profile };
 
   try {
@@ -124,8 +127,6 @@ Return JSON array of 10 objects:
   let savedPrompts = rows;
 
   try {
-    const supabase = await createSupabaseServerClient();
-    
     const { data, error } = await supabase
       .from("prompts")
       .insert(rows)

@@ -72,7 +72,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Step 1: Fetch website content (fall back to knowledge-only prompt on any failure)
   let websiteContent: string | null = null;
   try {
     const content = await fetchWebsiteContent(website_url);
@@ -80,10 +79,9 @@ export async function POST(request: NextRequest) {
       websiteContent = content;
     }
   } catch {
-    // Intentionally swallowed — fallback prompt handles this case
+    // fallback to knowledge prompt
   }
 
-  // Step 2: Build prompt — scraped content if available, otherwise knowledge fallback
   const userPrompt = websiteContent
     ? `Analyze this website content and extract:
 - brand_name: the company name${brand_name ? ` (hint: it may be "${brand_name}")` : ""}
@@ -104,7 +102,6 @@ ${brand_name ? `Brand name: ${brand_name}` : ""}
 
 Respond with JSON only, same format as before.`;
 
-  // Step 3: Analyze with GPT-4o
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -112,8 +109,7 @@ Respond with JSON only, same format as before.`;
       messages: [
         {
           role: "system",
-          content:
-            "You are a business analyst. Extract structured information from website content. Always respond with valid JSON only, no markdown, no explanation.",
+          content: "You are a business analyst. Extract structured information from website content. Always respond with valid JSON only, no markdown, no explanation.",
         },
         {
           role: "user",
@@ -122,18 +118,19 @@ Respond with JSON only, same format as before.`;
       ],
     });
 
-    const rawText = (completion.choices[0].message.content ?? "")
-      .trim()
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```$/, "")
+    const responseText = completion.choices[0].message.content ?? "";
+    const cleaned = responseText
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
       .trim();
 
     let profile: CompanyProfile;
     try {
-      profile = JSON.parse(rawText) as CompanyProfile;
+      profile = JSON.parse(cleaned) as CompanyProfile;
     } catch {
       return NextResponse.json(
-        { error: "GPT-4o returned invalid JSON", raw: rawText },
+        { error: "GPT-4o returned invalid JSON", raw: responseText },
         { status: 500 }
       );
     }

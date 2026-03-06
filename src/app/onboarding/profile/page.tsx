@@ -162,13 +162,23 @@ export default function ProfilePage() {
       return;
     }
     const data = JSON.parse(stored);
+    const profileData = data.profile || {};
+
+    if (typeof profileData.differentiators === 'string') {
+      profileData.differentiators = profileData.differentiators
+        .split(',').map((s: string) => s.trim()).filter(Boolean);
+    }
+    if (typeof profileData.competitors === 'string') {
+      profileData.competitors = profileData.competitors
+        .split(',').map((s: string) => s.trim()).filter(Boolean);
+    }
     
     // Get website_url from pending data if not in profile
     const pendingUrl = sessionStorage.getItem('nuave_pending_url');
     
     setProfile({
-      ...data.profile,
-      website_url: data.profile.website_url || pendingUrl || ""
+      ...profileData,
+      website_url: profileData.website_url || pendingUrl || ""
     });
     setWorkspaceId(data.workspace_id);
   }, []);

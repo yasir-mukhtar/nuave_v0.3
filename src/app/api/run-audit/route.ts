@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/server';
 
 const OPENAI_MODEL = "gpt-4o-2024-11-20"
 
@@ -13,6 +13,8 @@ interface PromptRequest {
 export async function POST(req: NextRequest) {
   let auditId: string | null = null;
   const supabase = createSupabaseAdminClient();
+  const supabaseServer = await createSupabaseServerClient();
+  const { data: { user } } = await supabaseServer.auth.getUser();
 
   try {
     const body = await req.json();
@@ -59,7 +61,7 @@ export async function POST(req: NextRequest) {
           id: workspace_id,
           brand_name: brandName,
           website_url: website_url || '',
-          user_id: null
+          user_id: user?.id ?? null
         });
     }
 

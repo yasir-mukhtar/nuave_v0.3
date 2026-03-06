@@ -18,7 +18,7 @@ type SidebarProps = {
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: IconLayoutDashboard },
-  { label: "Prompts", href: "/prompts", icon: IconList },
+  { label: "Prompts", href: "/dashboard/prompts", icon: IconList },
   { label: "Content", href: "/content", icon: IconFileDescription },
   { label: "Settings", href: "/settings", icon: IconSettings },
 ];
