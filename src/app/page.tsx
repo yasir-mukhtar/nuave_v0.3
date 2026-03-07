@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconCheck, IconArrowRight } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { createClient } from "@supabase/supabase-js";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -13,6 +14,17 @@ export default function Home() {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    supabase.auth.getSession().then(({ data }) => {
+      setIsLoggedIn(!!data.session);
+    });
+  }, []);
 
   async function handleSubmit() {
     console.log('handleSubmit called');
@@ -89,52 +101,51 @@ export default function Home() {
         </Link>
 
         {/* Nav buttons */}
-        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <Link 
-            href="/auth"
-            style={{
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#374151",
-              background: "transparent",
-              border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-md)",
-              padding: "7px 16px",
-              cursor: "pointer",
-              textDecoration: "none"
-            }}
-          >
-            Log in
-          </Link>
-          <Link 
-            href="/harga" 
-            style={{ 
-              fontSize: "14px", 
-              color: "var(--text-body)", 
-              textDecoration: "none", 
-              padding: "8px 16px" 
-            }}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <Link
+            href="/harga"
+            style={{ fontSize: "14px", color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}
           >
             Harga
           </Link>
-          <button
-            onClick={handleSubmit}
-            style={{
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#ffffff",
-              background: "var(--purple)",
-              border: "none",
-              borderRadius: "var(--radius-md)",
-              padding: "7px 16px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            Start free audit <IconArrowRight size={18} stroke={1.5} />
-          </button>
+
+          {isLoggedIn ? (
+            <Link
+              href="/dashboard"
+              style={{
+                fontSize: "14px", fontWeight: 500, color: "#ffffff",
+                background: "var(--purple)", textDecoration: "none",
+                padding: "8px 20px", borderRadius: "8px",
+              }}
+            >
+              Dashboard →
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/auth"
+                style={{ fontSize: "14px", color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}
+              >
+                Log in
+              </Link>
+              <Link
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const form = document.querySelector('form') || document.getElementById('audit-form');
+                  if (form) form.scrollIntoView({ behavior: 'smooth' });
+                  else window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                style={{
+                  fontSize: "14px", fontWeight: 500, color: "#ffffff",
+                  background: "var(--purple)", textDecoration: "none",
+                  padding: "8px 20px", borderRadius: "8px",
+                }}
+              >
+                Start free audit →
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -194,7 +205,7 @@ export default function Home() {
           </p>
 
           {/* Form card */}
-          <div className="card card-container" style={{ width: "100%", gap: "16px" }}>
+          <div className="card card-container" style={{ width: "100%", gap: "16px" }} id="audit-form">
             <div className="form-field">
               <label>Brand Name</label>
               <input
