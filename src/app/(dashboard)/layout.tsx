@@ -44,27 +44,29 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     <div
       style={{
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
         minHeight: "100vh",
       }}
     >
-      <Sidebar
-        credits={credits}
-        userName={userName}
-        workspaceName={workspaceName}
-      />
-      <main
-        style={{
-          marginLeft: "240px",
-          flex: 1,
-          overflowY: "auto",
-          background: "var(--bg-page)",
-          padding: "32px",
-        }}
-      >
-        <LowCreditsBanner />
-        {children}
-      </main>
+      <LowCreditsBanner />
+      <div style={{ display: "flex", flex: 1 }}>
+        <Sidebar
+          credits={credits}
+          userName={userName}
+          workspaceName={workspaceName}
+        />
+        <main
+          style={{
+            marginLeft: "240px",
+            flex: 1,
+            overflowY: "auto",
+            background: "var(--bg-page)",
+            padding: "32px",
+          }}
+        >
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
