@@ -173,12 +173,13 @@ export default function ProfilePage() {
         .split(',').map((s: string) => s.trim()).filter(Boolean);
     }
     
-    // Get website_url from pending data if not in profile
+    // Get website_url from API response or pending data
     const pendingUrl = sessionStorage.getItem('nuave_pending_url');
+    const website_url = profileData.website_url || data.website_url || pendingUrl || "";
     
     setProfile({
       ...profileData,
-      website_url: profileData.website_url || pendingUrl || ""
+      website_url
     });
     setWorkspaceId(data.workspace_id);
   }, []);
@@ -200,6 +201,14 @@ export default function ProfilePage() {
         setError(data.error ?? "Something went wrong.");
         return;
       }
+      // Update nuave_profile with the latest profile data (which now includes website_url)
+      const stored = sessionStorage.getItem("nuave_profile");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        parsed.profile = profile;
+        sessionStorage.setItem("nuave_profile", JSON.stringify(parsed));
+      }
+      
       sessionStorage.setItem("nuave_prompts", JSON.stringify(data));
       router.push("/onboarding/prompts");
     } catch {

@@ -67,7 +67,7 @@ export default function PromptsPage() {
       
       const workspace_id = profileData?.workspace_id || crypto.randomUUID();
       const brand_name = profileData?.profile?.brand_name || "";
-      const website_url = profileData?.profile?.website_url || sessionStorage.getItem('nuave_pending_url') || "";
+      const website_url = profileData?.profile?.website_url || profileData?.website_url || "";
 
       const { prompts: storedPrompts } = JSON.parse(
         sessionStorage.getItem("nuave_prompts") || '{"prompts":[]}'

@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
           id: workspace_id,
           brand_name: brandName,
           website_url: website_url || '',
+          company_overview: profile?.company_overview || '',
           user_id: user?.id ?? null
         });
     }

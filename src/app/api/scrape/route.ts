@@ -138,6 +138,7 @@ Respond with JSON only, same format as before.`;
     return NextResponse.json({
       success: true,
       source: websiteContent ? "scraped" : "knowledge",
+      website_url,
       profile,
     });
   } catch (error) {
