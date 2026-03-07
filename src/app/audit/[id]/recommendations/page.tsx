@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { 
   IconSparkles, 
   IconCopy, 
   IconArrowLeft 
 } from '@tabler/icons-react';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { createBrowserClient } from '@supabase/ssr';
 
 interface Recommendation {
   id: string;
@@ -31,92 +31,98 @@ export default function RecommendationsPage() {
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [credits, setCredits] = useState<number | null>(null);
   const [brandName, setBrandName] = useState('Brand');
-
-  const fetchRecommendations = useCallback(async (id: string) => {
-    if (!id) return [];
-    try {
-      const res = await fetch('/api/recommendations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audit_id: id })
-      });
-      
-      const data = await res.json();
-      if (data.success && Array.isArray(data.recommendations)) {
-        return data.recommendations;
-      }
-    } catch (error) {
-      console.error('Failed to fetch recommendations:', error);
-    }
-    return [];
-  }, []);
+  
+  const initialFetchRef = useRef(false);
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
+    if (initialFetchRef.current) return;
+    initialFetchRef.current = true;
 
-    async function fetchUserData() {
-      try {
-        const res = await fetch('/api/user/credits')
-        const { credits } = await res.json()
-        if (credits !== null) setCredits(credits)
-      } catch (err) {
-        console.error('Failed to fetch user credits:', err)
-      }
-    }
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
 
-    async function fetchBrandName() {
-      // Try session storage first
-      const profileStr = sessionStorage.getItem('nuave_profile');
-      if (profileStr) {
-        try {
-          const profile = JSON.parse(profileStr);
-          if (profile.profile?.brand_name) {
-            setBrandName(profile.profile.brand_name);
-            return;
-          }
-        } catch (e) {}
-      }
-
-      // Fetch from DB if not in session
-      if (auditId) {
-        const { data } = await supabase
-          .from('audits')
-          .select('workspaces(brand_name)')
-          .eq('id', auditId)
-          .single();
-        
-        const brand = (data?.workspaces as any)?.brand_name;
-        if (brand) setBrandName(brand);
-      }
-    }
-
-    fetchUserData();
-    fetchBrandName();
-
-    async function initialFetch() {
+    async function fetchData() {
+      if (!auditId) return;
       setLoading(true);
-      const data = await fetchRecommendations(auditId);
-      if (data.length > 0) {
-        setRecommendations(data);
-        const revealed = new Set<string>();
-        data.forEach((rec: Recommendation) => {
-          if (rec.suggested_copy) revealed.add(rec.id);
+
+      try {
+        // 1. Fetch User Credits
+        fetch('/api/user/credits')
+          .then(res => res.json())
+          .then(data => { if (data.credits !== null) setCredits(data.credits); });
+
+        // 2. Fetch Brand Name
+        const profileStr = sessionStorage.getItem('nuave_profile');
+        if (profileStr) {
+          const profile = JSON.parse(profileStr);
+          if (profile.profile?.brand_name) setBrandName(profile.profile.brand_name);
+        } else {
+          supabase
+            .from('audits')
+            .select('workspaces(brand_name)')
+            .eq('id', auditId)
+            .single()
+            .then(({ data }) => {
+              const brand = (data?.workspaces as any)?.brand_name;
+              if (brand) setBrandName(brand);
+            });
+        }
+
+        // 3. Load existing recommendations from Supabase directly
+        const { data: existing } = await supabase
+          .from('recommendations')
+          .select('*')
+          .eq('audit_id', auditId)
+          .order('created_at', { ascending: true });
+
+        if (existing && existing.length > 0) {
+          setRecommendations(existing);
+          const revealed = new Set<string>();
+          existing.forEach((rec: Recommendation) => {
+            if (rec.suggested_copy) revealed.add(rec.id);
+          });
+          setRevealedIds(revealed);
+          setLoading(false);
+          return;
+        }
+
+        // 4. None exist yet — call API once to generate them
+        const res = await fetch('/api/recommendations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audit_id: auditId }),
         });
-        setRevealedIds(revealed);
+        const data = await res.json();
+        setRecommendations(data.recommendations || []);
+      } catch (error) {
+        console.error('Data fetch error:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
-    initialFetch();
-  }, [auditId, fetchRecommendations]);
+    fetchData();
+  }, [auditId]);
 
+  // Polling logic for background generation
   useEffect(() => {
-    // If no recommendations and not initially loading, start polling every 3s
     if (!loading && recommendations.length === 0 && !polling) {
       setPolling(true);
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
       const interval = setInterval(async () => {
-        const fresh = await fetchRecommendations(auditId);
-        if (fresh.length > 0) {
+        const { data: fresh } = await supabase
+          .from('recommendations')
+          .select('*')
+          .eq('audit_id', auditId)
+          .order('created_at', { ascending: true });
+
+        if (fresh && fresh.length > 0) {
           setRecommendations(fresh);
           const revealed = new Set<string>();
           fresh.forEach((rec: Recommendation) => {
@@ -128,7 +134,6 @@ export default function RecommendationsPage() {
         }
       }, 3000);
       
-      // Stop polling after 60s max
       const timeout = setTimeout(() => {
         clearInterval(interval);
         setPolling(false);
@@ -139,7 +144,7 @@ export default function RecommendationsPage() {
         clearTimeout(timeout);
       };
     }
-  }, [loading, recommendations.length, polling, auditId, fetchRecommendations]);
+  }, [loading, recommendations.length, polling, auditId]);
 
   async function handleReveal(recId: string) {
     setRevealedIds(prev => new Set([...prev, recId]));
@@ -162,9 +167,7 @@ export default function RecommendationsPage() {
         );
         
         if (typeof credits === 'number') {
-          const newCredits = Math.max(0, credits - 1);
-          setCredits(newCredits);
-          localStorage.setItem('nuave_credits', newCredits.toString());
+          setCredits(Math.max(0, credits - 1));
         }
       }
     } catch (error) {
