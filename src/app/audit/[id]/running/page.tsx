@@ -2,21 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { IconBrain, IconAlertTriangle } from '@tabler/icons-react';
-
-const statusMessages = [
-  "Testing awareness queries...",
-  "Testing consideration queries...",
-  "Testing decision queries...",
-  "Analyzing brand mentions...",
-  "Calculating your visibility score...",
-];
+import { IconAlertTriangle } from '@tabler/icons-react';
+import AuditRunningLoader from "@/components/AuditRunningLoader";
 
 export default function AuditRunningPage() {
   const router = useRouter();
   const params = useParams();
-  const [messageIndex, setMessageIndex] = useState(0);
-  const [progressIndex, setProgressIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -75,148 +66,55 @@ export default function AuditRunningPage() {
     };
   }, [router, params.id]);
 
-  // Cycling status messages every 3 seconds
-  useEffect(() => {
-    const messageInterval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % statusMessages.length);
-    }, 3000);
-
-    return () => clearInterval(messageInterval);
-  }, []);
-
-  // Progress dots every 3 seconds (matching 30s total estimate for 10 dots)
-  useEffect(() => {
-    const dotInterval = setInterval(() => {
-      setProgressIndex((prev) => (prev < 10 ? prev + 1 : prev));
-    }, 3000);
-
-    return () => clearInterval(dotInterval);
-  }, []);
-
-  return (
-    <>
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.05); }
-        }
-        .pulsing-circle {
-          animation: pulse 1.5s ease-in-out infinite;
-        }
-        @media (max-width: 768px) {
-          .pulsing-circle {
-            width: 150px !important;
-            height: 150px !important;
-          }
-          .status-container {
-            padding: 0 24px !important;
-          }
-        }
-      `}</style>
-
+  if (error) {
+    return (
       <div
         style={{
-          position: "fixed",
-          inset: 0,
-          background: "#ffffff",
-          zIndex: 9999,
+          minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          background: "#ffffff",
+          textAlign: "center",
+          padding: "24px",
           fontFamily: "var(--font-geist-sans), sans-serif",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            maxWidth: "400px",
-            width: "100%",
-            textAlign: "center",
-            gap: "40px",
+        <div style={{
+          width: "120px",
+          height: "120px",
+          borderRadius: "50%",
+          background: "#FEF2F2",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: "24px"
+        }}>
+          <IconAlertTriangle size={48} stroke={1.5} color="#EF4444" />
+        </div>
+        <h1 style={{ fontSize: "24px", fontWeight: 700, color: "#111827", margin: "0 0 8px 0" }}>
+          Something went wrong
+        </h1>
+        <p style={{ fontSize: "16px", color: "#6B7280", margin: "0 0 24px 0" }}>
+          {error}
+        </p>
+        <a 
+          href="/" 
+          style={{ 
+            background: "#533AFD", 
+            color: "#ffffff", 
+            padding: "12px 24px", 
+            borderRadius: "8px", 
+            fontWeight: 600, 
+            textDecoration: "none" 
           }}
         >
-          {/* TOP SECTION - Animated pulsing circle */}
-          <div
-            className="pulsing-circle"
-            style={{
-              width: "200px",
-              height: "200px",
-              borderRadius: "50%",
-              border: "3px solid #6C3FF5",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {error ? (
-              <IconAlertTriangle size={64} stroke={1.5} color="#EF4444" />
-            ) : (
-              <IconBrain size={64} stroke={1.5} color="#6C3FF5" />
-            )}
-          </div>
-
-          {/* MIDDLE SECTION - Status text */}
-          <div className="status-container" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <h1
-                style={{
-                  fontSize: "24px",
-                  fontWeight: 700,
-                  color: "#111827",
-                  margin: 0,
-                }}
-              >
-                {error ? "Something went wrong" : "Asking ChatGPT your questions..."}
-              </h1>
-              <p style={{ fontSize: "16px", color: "#6B7280", margin: 0 }}>
-                {error ? "We couldn't complete your audit." : "This takes about 30 seconds"}
-              </p>
-            </div>
-            
-            {!error && (
-              <p
-                key={messageIndex}
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  color: "#6C3FF5",
-                  margin: 0,
-                  height: "20px",
-                }}
-              >
-                {statusMessages[messageIndex]}
-              </p>
-            )}
-
-            {error && (
-              <p style={{ color: '#EF4444', marginTop: '16px', fontSize: '14px' }}>
-                {error} <a href="/" style={{ color: '#6C3FF5', fontWeight: 600, textDecoration: 'none' }}>Try again</a>
-              </p>
-            )}
-          </div>
-
-          {/* BOTTOM SECTION - Progress dots */}
-          {!error && (
-            <div style={{ display: "flex", gap: "8px" }}>
-              {[...Array(10)].map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: i < progressIndex ? "#6C3FF5" : "#E5E7EB",
-                    transition: "background 0.3s ease",
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+          Try again
+        </a>
       </div>
-    </>
-  );
+    );
+  }
+
+  return <AuditRunningLoader />;
 }
