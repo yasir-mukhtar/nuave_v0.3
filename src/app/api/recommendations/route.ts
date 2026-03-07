@@ -19,7 +19,19 @@ export async function POST(request: Request) {
 
     const supabase = createSupabaseAdminClient()
 
-    // Query 1: get audit
+    // 1. Check if recommendations already exist for this audit
+    const { data: existing } = await supabase
+      .from('recommendations')
+      .select('*')
+      .eq('audit_id', audit_id)
+      .order('created_at', { ascending: true });
+
+    if (existing && existing.length > 0) {
+      // Already generated — return immediately, no Claude call needed
+      return NextResponse.json({ success: true, recommendations: existing });
+    }
+
+    // 2. Query 1: get audit
     const { data: audit, error: auditError } = await supabase
       .from('audits')
       .select('*')
