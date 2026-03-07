@@ -211,32 +211,23 @@ export default function RecommendationsPage() {
             });
         }
 
-        // 3. Load existing recommendations from Supabase directly
-        const { data: existing } = await supabase
-          .from('recommendations')
-          .select('*')
-          .eq('audit_id', auditId)
-          .order('created_at', { ascending: true });
-
-        if (existing && existing.length > 0) {
-          setRecommendations(existing);
-          const revealed = new Set<string>();
-          existing.forEach((rec: Recommendation) => {
-            if (rec.suggested_copy) revealed.add(rec.id);
-          });
-          setRevealedIds(revealed);
-          setLoading(false);
-          return;
-        }
-
-        // 4. None exist yet — call API once to generate them
+        // Always call the API — loading screen plays every visit
+        // The API returns cached results instantly if they exist
         const res = await fetch('/api/recommendations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ audit_id: auditId }),
         });
         const data = await res.json();
-        setRecommendations(data.recommendations || []);
+        const recs = data.recommendations || [];
+        setRecommendations(recs);
+
+        // Restore any already-revealed fixes
+        const revealed = new Set<string>();
+        recs.forEach((rec: Recommendation) => {
+          if (rec.suggested_copy) revealed.add(rec.id);
+        });
+        setRevealedIds(revealed);
       } catch (error) {
         console.error('Data fetch error:', error);
       } finally {
