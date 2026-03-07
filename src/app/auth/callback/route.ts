@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
+  const origin = requestUrl.origin;
 
   if (code) {
     const supabase = await createSupabaseServerClient();
@@ -42,6 +43,16 @@ export async function GET(request: Request) {
     }
   }
 
-  // Redirect to analyze page to continue the audit
-  return NextResponse.redirect(new URL('/onboarding/analyze', requestUrl.origin));
+  const pkg = requestUrl.searchParams.get('package');
+  const brand = requestUrl.searchParams.get('brand');
+
+  if (pkg) {
+    return NextResponse.redirect(`${origin}/dashboard/credits?package=${pkg}`);
+  }
+  if (brand) {
+    return NextResponse.redirect(`${origin}/onboarding/analyze`);
+  }
+
+  // Default redirect
+  return NextResponse.redirect(`${origin}/dashboard`);
 }

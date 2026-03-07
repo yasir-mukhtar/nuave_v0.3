@@ -182,16 +182,23 @@ export default function HargaPage() {
                 {pkg.description}
               </p>
 
-              <Link href="/auth" style={{
-                display: "block", textAlign: "center",
-                padding: "12px 24px", borderRadius: "8px",
-                fontSize: "14px", fontWeight: 600, textDecoration: "none",
-                background: pkg.popular ? "#ffffff" : "var(--purple)",
-                color: pkg.popular ? "var(--purple)" : "#ffffff",
-                marginBottom: "28px",
-              }}>
+              <button
+                onClick={() => {
+                  sessionStorage.setItem('nuave_pending_package', pkg.id);
+                  window.location.href = '/auth';
+                }}
+                style={{
+                  display: "block", width: "100%", textAlign: "center",
+                  padding: "12px 24px", borderRadius: "8px",
+                  fontSize: "14px", fontWeight: 600,
+                  background: pkg.popular ? "#ffffff" : "var(--purple)",
+                  color: pkg.popular ? "var(--purple)" : "#ffffff",
+                  border: "none", cursor: "pointer",
+                  marginBottom: "28px",
+                }}
+              >
                 Beli {pkg.name} →
-              </Link>
+              </button>
 
               <div style={{ borderTop: `1px solid ${pkg.popular ? "rgba(255,255,255,0.2)" : "var(--border-default)"}`, paddingTop: "24px" }}>
                 {pkg.features.map((f, i) => (

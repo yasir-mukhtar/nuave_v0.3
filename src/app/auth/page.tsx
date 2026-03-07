@@ -5,19 +5,35 @@ import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 export default function AuthPage() {
-  const [pendingBrand, setPendingBrand] = useState<string | null>(null);
+  const [context, setContext] = useState<'audit' | 'upgrade' | 'default'>('default');
+  const [pendingBrand, setPendingBrand] = useState('');
+  const [pendingPackage, setPendingPackage] = useState('');
   const supabase = createSupabaseBrowserClient();
 
   useEffect(() => {
     const brand = sessionStorage.getItem('nuave_pending_brand');
-    setPendingBrand(brand);
+    const pkg = sessionStorage.getItem('nuave_pending_package');
+    if (pkg) {
+      setPendingPackage(pkg);
+      setContext('upgrade');
+    } else if (brand) {
+      setPendingBrand(brand);
+      setContext('audit');
+    }
   }, []);
 
   const handleGoogleSignIn = async () => {
+    const pkg = sessionStorage.getItem('nuave_pending_package');
+    const brand = sessionStorage.getItem('nuave_pending_brand');
+    
+    let callbackUrl = `${window.location.origin}/auth/callback`;
+    if (pkg) callbackUrl += `?package=${pkg}`;
+    else if (brand) callbackUrl += `?brand=${encodeURIComponent(brand)}`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl,
       },
     });
     if (error) console.error(error);
@@ -95,34 +111,62 @@ export default function AuthPage() {
         </Link>
 
         {/* Content */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>
-            Continue your free audit
-          </h1>
-          <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
-            Sign in to run your AI visibility audit and get your free visibility score.
-          </p>
-        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+          {context === 'upgrade' && (
+            <>
+              <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px 0', textAlign: 'center' }}>
+                Aktifkan paket Anda
+              </h1>
+              {pendingPackage && (
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  background: 'var(--purple-light)', border: '1px solid #C4B5FD',
+                  borderRadius: '999px', padding: '4px 14px',
+                  fontSize: '12px', fontWeight: 500, color: 'var(--purple)',
+                  marginBottom: '12px',
+                }}>
+                  Paket dipilih: {pendingPackage.charAt(0).toUpperCase() + pendingPackage.slice(1)}
+                </div>
+              )}
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 24px 0' }}>
+                Masuk untuk melanjutkan pembayaran.
+              </p>
+            </>
+          )}
 
-        {/* Brand Pill */}
-        {pendingBrand && (
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              background: 'var(--purple-light)',
-              color: 'var(--purple)',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '13px',
-              fontWeight: 600,
-            }}
-          >
-            Auditing: {pendingBrand}
-          </div>
-        )}
+          {context === 'audit' && (
+            <>
+              <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px 0', textAlign: 'center' }}>
+                Lanjutkan audit gratis Anda
+              </h1>
+              {pendingBrand && (
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  background: 'var(--purple-light)', border: '1px solid #C4B5FD',
+                  borderRadius: '999px', padding: '4px 14px',
+                  fontSize: '12px', fontWeight: 500, color: 'var(--purple)',
+                  marginBottom: '12px',
+                }}>
+                  Mengaudit: {pendingBrand}
+                </div>
+              )}
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 24px 0' }}>
+                Masuk untuk melihat skor visibilitas AI merek Anda.
+              </p>
+            </>
+          )}
+
+          {context === 'default' && (
+            <>
+              <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px 0', textAlign: 'center' }}>
+                Masuk ke Nuave
+              </h1>
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 24px 0' }}>
+                Kelola audit AI dan visibilitas merek Anda.
+              </p>
+            </>
+          )}
+        </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
           <button onClick={handleGoogleSignIn} className="btn-google">
