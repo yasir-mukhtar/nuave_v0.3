@@ -9,6 +9,7 @@ import {
   IconSettings, 
   IconCoins 
 } from '@tabler/icons-react';
+import { useCreditsBalance } from "@/hooks/useCreditsBalance";
 
 type SidebarProps = {
   credits: number;
@@ -32,9 +33,10 @@ function getInitials(name: string) {
   return initials || "YM";
 }
 
-export function Sidebar({ credits, userName, workspaceName }: SidebarProps) {
+export function Sidebar({ credits: initialCredits, userName, workspaceName }: SidebarProps) {
   const pathname = usePathname();
   const initials = getInitials(userName);
+  const { credits } = useCreditsBalance();
 
   return (
     <aside
@@ -222,7 +224,7 @@ export function Sidebar({ credits, userName, workspaceName }: SidebarProps) {
           }}
         >
           <IconCoins size={14} stroke={1.5} />
-          <span>{credits} credits</span>
+          <span>{credits ?? "—"} credits</span>
         </div>
       </div>
     </aside>

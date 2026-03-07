@@ -1,31 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useState } from "react";
+import { useCreditsBalance } from "@/hooks/useCreditsBalance";
 
 export default function LowCreditsBanner() {
-  const [credits, setCredits] = useState<number | null>(null);
+  const { credits } = useCreditsBalance();
   const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) return;
-      supabase
-        .from("users")
-        .select("credits_balance")
-        .eq("id", data.user.id)
-        .single()
-        .then(({ data: userData }) => {
-          if (userData) setCredits(userData.credits_balance);
-        });
-    });
-  }, []);
-
-  // Only show when credits are 5 or below, and not dismissed
   if (credits === null || credits > 5 || dismissed) return null;
 
   const isEmpty = credits === 0;
@@ -68,9 +49,8 @@ export default function LowCreditsBanner() {
             background: "none", border: "none",
             cursor: "pointer", padding: "4px",
             color: isEmpty ? "#EF4444" : "#D97706",
-            fontSize: "16px", lineHeight: 1,
+            fontSize: "18px", lineHeight: 1,
           }}
-          aria-label="Tutup"
         >
           ×
         </button>
