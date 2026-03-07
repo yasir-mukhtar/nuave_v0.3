@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import LowCreditsBanner from "@/components/LowCreditsBanner";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -57,11 +58,13 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
           marginLeft: "240px",
           flex: 1,
           overflowY: "auto",
-          padding: "32px",
           background: "var(--bg-page)",
         }}
       >
-        {children}
+        <LowCreditsBanner />
+        <div style={{ padding: "32px" }}>
+          {children}
+        </div>
       </main>
     </div>
   );
