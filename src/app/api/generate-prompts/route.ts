@@ -12,6 +12,7 @@ interface Profile {
   competitors: string[];
   target_audience?: string;
   language?: string;
+  website_url?: string;
 }
 
 interface GeneratedPrompt {
@@ -39,6 +40,25 @@ export async function POST(request: NextRequest) {
       { error: "profile is required" },
       { status: 400 }
     );
+  }
+
+  // Persist workspace profile to Supabase
+  try {
+    await supabase
+      .from('workspaces')
+      .update({
+        website_url: profile.website_url || null,
+        company_overview: profile.company_overview || null,
+        industry: profile.industry || null,
+        differentiators: profile.differentiators || [],
+        competitors: profile.competitors || [],
+        target_audience: profile.target_audience || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', workspace_id);
+  } catch (err) {
+    console.error("Failed to persist workspace profile:", err);
+    // Non-fatal, continue with prompt generation
   }
 
   const localLanguage =

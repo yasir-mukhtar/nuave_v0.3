@@ -16,6 +16,7 @@ interface CompanyProfile {
   competitors: string[];
   target_audience?: string;
   language?: string;
+  website_url?: string;
 }
 
 async function fetchWebsiteContent(url: string): Promise<string> {
@@ -128,6 +129,7 @@ Respond with JSON only, same format as before.`;
     let profile: CompanyProfile;
     try {
       profile = JSON.parse(cleaned) as CompanyProfile;
+      profile.website_url = website_url;
     } catch {
       return NextResponse.json(
         { error: "GPT-4o returned invalid JSON", raw: responseText },
