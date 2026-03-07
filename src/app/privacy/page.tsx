@@ -18,8 +18,7 @@ export default function PrivacyPage() {
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-          <div style={{ width: "10px", height: "10px", background: "var(--purple)", borderRadius: "3px" }} />
-          <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-heading)" }}>Nuave</span>
+          <img src="/logo-nuave.svg" alt="Nuave" height="28" />
         </Link>
         <Link href="/" style={{ fontSize: "14px", color: "var(--text-muted)", textDecoration: "none" }}>
           ← Kembali ke beranda

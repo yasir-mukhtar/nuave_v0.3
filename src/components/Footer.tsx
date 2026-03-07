@@ -20,8 +20,7 @@ export default function Footer() {
 
         {/* Brand */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div style={{ width: "8px", height: "8px", background: "var(--purple)", borderRadius: "2px" }} />
-          <span style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-heading)" }}>Nuave</span>
+          <img src="/logo-nuave.svg" alt="Nuave" height="20" />
         </div>
 
         {/* Contact & Social */}

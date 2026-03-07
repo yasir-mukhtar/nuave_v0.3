@@ -63,23 +63,7 @@ export function Sidebar({ credits: initialCredits, userName, workspaceName }: Si
           textDecoration: "none",
         }}
       >
-        <div
-          style={{
-            width: "10px",
-            height: "10px",
-            borderRadius: "3px",
-            background: "var(--purple)",
-          }}
-        />
-        <span
-          style={{
-            fontSize: "18px",
-            fontWeight: 700,
-            color: "var(--text-heading)",
-          }}
-        >
-          Nuave
-        </span>
+        <img src="/logo-nuave.svg" alt="Nuave" height="28" />
       </Link>
 
       {/* Nav */}

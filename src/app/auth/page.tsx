@@ -109,18 +109,7 @@ export default function AuthPage() {
             textDecoration: 'none'
           }}
         >
-          <div
-            style={{
-              width: '12px',
-              height: '12px',
-              background: 'var(--purple)',
-              borderRadius: '3px',
-              flexShrink: 0,
-            }}
-          />
-          <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)' }}>
-            Nuave
-          </span>
+          <img src="/logo-nuave.svg" alt="Nuave" height="32" />
         </Link>
 
         {/* Content */}
