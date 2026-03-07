@@ -29,8 +29,17 @@ export async function middleware(req: NextRequest) {
     },
   });
 
-  // Refresh session on every request (updateSession pattern)
-  await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Protected routes logic
+  const isDashboard = req.nextUrl.pathname.startsWith('/dashboard');
+  const isOnboarding = req.nextUrl.pathname.startsWith('/onboarding');
+
+  if ((isDashboard || isOnboarding) && !user) {
+    const redirectUrl = new URL('/auth', req.url);
+    redirectUrl.searchParams.set('next', req.nextUrl.pathname + req.nextUrl.search);
+    return NextResponse.redirect(redirectUrl);
+  }
 
   return res;
 }

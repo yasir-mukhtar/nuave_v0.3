@@ -23,12 +23,25 @@ export default function AuthPage() {
   }, []);
 
   const handleGoogleSignIn = async () => {
-    const pkg = sessionStorage.getItem('nuave_pending_package');
-    const brand = sessionStorage.getItem('nuave_pending_brand');
-    
+    const nextParam = new URLSearchParams(window.location.search).get('next');
     let callbackUrl = `${window.location.origin}/auth/callback`;
-    if (pkg) callbackUrl += `?package=${pkg}`;
-    else if (brand) callbackUrl += `?brand=${encodeURIComponent(brand)}`;
+    
+    if (nextParam) {
+      // Extract package from next param
+      try {
+        const nextUrl = new URL(nextParam, window.location.origin);
+        const pkg = nextUrl.searchParams.get('package');
+        if (pkg) callbackUrl += `?package=${pkg}`;
+      } catch (e) {
+        console.error("Error parsing next param:", e);
+      }
+    } else {
+      const pkg = sessionStorage.getItem('nuave_pending_package');
+      const brand = sessionStorage.getItem('nuave_pending_brand');
+      
+      if (pkg) callbackUrl += `?package=${pkg}`;
+      else if (brand) callbackUrl += `?brand=${encodeURIComponent(brand)}`;
+    }
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
