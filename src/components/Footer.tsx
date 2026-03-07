@@ -4,24 +4,80 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer style={{
-      textAlign: "center",
-      padding: "24px 16px",
-      fontSize: "13px",
-      color: "var(--text-muted)",
       borderTop: "1px solid var(--border-default)",
       marginTop: "48px",
+      padding: "32px 16px",
+      background: "var(--surface)",
     }}>
-      <Link href="/privacy" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
-        Kebijakan Privasi
-      </Link>
-      {" · "}
-      <Link href="/terms" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
-        Syarat &amp; Ketentuan
-      </Link>
-      {" · "}
-      <a href="mailto:hello@nuave.id" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
-        Kontak
-      </a>
+      <div style={{
+        maxWidth: "800px",
+        margin: "0 auto",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "16px",
+      }}>
+
+        {/* Brand */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ width: "8px", height: "8px", background: "var(--purple)", borderRadius: "2px" }} />
+          <span style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-heading)" }}>Nuave</span>
+        </div>
+
+        {/* Contact & Social */}
+        <div style={{ display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap", justifyContent: "center" }}>
+          <a
+            href="mailto:hello.nuave@gmail.com"
+            style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "var(--text-muted)", textDecoration: "none" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+            hello.nuave@gmail.com
+          </a>
+
+          <a
+            href="https://instagram.com/nuave.id"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "var(--text-muted)", textDecoration: "none" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+            </svg>
+            @nuave.id
+          </a>
+
+          <a
+            href="https://x.com/nuaveID"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "var(--text-muted)", textDecoration: "none" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            @nuaveID
+          </a>
+        </div>
+
+        {/* Legal Links */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "12px", color: "var(--text-muted)" }}>
+          <Link href="/privacy" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
+            Kebijakan Privasi
+          </Link>
+          <span>·</span>
+          <Link href="/terms" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
+            Syarat &amp; Ketentuan
+          </Link>
+        </div>
+
+        {/* Copyright */}
+        <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: 0 }}>
+          © {new Date().getFullYear()} Nuave. All rights reserved.
+        </p>
+
+      </div>
     </footer>
   );
 }
