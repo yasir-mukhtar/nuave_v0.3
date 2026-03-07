@@ -99,7 +99,7 @@ export default function PromptsPage() {
       
     } catch (err: any) {
       console.error("Audit error:", err);
-      setError(err.message || "An unexpected error occurred during the audit.");
+      setError(err.message || "Terjadi kesalahan saat menjalankan audit.");
     }
   };
 
@@ -114,7 +114,7 @@ export default function PromptsPage() {
           background: "var(--bg-page)",
         }}
       >
-        <p style={{ color: "var(--text-muted)" }}>Loading prompts...</p>
+        <p style={{ color: "var(--text-muted)" }}>Memuat prompt...</p>
       </div>
     );
   }
@@ -174,7 +174,7 @@ export default function PromptsPage() {
                 gap: "4px",
               }}
             >
-              <IconArrowLeft size={18} stroke={1.5} /> Back
+              <IconArrowLeft size={18} stroke={1.5} /> Kembali
             </button>
 
             <ProgressBar active={4} />
@@ -194,7 +194,7 @@ export default function PromptsPage() {
                 gap: "4px",
               }}
             >
-              <IconRefresh size={18} stroke={1.5} /> Regenerate
+              <IconRefresh size={18} stroke={1.5} /> Regenerasi
             </button>
           </div>
 
@@ -208,7 +208,7 @@ export default function PromptsPage() {
                 margin: 0,
               }}
             >
-              Prompt suggestions
+              Saran prompt
             </h1>
             <p
               style={{
@@ -218,7 +218,7 @@ export default function PromptsPage() {
                 marginBottom: 0,
               }}
             >
-              We will ask these to ChatGPT to measure your brand visibility.
+              Kami akan menanyakan ini ke ChatGPT untuk mengukur visibilitas brand kamu.
             </p>
           </div>
 
@@ -318,7 +318,7 @@ export default function PromptsPage() {
             transition: "all 0.2s",
           }}
         >
-          Show results <IconArrowRight size={18} stroke={1.5} />
+          Lihat hasil <IconArrowRight size={18} stroke={1.5} />
         </button>
       </div>
     </>

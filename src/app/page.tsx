@@ -49,7 +49,7 @@ export default function Home() {
       }
     } catch (err) {
       console.error('Submit error:', err);
-      setError("An error occurred. Please try again.");
+      setError("Terjadi kesalahan. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -172,7 +172,7 @@ export default function Home() {
               padding: "4px 14px",
             }}
           >
-            Free AI Visibility Audit
+            Audit Visibilitas AI Gratis
           </span>
 
           {/* Headline */}
@@ -184,7 +184,7 @@ export default function Home() {
               margin: 0,
             }}
           >
-            Does ChatGPT know your brand?
+            Apakah ChatGPT tahu bisnis kamu?
           </h1>
 
           {/* Subheadline */}
@@ -197,29 +197,28 @@ export default function Home() {
               margin: 0,
             }}
           >
-            Find out in 2 minutes. See your visibility score, discover what competitors rank for,
-            and get a roadmap to improve.
+            Cari tahu dalam 2 menit. Lihat visibility score kamu, temukan apa yang muncul untuk kompetitor, dan dapatkan roadmap untuk meningkatkannya.
           </p>
 
           {/* Form card */}
           <div className="card card-container" style={{ width: "100%", gap: "16px" }} id="audit-form">
             <div className="form-field">
-              <label>Brand Name</label>
+              <label>Nama Brand</label>
               <input
                 className="input-large"
                 type="text"
-                placeholder="e.g. Nuave"
+                placeholder="misal: Nuave"
                 value={brandName}
                 onChange={(e) => setBrandName(e.target.value)}
               />
             </div>
 
             <div className="form-field">
-              <label>Website URL</label>
+              <label>URL Website</label>
               <input
                 className="input-large"
                 type="url"
-                placeholder="e.g. https://nuave.id"
+                placeholder="misal: https://nuave.id"
                 value={websiteUrl}
                 onChange={(e) => setWebsiteUrl(e.target.value)}
               />
@@ -249,9 +248,9 @@ export default function Home() {
                 opacity: loading ? 0.7 : 1,
               }}
             >
-              {loading ? "Analyzing…" : (
+              {loading ? "Menganalisis…" : (
                 <>
-                  Start Free Audit <IconArrowRight size={18} stroke={1.5} />
+                  Mulai Audit Gratis <IconArrowRight size={18} stroke={1.5} />
                 </>
               )}
             </button>
@@ -260,13 +259,13 @@ export default function Home() {
           {/* Trust line */}
           <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#9CA3AF" }}>
-              <IconCheck size={16} stroke={2} color="var(--purple)" /> Free
+              <IconCheck size={16} stroke={2} color="var(--purple)" /> Gratis
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#9CA3AF" }}>
-              <IconCheck size={16} stroke={2} color="var(--purple)" /> No sign up required
+              <IconCheck size={16} stroke={2} color="var(--purple)" /> Tanpa kartu kredit
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#9CA3AF" }}>
-              <IconCheck size={16} stroke={2} color="var(--purple)" /> Results in 60 seconds
+              <IconCheck size={16} stroke={2} color="var(--purple)" /> Hasil dalam 60 detik
             </div>
           </div>
         </div>

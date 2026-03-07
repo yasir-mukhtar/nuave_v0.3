@@ -134,7 +134,7 @@ export default function AuthPage() {
                 </div>
               )}
               <p style={{ fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 24px 0' }}>
-                Masuk untuk melanjutkan pembayaran.
+                Masuk untuk melanjutkan ke pembayaran.
               </p>
             </>
           )}
@@ -142,7 +142,7 @@ export default function AuthPage() {
           {context === 'audit' && (
             <>
               <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px 0', textAlign: 'center' }}>
-                Lanjutkan audit gratis Anda
+                Lanjutkan audit gratis kamu
               </h1>
               {pendingBrand && (
                 <div style={{
@@ -156,7 +156,7 @@ export default function AuthPage() {
                 </div>
               )}
               <p style={{ fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 24px 0' }}>
-                Masuk untuk melihat skor visibilitas AI merek Anda.
+                Masuk untuk melihat visibility score brand kamu.
               </p>
             </>
           )}
@@ -167,7 +167,7 @@ export default function AuthPage() {
                 Masuk ke Nuave
               </h1>
               <p style={{ fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 24px 0' }}>
-                Kelola audit AI dan visibilitas merek Anda.
+                Kelola audit AI dan visibilitas brand kamu.
               </p>
             </>
           )}
@@ -176,13 +176,13 @@ export default function AuthPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
           <button onClick={handleGoogleSignIn} className="btn-google">
             <img src="/google-icon.svg" width={18} height={18} alt="Google" />
-            Continue with Google
+            Lanjutkan dengan Google
           </button>
 
           <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.4, margin: 0 }}>
-            By continuing, you agree to our{' '}
-            <Link href="/terms" style={{ color: 'var(--text-body)', textDecoration: 'underline' }}>Terms of Service</Link> and{' '}
-            <Link href="/privacy" style={{ color: 'var(--text-body)', textDecoration: 'underline' }}>Privacy Policy</Link>.
+            Dengan melanjutkan, Anda menyetujui{' '}
+            <Link href="/terms" style={{ color: 'var(--text-body)', textDecoration: 'underline' }}>Syarat & Ketentuan</Link> dan{' '}
+            <Link href="/privacy" style={{ color: 'var(--text-body)', textDecoration: 'underline' }}>Kebijakan Privasi</Link> kami.
           </p>
         </div>
       </div>

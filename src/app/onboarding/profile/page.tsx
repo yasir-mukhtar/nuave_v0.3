@@ -132,7 +132,7 @@ function AddChip() {
         gap: "4px",
       }}
     >
-      <IconPlus size={14} stroke={2} /> Add
+      <IconPlus size={14} stroke={2} /> Tambah
     </button>
   );
 }
@@ -191,7 +191,7 @@ export default function ProfilePage() {
     setLoading(true);
     try {
       if (!workspaceId) {
-        throw new Error("Missing workspace ID. Please try restarting the audit.");
+        throw new Error("ID workspace tidak ditemukan. Silakan coba ulangi audit.");
       }
       const res = await fetch("/api/generate-prompts", {
         method: "POST",
@@ -200,7 +200,7 @@ export default function ProfilePage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong.");
+        setError(data.error ?? "Terjadi kesalahan.");
         return;
       }
       // Update nuave_profile with the latest profile data (which now includes website_url)
@@ -214,7 +214,7 @@ export default function ProfilePage() {
       sessionStorage.setItem("nuave_prompts", JSON.stringify(data));
       router.push("/onboarding/prompts");
     } catch {
-      setError("Network error. Please try again.");
+      setError("Kesalahan jaringan. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -233,7 +233,7 @@ export default function ProfilePage() {
           color: "var(--text-muted)",
         }}
       >
-        Loading profile…
+        Memuat profil…
       </div>
     );
   }
@@ -271,7 +271,7 @@ export default function ProfilePage() {
               gap: "4px",
             }}
           >
-            <IconArrowLeft size={18} stroke={1.5} /> Back
+            <IconArrowLeft size={18} stroke={1.5} /> Kembali
           </button>
           <ProgressBar active={3} />
           <div style={{ width: "56px" }} />
@@ -287,7 +287,7 @@ export default function ProfilePage() {
               margin: 0,
             }}
           >
-            Company details
+            Detail Perusahaan
           </h1>
           <p
             style={{
@@ -297,7 +297,7 @@ export default function ProfilePage() {
               marginBottom: 0,
             }}
           >
-            Review and edit before continuing.
+            Tinjau dan edit sebelum melanjutkan.
           </p>
         </div>
 
@@ -314,7 +314,7 @@ export default function ProfilePage() {
 
             {/* Company name */}
             <div>
-              <FieldLabel>Company name</FieldLabel>
+              <FieldLabel>Nama perusahaan</FieldLabel>
               <div style={{ display: "flex", flexDirection: "row", gap: "8px", alignItems: "center" }}>
                 <input
                   type="text"
@@ -393,7 +393,7 @@ export default function ProfilePage() {
 
             {/* Differentiators */}
             <div>
-              <FieldLabel>What sets you apart?</FieldLabel>
+              <FieldLabel>Keunggulan brand kamu?</FieldLabel>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
                 {profile.differentiators.map((d) => (
                   <PurpleChip key={d} label={d} />
@@ -404,7 +404,7 @@ export default function ProfilePage() {
 
             {/* Competitors */}
             <div>
-              <FieldLabel>Known competitors</FieldLabel>
+              <FieldLabel>Kompetitor utama</FieldLabel>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
                 {profile.competitors.map((c) => (
                   <GrayChip key={c} label={c} />
@@ -436,9 +436,9 @@ export default function ProfilePage() {
                   opacity: loading ? 0.7 : 1,
                 }}
               >
-                {loading ? "Generating…" : (
+                {loading ? "Menyiapkan…" : (
                   <>
-                    Generate Prompts <IconArrowRight size={18} stroke={1.5} />
+                    Buat Prompt <IconArrowRight size={18} stroke={1.5} />
                   </>
                 )}
               </button>
@@ -516,7 +516,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Competitors */}
-              <SectionLabel>Competitors</SectionLabel>
+              <SectionLabel>Kompetitor</SectionLabel>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                 {profile.competitors.map((c) => (
                   <span

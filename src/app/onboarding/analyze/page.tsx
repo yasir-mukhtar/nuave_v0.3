@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "navigation";
 import { IconCheck, IconLoader2 } from '@tabler/icons-react';
 
 const steps = [
   { state: "done", label: "Scraping website" },
-  { state: "done", label: "Detecting language", subtitle: "Detected: Indonesian" },
-  { state: "active", label: "Analyzing your product" },
-  { state: "pending", label: "Generating differentiators" },
-  { state: "pending", label: "Finding competitors" },
-  { state: "pending", label: "Creating company profile" },
+  { state: "done", label: "Mendeteksi bahasa", subtitle: "Terdeteksi: Bahasa Indonesia" },
+  { state: "active", label: "Menganalisis produk kamu" },
+  { state: "pending", label: "Menghasilkan differentiators" },
+  { state: "pending", label: "Mencari kompetitor" },
+  { state: "pending", label: "Membuat profil bisnis" },
 ] as const;
 
 export default function AnalyzePage() {
@@ -36,7 +36,7 @@ export default function AnalyzePage() {
 
         if (!res.ok) {
           const data = await res.json();
-          throw new Error(data.error || 'Failed to analyze website');
+          throw new Error(data.error || 'Gagal menganalisis website');
         }
 
         const data = await res.json();
@@ -49,7 +49,7 @@ export default function AnalyzePage() {
         router.push('/onboarding/profile');
       } catch (err: any) {
         console.error('Scrape error:', err);
-        setError(err.message || 'An error occurred during analysis');
+        setError(err.message || 'Terjadi kesalahan saat analisis');
       }
     }
 
@@ -87,10 +87,10 @@ export default function AnalyzePage() {
               }}
             >
               <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                Analyzing your brand
+                Menganalisis brand kamu
               </span>
               <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                Step 2 of 4
+                Langkah 2 dari 4
               </span>
             </div>
             <div style={{ display: "flex", gap: "4px" }}>
@@ -110,7 +110,24 @@ export default function AnalyzePage() {
 
           {/* Step list */}
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {steps.map((step) => {
+            {error ? (
+              <div style={{ textAlign: 'center', padding: '24px' }}>
+                <p style={{ color: 'var(--red)', marginBottom: '16px' }}>{error}</p>
+                <button 
+                  onClick={() => window.location.reload()}
+                  style={{
+                    background: 'var(--purple)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Coba lagi
+                </button>
+              </div>
+            ) : steps.map((step) => {
               const isDone = step.state === "done";
               const isActive = step.state === "active";
 

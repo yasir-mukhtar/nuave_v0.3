@@ -67,7 +67,7 @@ export default function ResultsPage() {
         const res = await fetch(`/api/audit/${auditId}/status`)
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to fetch audit data');
+          throw new Error(errorData.error || 'Gagal mengambil data audit');
         }
         
         const data = await res.json()
@@ -76,14 +76,14 @@ export default function ResultsPage() {
           // Cache full result
           sessionStorage.setItem('nuave_audit', JSON.stringify(data))
         } else if (data.status === 'failed') {
-          throw new Error('Audit failed to complete.');
+          throw new Error('Audit gagal diselesaikan.');
         } else {
           // Still running, redirect back to running screen
           router.push(`/audit/${auditId}/running`);
         }
       } catch (err: any) {
         console.error("Failed to fetch audit data", err);
-        setError(err.message || "Something went wrong.");
+        setError(err.message || "Terjadi kesalahan.");
       } finally {
         setLoading(false);
       }
@@ -95,7 +95,7 @@ export default function ResultsPage() {
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-page)" }}>
-        <p style={{ color: "var(--text-muted)" }}>Loading results...</p>
+        <p style={{ color: "var(--text-muted)" }}>Memuat hasil...</p>
       </div>
     );
   }
@@ -103,7 +103,7 @@ export default function ResultsPage() {
   if (error || !auditData) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg-page)", gap: "16px" }}>
-        <p style={{ color: "#EF4444" }}>{error || "Audit not found."}</p>
+        <p style={{ color: "#EF4444" }}>{error || "Audit tidak ditemukan."}</p>
         <button 
           onClick={() => window.location.reload()}
           style={{
@@ -117,7 +117,7 @@ export default function ResultsPage() {
             cursor: "pointer",
           }}
         >
-          Try again
+          Coba lagi
         </button>
       </div>
     );
@@ -128,20 +128,20 @@ export default function ResultsPage() {
   const arc = (score / 100) * circumference;
 
   let scoreColor = "#EF4444"; // Default Red
-  let scoreLabel = "Low Visibility";
+  let scoreLabel = "Visibilitas Rendah";
 
   if (score >= 70) {
     scoreColor = "#22C55E";
-    scoreLabel = "Strong Visibility";
+    scoreLabel = "Visibilitas Kuat";
   } else if (score >= 40) {
     scoreColor = "#F59E0B";
-    scoreLabel = "Partially Visible";
+    scoreLabel = "Visibilitas Sedang";
   }
 
   // Get brand name from profile if not in auditData
   const profileStr = typeof window !== 'undefined' ? sessionStorage.getItem("nuave_profile") : null;
   const profile = profileStr ? JSON.parse(profileStr) : null;
-  const brandName = auditData.brand_name || profile?.profile?.brand_name || "the brand";
+  const brandName = auditData.brand_name || profile?.profile?.brand_name || "brand";
 
   function highlightBrand(text: string, brand: string) {
     if (!brand || !text) return [<span key={0}>{text}</span>];
@@ -151,7 +151,7 @@ export default function ResultsPage() {
       regex.test(part) ? (
         <mark key={i} style={{
           background: '#EDE9FF',
-          color: '#6C3FF5',
+          color: '#533AFD',
           fontWeight: 500,
           borderRadius: '3px',
           padding: '0 2px',
@@ -205,7 +205,7 @@ export default function ResultsPage() {
             fontSize: '14px',
             color: '#374151'
           }}>
-            <span style={{ color: '#6C3FF5', flexShrink: 0 }}>•</span>
+            <span style={{ color: '#533AFD', flexShrink: 0 }}>•</span>
             <span>{renderInline(content)}</span>
           </div>
         );
@@ -290,7 +290,7 @@ export default function ResultsPage() {
             marginTop: 0,
           }}
         >
-          Your AI Visibility Score
+          Visibility Score AI Kamu
         </h1>
 
         {/* 1. Score hero card */}
@@ -330,7 +330,7 @@ export default function ResultsPage() {
 
           {/* Caption */}
           <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", textAlign: "center", margin: 0 }}>
-            {auditData.brand_mention_count} of {auditData.total_prompts} prompts mentioned your brand
+            {auditData.brand_mention_count} dari {auditData.total_prompts} prompt menyebutkan brand kamu
           </p>
 
           {/* Competitor strip */}
@@ -344,7 +344,7 @@ export default function ResultsPage() {
             }}
           >
             <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginBottom: "10px", marginTop: 0 }}>
-              ChatGPT mentioned these competitors instead:
+              ChatGPT lebih banyak menyebutkan kompetitor ini:
             </p>
             <div>
               <span
@@ -358,7 +358,7 @@ export default function ResultsPage() {
                   fontStyle: "italic",
                 }}
               >
-                See recommendations for details
+                Lihat rekomendasi untuk detailnya
               </span>
             </div>
           </div>
@@ -385,10 +385,10 @@ export default function ResultsPage() {
             }}
           >
             <span style={{ fontSize: "var(--text-base)", fontWeight: 600, color: "var(--text-heading)" }}>
-              Prompt Results
+              Hasil Prompt
             </span>
             <span style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-              {auditData.total_prompts} tested
+              {auditData.total_prompts} diuji
             </span>
           </div>
 
@@ -456,7 +456,7 @@ export default function ResultsPage() {
                   whiteSpace: "nowrap",
                 }}
               >
-                {result.brand_mentioned ? "Mentioned" : "Not mentioned"}
+                {result.brand_mentioned ? "Disebut" : "Tidak disebut"}
               </span>
             </div>
           ))}
@@ -476,7 +476,7 @@ export default function ResultsPage() {
               cursor: "pointer",
             }}
           >
-            Save report
+            Simpan laporan
           </button>
           <button
             onClick={() => router.push(`/audit/${auditId}/recommendations`)}
@@ -494,7 +494,7 @@ export default function ResultsPage() {
               gap: "4px",
             }}
           >
-            See recommendations <IconArrowRight size={18} stroke={1.5} />
+            Lihat Rekomendasi <IconArrowRight size={18} stroke={1.5} />
           </button>
         </div>
       </div>
@@ -544,7 +544,7 @@ export default function ResultsPage() {
               }}
             >
               <h2 style={{ fontSize: "16px", fontWeight: 600, color: "#111827", margin: 0 }}>
-                Prompt Result
+                Hasil Prompt
               </h2>
               <button
                 onClick={() => setSelectedResult(null)}
@@ -576,7 +576,7 @@ export default function ResultsPage() {
                 <div
                   style={{
                     marginLeft: "auto",
-                    background: "#6C3FF5",
+                    background: "var(--purple)",
                     color: "white",
                     borderRadius: "18px 18px 4px 18px",
                     padding: "10px 14px",
@@ -614,7 +614,7 @@ export default function ResultsPage() {
                       <IconCircleXFilled size={20} color="#DC2626" />
                     )}
                     <span style={{ fontSize: "13px", fontWeight: 500, color: "#111827" }}>
-                      {brandName} was {selectedResult.brand_mentioned ? "mentioned" : "not mentioned"}
+                      {brandName} {selectedResult.brand_mentioned ? "disebutkan" : "tidak disebutkan"}
                     </span>
                   </div>
                 </div>
@@ -641,7 +641,7 @@ export default function ResultsPage() {
                 textAlign: "center",
               }}
             >
-              Response by GPT-4o with web search · {selectedResult.created_at ? new Date(selectedResult.created_at).toLocaleString() : new Date().toLocaleString()}
+              Respons oleh GPT-4o dengan pencarian web · {selectedResult.created_at ? new Date(selectedResult.created_at).toLocaleString('id-ID') : new Date().toLocaleString('id-ID')}
             </div>
           </div>
         </>

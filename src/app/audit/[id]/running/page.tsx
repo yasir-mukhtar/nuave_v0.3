@@ -27,7 +27,7 @@ export default function AuditRunningPage() {
         }
         
         if (data.status === 'failed') {
-          setError('Audit failed. Please try again.');
+          setError('Audit gagal. Silakan coba lagi.');
           return true; // Stop polling
         }
       } catch (err) {
@@ -94,7 +94,7 @@ export default function AuditRunningPage() {
           <IconAlertTriangle size={48} stroke={1.5} color="#EF4444" />
         </div>
         <h1 style={{ fontSize: "24px", fontWeight: 700, color: "#111827", margin: "0 0 8px 0" }}>
-          Something went wrong
+          Terjadi kesalahan
         </h1>
         <p style={{ fontSize: "16px", color: "#6B7280", margin: "0 0 24px 0" }}>
           {error}
@@ -110,7 +110,7 @@ export default function AuditRunningPage() {
             textDecoration: "none" 
           }}
         >
-          Try again
+          Coba lagi
         </a>
       </div>
     );

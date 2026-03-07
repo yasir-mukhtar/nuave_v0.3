@@ -6,33 +6,33 @@ import { LOTTIE_DATA } from "./lottie/recommendations-loader-data";
 const steps = [
   {
     id: 1,
-    label: "Reading your audit results",
+    label: "Menganalisis hasil audit kamu",
     duration: 3000,
     subtasks: [
-      { label: "Parsing 10 GPT-4o responses", duration: 800 },
-      { label: "Mapping brand mention patterns", duration: 1000 },
-      { label: "Scoring competitor presence", duration: 1200 },
+      { label: "Memproses 10 respons GPT-4o", duration: 800 },
+      { label: "Memetakan pola penyebutan brand", duration: 1000 },
+      { label: "Menilai kehadiran kompetitor", duration: 1200 },
     ],
   },
   {
     id: 2,
-    label: "Generating recommendations",
+    label: "Menyiapkan rekomendasi",
     duration: 7000,
     subtasks: [
-      { label: "Identifying web copy gaps", duration: 1500 },
-      { label: "Analysing meta & structure", duration: 2000 },
-      { label: "Finding content opportunities", duration: 2000 },
-      { label: "Crafting improvement suggestions", duration: 1500 },
+      { label: "Mengidentifikasi celah web copy", duration: 1500 },
+      { label: "Menganalisis meta & struktur", duration: 2000 },
+      { label: "Mencari peluang konten", duration: 2000 },
+      { label: "Menyusun saran perbaikan", duration: 1500 },
     ],
   },
   {
     id: 3,
-    label: "Prioritising by impact",
+    label: "Memprioritaskan dampak",
     duration: 3000,
     subtasks: [
-      { label: "Ranking by AEO impact score", duration: 1200 },
-      { label: "Matching to your brand profile", duration: 1000 },
-      { label: "Finalising recommendations", duration: 800 },
+      { label: "Ranking berdasarkan dampak AEO", duration: 1200 },
+      { label: "Menyesuaikan dengan profil brand", duration: 1000 },
+      { label: "Finalisasi rekomendasi", duration: 800 },
     ],
   },
 ];
@@ -71,7 +71,7 @@ function useProgress() {
   let subtaskElapsed = 0;
   for (let i = 0; i < currentStep.subtasks.length; i++) {
     if (stepElapsed >= subtaskElapsed + currentStep.subtasks[i].duration) {
-      subtaskElapsed += currentStep.subtasks[i].duration;
+      subtaskElapsed += subtaskElapsed + currentStep.subtasks[i].duration;
       subtaskIdx = i + 1;
     } else {
       subtaskIdx = i;
@@ -102,7 +102,7 @@ const CheckIcon = () => (
 const SpinnerDot = () => (
   <span style={{
     display: "inline-block", width: 14, height: 14, borderRadius: "50%",
-    border: "2px solid #EDE9FF", borderTopColor: "#6C3FF5",
+    border: "2px solid #EDE9FF", borderTopColor: "var(--purple)",
     animation: "spin 0.7s linear infinite", flexShrink: 0
   }} />
 );
@@ -178,10 +178,10 @@ export default function RecommendationsLoader() {
         margin: "0 0 4px", fontSize: 20, fontWeight: 600,
         color: "#111827", letterSpacing: "-0.3px", textAlign: "center"
       }}>
-        {done ? "Recommendations ready" : "Building your recommendations\u2026"}
+        {done ? "Rekomendasi siap" : "Menyiapkan rekomendasi kamu\u2026"}
       </h2>
       <p style={{ margin: "0 0 32px", fontSize: 13, color: "#6B7280", textAlign: "center" }}>
-        {done ? "Redirecting you now" : `${elapsed_seconds}s elapsed`}
+        {done ? "Mengalihkan halaman sekarang" : `${elapsed_seconds} detik berlalu`}
       </p>
 
       {/* Progress bar */}
@@ -190,7 +190,7 @@ export default function RecommendationsLoader() {
         borderRadius: 99, overflow: "hidden", marginBottom: 32
       }}>
         <div style={{
-          height: "100%", background: "#6C3FF5", borderRadius: 99,
+          height: "100%", background: "var(--purple)", borderRadius: 99,
           width: `${overallProgress}%`, transition: "width 0.15s linear"
         }} />
       </div>
@@ -215,7 +215,7 @@ export default function RecommendationsLoader() {
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 11, fontWeight: 600,
                   background: isComplete ? "transparent" : isActive ? "#EDE9FF" : "#F3F4F6",
-                  color: isActive ? "#6C3FF5" : "#9CA3AF",
+                  color: isActive ? "var(--purple)" : "#9CA3AF",
                 }}>
                   {isComplete ? <CheckIcon /> : step.id}
                 </div>
@@ -230,10 +230,10 @@ export default function RecommendationsLoader() {
 
                 {isActive && (
                   <span style={{
-                    fontSize: 11, color: "#6C3FF5", fontWeight: 500,
+                    fontSize: 11, color: "var(--purple)", fontWeight: 500,
                     animation: "pulse 1.5s ease infinite"
                   }}>
-                    Step {si + 1} of {steps.length}
+                    Langkah {si + 1} dari {steps.length}
                   </span>
                 )}
               </div>

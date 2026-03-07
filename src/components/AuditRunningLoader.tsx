@@ -6,32 +6,32 @@ import { LOTTIE_DATA } from "./lottie/recommendations-loader-data";
 const steps = [
   {
     id: 1,
-    label: "Sending your questions to ChatGPT",
-    duration: 4000,
+    label: "Mengirim pertanyaan ke ChatGPT",
+    duration: 10000,
     subtasks: [
-      { label: "Testing awareness queries...", duration: 1200 },
-      { label: "Testing consideration queries...", duration: 1400 },
-      { label: "Testing decision queries...", duration: 1400 },
+      { label: "Menguji pertanyaan awareness...", duration: 3000 },
+      { label: "Menguji pertanyaan consideration...", duration: 3500 },
+      { label: "Menguji pertanyaan decision...", duration: 3500 },
     ],
   },
   {
     id: 2,
-    label: "Analysing brand mentions",
-    duration: 5000,
+    label: "Menganalisis brand mentions",
+    duration: 10000,
     subtasks: [
-      { label: "Scanning responses for your brand...", duration: 1800 },
-      { label: "Detecting competitor mentions...", duration: 1600 },
-      { label: "Calculating mention frequency...", duration: 1600 },
+      { label: "Memindai respons untuk brand Anda...", duration: 3500 },
+      { label: "Mendeteksi brand mentions kompetitor...", duration: 3500 },
+      { label: "Menghitung frekuensi brand mentions...", duration: 3000 },
     ],
   },
   {
     id: 3,
-    label: "Scoring your visibility",
-    duration: 4000,
+    label: "Menghitung visibility score",
+    duration: 10000,
     subtasks: [
-      { label: "Tallying brand mention count...", duration: 1400 },
-      { label: "Computing visibility score...", duration: 1400 },
-      { label: "Finalising your results...", duration: 1200 },
+      { label: "Merangkum jumlah brand mentions...", duration: 3500 },
+      { label: "Menghitung visibility score...", duration: 3500 },
+      { label: "Menyiapkan hasil audit Anda...", duration: 3000 },
     ],
   },
 ];
@@ -101,7 +101,7 @@ const CheckIcon = () => (
 const SpinnerDot = () => (
   <span style={{
     display: "inline-block", width: 14, height: 14, borderRadius: "50%",
-    border: "2px solid #EDE9FF", borderTopColor: "#6C3FF5",
+    border: "2px solid #EDE9FF", borderTopColor: "var(--purple)",
     animation: "spin 0.7s linear infinite", flexShrink: 0
   }} />
 );
@@ -118,7 +118,6 @@ function LottiePlayer({ animationData, size = 120 }: { animationData: any, size?
   const [lottie, setLottie] = useState<any>(null);
 
   useEffect(() => {
-    // Dynamically load lottie-web from CDN
     const script = document.createElement("script");
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js";
     script.onload = () => setLottie((window as any).lottie);
@@ -177,10 +176,10 @@ export default function AuditRunningLoader() {
         margin: "0 0 4px", fontSize: 20, fontWeight: 600,
         color: "#111827", letterSpacing: "-0.3px", textAlign: "center"
       }}>
-        {done ? "Audit complete" : "Running your visibility audit\u2026"}
+        {done ? "Audit selesai" : "Berkomunikasi dengan ChatGPT..."}
       </h2>
       <p style={{ margin: "0 0 32px", fontSize: 13, color: "#6B7280", textAlign: "center" }}>
-        {done ? "Calculating final score" : `${elapsed_seconds}s elapsed`}
+        {done ? "Menyiapkan hasil Anda" : "Ini butuh sekitar 30 detik"}
       </p>
 
       {/* Progress bar */}
@@ -189,7 +188,7 @@ export default function AuditRunningLoader() {
         borderRadius: 99, overflow: "hidden", marginBottom: 32
       }}>
         <div style={{
-          height: "100%", background: "#6C3FF5", borderRadius: 99,
+          height: "100%", background: "var(--purple)", borderRadius: 99,
           width: `${overallProgress}%`, transition: "width 0.15s linear"
         }} />
       </div>
@@ -214,7 +213,7 @@ export default function AuditRunningLoader() {
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 11, fontWeight: 600,
                   background: isComplete ? "transparent" : isActive ? "#EDE9FF" : "#F3F4F6",
-                  color: isActive ? "#6C3FF5" : "#9CA3AF",
+                  color: isActive ? "var(--purple)" : "#9CA3AF",
                 }}>
                   {isComplete ? <CheckIcon /> : step.id}
                 </div>
@@ -229,10 +228,10 @@ export default function AuditRunningLoader() {
 
                 {isActive && (
                   <span style={{
-                    fontSize: 11, color: "#6C3FF5", fontWeight: 500,
+                    fontSize: 11, color: "var(--purple)", fontWeight: 500,
                     animation: "pulse 1.5s ease infinite"
                   }}>
-                    Step {si + 1} of {steps.length}
+                    Langkah {si + 1} dari {steps.length}
                   </span>
                 )}
               </div>

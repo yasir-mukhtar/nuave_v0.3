@@ -8,7 +8,6 @@ import {
   IconArrowLeft 
 } from '@tabler/icons-react';
 import { createBrowserClient } from '@supabase/ssr';
-import RecommendationsLoader from "@/components/RecommendationsLoader";
 
 interface Recommendation {
   id: string;
@@ -189,7 +188,7 @@ export default function RecommendationsPage() {
             display: 'flex', gap: '8px',
             marginBottom: '3px', fontSize: '14px'
           }}>
-            <span style={{ color: '#6C3FF5', flexShrink: 0 }}>•</span>
+            <span style={{ color: '#533AFD', flexShrink: 0 }}>•</span>
             <span dangerouslySetInnerHTML={{
               __html: content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             }} />
@@ -217,16 +216,16 @@ export default function RecommendationsPage() {
 
   const getPriorityBadgeStyle = (priority: string) => {
     switch (priority) {
-      case 'high': return { background: '#FEE2E2', color: '#DC2626' };
-      case 'medium': return { background: '#FEF3C7', color: '#D97706' };
-      case 'low': return { background: '#F3F4F6', color: '#6B7280' };
-      default: return { background: '#F3F4F6', color: '#6B7280' };
+      case 'high': return { background: '#FEE2E2', color: '#DC2626', label: 'Tinggi' };
+      case 'medium': return { background: '#FEF3C7', color: '#D97706', label: 'Sedang' };
+      case 'low': return { background: '#F3F4F6', color: '#6B7280', label: 'Rendah' };
+      default: return { background: '#F3F4F6', color: '#6B7280', label: priority };
     }
   };
 
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
-      case 'web_copy': return { background: '#EDE9FF', color: '#6C3FF5', label: 'Web Copy' };
+      case 'web_copy': return { background: '#EDE9FF', color: '#533AFD', label: 'Web Copy' };
       case 'content_gap': return { background: '#DCFCE7', color: '#16A34A', label: 'Content Gap' };
       case 'structure': 
       case 'meta_structure': return { background: '#DBEAFE', color: '#2563EB', label: 'Meta & Structure' };
@@ -238,6 +237,10 @@ export default function RecommendationsPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse-light {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
       `}</style>
 
       {/* TOPBAR */}
@@ -266,11 +269,11 @@ export default function RecommendationsPage() {
             fontWeight: 500
           }}
         >
-          <IconArrowLeft size={18} stroke={1.5} /> Back to results
+          <IconArrowLeft size={18} stroke={1.5} /> Kembali ke hasil
         </button>
         
         <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
-          {brandName} <span style={{ color: '#9CA3AF', fontWeight: 400 }}>Recommendations</span>
+          {brandName} <span style={{ color: '#9CA3AF', fontWeight: 400 }}>Rekomendasi</span>
         </div>
         
         <div style={{
@@ -281,23 +284,23 @@ export default function RecommendationsPage() {
           fontWeight: 600,
           color: '#374151'
         }}>
-          {credits !== null ? credits : '—'} credits
+          {credits !== null ? credits : '—'} kredit
         </div>
       </div>
 
       {/* HERO */}
       <div style={{ padding: '32px 32px 0' }}>
         <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 8px 0' }}>
-          Here&apos;s how to get ChatGPT to mention you
+          Begini cara agar ChatGPT menyebut bisnis kamu
         </h1>
         <p style={{ fontSize: '16px', color: '#6B7280', margin: 0 }}>
-          Fix these issues to improve your AI visibility score
+          Perbaiki isu-isu ini untuk meningkatkan visibility score AI kamu
         </p>
 
         {/* FILTER TABS */}
         <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
           {[
-            { id: 'all', label: 'All' },
+            { id: 'all', label: 'Semua' },
             { id: 'web_copy', label: 'Web Copy' },
             { id: 'content_gap', label: 'Content Gaps' },
             { id: 'structure', label: 'Meta & Structure' }
@@ -308,7 +311,7 @@ export default function RecommendationsPage() {
                 key={tab.id}
                 onClick={() => setActiveFilter(tab.id as any)}
                 style={{
-                  background: isActive ? '#6C3FF5' : '#F3F4F6',
+                  background: isActive ? 'var(--purple)' : '#F3F4F6',
                   color: isActive ? 'white' : '#374151',
                   borderRadius: '999px',
                   padding: '6px 16px',
@@ -328,22 +331,33 @@ export default function RecommendationsPage() {
 
       {/* RECOMMENDATIONS GRID */}
       <div style={{ 
-        padding: loading || (recommendations.length === 0 && polling) ? '0' : '24px 32px', 
+        padding: '24px 32px', 
         display: 'grid', 
         gridTemplateColumns: '1fr', 
         gap: '12px' 
       }}>
         {loading || (recommendations.length === 0 && polling) ? (
-          <div style={{ gridColumn: '1/-1' }}>
-            <RecommendationsLoader />
-          </div>
+          <>
+            {[1,2,3,4].map((i) => (
+              <div key={i} className="card" style={{ height: '120px', animation: 'pulse-light 1.5s ease-in-out infinite' }}>
+                <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+                  <div style={{ width: "60px", height: "22px", borderRadius: "6px", background: "#F3F4F6" }} />
+                  <div style={{ width: "80px", height: "22px", borderRadius: "6px", background: "#F3F4F6" }} />
+                </div>
+                <div style={{ width: "70%", height: "20px", borderRadius: "6px", background: "#F3F4F6", marginBottom: "10px" }} />
+              </div>
+            ))}
+            <p style={{ textAlign: "center", fontSize: "13px", color: "var(--text-muted)", marginTop: "16px" }}>
+              {polling ? "Menyiapkan rekomendasi kamu..." : "Memuat rekomendasi..."}
+            </p>
+          </>
         ) : recommendations.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: '#6B7280' }}>
-            <p>No recommendations found for this audit.</p>
+            <p>Tidak ada rekomendasi untuk audit ini.</p>
           </div>
         ) : (
           filteredRecommendations.map(rec => {
-            const priorityStyle = getPriorityBadgeStyle(rec.priority);
+            const priorityInfo = getPriorityBadgeStyle(rec.priority);
             const typeStyle = getTypeBadgeStyle(rec.type);
             const isRevealed = revealedIds.has(rec.id);
 
@@ -352,14 +366,15 @@ export default function RecommendationsPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <span style={{ 
-                      ...priorityStyle, 
+                      background: priorityInfo.background,
+                      color: priorityInfo.color,
                       borderRadius: '999px', 
                       padding: '2px 10px', 
                       fontSize: '11px', 
                       fontWeight: 600,
                       textTransform: 'capitalize'
                     }}>
-                      {rec.priority}
+                      Prioritas {priorityInfo.label}
                     </span>
                     <span style={{ 
                       background: typeStyle.background,
@@ -392,7 +407,7 @@ export default function RecommendationsPage() {
                     <button
                       onClick={() => handleReveal(rec.id)}
                       style={{
-                        background: '#6C3FF5',
+                        background: 'var(--purple)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '8px',
@@ -405,7 +420,7 @@ export default function RecommendationsPage() {
                         cursor: 'pointer'
                       }}
                     >
-                      <IconSparkles size={14} /> Reveal Fix · 1 credit
+                      <IconSparkles size={14} /> Tampilkan Solusi · 1 kredit
                     </button>
                   </div>
                 ) : (
@@ -417,8 +432,8 @@ export default function RecommendationsPage() {
                     padding: '16px'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '12px', color: '#6C3FF5', fontWeight: 600, textTransform: 'uppercase' }}>
-                        Suggested Fix
+                      <span style={{ fontSize: '12px', color: 'var(--purple)', fontWeight: 600, textTransform: 'uppercase' }}>
+                        Saran Perbaikan
                       </span>
                       <button
                         onClick={() => rec.suggested_copy && navigator.clipboard.writeText(rec.suggested_copy)}
@@ -433,7 +448,7 @@ export default function RecommendationsPage() {
                           fontSize: '12px'
                         }}
                       >
-                        <IconCopy size={14} /> Copy
+                        <IconCopy size={14} /> Salin
                       </button>
                     </div>
                     <div style={{ fontSize: '14px', color: '#374151', lineHeight: 1.6 }}>
@@ -442,9 +457,9 @@ export default function RecommendationsPage() {
                       ) : (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#9CA3AF' }}>
                           <span className="loader" style={{ 
-                            width: '16px', height: '16px', border: '2px solid #E5E7EB', borderTopColor: '#6C3FF5', borderRadius: '50%', animation: 'spin 1s linear infinite' 
+                            width: '16px', height: '16px', border: '2px solid #E5E7EB', borderTopColor: 'var(--purple)', borderRadius: '50%', animation: 'spin 1s linear infinite' 
                           }} />
-                          Generating fix...
+                          Menyiapkan solusi...
                         </div>
                       )}
                     </div>
