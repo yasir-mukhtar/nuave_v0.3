@@ -1,26 +1,24 @@
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function useCreditsBalance() {
   const [credits, setCredits] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createSupabaseBrowserClient();
 
     async function fetchCredits() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("users")
         .select("credits_balance")
         .eq("id", user.id)
         .single();
 
+      if (error) console.error("useCreditsBalance error:", error);
       if (data) setCredits(data.credits_balance);
       setLoading(false);
     }
