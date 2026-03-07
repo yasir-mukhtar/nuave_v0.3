@@ -15,7 +15,7 @@ export default function Footer() {
         Kebijakan Privasi
       </Link>
       {" · "}
-      <Link href="/syarat-dan-ketentuan" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
+      <Link href="/terms" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
         Syarat &amp; Ketentuan
       </Link>
       {" · "}
