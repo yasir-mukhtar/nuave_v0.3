@@ -144,7 +144,7 @@ Respond with JSON only, same format as before.`;
 
     // Use admin client for the INSERT to bypass RLS
     const adminClient = createSupabaseAdminClient();
-    const { data: workspace, error: wsError } = await adminClient
+    const { data: workspaceRows, error: wsError } = await adminClient
       .from('workspaces')
       .insert({
         user_id: user?.id || null,
@@ -157,8 +157,9 @@ Respond with JSON only, same format as before.`;
         target_audience: profile.target_audience || null,
         language: profile.language || 'en',
       })
-      .select('id')
-      .single();
+      .select('id');
+
+    const workspace = workspaceRows?.[0] || null;
 
     if (wsError) {
       console.error('Workspace insert failed:', wsError);
