@@ -59,12 +59,11 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
           flex: 1,
           overflowY: "auto",
           background: "var(--bg-page)",
+          padding: "32px",
         }}
       >
         <LowCreditsBanner />
-        <div style={{ padding: "32px" }}>
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   );

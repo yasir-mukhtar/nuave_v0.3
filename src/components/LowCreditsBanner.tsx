@@ -25,8 +25,8 @@ export default function LowCreditsBanner() {
     });
   }, []);
 
-  // Only show when credits are 10 or below, and not dismissed
-  if (credits === null || credits > 10 || dismissed) return null;
+  // Only show when credits are 5 or below, and not dismissed
+  if (credits === null || credits > 5 || dismissed) return null;
 
   const isEmpty = credits === 0;
 
