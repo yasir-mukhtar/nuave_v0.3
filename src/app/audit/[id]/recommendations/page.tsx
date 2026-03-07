@@ -480,7 +480,12 @@ export default function RecommendationsPage() {
       </div>
 
       {/* RECOMMENDATIONS GRID */}
-      <div style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+      <div style={{ 
+        padding: loading || (recommendations.length === 0 && polling) ? '0' : '24px 32px', 
+        display: 'grid', 
+        gridTemplateColumns: '1fr', 
+        gap: '12px' 
+      }}>
         {loading || (recommendations.length === 0 && polling) ? (
           <div style={{ gridColumn: '1/-1' }}>
             <RecommendationsLoadingScreen brandName={brandName} />
