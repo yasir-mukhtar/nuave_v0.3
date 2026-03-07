@@ -124,9 +124,14 @@ export default function Home() {
             <>
               <Link
                 href="/auth"
-                style={{ fontSize: "14px", color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}
+                style={{ 
+                  fontSize: "14px", fontWeight: 500, color: "var(--purple)",
+                  background: "transparent", textDecoration: "none",
+                  padding: "8px 20px", borderRadius: "8px",
+                  border: "1.5px solid var(--purple)",
+                }}
               >
-                Log in
+                Masuk
               </Link>
               <Link
                 href="/"
@@ -142,7 +147,7 @@ export default function Home() {
                   padding: "8px 20px", borderRadius: "8px",
                 }}
               >
-                Start free audit →
+                Daftar gratis →
               </Link>
             </>
           )}
