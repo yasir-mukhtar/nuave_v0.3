@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
 
@@ -146,9 +147,14 @@ Respond with JSON only, same format as before.`;
 
     // Use admin client for the INSERT to bypass RLS
     const adminClient = createSupabaseAdminClient();
-    const { data: workspaceRows, error: wsError } = await adminClient
+    
+    // Generate workspace ID before insert
+    const workspaceId = randomUUID();
+
+    const { error: wsError } = await adminClient
       .from('workspaces')
       .insert({
+        id: workspaceId,
         user_id: user?.id || null,
         brand_name: profile.brand_name,
         website_url: website_url,
@@ -158,10 +164,7 @@ Respond with JSON only, same format as before.`;
         competitors: profile.competitors || [],
         target_audience: profile.target_audience || null,
         language: profile.language || 'en',
-      })
-      .select('id');
-
-    const workspace = workspaceRows?.[0] || null;
+      });
 
     if (wsError) {
       console.error('Workspace insert failed:', JSON.stringify(wsError));
@@ -172,7 +175,7 @@ Respond with JSON only, same format as before.`;
       success: true,
       source: websiteContent ? "scraped" : "knowledge",
       website_url,
-      workspace_id: workspace?.id || null,
+      workspace_id: wsError ? null : workspaceId,
       profile,
     });
   } catch (error) {
