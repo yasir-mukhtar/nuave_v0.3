@@ -34,9 +34,17 @@ export async function GET(
 
     // STEP 2 — Handle different statuses
     if (audit.status === 'running' || audit.status === 'pending') {
+      // Count how many prompts have been processed so far
+      const { count: completedPrompts } = await supabase
+        .from('audit_results')
+        .select('*', { count: 'exact', head: true })
+        .eq('audit_id', id);
+
       return NextResponse.json({
         status: 'running',
-        audit_id: id
+        audit_id: id,
+        completed_prompts: completedPrompts ?? 0,
+        total_prompts: audit.total_prompts ?? 10,
       });
     }
 

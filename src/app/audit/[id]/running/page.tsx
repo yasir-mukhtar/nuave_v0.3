@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { IconAlertTriangle } from '@tabler/icons-react';
 import AuditRunningLoader from "@/components/AuditRunningLoader";
@@ -9,24 +9,45 @@ export default function AuditRunningPage() {
   const router = useRouter();
   const params = useParams();
   const [error, setError] = useState<string | null>(null);
+  const [completedPrompts, setCompletedPrompts] = useState(0);
+  const [totalPrompts, setTotalPrompts] = useState(10);
+  const [auditStatus, setAuditStatus] = useState<"running" | "complete" | "failed">("running");
+  const redirectTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     let auditId = params.id as string;
-    
-    // Polling function to get audit_id if missing or poll status
+
     const pollStatus = async (id: string) => {
       try {
         const res = await fetch(`/api/audit/${id}/status`);
         const data = await res.json();
-        
+
+        if (data.status === 'running') {
+          // Update real progress from API
+          setCompletedPrompts(data.completed_prompts ?? 0);
+          setTotalPrompts(data.total_prompts ?? 10);
+          return false; // Continue polling
+        }
+
         if (data.status === 'complete') {
+          // Update progress to full
+          setCompletedPrompts(data.total_prompts ?? 10);
+          setTotalPrompts(data.total_prompts ?? 10);
+          setAuditStatus("complete");
+
           // Save full results to sessionStorage for results page
           sessionStorage.setItem('nuave_audit', JSON.stringify(data));
-          router.push(`/audit/${id}/results`);
+
+          // Let the loader finish its animation before redirecting
+          redirectTimer.current = setTimeout(() => {
+            router.push(`/audit/${id}/results`);
+          }, 4500); // step 2 (2s) + step 3 (2s) + brief pause
+
           return true; // Stop polling
         }
-        
+
         if (data.status === 'failed') {
+          setAuditStatus("failed");
           setError('Audit gagal. Silakan coba lagi.');
           return true; // Stop polling
         }
@@ -45,14 +66,13 @@ export default function AuditRunningPage() {
       }, 3000);
     };
 
-    // 1. Resolve auditId
+    // Resolve auditId
     if (auditId === 'temp') {
       const checkPendingId = () => {
         const pendingId = sessionStorage.getItem('nuave_pending_audit_id');
         if (pendingId) {
           startPolling(pendingId);
         } else {
-          // Retry in 2 seconds if not found yet
           setTimeout(checkPendingId, 2000);
         }
       };
@@ -63,6 +83,7 @@ export default function AuditRunningPage() {
 
     return () => {
       if (intervalId) clearInterval(intervalId);
+      if (redirectTimer.current) clearTimeout(redirectTimer.current);
     };
   }, [router, params.id]);
 
@@ -99,15 +120,15 @@ export default function AuditRunningPage() {
         <p style={{ fontSize: "16px", color: "#6B7280", margin: "0 0 24px 0" }}>
           {error}
         </p>
-        <a 
-          href="/" 
-          style={{ 
-            background: "#533AFD", 
-            color: "#ffffff", 
-            padding: "12px 24px", 
-            borderRadius: "8px", 
-            fontWeight: 600, 
-            textDecoration: "none" 
+        <a
+          href="/"
+          style={{
+            background: "#533AFD",
+            color: "#ffffff",
+            padding: "12px 24px",
+            borderRadius: "8px",
+            fontWeight: 600,
+            textDecoration: "none"
           }}
         >
           Coba lagi
@@ -116,5 +137,11 @@ export default function AuditRunningPage() {
     );
   }
 
-  return <AuditRunningLoader />;
+  return (
+    <AuditRunningLoader
+      completedPrompts={completedPrompts}
+      totalPrompts={totalPrompts}
+      status={auditStatus}
+    />
+  );
 }
