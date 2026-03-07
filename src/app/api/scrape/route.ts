@@ -141,6 +141,8 @@ Respond with JSON only, same format as before.`;
     // Get the authenticated user
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
+    
+    console.log('user from session:', user?.id ?? 'NULL - no session');
 
     // Use admin client for the INSERT to bypass RLS
     const adminClient = createSupabaseAdminClient();
@@ -162,7 +164,8 @@ Respond with JSON only, same format as before.`;
     const workspace = workspaceRows?.[0] || null;
 
     if (wsError) {
-      console.error('Workspace insert failed:', wsError);
+      console.error('Workspace insert failed:', JSON.stringify(wsError));
+      console.error('Insert payload user_id was:', user?.id ?? null);
     }
 
     return NextResponse.json({
