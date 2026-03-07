@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "navigation";
+import { useRouter } from "next/navigation";
 import { IconCheck, IconLoader2 } from '@tabler/icons-react';
 
 const steps = [
