@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { 
   IconSparkles, 
@@ -26,10 +26,30 @@ export default function RecommendationsPage() {
   
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [polling, setPolling] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'web_copy' | 'content_gap' | 'structure'>('all');
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
   const [credits, setCredits] = useState<number | null>(null);
   const [brandName, setBrandName] = useState('Brand');
+
+  const fetchRecommendations = useCallback(async (id: string) => {
+    if (!id) return [];
+    try {
+      const res = await fetch('/api/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audit_id: id })
+      });
+      
+      const data = await res.json();
+      if (data.success && Array.isArray(data.recommendations)) {
+        return data.recommendations;
+      }
+    } catch (error) {
+      console.error('Failed to fetch recommendations:', error);
+    }
+    return [];
+  }, []);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -73,37 +93,53 @@ export default function RecommendationsPage() {
     fetchUserData();
     fetchBrandName();
 
-    async function fetchRecommendations() {
-      if (!auditId) return;
-      
-      try {
-        setLoading(true);
-        const res = await fetch('/api/recommendations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ audit_id: auditId })
+    async function initialFetch() {
+      setLoading(true);
+      const data = await fetchRecommendations(auditId);
+      if (data.length > 0) {
+        setRecommendations(data);
+        const revealed = new Set<string>();
+        data.forEach((rec: Recommendation) => {
+          if (rec.suggested_copy) revealed.add(rec.id);
         });
-        
-        const data = await res.json();
-        if (data.success && Array.isArray(data.recommendations)) {
-          setRecommendations(data.recommendations);
-          
-          // Check for any already revealed recs
+        setRevealedIds(revealed);
+      }
+      setLoading(false);
+    }
+
+    initialFetch();
+  }, [auditId, fetchRecommendations]);
+
+  useEffect(() => {
+    // If no recommendations and not initially loading, start polling every 3s
+    if (!loading && recommendations.length === 0 && !polling) {
+      setPolling(true);
+      const interval = setInterval(async () => {
+        const fresh = await fetchRecommendations(auditId);
+        if (fresh.length > 0) {
+          setRecommendations(fresh);
           const revealed = new Set<string>();
-          data.recommendations.forEach((rec: Recommendation) => {
+          fresh.forEach((rec: Recommendation) => {
             if (rec.suggested_copy) revealed.add(rec.id);
           });
           setRevealedIds(revealed);
+          setPolling(false);
+          clearInterval(interval);
         }
-      } catch (error) {
-        console.error('Failed to fetch recommendations:', error);
-      } finally {
-        setLoading(false);
-      }
+      }, 3000);
+      
+      // Stop polling after 60s max
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+        setPolling(false);
+      }, 60000);
+      
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
     }
-
-    fetchRecommendations();
-  }, [auditId]);
+  }, [loading, recommendations.length, polling, auditId, fetchRecommendations]);
 
   async function handleReveal(recId: string) {
     setRevealedIds(prev => new Set([...prev, recId]));
@@ -205,6 +241,14 @@ export default function RecommendationsPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
+
       {/* TOPBAR */}
       <div style={{
         position: 'sticky',
@@ -293,39 +337,29 @@ export default function RecommendationsPage() {
 
       {/* RECOMMENDATIONS GRID */}
       <div style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-        {loading ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="card" style={{ height: '180px', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
-              <style>{`
-                @keyframes pulse {
-                  0%, 100% { opacity: 1; }
-                  50% { opacity: .5; }
-                }
-              `}</style>
-              <div style={{ height: '20px', width: '120px', background: '#F3F4F6', borderRadius: '4px', marginBottom: '16px' }} />
-              <div style={{ height: '24px', width: '60%', background: '#F3F4F6', borderRadius: '4px', marginBottom: '12px' }} />
-              <div style={{ height: '16px', width: '90%', background: '#F3F4F6', borderRadius: '4px', marginBottom: '8px' }} />
-              <div style={{ height: '16px', width: '80%', background: '#F3F4F6', borderRadius: '4px' }} />
-            </div>
-          ))
-        ) : filteredRecommendations.length === 0 ? (
+        {loading || (recommendations.length === 0 && polling) ? (
+          <>
+            {[1,2,3,4,5,6].map((i) => (
+              <div key={i} className="card" style={{ height: '180px', animation: 'pulse 1.5s ease-in-out infinite' }}>
+                <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+                  <div style={{ width: "60px", height: "22px", borderRadius: "6px", background: "#F3F4F6" }} />
+                  <div style={{ width: "80px", height: "22px", borderRadius: "6px", background: "#F3F4F6" }} />
+                </div>
+                <div style={{ width: "70%", height: "20px", borderRadius: "6px", background: "#F3F4F6", marginBottom: "10px" }} />
+                <div style={{ width: "90%", height: "16px", borderRadius: "6px", background: "#F3F4F6", marginBottom: "8px" }} />
+                <div style={{ width: "60%", height: "16px", borderRadius: "6px", background: "#F3F4F6" }} />
+              </div>
+            ))}
+            <p style={{ 
+              textAlign: "center", fontSize: "13px", 
+              color: "var(--text-muted)", marginTop: "16px" 
+            }}>
+              {polling ? "Sedang menyiapkan rekomendasi..." : "Memuat rekomendasi..."}
+            </p>
+          </>
+        ) : recommendations.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: '#6B7280' }}>
-            <p>No recommendations generated yet.</p>
-            <button 
-              onClick={() => window.location.reload()}
-              style={{
-                marginTop: '16px',
-                background: '#6C3FF5',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '10px 20px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Generate Recommendations
-            </button>
+            <p>No recommendations found for this audit.</p>
           </div>
         ) : (
           filteredRecommendations.map(rec => {
@@ -431,7 +465,6 @@ export default function RecommendationsPage() {
                             width: '16px', height: '16px', border: '2px solid #E5E7EB', borderTopColor: '#6C3FF5', borderRadius: '50%', animation: 'spin 1s linear infinite' 
                           }} />
                           Generating fix...
-                          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                         </div>
                       )}
                     </div>

@@ -268,6 +268,19 @@ async function processAuditInBackground(
       })
       .eq('id', auditId);
 
+    // Auto-generate recommendations after audit completes
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nuave.id';
+      await fetch(`${baseUrl}/api/recommendations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audit_id: auditId }),
+      });
+    } catch (err) {
+      console.error('Auto-generate recommendations failed:', err);
+      // Non-fatal — user can still manually generate
+    }
+
   } catch (error) {
     console.error('Background audit process failed:', error);
     await supabase
