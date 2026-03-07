@@ -8,6 +8,7 @@ import {
   IconArrowLeft 
 } from '@tabler/icons-react';
 import { createBrowserClient } from '@supabase/ssr';
+import RecommendationsLoader from "@/components/RecommendationsLoader";
 
 interface Recommendation {
   id: string;
@@ -17,147 +18,6 @@ interface Recommendation {
   description: string;
   suggested_copy?: string;
   page_target?: string;
-}
-
-// ─── Loading Component ────────────────────────────────────────────────────────
-
-const TASKS = [
-  { id: 'read', label: 'Reading your audit results', duration: 1800,
-    subtasks: ['10 prompt responses scanned', '3 brand mentions found'] },
-  { id: 'gaps', label: 'Mapping content gaps', duration: 2400,
-    subtasks: ['Queries where competitors ranked above you', 'Awareness, consideration & decision gaps identified'] },
-  { id: 'copy', label: 'Analysing your website copy', duration: 5200,
-    subtasks: ['Comparing against AEO best practices', 'Checking meta descriptions and page titles', 'Evaluating content structure for AI crawlability'] },
-  { id: 'generate', label: 'Generating improvement suggestions', duration: 8500,
-    subtasks: ['Writing web copy fixes', 'Building content gap topics', 'Drafting meta & structure improvements'] },
-  { id: 'prioritise', label: 'Prioritising by impact', duration: 2000,
-    subtasks: ['Scoring by conversion potential', 'Ranking high → medium → low priority'] },
-];
-const TOTAL_DURATION = TASKS.reduce((s, t) => s + t.duration, 0);
-function fmt(ms: number) { const s = Math.ceil(ms / 1000); return s <= 0 ? 'almost done' : s === 1 ? '1s left' : `~${s}s left`; }
-
-function RecommendationsLoadingScreen({ brandName }: { brandName: string }) {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [taskProgress, setTaskProgress] = useState(0);
-  const [visibleSubs, setVisibleSubs] = useState(0);
-  const [doneElapsed, setDoneElapsed] = useState<Record<string, number>>({});
-  const [timeLeft, setTimeLeft] = useState(TOTAL_DURATION);
-  const [allDone, setAllDone] = useState(false);
-  const startRef = useRef(Date.now());
-  const taskStartRef = useRef(Date.now());
-  const rafRef = useRef<number>(0);
-  const doneRef = useRef(false);
-
-  useEffect(() => {
-    startRef.current = Date.now();
-    taskStartRef.current = Date.now();
-    function tick() {
-      if (doneRef.current) return;
-      const now = Date.now();
-      const taskElapsed = now - taskStartRef.current;
-      setTimeLeft(Math.max(0, TOTAL_DURATION - (now - startRef.current)));
-      setActiveIdx(prev => {
-        const task = TASKS[prev];
-        if (!task) return prev;
-        setTaskProgress(Math.min(100, (taskElapsed / task.duration) * 100));
-        const ratio = taskElapsed / task.duration;
-        setVisibleSubs(Math.min([0.2, 0.55, 0.78].filter(t => ratio >= t).length, task.subtasks.length));
-        if (taskElapsed >= task.duration) {
-          setDoneElapsed(d => ({ ...d, [task.id]: taskElapsed }));
-          taskStartRef.current = now;
-          setVisibleSubs(0);
-          if (prev + 1 >= TASKS.length) { doneRef.current = true; setAllDone(true); return prev; }
-          return prev + 1;
-        }
-        return prev;
-      });
-      rafRef.current = requestAnimationFrame(tick);
-    }
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  const overallPct = allDone ? 100 : Math.round(((TOTAL_DURATION - Math.max(0, timeLeft)) / TOTAL_DURATION) * 100);
-
-  return (
-    <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: '80px', fontFamily: 'inherit' }}>
-      <style>{`@keyframes spin-rec { to { transform: rotate(360deg); } } @keyframes fade-sub { from { opacity:0; transform:translateY(4px) } to { opacity:1; transform:translateY(0) } }`}</style>
-      <div style={{ width: '100%', maxWidth: '520px', padding: '0 24px' }}>
-
-        {/* Header */}
-        <div style={{ marginBottom: '28px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={allDone ? '#22C55E' : '#6C3FF5'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              {allDone ? <path d="M20 6L9 17l-5-5"/> : <><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 17l.75 2.25L8 20l-2.25.75L5 23l-.75-2.25L2 20l2.25-.75L5 17z"/></>}
-            </svg>
-            <h1 style={{ fontSize: '17px', fontWeight: 600, color: '#111827', margin: 0, letterSpacing: '-0.01em' }}>
-              {allDone ? 'Analysis complete' : `Analysing ${brandName}'s AI visibility gaps`}
-            </h1>
-          </div>
-          <p style={{ fontSize: '13px', color: '#6B7280', margin: 0, lineHeight: 1.5 }}>
-            {allDone ? 'Your recommendations are ready.' : 'Generating personalised recommendations — takes about 20 seconds.'}
-          </p>
-        </div>
-
-        {/* Overall progress */}
-        <div style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', color: '#9CA3AF' }}>{allDone ? TASKS.length : activeIdx} of {TASKS.length} steps complete</span>
-            <span style={{ fontSize: '12px', fontWeight: 500, color: allDone ? '#22C55E' : '#6C3FF5' }}>{allDone ? 'Done ✓' : fmt(timeLeft)}</span>
-          </div>
-          <div style={{ height: '4px', background: '#F3F4F6', borderRadius: '99px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${overallPct}%`, background: allDone ? '#22C55E' : 'linear-gradient(90deg,#6C3FF5,#8B5CF6)', borderRadius: '99px', transition: 'width 0.5s ease, background 0.5s ease' }} />
-          </div>
-        </div>
-
-        <div style={{ height: '1px', background: '#F3F4F6', marginBottom: '12px' }} />
-
-        {/* Task list */}
-        {TASKS.map((task, i) => {
-          const isDone = allDone || i < activeIdx;
-          const isActive = !allDone && i === activeIdx;
-          const isPending = !allDone && i > activeIdx;
-          return (
-            <div key={task.id} style={{ padding: '12px 14px', borderRadius: '10px', background: isActive ? '#FAFAF9' : 'transparent', border: isActive ? '1px solid #E5E7EB' : '1px solid transparent', marginBottom: '2px', transition: 'background 0.3s ease' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                {/* Icon */}
-                <div style={{ width: 16, height: 16, flexShrink: 0 }}>
-                  {isDone && <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#22C55E"/><path d="M4.5 8l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                  {isActive && <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ animation: 'spin-rec 0.9s linear infinite' }}><circle cx="8" cy="8" r="6.5" stroke="#E5E7EB" strokeWidth="1.5"/><path d="M8 1.5A6.5 6.5 0 0 1 14.5 8" stroke="#6C3FF5" strokeWidth="1.5" strokeLinecap="round"/></svg>}
-                  {isPending && <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#D1D5DB" strokeWidth="1.5"/></svg>}
-                </div>
-                <span style={{ flex: 1, fontSize: '13.5px', fontWeight: isActive ? 500 : 400, color: isPending ? '#9CA3AF' : '#111827', transition: 'color 0.2s' }}>{task.label}</span>
-                {isDone && <span style={{ fontSize: '11px', color: '#9CA3AF' }}>{((doneElapsed[task.id] ?? task.duration) / 1000).toFixed(1)}s</span>}
-              </div>
-              {/* Progress bar */}
-              {isActive && (
-                <div style={{ height: '3px', background: '#F3F4F6', borderRadius: '99px', margin: '10px 0 0 26px', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${taskProgress}%`, background: 'linear-gradient(90deg,#6C3FF5,#8B5CF6)', borderRadius: '99px', transition: 'width 0.3s ease' }} />
-                </div>
-              )}
-              {/* Sub-tasks */}
-              {(isActive || isDone) && task.subtasks.map((st, j) => {
-                const visible = isDone || visibleSubs > j;
-                return (
-                  <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', marginLeft: '26px', opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(4px)', transition: 'opacity 0.35s ease, transform 0.35s ease' }}>
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ flexShrink: 0, opacity: 0.4 }}><path d="M1.5 1.5v5h7" stroke="#6B7280" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    <span style={{ fontSize: '12px', color: '#9CA3AF' }}>{st}</span>
-                    {(isDone || visibleSubs > j + 1) && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="#22C55E" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-
-        {!allDone && (
-          <p style={{ marginTop: '20px', fontSize: '12px', color: '#9CA3AF', textAlign: 'center' }}>
-            You can safely leave this page — we&apos;ll save your results.
-          </p>
-        )}
-      </div>
-    </div>
-  );
 }
 
 export default function RecommendationsPage() {
@@ -377,10 +237,6 @@ export default function RecommendationsPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
@@ -479,7 +335,7 @@ export default function RecommendationsPage() {
       }}>
         {loading || (recommendations.length === 0 && polling) ? (
           <div style={{ gridColumn: '1/-1' }}>
-            <RecommendationsLoadingScreen brandName={brandName} />
+            <RecommendationsLoader />
           </div>
         ) : recommendations.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: '#6B7280' }}>
