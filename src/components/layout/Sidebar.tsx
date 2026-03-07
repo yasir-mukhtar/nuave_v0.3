@@ -51,12 +51,14 @@ export function Sidebar({ credits, userName, workspaceName }: SidebarProps) {
       }}
     >
       {/* Logo area */}
-      <div
+      <Link
+        href="/"
         style={{
           height: "56px",
           display: "flex",
           alignItems: "center",
           gap: "8px",
+          textDecoration: "none",
         }}
       >
         <div
@@ -76,7 +78,7 @@ export function Sidebar({ credits, userName, workspaceName }: SidebarProps) {
         >
           Nuave
         </span>
-      </div>
+      </Link>
 
       {/* Nav */}
       <nav

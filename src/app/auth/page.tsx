@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 export default function AuthPage() {
@@ -68,7 +69,17 @@ export default function AuthPage() {
         }}
       >
         {/* Logo */}
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center', justifyContent: 'center' }}>
+        <Link 
+          href="/" 
+          style={{ 
+            display: 'flex', 
+            flexDirection: 'row', 
+            gap: '8px', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            textDecoration: 'none'
+          }}
+        >
           <div
             style={{
               width: '12px',
@@ -81,7 +92,7 @@ export default function AuthPage() {
           <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)' }}>
             Nuave
           </span>
-        </div>
+        </Link>
 
         {/* Content */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -121,8 +132,8 @@ export default function AuthPage() {
 
           <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.4, margin: 0 }}>
             By continuing, you agree to our{' '}
-            <a href="#" style={{ color: 'var(--text-body)', textDecoration: 'underline' }}>Terms of Service</a> and{' '}
-            <a href="#" style={{ color: 'var(--text-body)', textDecoration: 'underline' }}>Privacy Policy</a>.
+            <Link href="/terms" style={{ color: 'var(--text-body)', textDecoration: 'underline' }}>Terms of Service</Link> and{' '}
+            <Link href="/privacy" style={{ color: 'var(--text-body)', textDecoration: 'underline' }}>Privacy Policy</Link>.
           </p>
         </div>
       </div>

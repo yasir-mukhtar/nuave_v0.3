@@ -17,10 +17,10 @@ export default function PrivacyPage() {
         padding: "0 32px", height: "56px",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
           <div style={{ width: "10px", height: "10px", background: "var(--purple)", borderRadius: "3px" }} />
           <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-heading)" }}>Nuave</span>
-        </div>
+        </Link>
         <Link href="/" style={{ fontSize: "14px", color: "var(--text-muted)", textDecoration: "none" }}>
           ← Kembali ke beranda
         </Link>

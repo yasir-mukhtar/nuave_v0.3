@@ -63,6 +63,10 @@ export default function Footer() {
 
         {/* Legal Links */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "12px", color: "var(--text-muted)" }}>
+          <Link href="/harga" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
+            Harga
+          </Link>
+          <span>·</span>
           <Link href="/privacy" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
             Kebijakan Privasi
           </Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconCheck, IconArrowRight } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -63,7 +64,16 @@ export default function Home() {
         }}
       >
         {/* Logo */}
-        <div style={{ display: "flex", flexDirection: "row", gap: "8px", alignItems: "center" }}>
+        <Link 
+          href="/"
+          style={{ 
+            display: "flex", 
+            flexDirection: "row", 
+            gap: "8px", 
+            alignItems: "center",
+            textDecoration: "none"
+          }}
+        >
           <div
             style={{
               width: "10px",
@@ -76,11 +86,12 @@ export default function Home() {
           <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-heading)" }}>
             Nuave
           </span>
-        </div>
+        </Link>
 
         {/* Nav buttons */}
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          <button
+          <Link 
+            href="/auth"
             style={{
               fontSize: "14px",
               fontWeight: 500,
@@ -90,11 +101,24 @@ export default function Home() {
               borderRadius: "var(--radius-md)",
               padding: "7px 16px",
               cursor: "pointer",
+              textDecoration: "none"
             }}
           >
             Log in
-          </button>
+          </Link>
+          <Link 
+            href="/harga" 
+            style={{ 
+              fontSize: "14px", 
+              color: "var(--text-body)", 
+              textDecoration: "none", 
+              padding: "8px 16px" 
+            }}
+          >
+            Harga
+          </Link>
           <button
+            onClick={handleSubmit}
             style={{
               fontSize: "14px",
               fontWeight: 500,
