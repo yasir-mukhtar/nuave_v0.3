@@ -109,7 +109,10 @@ export default function AuthPage() {
             textDecoration: 'none'
           }}
         >
-          <img src="/logo-nuave.svg" alt="Nuave" height="32" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/logo-nuave.svg" alt="Nuave" width="32" height="32" style={{ display: 'block' }} />
+            <span style={{ fontWeight: 700, fontSize: '18px', color: '#111827' }}>Nuave</span>
+          </div>
         </Link>
 
         {/* Content */}

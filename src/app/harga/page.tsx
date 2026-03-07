@@ -106,7 +106,10 @@ export default function HargaPage() {
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-          <img src="/logo-nuave.svg" alt="Nuave" height="28" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/logo-nuave.svg" alt="Nuave" width="32" height="32" style={{ display: 'block' }} />
+            <span style={{ fontWeight: 700, fontSize: '18px', color: '#111827' }}>Nuave</span>
+          </div>
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <Link href="/auth" style={{ fontSize: "14px", color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}>
