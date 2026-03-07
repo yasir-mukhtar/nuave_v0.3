@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
+import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -137,10 +138,43 @@ Respond with JSON only, same format as before.`;
       );
     }
 
+    // Get the authenticated user
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let workspaceId = null;
+
+    if (user) {
+      // Insert workspace row using admin client to ensure it persists regardless of RLS for this initial setup
+      const adminClient = createSupabaseAdminClient();
+      const { data: workspace, error: wsError } = await adminClient
+        .from('workspaces')
+        .insert({
+          user_id: user.id,
+          brand_name: profile.brand_name,
+          website_url: website_url,
+          company_overview: profile.company_overview || null,
+          industry: profile.industry || null,
+          differentiators: profile.differentiators || [],
+          competitors: profile.competitors || [],
+          target_audience: profile.target_audience || null,
+          language: profile.language || 'en',
+        })
+        .select('id')
+        .single();
+
+      if (wsError) {
+        console.error('Workspace insert error:', wsError);
+      } else {
+        workspaceId = workspace?.id;
+      }
+    }
+
     return NextResponse.json({
       success: true,
       source: websiteContent ? "scraped" : "knowledge",
       website_url,
+      workspace_id: workspaceId,
       profile,
     });
   } catch (error) {

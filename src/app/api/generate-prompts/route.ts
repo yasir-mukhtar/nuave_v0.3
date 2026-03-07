@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
 
   // Persist workspace profile to Supabase
   try {
-    await supabase
+    const adminClient = createSupabaseAdminClient();
+    await adminClient
       .from('workspaces')
       .update({
         website_url: profile.website_url || null,

@@ -190,11 +190,13 @@ export default function ProfilePage() {
     setError(null);
     setLoading(true);
     try {
-      const tempId = workspaceId || crypto.randomUUID();
+      if (!workspaceId) {
+        throw new Error("Missing workspace ID. Please try restarting the audit.");
+      }
       const res = await fetch("/api/generate-prompts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspace_id: tempId, profile }),
+        body: JSON.stringify({ workspace_id: workspaceId, profile }),
       });
       const data = await res.json();
       if (!res.ok) {
