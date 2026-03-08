@@ -34,6 +34,24 @@ export async function GET(
 
     // STEP 2 — Handle different statuses
     if (audit.status === 'running' || audit.status === 'pending') {
+      // Stale audit reaper: if running for more than 10 minutes, mark as failed
+      const createdAt = new Date(audit.created_at).getTime();
+      const now = Date.now();
+      const STALE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+
+      if (now - createdAt > STALE_THRESHOLD_MS) {
+        await supabase
+          .from('audits')
+          .update({ status: 'failed' })
+          .eq('id', id);
+
+        return NextResponse.json({
+          status: 'failed',
+          audit_id: id,
+          error: 'Audit timed out. Please try again.'
+        });
+      }
+
       // Count how many prompts have been processed so far
       const { count: completedPrompts } = await supabase
         .from('audit_results')

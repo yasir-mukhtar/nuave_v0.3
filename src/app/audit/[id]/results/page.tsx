@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { 
-  IconCheck, 
-  IconX, 
-  IconArrowRight, 
-  IconCircleCheck, 
-  IconCircleX, 
-  IconCircleCheckFilled, 
-  IconCircleXFilled 
+import {
+  IconCheck,
+  IconX,
+  IconArrowRight,
+  IconCircleCheck,
+  IconCircleX,
+  IconCircleCheckFilled,
+  IconCircleXFilled
 } from '@tabler/icons-react';
+import PromptDetailModal from '@/components/PromptDetailModal';
 
 interface AuditResult {
   prompt_text: string;
@@ -501,150 +502,11 @@ export default function ResultsPage() {
 
       {/* DETAIL MODAL */}
       {selectedResult && (
-        <>
-          {/* OVERLAY */}
-          <div
-            onClick={() => setSelectedResult(null)}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.2)",
-              zIndex: 49,
-            }}
-          />
-
-          {/* PANEL */}
-          <div
-            className="animate-modal-in modal-panel"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              position: "fixed",
-              top: "24px",
-              right: "24px",
-              bottom: "24px",
-              width: "480px",
-              background: "#FFFFFF",
-              borderRadius: "16px",
-              border: "1px solid #E5E7EB",
-              boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
-              overflow: "hidden",
-              zIndex: 50,
-            }}
-          >
-            {/* ZONE 1 — HEADER (fixed) */}
-            <div
-              style={{
-                flexShrink: 0,
-                padding: "20px 24px 16px 24px",
-                borderBottom: "1px solid #E5E7EB",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <h2 style={{ fontSize: "16px", fontWeight: 600, color: "#111827", margin: 0 }}>
-                Hasil Prompt
-              </h2>
-              <button
-                onClick={() => setSelectedResult(null)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#6B7280",
-                  cursor: "pointer",
-                  padding: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <IconX size={18} stroke={1.5} />
-              </button>
-            </div>
-
-            {/* ZONE 2 — SCROLLABLE CONTENT AREA */}
-            <div 
-              style={{ 
-                flex: 1, 
-                overflowY: "auto", 
-                padding: "20px 24px",
-              }}
-            >
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                
-                {/* USER PROMPT BUBBLE */}
-                <div
-                  style={{
-                    marginLeft: "auto",
-                    background: "var(--purple)",
-                    color: "white",
-                    borderRadius: "18px 18px 4px 18px",
-                    padding: "10px 14px",
-                    maxWidth: "85%",
-                    fontSize: "14px",
-                    display: "inline-block",
-                    marginBottom: "12px",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                  }}
-                >
-                  {selectedResult.prompt_text}
-                </div>
-
-                {/* MENTION STATUS BADGE */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      background: "#F4F4F4",
-                      borderRadius: "999px",
-                      padding: "6px 12px 6px 6px",
-                    }}
-                  >
-                    {selectedResult.brand_mentioned ? (
-                      <IconCircleCheckFilled size={20} color="#16A34A" />
-                    ) : (
-                      <IconCircleXFilled size={20} color="#DC2626" />
-                    )}
-                    <span style={{ fontSize: "13px", fontWeight: 500, color: "#111827" }}>
-                      {brandName} {selectedResult.brand_mentioned ? "disebutkan" : "tidak disebutkan"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* AI RESPONSE (RICH TEXT) */}
-                <div
-                  style={{
-                    whiteSpace: "pre-wrap",
-                  }}
-                >
-                  {renderMarkdown(selectedResult.ai_response)}
-                </div>
-              </div>
-            </div>
-
-            {/* ZONE 3 — FOOTER (fixed) */}
-            <div
-              style={{
-                flexShrink: 0,
-                padding: "12px 24px",
-                borderTop: "1px solid #E5E7EB",
-                fontSize: "11px",
-                color: "#9CA3AF",
-                textAlign: "center",
-              }}
-            >
-              Respons oleh GPT-4o dengan pencarian web · {selectedResult.created_at ? new Date(selectedResult.created_at).toLocaleString('id-ID') : new Date().toLocaleString('id-ID')}
-            </div>
-          </div>
-        </>
+        <PromptDetailModal
+          result={selectedResult}
+          brandName={brandName}
+          onClose={() => setSelectedResult(null)}
+        />
       )}
     </div>
   );

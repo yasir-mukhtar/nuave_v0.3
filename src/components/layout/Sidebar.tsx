@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  IconLayoutDashboard, 
-  IconList, 
-  IconFileDescription, 
-  IconSettings, 
-  IconCoins 
+import {
+  IconSmartHome,
+  IconMessageDots,
+  IconArticle,
+  IconRosetteAsterisk,
+  IconChevronUp,
 } from '@tabler/icons-react';
-import { useCreditsBalance } from "@/hooks/useCreditsBalance";
 
 type SidebarProps = {
   credits: number;
@@ -18,10 +17,16 @@ type SidebarProps = {
 };
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: IconLayoutDashboard },
-  { label: "Prompts", href: "/dashboard/prompts", icon: IconList },
-  { label: "Content", href: "/content", icon: IconFileDescription },
-  { label: "Settings", href: "/settings", icon: IconSettings },
+  { label: "Dashboard", href: "/dashboard", icon: IconSmartHome },
+  { label: "Prompt", href: "/dashboard/prompts", icon: IconMessageDots },
+  { label: "Konten", href: "/content", icon: IconArticle },
+  { label: "Brand", href: "/brand", icon: IconRosetteAsterisk },
+];
+
+const bottomLinks = [
+  { label: "Bantuan", href: "/bantuan" },
+  { label: "Panduan", href: "/panduan" },
+  { label: "Pengaturan", href: "/settings" },
 ];
 
 function getInitials(name: string) {
@@ -33,22 +38,23 @@ function getInitials(name: string) {
   return initials || "YM";
 }
 
-export function Sidebar({ credits: initialCredits, userName, workspaceName }: SidebarProps) {
+export function Sidebar({ userName, workspaceName }: SidebarProps) {
   const pathname = usePathname();
   const initials = getInitials(userName);
-  const { credits } = useCreditsBalance();
 
   return (
     <aside
       style={{
-        width: "240px",
+        width: "200px",
         height: "100vh",
-        position: "sticky",
+        position: "fixed",
         top: 0,
-        padding: "16px",
+        left: 0,
+        zIndex: 10,
+        padding: "24px 16px 16px",
         display: "flex",
         flexDirection: "column",
-        background: "var(--bg-surface)",
+        background: "#F5F5F5",
         borderRight: "1px solid var(--border-default)",
       }}
     >
@@ -56,38 +62,31 @@ export function Sidebar({ credits: initialCredits, userName, workspaceName }: Si
       <Link
         href="/"
         style={{
-          height: "56px",
           display: "flex",
           alignItems: "center",
           gap: "8px",
           textDecoration: "none",
+          marginBottom: "32px",
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/logo-nuave.svg" alt="Nuave" width="32" height="32" style={{ display: 'block' }} />
-          <span style={{ fontWeight: 700, fontSize: '18px', color: '#111827' }}>Nuave</span>
-        </div>
+        <img src="/logo-nuave.svg" alt="Nuave" width="28" height="28" style={{ display: 'block' }} />
+        <span style={{ fontWeight: 700, fontSize: '17px', color: 'var(--text-heading)' }}>Nuave</span>
       </Link>
 
-      {/* Nav */}
+      {/* Primary nav */}
       <nav
         style={{
-          marginTop: "24px",
           display: "flex",
           flexDirection: "column",
-          gap: "4px",
+          gap: "2px",
         }}
       >
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
-            item.href === "/"
-              ? pathname === "/"
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
               : pathname?.startsWith(item.href);
-
-          const baseColor = "var(--text-muted)";
-          const activeColor = "var(--purple)";
-          const hoverColor = "var(--text-heading)";
 
           return (
             <Link
@@ -103,32 +102,29 @@ export function Sidebar({ credits: initialCredits, userName, workspaceName }: Si
                   alignItems: "center",
                   gap: "10px",
                   height: "36px",
-                  padding: "0 12px",
-                  borderRadius: "8px",
+                  padding: "0 8px",
+                  borderRadius: "6px",
                   cursor: "pointer",
-                  color: isActive ? activeColor : baseColor,
-                  background: isActive ? "#ffffff" : "transparent",
-                  boxShadow: isActive ? "var(--shadow-card)" : "none",
+                  color: isActive ? "var(--text-heading)" : "var(--text-muted)",
+                  background: "transparent",
                   transition: "var(--transition-fast)",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                    "#ffffff";
-                  (e.currentTarget as HTMLDivElement).style.color = hoverColor;
+                  if (!isActive) {
+                    e.currentTarget.style.color = "var(--text-body)";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                    isActive ? "#ffffff" : "transparent";
-                  (e.currentTarget as HTMLDivElement).style.color = isActive
-                    ? activeColor
-                    : baseColor;
+                  if (!isActive) {
+                    e.currentTarget.style.color = "var(--text-muted)";
+                  }
                 }}
               >
-                <Icon size={18} stroke={1.5} />
+                <Icon size={18} stroke={2} />
                 <span
                   style={{
-                    fontSize: "var(--text-sm)",
-                    fontWeight: 500,
+                    fontSize: "14px",
+                    fontWeight: isActive ? 600 : 400,
                   }}
                 >
                   {item.label}
@@ -139,23 +135,65 @@ export function Sidebar({ credits: initialCredits, userName, workspaceName }: Si
         })}
       </nav>
 
-      {/* Bottom area */}
-      <div
-        style={{
-          marginTop: "auto",
-        }}
-      >
+      {/* Bottom section */}
+      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "0px" }}>
+        {/* Secondary links */}
+        <nav
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+            marginBottom: "20px",
+          }}
+        >
+          {bottomLinks.map((item) => {
+            const isActive = pathname?.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  textDecoration: "none",
+                  display: "block",
+                  padding: "6px 8px",
+                  fontSize: "14px",
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? "var(--text-heading)" : "var(--text-muted)",
+                  borderRadius: "6px",
+                  transition: "var(--transition-fast)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = "var(--text-body)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = "var(--text-muted)";
+                  }
+                }}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* User profile */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "10px",
+            padding: "8px",
+            borderTop: "1px solid var(--border-default)",
+            paddingTop: "16px",
           }}
         >
           <div
             style={{
-              width: "28px",
-              height: "28px",
+              width: "32px",
+              height: "32px",
               borderRadius: "50%",
               background: "var(--purple)",
               color: "#ffffff",
@@ -164,6 +202,7 @@ export function Sidebar({ credits: initialCredits, userName, workspaceName }: Si
               justifyContent: "center",
               fontSize: "12px",
               fontWeight: 600,
+              flexShrink: 0,
             }}
           >
             {initials}
@@ -172,7 +211,9 @@ export function Sidebar({ credits: initialCredits, userName, workspaceName }: Si
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "2px",
+              gap: "1px",
+              flex: 1,
+              minWidth: 0,
             }}
           >
             <span
@@ -180,6 +221,9 @@ export function Sidebar({ credits: initialCredits, userName, workspaceName }: Si
                 fontSize: "13px",
                 fontWeight: 500,
                 color: "var(--text-heading)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               {userName}
@@ -188,30 +232,15 @@ export function Sidebar({ credits: initialCredits, userName, workspaceName }: Si
               style={{
                 fontSize: "12px",
                 color: "var(--text-muted)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               {workspaceName}
             </span>
           </div>
-        </div>
-
-        {/* Credits chip */}
-        <div
-          style={{
-            marginTop: "8px",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "4px",
-            padding: "4px 10px",
-            borderRadius: "var(--radius-full)",
-            background: "var(--purple-light)",
-            color: "var(--purple)",
-            fontSize: "12px",
-            fontWeight: 500,
-          }}
-        >
-          <IconCoins size={14} stroke={1.5} />
-          <span>{credits ?? "—"} credits</span>
+          <IconChevronUp size={16} stroke={2} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
         </div>
       </div>
     </aside>

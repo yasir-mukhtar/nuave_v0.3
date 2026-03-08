@@ -12,6 +12,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Nuave - AI Brand Visibility Audit",
   description: "Does ChatGPT know your brand? Find out in 2 minutes with a free AI visibility audit.",
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
