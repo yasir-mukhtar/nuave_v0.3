@@ -22,8 +22,8 @@ type SidebarProps = {
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: IconSmartHome },
-  { label: "Prompt", href: "/dashboard/prompts", icon: IconMessageDots },
-  { label: "Konten", href: "/dashboard/konten", icon: IconArticle },
+  { label: "Prompt", href: "/prompt", icon: IconMessageDots },
+  { label: "Konten", href: "/content", icon: IconArticle },
   { label: "Brand", href: "/brand", icon: IconRosetteAsterisk },
 ];
 
