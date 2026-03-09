@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { IconArrowLeft } from "@tabler/icons-react";
 import Footer from "@/components/Footer";
 
 export default function PrivacyPage() {
+  const router = useRouter();
   const CONTACT_EMAIL = "privacy@nuave.ai";
   const LAST_UPDATED = "7 Maret 2026";
 
@@ -23,14 +26,29 @@ export default function PrivacyPage() {
             <span style={{ fontWeight: 700, fontSize: '18px', color: '#111827' }}>Nuave</span>
           </div>
         </Link>
-        <Link href="/" style={{ fontSize: "14px", color: "var(--text-muted)", textDecoration: "none" }}>
-          ← Kembali ke beranda
-        </Link>
       </header>
 
       {/* Hero */}
       <div style={{ background: "var(--surface)", borderBottom: "1px solid var(--border-default)", padding: "48px 32px" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+          <div style={{ marginBottom: "20px" }}>
+            <button
+              onClick={() => {
+                if (window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push("/");
+                }
+              }}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "6px",
+                fontSize: "13px", color: "var(--text-muted)", background: "none",
+                border: "none", padding: 0, cursor: "pointer",
+              }}
+            >
+              <IconArrowLeft size={16} stroke={1.5} /> Kembali
+            </button>
+          </div>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             background: "var(--purple-light)", border: "1px solid #C4B5FD",

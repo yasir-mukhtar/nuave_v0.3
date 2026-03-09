@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { IconArrowLeft } from "@tabler/icons-react";
 import Footer from "@/components/Footer";
 
 const PACKAGES = [
@@ -93,6 +95,8 @@ const FAQS = [
 ];
 
 export default function HargaPage() {
+  const router = useRouter();
+
   return (
     <div style={{ minHeight: "100vh", background: "#ffffff" }}>
 
@@ -111,21 +115,32 @@ export default function HargaPage() {
             <span style={{ fontWeight: 700, fontSize: '18px', color: '#111827' }}>Nuave</span>
           </div>
         </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <Link href="/auth" style={{ fontSize: "14px", color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}>
-            Log in
-          </Link>
-          <Link href="/" style={{
-            fontSize: "14px", fontWeight: 500, color: "#ffffff",
-            background: "var(--purple)", textDecoration: "none",
-            padding: "8px 20px", borderRadius: "8px",
-          }}>
-            Mulai gratis →
-          </Link>
-        </div>
       </header>
 
       {/* Hero */}
+      <section style={{ background: "var(--surface)", borderBottom: "1px solid var(--border-default)", padding: "48px 32px" }}>
+        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+          <div style={{ marginBottom: "20px" }}>
+            <button
+              onClick={() => {
+                if (window.history.length > 1) {
+                  router.back();
+                } else {
+                  router.push("/");
+                }
+              }}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "6px",
+                fontSize: "13px", color: "var(--text-muted)", background: "none",
+                border: "none", padding: 0, cursor: "pointer",
+              }}
+            >
+              <IconArrowLeft size={16} stroke={1.5} /> Kembali
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section style={{ textAlign: "center", padding: "64px 24px 48px" }}>
         <div style={{
           display: "inline-flex", alignItems: "center", gap: "6px",
