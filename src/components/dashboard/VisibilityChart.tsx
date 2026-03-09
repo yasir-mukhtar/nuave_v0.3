@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   AreaChart,
   Area,
@@ -87,6 +87,28 @@ const gridYTicks = [20, 40, 60, 80, 100];
 export default function VisibilityChart({ data, latestScore }: VisibilityChartProps) {
   const [filterIdx, setFilterIdx] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownClosing, setDropdownClosing] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  function closeFilterDropdown() {
+    setDropdownClosing(true);
+    setTimeout(() => {
+      setDropdownOpen(false);
+      setDropdownClosing(false);
+    }, 200);
+  }
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        closeFilterDropdown();
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClick);
+      return () => document.removeEventListener("mousedown", handleClick);
+    }
+  }, [dropdownOpen]);
 
   const days = filterOptions[filterIdx].days;
 
@@ -175,9 +197,9 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
         </div>
 
         {/* Filter dropdown */}
-        <div style={{ position: 'relative' }}>
+        <div ref={filterRef} style={{ position: 'relative' }}>
           <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
+            onClick={() => dropdownOpen ? closeFilterDropdown() : setDropdownOpen(true)}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -199,7 +221,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
 
           {dropdownOpen && (
             <div
-              className="popover-down"
+              className={dropdownClosing ? "popover-down-out" : "popover-down"}
               style={{
                 position: 'absolute',
                 top: '100%',
@@ -219,7 +241,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
                   key={opt.days}
                   onClick={() => {
                     setFilterIdx(idx);
-                    setDropdownOpen(false);
+                    closeFilterDropdown();
                   }}
                   style={{
                     display: 'block',

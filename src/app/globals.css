@@ -277,12 +277,19 @@ label.field-label.disabled {
 
 /* ── Popover animations ── */
 @keyframes popover-in-up {
-  from {
+  0% {
     opacity: 0;
-    filter: blur(4px);
-    transform: translateY(4px) scale(0.97);
+    filter: blur(6px);
+    transform: translateY(8px) scale(0.95);
   }
-  to {
+  10% {
+    filter: blur(0);
+  }
+  75% {
+    transform: translateY(-1px) scale(1.005);
+    filter: blur(0);
+  }
+  100% {
     opacity: 1;
     filter: blur(0);
     transform: translateY(0) scale(1);
@@ -290,24 +297,65 @@ label.field-label.disabled {
 }
 
 @keyframes popover-in-down {
-  from {
+  0% {
     opacity: 0;
-    filter: blur(4px);
-    transform: translateY(-4px) scale(0.97);
+    filter: blur(6px);
+    transform: translateY(-8px) scale(0.95);
   }
-  to {
+  10% {
+    filter: blur(0);
+  }
+  75% {
+    transform: translateY(1px) scale(1.005);
+    filter: blur(0);
+  }
+  100% {
     opacity: 1;
     filter: blur(0);
     transform: translateY(0) scale(1);
   }
 }
 
+@keyframes popover-out-up {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(4px) scale(0.97);
+  }
+}
+
+@keyframes popover-out-down {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+
 .popover-up {
-  animation: popover-in-up 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: popover-in-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .popover-down {
-  animation: popover-in-down 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: popover-in-down 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.popover-up-out {
+  animation: popover-out-up 0.2s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.popover-down-out {
+  animation: popover-out-down 0.2s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
 @media (max-width: 768px) {

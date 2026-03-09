@@ -23,7 +23,7 @@ type SidebarProps = {
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: IconSmartHome },
   { label: "Prompt", href: "/dashboard/prompts", icon: IconMessageDots },
-  { label: "Konten", href: "/content", icon: IconArticle },
+  { label: "Konten", href: "/dashboard/konten", icon: IconArticle },
   { label: "Brand", href: "/brand", icon: IconRosetteAsterisk },
 ];
 
@@ -31,27 +31,32 @@ const bottomLinks = [
   { label: "Bantuan", href: "/support" },
 ];
 
-function getInitials(name: string) {
-  if (!name) return "YM";
-  const parts = name.trim().split(" ");
-  const first = parts[0]?.[0] ?? "";
-  const last = parts[parts.length - 1]?.[0] ?? "";
-  const initials = (first + last).toUpperCase();
-  return initials || "YM";
+function getInitial(name: string) {
+  if (!name) return "N";
+  return (name.trim()[0] ?? "N").toUpperCase();
 }
 
 export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const initials = getInitials(userName);
+  const initial = getInitial(userName);
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [popoverClosing, setPopoverClosing] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  function closePopover() {
+    setPopoverClosing(true);
+    setTimeout(() => {
+      setPopoverOpen(false);
+      setPopoverClosing(false);
+    }, 200);
+  }
 
   // Close popover on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        setPopoverOpen(false);
+        closePopover();
       }
     }
     if (popoverOpen) {
@@ -69,7 +74,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
   return (
     <aside
       style={{
-        width: "200px",
+        width: "256px",
         height: "100vh",
         position: "fixed",
         top: 0,
@@ -209,7 +214,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
           {/* Popover */}
           {popoverOpen && (
             <div
-              className="popover-up"
+              className={popoverClosing ? "popover-up-out" : "popover-up"}
               style={{
                 position: "absolute",
                 bottom: "calc(100% + 4px)",
@@ -267,7 +272,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
 
           {/* User card trigger */}
           <div
-            onClick={() => setPopoverOpen(!popoverOpen)}
+            onClick={() => popoverOpen ? closePopover() : setPopoverOpen(true)}
             style={{
               display: "flex",
               alignItems: "center",
@@ -289,20 +294,20 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
           >
             <div
               style={{
-                width: "32px",
-                height: "32px",
+                width: "24px",
+                height: "24px",
                 borderRadius: "50%",
                 background: "var(--purple)",
                 color: "#ffffff",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "12px",
+                fontSize: "11px",
                 fontWeight: 600,
                 flexShrink: 0,
               }}
             >
-              {initials}
+              {initial}
             </div>
             <div
               style={{

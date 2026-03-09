@@ -62,8 +62,9 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
         />
         <div
           style={{
-            marginLeft: "200px",
+            marginLeft: "256px",
             flex: 1,
+            minWidth: 0,
             display: "flex",
             flexDirection: "column",
             background: "var(--bg-page)",
@@ -74,7 +75,9 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
             style={{
               flex: 1,
               overflowY: "auto",
+              overflowX: "hidden",
               padding: "32px",
+              minWidth: 0,
             }}
           >
             {children}

@@ -17,15 +17,24 @@ export default function Topbar() {
   const { credits } = useCreditsBalance();
   const { workspaces, activeWorkspaceId, setActiveWorkspaceId, activeWorkspace } = useActiveWorkspace();
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const workspaceName = activeWorkspace?.brand_name ?? "Select Workspace";
+
+  function closeDropdown() {
+    setClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+    }, 200);
+  }
 
   // Close dropdown on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
+        closeDropdown();
       }
     }
     if (open) {
@@ -48,7 +57,7 @@ export default function Topbar() {
       {/* Left: workspace/brand selector */}
       <div ref={dropdownRef} style={{ position: "relative" }}>
         <button
-          onClick={() => setOpen(!open)}
+          onClick={() => open ? closeDropdown() : setOpen(true)}
           style={{
             display: "flex",
             alignItems: "center",
@@ -74,7 +83,7 @@ export default function Topbar() {
 
         {open && (
           <div
-            className="popover-down"
+            className={closing ? "popover-down-out" : "popover-down"}
             style={{
               position: "absolute",
               top: "calc(100% + 4px)",
@@ -100,7 +109,7 @@ export default function Topbar() {
                     key={ws.id}
                     onClick={() => {
                       setActiveWorkspaceId(ws.id);
-                      setOpen(false);
+                      closeDropdown();
                     }}
                     style={{
                       display: "flex",
