@@ -167,113 +167,178 @@ export default function Home() {
 
       {/* ──── Hero ──── */}
       <section style={{
-        maxWidth: "1120px", margin: "0 auto",
-        padding: "120px 32px 80px",
-        display: "grid", gridTemplateColumns: "1fr 1fr", gap: "64px", alignItems: "center",
+        position: "relative", overflow: "hidden",
+        background: "linear-gradient(135deg, #F5F0FF 0%, #EDE9FF 25%, #F0EAFF 50%, #E8E0FF 75%, #F5F0FF 100%)",
       }}>
-        {/* Left column */}
-        <div>
-          <h1 style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)",
-            fontWeight: 700, lineHeight: 1.15, letterSpacing: "-0.02em",
-            color: "#111827", margin: "0 0 20px 0",
-          }}>
-            Buat brand Anda muncul di setiap jawaban AI — bukan hanya di Google.
-          </h1>
-          <p style={{
-            fontSize: "16px", color: "#6B7280", lineHeight: 1.7, margin: "0 0 32px 0", maxWidth: "480px",
-          }}>
-            Lihat bagaimana ChatGPT melihat brand Anda, bandingkan dengan kompetitor, dan dapatkan rekomendasi yang langsung berdampak.
-          </p>
+        {/* Abstract wavy background SVGs */}
+        <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} preserveAspectRatio="none" viewBox="0 0 1440 800">
+          <defs>
+            <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#6C3FF5" stopOpacity="0.08" />
+              <stop offset="50%" stopColor="#A78BFA" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#C084FC" stopOpacity="0.06" />
+            </linearGradient>
+            <linearGradient id="wave2" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#EC4899" stopOpacity="0.06" />
+              <stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="#6C3FF5" stopOpacity="0.05" />
+            </linearGradient>
+            <linearGradient id="wave3" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#6C3FF5" stopOpacity="0.06" />
+              <stop offset="40%" stopColor="#3B82F6" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#A78BFA" stopOpacity="0.04" />
+            </linearGradient>
+          </defs>
+          {/* Large flowing wave — back */}
+          <path d="M0 400 C200 250, 400 550, 720 350 S1200 500, 1440 300 L1440 800 L0 800Z" fill="url(#wave1)" />
+          {/* Mid wave */}
+          <path d="M0 500 C180 380, 360 620, 600 450 S900 600, 1100 420 C1250 350, 1350 500, 1440 440 L1440 800 L0 800Z" fill="url(#wave2)" />
+          {/* Front wave */}
+          <path d="M0 600 C240 520, 480 700, 720 580 S1080 700, 1440 560 L1440 800 L0 800Z" fill="url(#wave3)" />
+          {/* Subtle top wave */}
+          <path d="M0 100 C300 180, 500 50, 800 130 S1200 60, 1440 120 L1440 0 L0 0Z" fill="url(#wave1)" />
+        </svg>
 
-          {/* Form */}
-          <div id="audit-form" style={{
-            display: "flex", flexDirection: "column", gap: "12px",
-            maxWidth: "420px",
-          }}>
-            <div className="form-field">
-              <label>Nama Brand</label>
-              <input className="input-large" type="text" placeholder="misal: Nuave"
-                value={brandName} onChange={(e) => setBrandName(e.target.value)} />
-            </div>
-            <div className="form-field">
-              <label>URL Website</label>
-              <input className="input-large" type="url" placeholder="misal: https://nuave.ai"
-                value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} />
-            </div>
-            {error && <p style={{ fontSize: "13px", color: "#e53e3e", margin: 0 }}>{error}</p>}
-            <button type="button" onClick={() => handleSubmit(brandName, websiteUrl, setLoading)} disabled={loading}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                width: "100%", fontSize: "15px", fontWeight: 600, color: "#ffffff",
-                background: "#6C3FF5", border: "none", borderRadius: "8px",
-                padding: "14px", cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading ? 0.7 : 1,
-              }}>
-              {loading ? "Menganalisis…" : <>Cek Visibilitas AI Anda <IconArrowRight size={18} stroke={1.5} /></>}
-            </button>
-          </div>
-
-          {/* Trust strip */}
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "16px", flexWrap: "wrap" }}>
-            {["Gratis", "60 detik", "Tanpa kartu kredit"].map((t) => (
-              <div key={t} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#9CA3AF" }}>
-                <IconCheck size={16} stroke={2} color="#6C3FF5" /> {t}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right column — mockup */}
+        {/* Gradient orbs */}
         <div style={{
-          background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: "16px",
-          padding: "32px", display: "flex", flexDirection: "column", gap: "24px",
+          position: "absolute", top: "-120px", right: "-80px", width: "500px", height: "500px",
+          borderRadius: "50%", background: "radial-gradient(circle, rgba(108,63,245,0.12) 0%, rgba(167,139,250,0.06) 40%, transparent 70%)",
+          filter: "blur(40px)", pointerEvents: "none",
+        }} />
+        <div style={{
+          position: "absolute", bottom: "-60px", left: "-100px", width: "400px", height: "400px",
+          borderRadius: "50%", background: "radial-gradient(circle, rgba(236,72,153,0.1) 0%, rgba(139,92,246,0.06) 40%, transparent 70%)",
+          filter: "blur(50px)", pointerEvents: "none",
+        }} />
+        <div style={{
+          position: "absolute", top: "40%", left: "50%", width: "300px", height: "300px",
+          borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(108,63,245,0.04) 50%, transparent 70%)",
+          filter: "blur(40px)", pointerEvents: "none", transform: "translateX(-50%)",
+        }} />
+
+        {/* Content */}
+        <div style={{
+          position: "relative", zIndex: 1,
+          maxWidth: "1120px", margin: "0 auto",
+          padding: "120px 32px 80px",
+          display: "grid", gridTemplateColumns: "1fr 1fr", gap: "64px", alignItems: "center",
         }}>
-          {/* Score gauge */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{
-              width: "120px", height: "120px", borderRadius: "50%", margin: "0 auto 12px",
-              background: `conic-gradient(#EF4444 0deg ${35 * 3.6}deg, #E5E7EB ${35 * 3.6}deg 360deg)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
+          {/* Left column */}
+          <div>
+            <h1 style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)",
+              fontWeight: 700, lineHeight: 1.15, letterSpacing: "-0.02em",
+              color: "#111827", margin: "0 0 20px 0",
             }}>
-              <div style={{
-                width: "96px", height: "96px", borderRadius: "50%", background: "#F9FAFB",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                flexDirection: "column",
-              }}>
-                <span style={{ fontSize: "32px", fontWeight: 700, color: "#EF4444" }}>35</span>
-              </div>
-            </div>
-            <span style={{
-              display: "inline-block", background: "#FEE2E2", color: "#DC2626",
-              fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: "999px",
+              Buat brand Anda muncul di setiap jawaban AI — bukan hanya di Google.
+            </h1>
+            <p style={{
+              fontSize: "16px", color: "#4B5563", lineHeight: 1.7, margin: "0 0 32px 0", maxWidth: "480px",
             }}>
-              Visibilitas Rendah
-            </span>
-            <p style={{ fontSize: "13px", color: "#6B7280", marginTop: "8px" }}>
-              2 dari 10 prompt menyebut brand Anda
+              Lihat bagaimana ChatGPT melihat brand Anda, bandingkan dengan kompetitor, dan dapatkan rekomendasi yang langsung berdampak.
             </p>
+
+            {/* Form */}
+            <div id="audit-form" style={{
+              display: "flex", flexDirection: "column", gap: "12px",
+              maxWidth: "420px",
+              background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)",
+              padding: "24px", borderRadius: "16px",
+              border: "1px solid rgba(108,63,245,0.1)",
+              boxShadow: "0 4px 24px rgba(108,63,245,0.06)",
+            }}>
+              <div className="form-field">
+                <label>Nama Brand</label>
+                <input className="input-large" type="text" placeholder="misal: Nuave"
+                  value={brandName} onChange={(e) => setBrandName(e.target.value)} />
+              </div>
+              <div className="form-field">
+                <label>URL Website</label>
+                <input className="input-large" type="url" placeholder="misal: https://nuave.ai"
+                  value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} />
+              </div>
+              {error && <p style={{ fontSize: "13px", color: "#e53e3e", margin: 0 }}>{error}</p>}
+              <button type="button" onClick={() => handleSubmit(brandName, websiteUrl, setLoading)} disabled={loading}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                  width: "100%", fontSize: "15px", fontWeight: 600, color: "#ffffff",
+                  background: "linear-gradient(135deg, #6C3FF5, #8B5CF6)", border: "none", borderRadius: "8px",
+                  padding: "14px", cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.7 : 1,
+                  boxShadow: "0 4px 16px rgba(108,63,245,0.3)",
+                }}>
+                {loading ? "Menganalisis…" : <>Cek Visibilitas AI Anda <IconArrowRight size={18} stroke={1.5} /></>}
+              </button>
+            </div>
+
+            {/* Trust strip */}
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "16px", flexWrap: "wrap" }}>
+              {["Gratis", "60 detik", "Tanpa kartu kredit"].map((t) => (
+                <div key={t} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#6B7280" }}>
+                  <IconCheck size={16} stroke={2} color="#6C3FF5" /> {t}
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Prompt rows */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {MOCK_PROMPTS.slice(0, 4).map((p, i) => (
-              <div key={i} style={{
-                display: "flex", alignItems: "center", gap: "10px",
-                padding: "10px 14px", background: "#ffffff", borderRadius: "8px",
-                border: "1px solid #E5E7EB", fontSize: "13px",
+          {/* Right column — mockup */}
+          <div style={{
+            background: "rgba(255,255,255,0.75)", backdropFilter: "blur(12px)",
+            border: "1px solid rgba(108,63,245,0.1)", borderRadius: "16px",
+            padding: "32px", display: "flex", flexDirection: "column", gap: "24px",
+            boxShadow: "0 8px 32px rgba(108,63,245,0.08)",
+          }}>
+            {/* Score gauge */}
+            <div style={{ textAlign: "center" }}>
+              <div style={{
+                width: "120px", height: "120px", borderRadius: "50%", margin: "0 auto 12px",
+                background: `conic-gradient(#EF4444 0deg ${35 * 3.6}deg, #E5E7EB ${35 * 3.6}deg 360deg)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
               }}>
-                {p.mentioned ? (
-                  <IconCheck size={16} stroke={2.5} color="#22C55E" style={{ flexShrink: 0 }} />
-                ) : (
-                  <IconX size={16} stroke={2.5} color="#EF4444" style={{ flexShrink: 0 }} />
-                )}
-                <span style={{ color: "#374151" }}>{p.prompt}</span>
+                <div style={{
+                  width: "96px", height: "96px", borderRadius: "50%", background: "rgba(255,255,255,0.9)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexDirection: "column",
+                }}>
+                  <span style={{ fontSize: "32px", fontWeight: 700, color: "#EF4444" }}>35</span>
+                </div>
               </div>
-            ))}
+              <span style={{
+                display: "inline-block", background: "#FEE2E2", color: "#DC2626",
+                fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: "999px",
+              }}>
+                Visibilitas Rendah
+              </span>
+              <p style={{ fontSize: "13px", color: "#6B7280", marginTop: "8px" }}>
+                2 dari 10 prompt menyebut brand Anda
+              </p>
+            </div>
+
+            {/* Prompt rows */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {MOCK_PROMPTS.slice(0, 4).map((p, i) => (
+                <div key={i} style={{
+                  display: "flex", alignItems: "center", gap: "10px",
+                  padding: "10px 14px", background: "rgba(255,255,255,0.8)", borderRadius: "8px",
+                  border: "1px solid rgba(229,231,235,0.8)", fontSize: "13px",
+                }}>
+                  {p.mentioned ? (
+                    <IconCheck size={16} stroke={2.5} color="#22C55E" style={{ flexShrink: 0 }} />
+                  ) : (
+                    <IconX size={16} stroke={2.5} color="#EF4444" style={{ flexShrink: 0 }} />
+                  )}
+                  <span style={{ color: "#374151" }}>{p.prompt}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* Bottom wave divider */}
+        <svg style={{ display: "block", width: "100%", height: "60px", position: "relative", zIndex: 1 }} preserveAspectRatio="none" viewBox="0 0 1440 60">
+          <path d="M0 0 C360 50, 720 60, 1080 30 S1440 50, 1440 0 L1440 60 L0 60Z" fill="#ffffff" />
+        </svg>
       </section>
 
       {/* ──── Stats ──── */}
