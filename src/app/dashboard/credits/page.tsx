@@ -2,6 +2,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { IconArrowLeft } from "@tabler/icons-react";
 
 const PACKAGES = [
   {
@@ -72,15 +73,29 @@ function CreditsPageContent() {
             <span style={{ fontWeight: 700, fontSize: '18px', color: '#111827' }}>Nuave</span>
           </div>
         </Link>
-        <Link href="/dashboard" style={{ fontSize: "14px", color: "var(--text-muted)", textDecoration: "none" }}>
-          ← Kembali ke dashboard
-        </Link>
       </header>
 
       <main style={{ maxWidth: "900px", margin: "0 auto", padding: "48px 24px" }}>
 
-        {/* Title */}
+        {/* Back button + Title */}
         <div style={{ marginBottom: "40px" }}>
+          <button
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/dashboard");
+              }
+            }}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "6px",
+              fontSize: "13px", color: "var(--text-muted)", background: "none",
+              border: "none", cursor: "pointer", padding: 0, marginBottom: "16px",
+            }}
+          >
+            <IconArrowLeft size={16} stroke={1.5} />
+            Kembali ke dashboard
+          </button>
           <h1 style={{ fontSize: "28px", fontWeight: 700, color: "var(--text-heading)", margin: "0 0 8px 0" }}>
             Beli Kredit
           </h1>
