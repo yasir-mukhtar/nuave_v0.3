@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 
 export default function TermsPage() {
   const LAST_UPDATED = "7 Maret 2026";
-  const CONTACT_EMAIL = "hello@nuave.id";
+  const CONTACT_EMAIL = "hello@nuave.ai";
 
   return (
     <div style={{ minHeight: "100vh", background: "#ffffff" }}>
@@ -334,7 +334,7 @@ export default function TermsPage() {
             Email: <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: "var(--purple)" }}>{CONTACT_EMAIL}</a>
           </p>
           <p style={{ fontSize: "14px", color: "var(--text-body)", margin: 0 }}>
-            Website: <a href="https://nuave.id" style={{ color: "var(--purple)" }}>https://nuave.id</a>
+            Website: <a href="https://nuave.ai" style={{ color: "var(--purple)" }}>https://nuave.ai</a>
           </p>
         </div>
 

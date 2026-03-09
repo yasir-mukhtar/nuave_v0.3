@@ -202,7 +202,7 @@ export default function Home() {
             </div>
             <div className="form-field">
               <label>URL Website</label>
-              <input className="input-large" type="url" placeholder="misal: https://nuave.id"
+              <input className="input-large" type="url" placeholder="misal: https://nuave.ai"
                 value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} />
             </div>
             {error && <p style={{ fontSize: "13px", color: "#e53e3e", margin: 0 }}>{error}</p>}
@@ -646,7 +646,7 @@ export default function Home() {
             </div>
             <div className="form-field">
               <label>URL Website</label>
-              <input className="input-large" type="url" placeholder="misal: https://nuave.id"
+              <input className="input-large" type="url" placeholder="misal: https://nuave.ai"
                 value={websiteUrl2} onChange={(e) => setWebsiteUrl2(e.target.value)} />
             </div>
             <button type="button" onClick={() => handleSubmit(brandName2, websiteUrl2, setLoading2)} disabled={loading2}

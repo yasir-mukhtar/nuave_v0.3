@@ -4,7 +4,7 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 
 export default function PrivacyPage() {
-  const CONTACT_EMAIL = "privacy@nuave.id";
+  const CONTACT_EMAIL = "privacy@nuave.ai";
   const LAST_UPDATED = "7 Maret 2026";
 
   return (
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
           <strong>Undang-Undang Nomor 27 Tahun 2022 tentang Perlindungan Data Pribadi (UU PDP)</strong>{" "}
           Republik Indonesia. Kebijakan ini menjelaskan bagaimana kami mengumpulkan, menggunakan,
           menyimpan, dan melindungi data pribadi Anda ketika menggunakan layanan Nuave di{" "}
-          <a href="https://nuave.id" style={{ color: "var(--purple)" }}>https://nuave.id</a>.
+          <a href="https://nuave.ai" style={{ color: "var(--purple)" }}>https://nuave.ai</a>.
         </p>
         <p style={{ fontSize: "15px", color: "var(--text-body)", lineHeight: 1.7, marginBottom: "32px" }}>
           Dengan menggunakan layanan kami, Anda menyetujui praktik yang dijelaskan dalam Kebijakan Privasi ini.
@@ -210,7 +210,7 @@ export default function PrivacyPage() {
         <div style={{ background: "var(--purple-light)", border: "1px solid #C4B5FD", borderRadius: "8px", padding: "16px" }}>
           <p style={{ fontSize: "14px", color: "#4C1D95", margin: 0 }}>
             Untuk menggunakan hak-hak di atas, kirimkan permintaan ke{" "}
-            <a href="mailto:privacy@nuave.id" style={{ color: "var(--purple)", fontWeight: 600 }}>privacy@nuave.id</a>.
+            <a href="mailto:privacy@nuave.ai" style={{ color: "var(--purple)", fontWeight: 600 }}>privacy@nuave.ai</a>.
             Kami akan merespons dalam <strong>14 hari kerja</strong>.
           </p>
         </div>
@@ -250,7 +250,7 @@ export default function PrivacyPage() {
         <SectionTitle n="9">Perlindungan Anak di Bawah Umur</SectionTitle>
         <p style={{ fontSize: "14px", color: "var(--text-body)", lineHeight: 1.7 }}>
           Layanan Nuave ditujukan untuk pengguna berusia <strong>18 tahun ke atas</strong>. Kami tidak secara sadar mengumpulkan data pribadi dari anak di bawah umur. Jika Anda mengetahui bahwa seseorang di bawah 18 tahun telah mendaftar, harap hubungi kami di{" "}
-          <a href="mailto:privacy@nuave.id" style={{ color: "var(--purple)" }}>privacy@nuave.id</a>.
+          <a href="mailto:privacy@nuave.ai" style={{ color: "var(--purple)" }}>privacy@nuave.ai</a>.
         </p>
 
         <hr style={{ border: "none", borderTop: "1px solid var(--border-default)", margin: "32px 0" }} />
@@ -268,11 +268,11 @@ export default function PrivacyPage() {
           <p style={{ fontSize: "14px", color: "var(--text-body)", margin: "0 0 8px 0" }}><strong>Penanggung Jawab Data:</strong> Nuave</p>
           <p style={{ fontSize: "14px", color: "var(--text-body)", margin: "0 0 8px 0" }}>
             <strong>Email:</strong>{" "}
-            <a href="mailto:privacy@nuave.id" style={{ color: "var(--purple)" }}>privacy@nuave.id</a>
+            <a href="mailto:privacy@nuave.ai" style={{ color: "var(--purple)" }}>privacy@nuave.ai</a>
           </p>
           <p style={{ fontSize: "14px", color: "var(--text-body)", margin: 0 }}>
             <strong>Website:</strong>{" "}
-            <a href="https://nuave.id" style={{ color: "var(--purple)" }}>https://nuave.id</a>
+            <a href="https://nuave.ai" style={{ color: "var(--purple)" }}>https://nuave.ai</a>
           </p>
         </div>
 

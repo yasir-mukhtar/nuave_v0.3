@@ -271,7 +271,7 @@ async function processAuditInBackground(
 
     // Auto-generate recommendations after audit completes
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nuave.id';
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nuave.ai';
       await fetch(`${baseUrl}/api/recommendations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
