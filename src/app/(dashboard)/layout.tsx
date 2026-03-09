@@ -15,6 +15,7 @@ type DashboardLayoutProps = {
 function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   const [credits, setCredits] = useState(0);
   const [userName, setUserName] = useState("User");
+  const [userEmail, setUserEmail] = useState("");
   const { activeWorkspace } = useActiveWorkspace();
   const workspaceName = activeWorkspace?.brand_name ?? "Select Workspace";
 
@@ -26,6 +27,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
     async function fetchUser() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        setUserEmail(user.email ?? "");
         const { data: userData } = await supabase
           .from('users')
           .select('full_name, credits_balance')
@@ -55,6 +57,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
         <Sidebar
           credits={credits}
           userName={userName}
+          userEmail={userEmail}
           workspaceName={workspaceName}
         />
         <div

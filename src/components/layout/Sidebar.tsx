@@ -1,18 +1,22 @@
 'use client';
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   IconSmartHome,
   IconMessageDots,
   IconArticle,
   IconRosetteAsterisk,
   IconChevronUp,
+  IconLogout,
 } from '@tabler/icons-react';
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type SidebarProps = {
   credits: number;
   userName: string;
+  userEmail: string;
   workspaceName: string;
 };
 
@@ -24,9 +28,7 @@ const navItems = [
 ];
 
 const bottomLinks = [
-  { label: "Bantuan", href: "/bantuan" },
-  { label: "Panduan", href: "/panduan" },
-  { label: "Pengaturan", href: "/settings" },
+  { label: "Bantuan", href: "/support" },
 ];
 
 function getInitials(name: string) {
@@ -38,9 +40,31 @@ function getInitials(name: string) {
   return initials || "YM";
 }
 
-export function Sidebar({ userName, workspaceName }: SidebarProps) {
+export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const initials = getInitials(userName);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Close popover on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setPopoverOpen(false);
+      }
+    }
+    if (popoverOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [popoverOpen]);
+
+  async function handleLogout() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    router.push("/");
+  }
 
   return (
     <aside
@@ -179,68 +203,140 @@ export function Sidebar({ userName, workspaceName }: SidebarProps) {
           })}
         </nav>
 
-        {/* User profile */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "8px",
-            borderTop: "1px solid var(--border-default)",
-            paddingTop: "16px",
-          }}
-        >
+        {/* User profile with popover */}
+        <div ref={popoverRef} style={{ position: "relative" }}>
+
+          {/* Popover */}
+          {popoverOpen && (
+            <div
+              className="popover-up"
+              style={{
+                position: "absolute",
+                bottom: "calc(100% + 4px)",
+                left: 0,
+                width: "max-content",
+                minWidth: "100%",
+                background: "#ffffff",
+                border: "1px solid var(--border-default)",
+                borderRadius: "8px",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+                overflow: "hidden",
+                zIndex: 20,
+              }}
+            >
+              {/* User info */}
+              <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--border-default)" }}>
+                <p style={{
+                  fontSize: "13px", fontWeight: 600, color: "var(--text-heading)",
+                  margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                }}>
+                  {userName}
+                </p>
+                <p style={{
+                  fontSize: "12px", color: "var(--text-muted)",
+                  margin: "2px 0 0 0",
+                }}>
+                  {userEmail}
+                </p>
+              </div>
+
+              {/* Logout button */}
+              <button
+                onClick={handleLogout}
+                style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  width: "100%", padding: "10px 14px",
+                  fontSize: "13px", color: "var(--text-muted)",
+                  background: "none", border: "none", cursor: "pointer",
+                  textAlign: "left",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--surface)";
+                  e.currentTarget.style.color = "var(--text-heading)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "none";
+                  e.currentTarget.style.color = "var(--text-muted)";
+                }}
+              >
+                <IconLogout size={16} stroke={1.5} />
+                Keluar
+              </button>
+            </div>
+          )}
+
+          {/* User card trigger */}
           <div
+            onClick={() => setPopoverOpen(!popoverOpen)}
             style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "50%",
-              background: "var(--purple)",
-              color: "#ffffff",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontSize: "12px",
-              fontWeight: 600,
-              flexShrink: 0,
+              gap: "10px",
+              padding: "10px",
+              cursor: "pointer",
+              borderRadius: "8px",
+              background: "#ffffff",
+              border: "1px solid var(--border-default)",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              transition: "var(--transition-fast)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.05)";
             }}
           >
-            {initials}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "1px",
-              flex: 1,
-              minWidth: 0,
-            }}
-          >
-            <span
+            <div
               style={{
-                fontSize: "13px",
-                fontWeight: 500,
-                color: "var(--text-heading)",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {userName}
-            </span>
-            <span
-              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "50%",
+                background: "var(--purple)",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 fontSize: "12px",
-                color: "var(--text-muted)",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                fontWeight: 600,
+                flexShrink: 0,
               }}
             >
-              {workspaceName}
-            </span>
+              {initials}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1px",
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  color: "var(--text-heading)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {userName}
+              </span>
+            </div>
+            <IconChevronUp
+              size={16}
+              stroke={2}
+              style={{
+                color: "var(--text-muted)",
+                flexShrink: 0,
+                transform: popoverOpen ? "rotate(0deg)" : "rotate(180deg)",
+                transition: "transform 0.2s ease",
+              }}
+            />
           </div>
-          <IconChevronUp size={16} stroke={2} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
         </div>
       </div>
     </aside>

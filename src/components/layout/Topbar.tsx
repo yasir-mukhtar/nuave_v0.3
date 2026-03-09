@@ -74,6 +74,7 @@ export default function Topbar() {
 
         {open && (
           <div
+            className="popover-down"
             style={{
               position: "absolute",
               top: "calc(100% + 4px)",

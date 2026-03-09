@@ -199,6 +199,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
 
           {dropdownOpen && (
             <div
+              className="popover-down"
               style={{
                 position: 'absolute',
                 top: '100%',

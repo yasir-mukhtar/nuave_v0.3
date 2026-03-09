@@ -67,6 +67,10 @@ export default function Footer() {
             Harga
           </Link>
           <span>·</span>
+          <Link href="/support" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
+            Bantuan
+          </Link>
+          <span>·</span>
           <Link href="/privacy" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>
             Kebijakan Privasi
           </Link>
