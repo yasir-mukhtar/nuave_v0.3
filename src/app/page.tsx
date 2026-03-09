@@ -124,11 +124,11 @@ export default function Home() {
     <div style={{ minHeight: "100vh", background: "#ffffff" }}>
 
       {/* ──── Nav ──── */}
-      <header style={{
+      <header className="lp-nav" style={{
         position: "fixed", top: 0, left: 0, right: 0, height: "56px",
         background: "rgba(255,255,255,0.95)", backdropFilter: "blur(8px)",
         borderBottom: "1px solid var(--border-default)",
-        padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
         zIndex: 100,
       }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
@@ -147,7 +147,7 @@ export default function Home() {
             </Link>
           ) : (
             <>
-              <Link href="/auth" style={{ fontSize: "14px", color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}>
+              <Link href="/auth" className="lp-nav-cta-text" style={{ fontSize: "14px", color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}>
                 Masuk
               </Link>
               <Link href="/auth" onClick={() => {
@@ -157,8 +157,9 @@ export default function Home() {
                 fontSize: "14px", fontWeight: 500, color: "#ffffff",
                 background: "#6C3FF5", textDecoration: "none",
                 padding: "8px 20px", borderRadius: "8px",
+                whiteSpace: "nowrap",
               }}>
-                Mulai Audit Gratis
+                Mulai Gratis
               </Link>
             </>
           )}
@@ -217,12 +218,7 @@ export default function Home() {
         }} />
 
         {/* Content */}
-        <div style={{
-          position: "relative", zIndex: 1,
-          maxWidth: "1120px", margin: "0 auto",
-          padding: "120px 32px 80px",
-          display: "grid", gridTemplateColumns: "1fr 1fr", gap: "64px", alignItems: "center",
-        }}>
+        <div className="lp-hero-grid">
           {/* Left column */}
           <div>
             <h1 style={{
@@ -242,7 +238,7 @@ export default function Home() {
             {/* Form */}
             <div id="audit-form" style={{
               display: "flex", flexDirection: "column", gap: "12px",
-              maxWidth: "420px",
+              maxWidth: "420px", width: "100%",
               background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)",
               padding: "24px", borderRadius: "16px",
               border: "1px solid rgba(108,63,245,0.1)",
@@ -283,7 +279,7 @@ export default function Home() {
           </div>
 
           {/* Right column — mockup */}
-          <div style={{
+          <div className="lp-hero-mockup" style={{
             background: "rgba(255,255,255,0.75)", backdropFilter: "blur(12px)",
             border: "1px solid rgba(108,63,245,0.1)", borderRadius: "16px",
             padding: "32px", display: "flex", flexDirection: "column", gap: "24px",
@@ -342,11 +338,8 @@ export default function Home() {
       </section>
 
       {/* ──── Stats ──── */}
-      <section style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", padding: "64px 32px" }}>
-        <div style={{
-          maxWidth: "1040px", margin: "0 auto",
-          display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px",
-        }}>
+      <section className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
+        <div className="lp-stats-grid">
           {STATS.map((s, i) => (
             <div key={i} style={{
               textAlign: "center", padding: "24px 16px",
@@ -363,11 +356,12 @@ export default function Home() {
       </section>
 
       {/* ──── SEO vs AEO ──── */}
-      <section style={{ maxWidth: "960px", margin: "0 auto", padding: "80px 32px" }}>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, color: "#111827", textAlign: "center", marginBottom: "48px" }}>
+      <section className="lp-section">
+        <div className="lp-section-inner">
+        <h2 className="lp-section-heading">
           SEO saja tidak cukup lagi.
         </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px" }}>
+        <div className="lp-two-col">
           {/* Before */}
           <div style={{
             padding: "32px", borderRadius: "16px", border: "1px solid #E5E7EB",
@@ -418,15 +412,16 @@ export default function Home() {
             <br />Nuave mengukur dan memperbaiki hal ini.
           </p>
         </div>
+        </div>
       </section>
 
       {/* ──── How it works ──── */}
-      <section style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", padding: "80px 32px" }}>
-        <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "32px", fontWeight: 700, color: "#111827", textAlign: "center", marginBottom: "48px" }}>
+      <section className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
+        <div className="lp-section-inner">
+          <h2 className="lp-section-heading">
             Bagaimana Nuave bekerja
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "32px" }}>
+          <div className="lp-steps-grid">
             {[
               { step: "1", title: "Masukkan brand & URL", desc: "Isi nama brand dan URL website Anda. Hanya butuh 5 detik." },
               { step: "2", title: "AI mengirim 10 pertanyaan", desc: "Nuave mengirim 10 pertanyaan realistis ke ChatGPT dan menganalisis apakah brand Anda disebut." },
@@ -451,14 +446,14 @@ export default function Home() {
       </section>
 
       {/* ──── Features ──── */}
-      <section style={{ maxWidth: "1040px", margin: "0 auto", padding: "80px 32px" }}>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, color: "#111827", textAlign: "center", marginBottom: "12px" }}>
+      <section className="lp-section" style={{ maxWidth: "1040px", margin: "0 auto" }}>
+        <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
           Semua yang Anda butuhkan
         </h2>
         <p style={{ fontSize: "16px", color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
           Fitur lengkap untuk mengukur dan meningkatkan visibilitas brand di AI.
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
+        <div className="lp-features-grid">
           {FEATURES.map((f, i) => (
             <div key={i} style={{
               padding: "28px", borderRadius: "12px",
@@ -479,12 +474,11 @@ export default function Home() {
       </section>
 
       {/* ──── Score Preview ──── */}
-      <section style={{
+      <section className="lp-section" style={{
         background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB",
-        padding: "80px 32px",
       }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "32px", fontWeight: 700, color: "#111827", textAlign: "center", marginBottom: "12px" }}>
+          <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
             Ini yang akan Anda lihat
           </h2>
           <p style={{ fontSize: "16px", color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
@@ -536,7 +530,7 @@ export default function Home() {
                     <IconX size={16} stroke={2.5} color="#EF4444" style={{ flexShrink: 0 }} />
                   )}
                   <span style={{ color: "#374151", flex: 1 }}>{p.prompt}</span>
-                  <span style={{
+                  <span className="lp-score-badge-text" style={{
                     fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "999px",
                     background: p.mentioned ? "#DCFCE7" : "#FEE2E2",
                     color: p.mentioned ? "#16A34A" : "#DC2626",
@@ -571,14 +565,14 @@ export default function Home() {
       </section>
 
       {/* ──── Pricing ──── */}
-      <section style={{ maxWidth: "960px", margin: "0 auto", padding: "80px 32px" }}>
-        <h2 style={{ fontSize: "32px", fontWeight: 700, color: "#111827", textAlign: "center", marginBottom: "12px" }}>
+      <section className="lp-section" style={{ maxWidth: "960px", margin: "0 auto" }}>
+        <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
           Harga sederhana, tanpa langganan
         </h2>
         <p style={{ fontSize: "16px", color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
           1 audit = 10 kredit. Daftar gratis = 10 kredit = 1 audit lengkap.
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
+        <div className="lp-pricing-grid">
           {PRICING.map((pkg) => (
             <div key={pkg.name} style={{
               position: "relative",
@@ -647,9 +641,9 @@ export default function Home() {
       </section>
 
       {/* ──── FAQ ──── */}
-      <section style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB", padding: "80px 32px" }}>
+      <section className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
         <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "32px", fontWeight: 700, color: "#111827", textAlign: "center", marginBottom: "40px" }}>
+          <h2 className="lp-section-heading" style={{ marginBottom: "40px" }}>
             Pertanyaan yang sering ditanya
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -688,7 +682,7 @@ export default function Home() {
       </section>
 
       {/* ──── Final CTA ──── */}
-      <section style={{ background: "#EDE9FF", padding: "80px 32px" }}>
+      <section className="lp-section" style={{ background: "#EDE9FF" }}>
         <div style={{ maxWidth: "560px", margin: "0 auto", textAlign: "center" }}>
           <h2 style={{ fontSize: "28px", fontWeight: 700, color: "#111827", marginBottom: "16px", lineHeight: 1.3 }}>
             Jangan biarkan brand Anda tidak terlihat di era AI.

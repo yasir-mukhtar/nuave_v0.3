@@ -358,6 +358,53 @@ label.field-label.disabled {
   animation: popover-out-down 0.2s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
+/* ── Landing page grid classes ── */
+.lp-nav { padding: 0 32px; }
+.lp-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 120px 32px 80px;
+  position: relative;
+  z-index: 1;
+}
+.lp-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.lp-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+.lp-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+.lp-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.lp-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.lp-section { padding: 80px 32px; }
+.lp-section-inner { max-width: 960px; margin: 0 auto; }
+.lp-hero-mockup { display: block; }
+.lp-nav-cta-text { display: inline; }
+.lp-section-heading { font-size: 32px; font-weight: 700; color: #111827; text-align: center; margin-bottom: 48px; }
+.lp-score-badge-text { display: inline; }
+
 @media (max-width: 768px) {
   .hero-section {
     padding: 24px 16px !important;
@@ -371,6 +418,39 @@ label.field-label.disabled {
   .card-row { padding: 12px; min-height: 56px; }
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.25rem; }
+
+  /* Landing page responsive */
+  .lp-nav { padding: 0 16px; }
+  .lp-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 80px 20px 48px;
+  }
+  .lp-hero-mockup { display: none !important; }
+  .lp-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .lp-two-col { grid-template-columns: 1fr; gap: 16px; }
+  .lp-steps-grid { grid-template-columns: 1fr; gap: 24px; }
+  .lp-features-grid { grid-template-columns: 1fr; gap: 16px; }
+  .lp-pricing-grid { grid-template-columns: 1fr; gap: 16px; }
+  .lp-section { padding: 48px 20px; }
+  .lp-section-heading { font-size: 24px; margin-bottom: 32px; }
+  .lp-nav-cta-text { display: none; }
+  .lp-score-badge-text { display: none; }
+  .lp-pricing-grid > div { transform: none !important; }
+}
+
+/* Footer responsive */
+@media (max-width: 768px) {
+  footer .footer-links { flex-direction: column; gap: 8px; }
+}
+
+@media (max-width: 480px) {
+  .lp-hero-grid { padding: 72px 16px 40px; }
+  .lp-stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lp-section { padding: 40px 16px; }
 }
 
 @theme inline {
