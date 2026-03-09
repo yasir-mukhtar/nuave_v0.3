@@ -8,7 +8,7 @@ import {
   IconMessageDots,
   IconArticle,
   IconRosetteAsterisk,
-  IconChevronUp,
+  IconSelector,
   IconLogout,
 } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -331,14 +331,12 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
                 {userName}
               </span>
             </div>
-            <IconChevronUp
+            <IconSelector
               size={16}
               stroke={2}
               style={{
                 color: "var(--text-muted)",
                 flexShrink: 0,
-                transform: popoverOpen ? "rotate(0deg)" : "rotate(180deg)",
-                transition: "transform 0.2s ease",
               }}
             />
           </div>

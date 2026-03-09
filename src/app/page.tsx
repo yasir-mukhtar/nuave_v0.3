@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconCheck, IconX, IconArrowRight, IconChevronDown, IconBrandOpenai, IconTarget, IconMessageChatbot, IconFileText, IconCpu, IconCreditCard } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { createClient } from "@supabase/supabase-js";
 import Footer from "@/components/Footer";
 
 /* ───── Data ───── */
@@ -95,12 +94,9 @@ export default function Home() {
   const [loading2, setLoading2] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-    supabase.auth.getSession().then(({ data }) => {
-      setIsLoggedIn(!!data.session);
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user);
     });
   }, []);
 
@@ -142,11 +138,12 @@ export default function Home() {
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {isLoggedIn ? (
             <Link href="/dashboard" style={{
+              display: "inline-flex", alignItems: "center", gap: "6px",
               fontSize: "14px", fontWeight: 500, color: "#ffffff",
               background: "#6C3FF5", textDecoration: "none",
               padding: "8px 20px", borderRadius: "8px",
             }}>
-              Dashboard →
+              Dashboard <IconArrowRight size={16} stroke={2} />
             </Link>
           ) : (
             <>
