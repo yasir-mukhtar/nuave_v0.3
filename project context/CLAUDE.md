@@ -102,6 +102,8 @@ Types: `web_copy`, `content_gap`, `meta_structure`.
 
 ## Design System
 
+**Full reference:** `DESIGN_SYSTEM.md` (root) — typography scale, spacing scale, component patterns, layout rules, and constraints.
+
 Light mode only. Accent: `#6C3FF5`. Reference: Acctual.com.
 
 | Token | Hex | | Token | Hex |
