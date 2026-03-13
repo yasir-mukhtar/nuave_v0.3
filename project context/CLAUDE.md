@@ -70,6 +70,7 @@ src/
 10. **After schema changes:** Run `NOTIFY pgrst, 'reload schema';` in Supabase SQL editor
 11. **UI language:** All user-facing strings in Bahasa Indonesia
 12. **Sidebar layout:** `.sidebar` must be sibling of `.main`, never nested
+13. **UI work:** Always read `DESIGN_SYSTEM.md` before building or modifying any UI (pages, components, layouts)
 
 ---
 
