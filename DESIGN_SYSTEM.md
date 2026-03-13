@@ -51,26 +51,131 @@ Fonts: **Geist Sans** (`font-heading`) for headings, **Inter** (`font-body`) for
 
 ### The Scale — 8 Steps, Each Has One Job
 
-| Step | Tailwind Class | Size | Weight | Use For |
-|------|---------------|------|--------|---------|
-| **Display** | `text-5xl` or `clamp(1.75rem, 5vw, 3rem)` | 48px | `font-bold` | Landing page hero headline only |
-| **H1** | `text-3xl` | 30px | `font-bold` | Page titles (`Dashboard`, `Hasil Audit`) |
-| **H2** | `text-2xl` | 24px | `font-semibold` | Section headings within a page |
-| **H3** | `text-lg` | 18px | `font-semibold` | Card titles, modal titles, sidebar group labels |
-| **Body** | `text-base` | 16px | `font-normal` | Paragraphs, descriptions, dialog content |
-| **Body small** | `text-sm` | 14px | `font-normal` | Form labels, table cells, nav items, helper text |
-| **Caption** | `text-xs` | 12px | `font-normal` | Timestamps, badges, metadata, fine print |
-| **Overline** | `text-xs uppercase tracking-wide` | 12px | `font-medium` | Section labels above groups, tag categories |
+Only use sizes from this table. Never use in-between values (no `text-[15px]`, no custom sizes).
+Use `rem` or `px` only — never `em` units, which break the scale inside nested elements.
 
-### Typography Rules
+| Step | Tailwind Class | Size | Weight | Line Height | Letter Spacing | Use For |
+|------|---------------|------|--------|-------------|----------------|---------|
+| **Display** | `text-5xl` or `clamp(1.75rem,5vw,3rem)` | 48px | `font-bold` | `leading-none` (1) | `tracking-tight` (-0.025em) | Landing page hero only |
+| **H1** | `text-3xl` | 30px | `font-bold` | `leading-tight` (1.25) | `tracking-tight` (-0.025em) | Page titles |
+| **H2** | `text-2xl` | 24px | `font-semibold` | `leading-snug` (1.375) | `tracking-tight` (-0.015em) | Section headings |
+| **H3** | `text-lg` | 18px | `font-semibold` | `leading-snug` (1.375) | `tracking-normal` (0) | Card titles, modal titles |
+| **Body** | `text-base` | 16px | `font-normal` | `leading-relaxed` (1.625) | `tracking-normal` (0) | Paragraphs, descriptions |
+| **Body small** | `text-sm` | 14px | `font-normal` | `leading-relaxed` (1.625) | `tracking-normal` (0) | Form labels, table cells, nav |
+| **Caption** | `text-xs` | 12px | `font-normal` | `leading-relaxed` (1.625) | `tracking-normal` (0) | Timestamps, badges, metadata |
+| **Overline** | `text-xs uppercase` | 12px | `font-medium` | `leading-none` | `tracking-widest` (0.1em) | Section labels, tag categories |
 
-- **Max 2 weights per component:** `font-normal` + one of `font-medium`/`font-semibold`/`font-bold`
+---
+
+### Letter Spacing Rules (from Refactoring UI)
+
+The default rule: **trust the typeface designer — leave letter-spacing alone.**
+Only adjust in these specific situations:
+
+| Situation | Rule | Tailwind | Why |
+|-----------|------|----------|-----|
+| Headlines (H1, H2, Display) | Tighten | `tracking-tight` | Geist has wide default spacing; tightening mimics a condensed headline feel |
+| H3 and below | Leave alone | `tracking-normal` | Default spacing is correct at these sizes |
+| ALL CAPS text (overlines, badges) | Loosen | `tracking-widest` | All-caps letters lack visual variety — extra spacing aids readability |
+| Body, small, caption | Never change | `tracking-normal` | Adjusting body tracking makes text feel unnatural |
+
+**Never** increase letter-spacing on headlines. **Never** decrease letter-spacing on body text.
+
+---
+
+### Line Height Rules (from Refactoring UI)
+
+Line-height and font size are **inversely proportional** — larger text needs less, smaller text needs more.
+
+| Size | Line Height | Tailwind | Reason |
+|------|-------------|----------|--------|
+| Display, H1 (≥30px) | 1.0–1.25 | `leading-none` / `leading-tight` | Eyes don't need help finding the next line at large sizes |
+| H2, H3 (18–24px) | 1.375 | `leading-snug` | Moderate help navigating lines |
+| Body, small (14–16px) | 1.625 | `leading-relaxed` | Eyes need more spacing to track lines reliably |
+| Caption (12px) | 1.625 | `leading-relaxed` | Small text needs the most help |
+| Wide paragraphs (>65ch) | 1.75–2.0 | `leading-loose` | Longer lines need taller line-height |
+
+**Never** apply a single `leading-normal` (1.5) to every text size — it's too tight for small text and too loose for headlines.
+
+---
+
+### Text Alignment Rules (from Refactoring UI)
+
+- **Default:** Always left-align (`text-left`) — matches how Indonesian/English is read
+- **Center-align:** Only for headlines or independent blocks of ≤ 2–3 lines (e.g., feature card titles)
+- **Never center-align** paragraphs longer than 2–3 lines — it creates ragged edges that hurt readability
+- **Right-align numbers** in tables — keeps decimals aligned for easy scanning (`text-right` on number columns)
+- **Never justify** text — creates awkward word gaps on the web
+
+---
+
+### Baseline Alignment Rule (from Refactoring UI)
+
+When mixing font sizes on the same line (e.g., a large title + small action link in a card header):
+
+```tsx
+// Wrong — center-aligns baselines, looks awkward
+<div className="flex items-center gap-4">
+  <h2 className="text-2xl font-semibold">Who to follow</h2>
+  <span className="text-sm text-[#6B7280]">See all</span>
+</div>
+
+// Correct — baseline alignment feels natural
+<div className="flex items-baseline gap-4">
+  <h2 className="text-2xl font-semibold">Who to follow</h2>
+  <span className="text-sm text-[#6B7280]">See all</span>
+</div>
+```
+
+Use `items-baseline` whenever mixing font sizes in a flex row.
+
+---
+
+### Line Length Rule (from Refactoring UI)
+
+- **Target:** 45–75 characters per line for body text
+- **In Tailwind:** Use `max-w-prose` (65ch) on paragraph containers — never let body text span full column width
+- **In wider layouts:** Constrain the paragraph even if surrounding elements are wider
+
+```tsx
+// Always constrain paragraph width, even inside wide cards
+<p className="max-w-prose text-sm text-[#374151] leading-relaxed">
+  Body copy here...
+</p>
+```
+
+---
+
+### Links in UI (from Refactoring UI)
+
+- **In paragraph text:** Links must be visually distinct — use `text-[#6C3FF5]` with underline
+- **In UI where most things are clickable** (nav, tables, card actions): Do NOT use accent color for every link — it becomes overwhelming
+- **Preferred emphasis for UI links:** Use `font-medium` + slightly darker color, no underline by default
+- **Ancillary links** (footer, breadcrumbs, secondary actions): Show underline or color only on hover
+
+```tsx
+// Paragraph link — must stand out
+<a className="text-[#6C3FF5] underline hover:text-[#3D2BC7]">Link text</a>
+
+// UI link — subtle, not competing with primary actions
+<a className="font-medium text-[#374151] hover:text-[#111827]">Link text</a>
+
+// Ancillary link — invisible until hovered
+<a className="text-[#6B7280] hover:underline hover:text-[#374151]">Link text</a>
+```
+
+---
+
+### Weight Hierarchy Rules
+
+- **Max 2 weights per component** — pick from: `font-normal` (400) + `font-semibold` (600), or `font-normal` + `font-bold` (700)
+- **Never use** `font-medium` (500) as the only emphasis — it's not enough contrast from `font-normal`
+- **Never use** `font-bold` (700) for H2 and below in app pages — `font-semibold` is sufficient
+- **`font-bold`** is reserved for: H1, Display, and maximum-emphasis data (scores, prices, key metrics)
 - **Headings:** Always `font-heading` (Geist Sans), color `#111827`
 - **Body:** Always `font-body` (Inter), color `#374151`
 - **Muted text:** Color `#6B7280` — never lighter than this
-- **Line height:** Use Tailwind defaults (`leading-normal`). Only override for display text (`leading-tight`)
-- **Letter spacing:** Only tighten for display/h1 (`tracking-tight`). Never loosen body text
-- **Never** use `text-4xl` in app pages — reserve large sizes for landing page only
+- **Never** use `text-4xl` or larger in app pages — large sizes are landing page only
 
 ---
 
