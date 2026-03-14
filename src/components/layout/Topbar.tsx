@@ -58,6 +58,7 @@ export default function Topbar() {
       <div ref={dropdownRef} style={{ position: "relative" }}>
         <button
           onClick={() => open ? closeDropdown() : setOpen(true)}
+          className="text-label-14"
           style={{
             display: "flex",
             alignItems: "center",
@@ -67,7 +68,6 @@ export default function Topbar() {
             borderRadius: "6px",
             padding: "6px 12px",
             cursor: "pointer",
-            fontSize: "14px",
             fontWeight: 500,
             color: "var(--text-heading)",
             boxShadow: "var(--shadow-subtle)",
@@ -111,6 +111,7 @@ export default function Topbar() {
                       setActiveWorkspaceId(ws.id);
                       closeDropdown();
                     }}
+                    className="text-label-14"
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -120,7 +121,6 @@ export default function Topbar() {
                       background: "none",
                       border: "none",
                       cursor: "pointer",
-                      fontSize: "14px",
                       fontWeight: isActive ? 600 : 400,
                       color: "var(--text-heading)",
                       textAlign: "left",
@@ -143,12 +143,12 @@ export default function Topbar() {
               <Link
                 href="/"
                 onClick={() => setOpen(false)}
+                className="text-label-14"
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
                   padding: "10px 14px",
-                  fontSize: "14px",
                   fontWeight: 500,
                   color: "var(--text-heading)",
                   textDecoration: "none",
@@ -165,11 +165,11 @@ export default function Topbar() {
       {/* Right: credits + buy button */}
       <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
         <div
+          className="text-label-14"
           style={{
             display: "flex",
             alignItems: "center",
             gap: "6px",
-            fontSize: "14px",
             fontWeight: 500,
             color: "var(--purple)",
           }}
@@ -180,12 +180,12 @@ export default function Topbar() {
 
         <Link
           href="/dashboard/credits"
+          className="text-label-14"
           style={{
             display: "flex",
             alignItems: "center",
             gap: "4px",
             padding: "6px 12px",
-            fontSize: "14px",
             fontWeight: 500,
             color: "var(--text-heading)",
             background: "none",

@@ -137,9 +137,9 @@ export default function Home() {
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {isLoggedIn ? (
-            <Link href="/dashboard" style={{
+            <Link href="/dashboard" className="text-label-14" style={{
               display: "inline-flex", alignItems: "center", gap: "6px",
-              fontSize: "14px", fontWeight: 500, color: "#ffffff",
+              fontWeight: 500, color: "#ffffff",
               background: "#6C3FF5", textDecoration: "none",
               padding: "8px 20px", borderRadius: "8px",
             }}>
@@ -147,14 +147,14 @@ export default function Home() {
             </Link>
           ) : (
             <>
-              <Link href="/auth" className="lp-nav-cta-text" style={{ fontSize: "14px", color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}>
+              <Link href="/auth" className="lp-nav-cta-text text-label-14" style={{ color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}>
                 Masuk
               </Link>
               <Link href="/auth" onClick={() => {
                 sessionStorage.removeItem('nuave_pending_brand');
                 sessionStorage.removeItem('nuave_pending_url');
-              }} style={{
-                fontSize: "14px", fontWeight: 500, color: "#ffffff",
+              }} className="text-label-14" style={{
+                fontWeight: 500, color: "#ffffff",
                 background: "#6C3FF5", textDecoration: "none",
                 padding: "8px 20px", borderRadius: "8px",
                 whiteSpace: "nowrap",
@@ -228,8 +228,8 @@ export default function Home() {
             }}>
               Buat brand Anda muncul di setiap jawaban AI — bukan hanya di Google.
             </h1>
-            <p style={{
-              fontSize: "16px", color: "#4B5563", lineHeight: 1.7, margin: "0 0 32px 0", maxWidth: "480px",
+            <p className="text-copy-16" style={{
+              color: "#4B5563", margin: "0 0 32px 0", maxWidth: "480px",
             }}>
               Lihat bagaimana ChatGPT melihat brand Anda, bandingkan dengan kompetitor, dan dapatkan rekomendasi yang langsung berdampak.
             </p>
@@ -270,7 +270,7 @@ export default function Home() {
             {/* Trust strip */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "16px", flexWrap: "wrap" }}>
               {["Gratis", "60 detik", "Tanpa kartu kredit"].map((t) => (
-                <div key={t} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#6B7280" }}>
+                <div key={t} className="text-label-13" style={{ display: "flex", alignItems: "center", gap: "4px", color: "#6B7280" }}>
                   <IconCheck size={16} stroke={2} color="#6C3FF5" /> {t}
                 </div>
               ))}
@@ -305,7 +305,7 @@ export default function Home() {
               }}>
                 Visibilitas Rendah
               </span>
-              <p style={{ fontSize: "13px", color: "#6B7280", marginTop: "8px" }}>
+              <p className="text-label-13" style={{ color: "#6B7280", marginTop: "8px" }}>
                 2 dari 10 prompt menyebut brand Anda
               </p>
             </div>
@@ -313,10 +313,10 @@ export default function Home() {
             {/* Prompt rows */}
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {MOCK_PROMPTS.slice(0, 4).map((p, i) => (
-                <div key={i} style={{
+                <div key={i} className="text-label-13" style={{
                   display: "flex", alignItems: "center", gap: "10px",
                   padding: "10px 14px", background: "rgba(255,255,255,0.8)", borderRadius: "8px",
-                  border: "1px solid rgba(229,231,235,0.8)", fontSize: "13px",
+                  border: "1px solid rgba(229,231,235,0.8)",
                 }}>
                   {p.mentioned ? (
                     <IconCheck size={16} stroke={2.5} color="#22C55E" style={{ flexShrink: 0 }} />
@@ -345,11 +345,11 @@ export default function Home() {
               background: "#ffffff", borderRadius: "12px", border: "1px solid #E5E7EB",
             }}>
               <div style={{ fontSize: "36px", fontWeight: 700, color: "#6C3FF5", marginBottom: "8px" }}>{s.value}</div>
-              <div style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.5 }}>{s.label}</div>
+              <div className="text-copy-14" style={{ color: "#6B7280" }}>{s.label}</div>
             </div>
           ))}
         </div>
-        <p style={{ textAlign: "center", fontSize: "12px", color: "#9CA3AF", marginTop: "20px" }}>
+        <p className="text-label-12" style={{ textAlign: "center", color: "#9CA3AF", marginTop: "20px" }}>
           Sumber: Analisis 8 juta respons AI — State of AI Search 2026
         </p>
       </section>
@@ -373,7 +373,7 @@ export default function Home() {
               Sebelum
             </div>
             {["Riset keyword", "10 blue links di Google", "Traffic stabil dari SEO", "Fokus ranking halaman", "Click-Through Rate (CTR)"].map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", fontSize: "14px", color: "#6B7280" }}>
+              <div key={i} className="text-label-14" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", color: "#6B7280" }}>
                 <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#D1D5DB", flexShrink: 0 }} />
                 {item}
               </div>
@@ -393,7 +393,7 @@ export default function Home() {
               Sekarang
             </div>
             {["Orang bertanya langsung ke ChatGPT", "AI memberi jawaban langsung", "50%+ traffic Google menurun", "Disebut di jawaban AI", "Share of Voice di AI"].map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", fontSize: "14px", color: "#111827", fontWeight: 500 }}>
+              <div key={i} className="text-label-14" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", color: "#111827", fontWeight: 500 }}>
                 <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#6C3FF5", flexShrink: 0 }} />
                 {item}
               </div>
@@ -437,7 +437,7 @@ export default function Home() {
                   {s.step}
                 </div>
                 <h3 style={{ fontSize: "16px", marginBottom: "8px" }}>{s.title}</h3>
-                <p style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.6 }}>{s.desc}</p>
+                <p className="text-copy-14" style={{ color: "#6B7280" }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -449,7 +449,7 @@ export default function Home() {
         <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
           Semua yang Anda butuhkan
         </h2>
-        <p style={{ fontSize: "16px", color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
+        <p className="text-copy-16" style={{ color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
           Fitur lengkap untuk mengukur dan meningkatkan visibilitas brand di AI.
         </p>
         <div className="lp-features-grid">
@@ -466,7 +466,7 @@ export default function Home() {
                 <f.icon size={20} stroke={1.5} color="#6C3FF5" />
               </div>
               <h3 style={{ fontSize: "15px", marginBottom: "8px" }}>{f.title}</h3>
-              <p style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.6 }}>{f.desc}</p>
+              <p className="text-copy-14" style={{ color: "#6B7280" }}>{f.desc}</p>
             </div>
           ))}
         </div>
@@ -480,7 +480,7 @@ export default function Home() {
           <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
             Ini yang akan Anda lihat
           </h2>
-          <p style={{ fontSize: "16px", color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
+          <p className="text-copy-16" style={{ color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
             Laporan detail dengan skor, analisis prompt, dan rekomendasi.
           </p>
 
@@ -509,7 +509,7 @@ export default function Home() {
               }}>
                 Visibilitas Rendah
               </span>
-              <p style={{ fontSize: "14px", color: "#6B7280", marginTop: "8px" }}>
+              <p className="text-copy-14" style={{ color: "#6B7280", marginTop: "8px" }}>
                 2 dari 10 prompt menyebut brand Anda
               </p>
             </div>
@@ -517,10 +517,10 @@ export default function Home() {
             {/* Prompt rows */}
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {MOCK_PROMPTS.map((p, i) => (
-                <div key={i} style={{
+                <div key={i} className="text-label-14" style={{
                   display: "flex", alignItems: "center", gap: "10px",
                   padding: "12px 16px", borderRadius: "8px",
-                  border: "1px solid #E5E7EB", fontSize: "14px",
+                  border: "1px solid #E5E7EB",
                   background: p.mentioned ? "#F0FDF4" : "#ffffff",
                 }}>
                   {p.mentioned ? (
@@ -568,7 +568,7 @@ export default function Home() {
         <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
           Harga sederhana, tanpa langganan
         </h2>
-        <p style={{ fontSize: "16px", color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
+        <p className="text-copy-16" style={{ color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
           1 audit = 10 kredit. Daftar gratis = 10 kredit = 1 audit lengkap.
         </p>
         <div className="lp-pricing-grid">
@@ -607,8 +607,8 @@ export default function Home() {
               }}>
                 {pkg.price}
               </p>
-              <p style={{
-                fontSize: "14px", margin: "0 0 24px 0",
+              <p className="text-copy-14" style={{
+                margin: "0 0 24px 0",
                 color: pkg.popular ? "rgba(255,255,255,0.6)" : "#6B7280",
               }}>
                 {pkg.credits} kredit
@@ -618,10 +618,11 @@ export default function Home() {
                   sessionStorage.setItem('nuave_pending_package', pkg.name.toLowerCase());
                   window.location.href = '/auth';
                 }}
+                className="text-label-14"
                 style={{
                   display: "block", width: "100%", textAlign: "center",
                   padding: "12px 24px", borderRadius: "8px",
-                  fontSize: "14px", fontWeight: 600, border: "none", cursor: "pointer",
+                  fontWeight: 600, border: "none", cursor: "pointer",
                   background: pkg.popular ? "#ffffff" : "#6C3FF5",
                   color: pkg.popular ? "#6C3FF5" : "#ffffff",
                 }}
@@ -631,7 +632,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <p style={{ textAlign: "center", fontSize: "13px", color: "#9CA3AF", marginTop: "24px" }}>
+        <p className="text-label-13" style={{ textAlign: "center", color: "#9CA3AF", marginTop: "24px" }}>
           Belum yakin?{" "}
           <Link href="/auth" style={{ color: "#6C3FF5", fontWeight: 500, textDecoration: "none" }}>
             Mulai dengan 10 kredit gratis →
@@ -659,7 +660,7 @@ export default function Home() {
                     cursor: "pointer", textAlign: "left",
                   }}
                 >
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "#111827" }}>{faq.q}</span>
+                  <span className="text-label-14" style={{ fontWeight: 600, color: "#111827" }}>{faq.q}</span>
                   <IconChevronDown
                     size={18} stroke={2} color="#6B7280"
                     style={{
@@ -671,7 +672,7 @@ export default function Home() {
                 </button>
                 {openFaq === i && (
                   <div style={{ padding: "0 24px 18px" }}>
-                    <p style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.6, margin: 0 }}>{faq.a}</p>
+                    <p className="text-copy-14" style={{ color: "#6B7280", margin: 0 }}>{faq.a}</p>
                   </div>
                 )}
               </div>

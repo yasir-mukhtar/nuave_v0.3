@@ -68,9 +68,9 @@ function renderMarkdown(text: string, brand: string) {
       return (
         <p
           key={i}
+          className="text-label-14"
           style={{
             fontWeight: 600,
-            fontSize: '14px',
             color: '#111827',
             marginTop: '12px',
             marginBottom: '4px',
@@ -85,11 +85,11 @@ function renderMarkdown(text: string, brand: string) {
       return (
         <div
           key={i}
+          className="text-copy-14"
           style={{
             display: 'flex',
             gap: '8px',
             marginBottom: '4px',
-            fontSize: '14px',
             color: '#374151',
           }}
         >
@@ -116,10 +116,9 @@ function renderMarkdown(text: string, brand: string) {
     return (
       <p
         key={i}
+        className="text-copy-14"
         style={{
-          fontSize: '14px',
           color: '#374151',
-          lineHeight: '1.7',
           marginBottom: '4px',
         }}
       >
@@ -293,6 +292,7 @@ export default function PromptDetailModal({
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {/* User prompt bubble */}
             <div
+              className="text-label-14"
               style={{
                 marginLeft: 'auto',
                 background: 'var(--purple)',
@@ -300,7 +300,6 @@ export default function PromptDetailModal({
                 borderRadius: '18px 18px 4px 18px',
                 padding: '10px 14px',
                 maxWidth: '85%',
-                fontSize: '14px',
                 display: 'inline-block',
                 marginBottom: '12px',
                 boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
@@ -333,8 +332,8 @@ export default function PromptDetailModal({
                   <IconCircleXFilled size={20} color="#DC2626" />
                 )}
                 <span
+                  className="text-label-13"
                   style={{
-                    fontSize: '13px',
                     fontWeight: 500,
                     color: '#111827',
                   }}

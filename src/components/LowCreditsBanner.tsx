@@ -28,15 +28,16 @@ export default function LowCreditsBanner() {
       {/* Centered content */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <IconCoins size={16} color={isEmpty ? "#991B1B" : "#92400E"} />
-        <p style={{ fontSize: "14px", color: isEmpty ? "#991B1B" : "#92400E", margin: 0 }}>
+        <p className="text-label-14" style={{ color: isEmpty ? "#991B1B" : "#92400E", margin: 0 }}>
           {isEmpty
             ? "Kredit kamu sudah habis. Beli kredit untuk melanjutkan audit dan fitur lainnya."
             : `Kredit kamu hampir habis — tersisa ${credits} kredit.`}
         </p>
         <Link
           href="/dashboard/credits"
+          className="text-label-13"
           style={{
-            fontSize: "13px", fontWeight: 600,
+            fontWeight: 600,
             color: "#ffffff",
             background: isEmpty ? "#EF4444" : "#D97706",
             padding: "5px 14px", borderRadius: "6px",
