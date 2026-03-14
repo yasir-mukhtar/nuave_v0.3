@@ -99,7 +99,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
         }}
       >
         <img src="/logo-nuave.svg" alt="Nuave" width="28" height="28" style={{ display: 'block' }} />
-        <span style={{ fontWeight: 700, fontSize: '17px', color: 'var(--text-heading)' }}>Nuave</span>
+        <span style={{ fontWeight: 600, fontSize: '17px', color: 'var(--text-heading)' }}>Nuave</span>
       </Link>
 
       {/* Primary nav */}
@@ -121,9 +121,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              style={{
-                textDecoration: "none",
-              }}
+              style={{ textDecoration: "none" }}
             >
               <div
                 style={{
@@ -139,22 +137,16 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
                   transition: "var(--transition-fast)",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.color = "var(--text-body)";
-                  }
+                  if (!isActive) e.currentTarget.style.color = "var(--text-body)";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.color = "var(--text-muted)";
-                  }
+                  if (!isActive) e.currentTarget.style.color = "var(--text-muted)";
                 }}
               >
                 <Icon size={18} stroke={2} />
                 <span
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: isActive ? 600 : 400,
-                  }}
+                  className="text-label-14"
+                  style={{ fontWeight: isActive ? 600 : 400 }}
                 >
                   {item.label}
                 </span>
@@ -181,25 +173,21 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                className="text-label-14"
                 style={{
                   textDecoration: "none",
                   display: "block",
                   padding: "6px 8px",
-                  fontSize: "14px",
                   fontWeight: isActive ? 600 : 400,
                   color: isActive ? "var(--text-heading)" : "var(--text-muted)",
                   borderRadius: "6px",
                   transition: "var(--transition-fast)",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.color = "var(--text-body)";
-                  }
+                  if (!isActive) e.currentTarget.style.color = "var(--text-body)";
                 }}
                 onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.color = "var(--text-muted)";
-                  }
+                  if (!isActive) e.currentTarget.style.color = "var(--text-muted)";
                 }}
               >
                 {item.label}
@@ -231,16 +219,19 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
             >
               {/* User info */}
               <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--border-default)" }}>
-                <p style={{
-                  fontSize: "13px", fontWeight: 600, color: "var(--text-heading)",
-                  margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                }}>
+                <p
+                  className="text-label-13"
+                  style={{
+                    fontWeight: 600, color: "var(--text-heading)",
+                    margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  }}
+                >
                   {userName}
                 </p>
-                <p style={{
-                  fontSize: "12px", color: "var(--text-muted)",
-                  margin: "2px 0 0 0",
-                }}>
+                <p
+                  className="text-label-12"
+                  style={{ color: "var(--text-muted)", margin: "2px 0 0 0" }}
+                >
                   {userEmail}
                 </p>
               </div>
@@ -248,10 +239,11 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
               {/* Logout button */}
               <button
                 onClick={handleLogout}
+                className="text-label-13"
                 style={{
                   display: "flex", alignItems: "center", gap: "8px",
                   width: "100%", padding: "10px 14px",
-                  fontSize: "13px", color: "var(--text-muted)",
+                  color: "var(--text-muted)",
                   background: "none", border: "none", cursor: "pointer",
                   textAlign: "left",
                 }}
@@ -319,8 +311,8 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
               }}
             >
               <span
+                className="text-label-13"
                 style={{
-                  fontSize: "13px",
                   fontWeight: 500,
                   color: "var(--text-heading)",
                   whiteSpace: "nowrap",
@@ -334,10 +326,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
             <IconSelector
               size={16}
               stroke={2}
-              style={{
-                color: "var(--text-muted)",
-                flexShrink: 0,
-              }}
+              style={{ color: "var(--text-muted)", flexShrink: 0 }}
             />
           </div>
         </div>

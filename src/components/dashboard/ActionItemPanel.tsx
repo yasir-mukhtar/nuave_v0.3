@@ -80,24 +80,18 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
           padding: '0 20px',
         }}
       >
-        <span
-          style={{
-            fontSize: '16px',
-            fontWeight: 600,
-            color: 'var(--text-heading)',
-          }}
-        >
+        <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)' }}>
           Action Item
         </span>
         {auditId && (
           <Link
             href={`/audit/${auditId}/recommendations`}
+            className="text-label-13"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
               padding: '6px 12px',
-              fontSize: '13px',
               fontWeight: 500,
               color: 'var(--text-heading)',
               textDecoration: 'none',
@@ -117,20 +111,12 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
       {/* Items list */}
       <div
         className="scroll-subtle"
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '4px 0',
-        }}
+        style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}
       >
         {items.length === 0 ? (
           <div
-            style={{
-              padding: '24px 20px',
-              textAlign: 'center',
-              fontSize: '13px',
-              color: 'var(--text-muted)',
-            }}
+            className="text-label-13"
+            style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-muted)' }}
           >
             Belum ada action item.
           </div>
@@ -145,18 +131,11 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
                 key={idx}
                 style={{
                   padding: '16px 20px',
-                  borderBottom:
-                    idx < items.length - 1 ? '1px solid #F3F4F6' : 'none',
+                  borderBottom: idx < items.length - 1 ? '1px solid #F3F4F6' : 'none',
                 }}
               >
                 {/* Number + Title */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '10px',
-                  }}
-                >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                   <span
                     style={{
                       width: '22px',
@@ -177,23 +156,16 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: 600,
-                        color: 'var(--text-heading)',
-                        margin: 0,
-                        lineHeight: 1.4,
-                      }}
+                      className="text-label-14"
+                      style={{ fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}
                     >
                       {item.title}
                     </p>
                     <p
+                      className="text-copy-13"
                       style={{
-                        fontSize: '13px',
-                        fontWeight: 400,
                         color: 'var(--text-muted)',
                         margin: '4px 0 0',
-                        lineHeight: 1.5,
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
@@ -204,21 +176,13 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
                     </p>
 
                     {/* Badges */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        marginTop: '10px',
-                      }}
-                    >
-                      {/* Priority badge */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
                       <span
+                        className="text-label-12"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '4px',
-                          fontSize: '12px',
                           fontWeight: 500,
                           color: priority.color,
                         }}
@@ -226,14 +190,12 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
                         <priority.Icon />
                         {priority.label}
                       </span>
-
-                      {/* Type badge */}
                       <span
+                        className="text-label-12"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '4px',
-                          fontSize: '12px',
                           fontWeight: 500,
                           color: 'var(--text-muted)',
                         }}

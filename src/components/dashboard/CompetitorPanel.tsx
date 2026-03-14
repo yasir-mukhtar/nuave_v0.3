@@ -62,22 +62,16 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
           padding: '0 20px',
         }}
       >
-        <span
-          style={{
-            fontSize: '16px',
-            fontWeight: 600,
-            color: 'var(--text-heading)',
-          }}
-        >
+        <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)' }}>
           Kompetitor
         </span>
         <button
+          className="text-label-13"
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '4px',
             padding: '6px 12px',
-            fontSize: '13px',
             fontWeight: 500,
             color: 'var(--text-heading)',
             background: 'none',
@@ -107,12 +101,8 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
       >
         {competitors.length === 0 ? (
           <div
-            style={{
-              padding: '24px 0',
-              textAlign: 'center',
-              fontSize: '13px',
-              color: 'var(--text-muted)',
-            }}
+            className="text-label-13"
+            style={{ padding: '24px 0', textAlign: 'center', color: 'var(--text-muted)' }}
           >
             Belum ada data kompetitor.
           </div>
@@ -128,30 +118,18 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
                 borderTop: idx > 0 ? '1px solid #F3F4F6' : 'none',
               }}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <CompetitorLogo name={comp.name} />
                 <span
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: 400,
-                    color: 'var(--text-body)',
-                  }}
+                  className="text-label-14"
+                  style={{ color: 'var(--text-body)' }}
                 >
                   {comp.name}
                 </span>
               </div>
               <span
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: 'var(--text-heading)',
-                }}
+                className="text-label-14"
+                style={{ fontWeight: 500, color: 'var(--text-heading)' }}
               >
                 {comp.score.toFixed(1)}%
               </span>
@@ -174,12 +152,10 @@ function CompetitorLogo({ name }: { name: string }) {
       height={24}
       style={{ borderRadius: '6px', flexShrink: 0, background: '#F3F4F6' }}
       onError={(e) => {
-        // Replace broken image with fallback initial
         const target = e.currentTarget;
         const parent = target.parentElement;
         if (parent) {
           target.style.display = 'none';
-          // Create fallback element
           const fallback = document.createElement('div');
           fallback.style.cssText =
             'width:24px;height:24px;border-radius:6px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#6B7280;flex-shrink:0;';

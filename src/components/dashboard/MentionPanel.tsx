@@ -44,24 +44,18 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
             padding: '0 20px',
           }}
         >
-          <span
-            style={{
-              fontSize: '16px',
-              fontWeight: 600,
-              color: 'var(--text-heading)',
-            }}
-          >
+          <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)' }}>
             Mention
           </span>
           {auditId && (
             <Link
               href={`/audit/${auditId}/results`}
+              className="text-label-13"
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
                 padding: '6px 12px',
-                fontSize: '13px',
                 fontWeight: 500,
                 color: 'var(--text-heading)',
                 textDecoration: 'none',
@@ -81,11 +75,7 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
         {/* Mention list */}
         <div
           className="scroll-subtle"
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '4px 0',
-          }}
+          style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}
         >
           <style>{`
             .mention-row:hover {
@@ -94,12 +84,8 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
           `}</style>
           {mentions.length === 0 ? (
             <div
-              style={{
-                padding: '24px 20px',
-                textAlign: 'center',
-                fontSize: '13px',
-                color: 'var(--text-muted)',
-              }}
+              className="text-label-13"
+              style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-muted)' }}
             >
               Belum ada data mention.
             </div>
@@ -121,8 +107,7 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
                   alignItems: 'flex-start',
                   gap: '10px',
                   padding: '10px 20px',
-                  borderBottom:
-                    idx < mentions.length - 1 ? '1px solid #F3F4F6' : 'none',
+                  borderBottom: idx < mentions.length - 1 ? '1px solid #F3F4F6' : 'none',
                   cursor: 'pointer',
                   transition: 'background 0.15s',
                 }}
@@ -130,29 +115,17 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
                 {item.brandMentioned ? (
                   <IconCircleCheckFilled
                     size={20}
-                    style={{
-                      color: '#16A34A',
-                      flexShrink: 0,
-                      marginTop: '1px',
-                    }}
+                    style={{ color: '#16A34A', flexShrink: 0, marginTop: '1px' }}
                   />
                 ) : (
                   <IconCircleXFilled
                     size={20}
-                    style={{
-                      color: '#DC2626',
-                      flexShrink: 0,
-                      marginTop: '1px',
-                    }}
+                    style={{ color: '#DC2626', flexShrink: 0, marginTop: '1px' }}
                   />
                 )}
                 <span
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: 400,
-                    color: 'var(--text-body)',
-                    lineHeight: 1.5,
-                  }}
+                  className="text-copy-14"
+                  style={{ color: 'var(--text-body)' }}
                 >
                   {item.promptText}
                 </span>
