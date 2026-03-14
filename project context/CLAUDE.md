@@ -70,6 +70,7 @@ src/
 10. **After schema changes:** Run `NOTIFY pgrst, 'reload schema';` in Supabase SQL editor
 11. **UI language:** All user-facing strings in Bahasa Indonesia
 12. **Sidebar layout:** `.sidebar` must be sibling of `.main`, never nested
+13. **UI work:** Always read `DESIGN_SYSTEM.md` before building or modifying any UI (pages, components, layouts)
 
 ---
 
@@ -101,6 +102,8 @@ Types: `web_copy`, `content_gap`, `meta_structure`.
 ---
 
 ## Design System
+
+**Full reference:** `DESIGN_SYSTEM.md` (root) — typography scale, spacing scale, component patterns, layout rules, and constraints.
 
 Light mode only. Accent: `#6C3FF5`. Reference: Acctual.com.
 
