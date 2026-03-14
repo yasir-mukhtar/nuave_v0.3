@@ -49,21 +49,51 @@
 
 Fonts: **Geist Sans** (`font-heading`) for headings, **Inter** (`font-body`) for everything else.
 
-### The Scale — 8 Steps, Each Has One Job
+### The Scale — Geist-Aligned, 4 Semantic Roles
 
-Only use sizes from this table. Never use in-between values (no `text-[15px]`, no custom sizes).
-Use `rem` or `px` only — never `em` units, which break the scale inside nested elements.
+Typography follows the **Geist Design System** (Vercel). Four semantic roles — Heading, Label, Copy, Button.
+The number in utility class names = font size in pixels.
 
-| Step | Tailwind Class | Size | Weight | Line Height | Letter Spacing | Use For |
-|------|---------------|------|--------|-------------|----------------|---------|
-| **Display** | `text-5xl` or `clamp(1.75rem,5vw,3rem)` | 48px | `font-bold` | `leading-none` (1) | `tracking-tight` (-0.025em) | Landing page hero only |
-| **H1** | `text-3xl` | 30px | `font-bold` | `leading-tight` (1.25) | `tracking-tight` (-0.025em) | Page titles |
-| **H2** | `text-2xl` | 24px | `font-semibold` | `leading-snug` (1.375) | `tracking-tight` (-0.015em) | Section headings |
-| **H3** | `text-lg` | 18px | `font-semibold` | `leading-snug` (1.375) | `tracking-normal` (0) | Card titles, modal titles |
-| **Body** | `text-base` | 16px | `font-normal` | `leading-relaxed` (1.625) | `tracking-normal` (0) | Paragraphs, descriptions |
-| **Body small** | `text-sm` | 14px | `font-normal` | `leading-relaxed` (1.625) | `tracking-normal` (0) | Form labels, table cells, nav |
-| **Caption** | `text-xs` | 12px | `font-normal` | `leading-relaxed` (1.625) | `tracking-normal` (0) | Timestamps, badges, metadata |
-| **Overline** | `text-xs uppercase` | 12px | `font-medium` | `leading-none` | `tracking-widest` (0.1em) | Section labels, tag categories |
+Only use sizes from this table. Never use in-between values. Use `rem` or `px` only.
+
+#### Headings — page/section titles, Geist Sans, tight tracking
+
+| Class | CSS Utility | Size | Weight | Line Height | Letter Spacing | Use For |
+|-------|------------|------|--------|-------------|----------------|---------|
+| **Display** | `.display-heading` | clamp(28–48px) | 600 | 1.1 | -0.04em | Landing page hero only |
+| **H1** | `h1` or `.text-heading-32` | 30px | 600 | 1.25 | -0.04em | Page titles |
+| **H2** | `h2` or `.text-heading-24` | 24px | 600 | 1.33 | -0.04em | Section headings |
+| **H3** | `h3` or `.text-heading-20` | 18px | 600 | 1.375 | -0.02em | Card titles, modal titles |
+
+#### Labels — single-line UI chrome, Inter, no tracking
+
+| Class | CSS Utility | Size | Weight | Line Height | Use For |
+|-------|------------|------|--------|-------------|---------|
+| **Label 16** | `.text-label-16` | 16px | 400 | 20px | Section titles, prominent labels |
+| **Label 14** | `.text-label-14` | 14px | 400 | 20px | Sidebar items, menus, nav links, form labels |
+| **Label 13** | `.text-label-13` | 13px | 400 | 16px | Secondary labels, dense table cells |
+| **Label 12** | `.text-label-12` | 12px | 400 | 16px | Timestamps, badge text, metadata |
+
+#### Copy — multi-line content text, Inter, no tracking
+
+| Class | CSS Utility | Size | Weight | Line Height | Use For |
+|-------|------------|------|--------|-------------|---------|
+| **Copy 16** | `.text-copy-16` | 16px | 400 | 24px | Modals, cards where text breathes |
+| **Copy 14** | `.text-copy-14` | 14px | 400 | 20px | Most common body text — descriptions, prompts |
+| **Copy 13** | `.text-copy-13` | 13px | 400 | 18px | Dense views, secondary content |
+
+#### Buttons — inside button components only
+
+| Class | CSS Utility | Size | Weight | Line Height | Use For |
+|-------|------------|------|--------|-------------|---------|
+| **Button 14** | `.text-button-14` | 14px | 500 | 20px | Default buttons |
+| **Button 12** | `.text-button-12` | 12px | 500 | 16px | Small/icon buttons in input fields |
+
+#### Overline (unchanged)
+
+| Class | Tailwind | Size | Use For |
+|-------|---------|------|---------|
+| **Overline** | `text-xs uppercase tracking-widest font-medium` | 12px | Section labels, tag categories, ALL CAPS labels |
 
 ---
 
@@ -72,12 +102,12 @@ Use `rem` or `px` only — never `em` units, which break the scale inside nested
 The default rule: **trust the typeface designer — leave letter-spacing alone.**
 Only adjust in these specific situations:
 
-| Situation | Rule | Tailwind | Why |
-|-----------|------|----------|-----|
-| Headlines (H1, H2, Display) | Tighten | `tracking-tight` | Geist has wide default spacing; tightening mimics a condensed headline feel |
-| H3 and below | Leave alone | `tracking-normal` | Default spacing is correct at these sizes |
-| ALL CAPS text (overlines, badges) | Loosen | `tracking-widest` | All-caps letters lack visual variety — extra spacing aids readability |
-| Body, small, caption | Never change | `tracking-normal` | Adjusting body tracking makes text feel unnatural |
+| Situation | Rule | Value | Why |
+|-----------|------|-------|-----|
+| H1, H2, Display (≥24px) | Tighten aggressively | `-0.04em` | Geist uses -0.04em at 24–40px; creates a polished, condensed headline feel |
+| H3 (18px) | Tighten moderately | `-0.02em` | Geist uses -0.02em at 16–20px; adds refinement without going too tight |
+| Labels, Copy, Button | Leave alone | `0` | Inter is already well-spaced at small sizes |
+| ALL CAPS text (overlines, badges) | Loosen | `tracking-widest` (0.1em) | All-caps letters lack visual variety — extra spacing aids readability |
 
 **Never** increase letter-spacing on headlines. **Never** decrease letter-spacing on body text.
 
@@ -168,10 +198,11 @@ Use `items-baseline` whenever mixing font sizes in a flex row.
 
 ### Weight Hierarchy Rules
 
-- **Max 2 weights per component** — pick from: `font-normal` (400) + `font-semibold` (600), or `font-normal` + `font-bold` (700)
-- **Never use** `font-medium` (500) as the only emphasis — it's not enough contrast from `font-normal`
-- **Never use** `font-bold` (700) for H2 and below in app pages — `font-semibold` is sufficient
-- **`font-bold`** is reserved for: H1, Display, and maximum-emphasis data (scores, prices, key metrics)
+- **All headings use `font-semibold` (600)** — Geist uses 600 for all heading sizes (72px down to 14px). `font-bold` (700) is intentionally avoided.
+- **`font-bold` (700)** is reserved only for maximum-emphasis data: scores, prices, key metrics in data displays
+- **`font-medium` (500)** is reserved only for button labels (`.text-button-*`)
+- **`font-normal` (400)** for all Labels and Copy
+- **Max 2 weights per component** — `font-normal` (400) + `font-semibold` (600) is the standard pair
 - **Headings:** Always `font-heading` (Geist Sans), color `#111827`
 - **Body:** Always `font-body` (Inter), color `#374151`
 - **Muted text:** Color `#6B7280` — never lighter than this

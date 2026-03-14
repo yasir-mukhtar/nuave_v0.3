@@ -60,9 +60,9 @@ h1, h2, h3, h4, h5, h6 {
   color: #111827;
 }
 
-h1 { font-size: 1.875rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.025em; }
-h2 { font-size: 1.5rem; font-weight: 600; line-height: 1.375; letter-spacing: -0.015em; }
-h3 { font-size: 1.125rem; font-weight: 600; line-height: 1.375; letter-spacing: 0; }
+h1 { font-size: 1.875rem; font-weight: 600; line-height: 1.25; letter-spacing: -0.04em; }
+h2 { font-size: 1.5rem; font-weight: 600; line-height: 1.33; letter-spacing: -0.04em; }
+h3 { font-size: 1.125rem; font-weight: 600; line-height: 1.375; letter-spacing: -0.02em; }
 
 p, span, div, input, textarea, select, button, label {
   font-family: var(--font-body);
@@ -74,12 +74,30 @@ p, span, div, input, textarea, select, button, label {
   color: #6B7280;
 }
 
+/* ── Geist-aligned typography utilities ── */
+/* Label: single-line UI chrome — menus, nav items, badges, form labels */
+.text-label-16 { font-size: 16px; line-height: 20px; font-weight: 400; }
+.text-label-14 { font-size: 14px; line-height: 20px; font-weight: 400; }
+.text-label-13 { font-size: 13px; line-height: 16px; font-weight: 400; }
+.text-label-12 { font-size: 12px; line-height: 16px; font-weight: 400; }
+
+/* Copy: multi-line content text — descriptions, paragraphs, prompts */
+.text-copy-16 { font-size: 16px; line-height: 24px; font-weight: 400; }
+.text-copy-14 { font-size: 14px; line-height: 20px; font-weight: 400; }
+.text-copy-13 { font-size: 13px; line-height: 18px; font-weight: 400; }
+
+/* Button: inside button components only */
+.text-button-14 { font-size: 14px; line-height: 20px; font-weight: 500; }
+.text-button-12 { font-size: 12px; line-height: 16px; font-weight: 500; }
+
 /* Hero/display text on landing page */
 .display-heading {
   font-family: var(--font-heading);
   font-size: clamp(1.75rem, 5vw, 3rem);
-  font-weight: 700;
+  font-weight: 600;
   color: #111827;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
 }
 
 .form-field {
@@ -402,7 +420,7 @@ label.field-label.disabled {
 .lp-section-inner { max-width: 960px; margin: 0 auto; }
 .lp-hero-mockup { display: block; }
 .lp-nav-cta-text { display: inline; }
-.lp-section-heading { font-size: 32px; font-weight: 700; color: #111827; text-align: center; margin-bottom: 48px; }
+.lp-section-heading { font-size: 32px; font-weight: 600; color: #111827; text-align: center; margin-bottom: 48px; letter-spacing: -0.04em; line-height: 1.25; }
 .lp-score-badge-text { display: inline; }
 
 @media (max-width: 768px) {
