@@ -202,7 +202,7 @@ export default function PromptsPage() {
   if (loading || wsLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "400px" }}>
-        <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>Memuat data prompt...</p>
+        <p style={{ color: "var(--text-muted)" }}>Memuat data prompt...</p>
       </div>
     );
   }
@@ -210,8 +210,8 @@ export default function PromptsPage() {
   if (prompts.length === 0) {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "400px", gap: "12px" }}>
-        <p style={{ fontSize: "16px", fontWeight: 600, color: "var(--text-heading)" }}>Belum ada prompt</p>
-        <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>Jalankan audit pertama Anda untuk melihat data di sini.</p>
+        <p style={{ fontSize: "16px", fontWeight: 600 }}>Belum ada prompt</p>
+        <p style={{ color: "var(--text-muted)" }}>Jalankan audit pertama Anda untuk melihat data di sini.</p>
       </div>
     );
   }
@@ -221,10 +221,10 @@ export default function PromptsPage() {
 
       {/* ── Header ── */}
       <div>
-        <h1 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-heading)", margin: "0 0 4px 0" }}>
+        <h1 style={{ fontSize: "20px", margin: "0 0 4px 0" }}>
           Prompt
         </h1>
-        <p style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0 }}>
+        <p style={{ color: "var(--text-muted)", margin: 0 }}>
           Semua pertanyaan yang diajukan AI saat mengaudit brand Anda.
         </p>
       </div>
@@ -403,7 +403,7 @@ export default function PromptsPage() {
         {/* Table rows */}
         {filtered.length === 0 ? (
           <div style={{ padding: "48px 16px", textAlign: "center" }}>
-            <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
+            <p style={{ color: "var(--text-muted)" }}>
               Tidak ada prompt yang cocok dengan filter.
             </p>
           </div>

@@ -198,7 +198,6 @@ export default function RecommendationsPage() {
       if (line.trim() === '') return <div key={i} style={{ height: '6px' }} />;
       return (
         <p key={i} style={{
-          fontSize: '14px', color: '#374151',
           lineHeight: '1.7', marginBottom: '2px'
         }}
           dangerouslySetInnerHTML={{
@@ -290,7 +289,7 @@ export default function RecommendationsPage() {
 
       {/* HERO */}
       <div style={{ padding: '32px 32px 0' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 8px 0' }}>
+        <h1 style={{ fontSize: '24px', margin: '0 0 8px 0' }}>
           Begini cara agar ChatGPT menyebut bisnis kamu
         </h1>
         <p style={{ fontSize: '16px', color: '#6B7280', margin: 0 }}>
@@ -394,7 +393,7 @@ export default function RecommendationsPage() {
                   )}
                 </div>
 
-                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '8px 0 6px' }}>
+                <h3 style={{ fontSize: '16px', margin: '8px 0 6px' }}>
                   {rec.title}
                 </h3>
 
@@ -451,7 +450,7 @@ export default function RecommendationsPage() {
                         <IconCopy size={14} /> Salin
                       </button>
                     </div>
-                    <div style={{ fontSize: '14px', color: '#374151', lineHeight: 1.6 }}>
+                    <div style={{ lineHeight: 1.6 }}>
                       {rec.suggested_copy ? (
                         renderMarkdown(rec.suggested_copy)
                       ) : (

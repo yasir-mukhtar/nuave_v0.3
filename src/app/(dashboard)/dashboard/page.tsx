@@ -161,7 +161,7 @@ export default function DashboardPage() {
   if (wsLoading || loading || !data) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "300px" }}>
-        <p style={{ color: "var(--text-muted)", fontSize: "14px" }}>Memuat dashboard...</p>
+        <p style={{ color: "var(--text-muted)" }}>Memuat dashboard...</p>
       </div>
     );
   }
@@ -170,7 +170,7 @@ export default function DashboardPage() {
     <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
       {/* Greeting */}
       <div>
-        <h1 style={{ fontSize: "28px", fontWeight: 700, color: "var(--text-heading)", margin: 0, lineHeight: 1.3 }}>
+        <h1 style={{ fontSize: "28px", margin: 0, lineHeight: 1.3 }}>
           Selamat datang, {data.firstName}
         </h1>
         <p style={{ fontSize: "15px", color: "var(--text-muted)", margin: "4px 0 0", lineHeight: 1.4 }}>
@@ -212,7 +212,7 @@ export default function DashboardPage() {
 
       {/* Recent Audits */}
       <div>
-        <h2 style={{ fontSize: "18px", fontWeight: 600, color: "var(--text-heading)", marginBottom: "16px" }}>
+        <h2 style={{ fontSize: "18px", marginBottom: "16px" }}>
           Recent Audits
         </h2>
 

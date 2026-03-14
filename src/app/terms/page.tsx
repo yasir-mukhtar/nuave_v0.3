@@ -58,7 +58,7 @@ export default function TermsPage() {
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--purple)" }} />
             Berlaku sejak 7 Maret 2026
           </div>
-          <h1 style={{ fontSize: "32px", fontWeight: 700, color: "var(--text-heading)", margin: "0 0 8px 0" }}>
+          <h1 style={{ fontSize: "32px", margin: "0 0 8px 0" }}>
             Syarat & Ketentuan
           </h1>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0 }}>
@@ -366,7 +366,7 @@ export default function TermsPage() {
 
 function SectionTitle({ n, children }: { n: string; children: React.ReactNode }) {
   return (
-    <h2 style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "20px", fontWeight: 700, color: "var(--text-heading)", marginBottom: "16px" }}>
+    <h2 style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "20px", marginBottom: "16px" }}>
       <span style={{
         width: "32px", height: "32px", borderRadius: "8px",
         background: "var(--purple-light)", color: "var(--purple)",

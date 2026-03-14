@@ -203,8 +203,6 @@ export default function ResultsPage() {
             display: 'flex',
             gap: '8px',
             marginBottom: '4px',
-            fontSize: '14px',
-            color: '#374151'
           }}>
             <span style={{ color: '#533AFD', flexShrink: 0 }}>•</span>
             <span>{renderInline(content)}</span>
@@ -228,8 +226,6 @@ export default function ResultsPage() {
       // Normal paragraph
       return (
         <p key={i} style={{
-          fontSize: '14px',
-          color: '#374151',
           lineHeight: '1.7',
           marginBottom: '4px'
         }}>
@@ -284,8 +280,6 @@ export default function ResultsPage() {
         <h1
           style={{
             fontSize: "var(--text-3xl)",
-            fontWeight: 700,
-            color: "var(--text-heading)",
             textAlign: "center",
             marginBottom: "32px",
             marginTop: 0,

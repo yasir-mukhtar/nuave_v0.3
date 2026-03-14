@@ -58,7 +58,7 @@ function renderMarkdown(text: string) {
     if (line.match(/^#{1,3}\s/)) {
       const content = line.replace(/^#{1,3}\s/, "");
       return (
-        <p key={i} style={{ fontWeight: 600, fontSize: "14px", color: "#111827", marginTop: "12px", marginBottom: "4px" }}>
+        <p key={i} style={{ fontWeight: 600, marginTop: "12px", marginBottom: "4px" }}>
           {renderBold(content)}
         </p>
       );
@@ -74,7 +74,7 @@ function renderMarkdown(text: string) {
     }
     if (line.trim() === "") return <div key={i} style={{ height: "6px" }} />;
     return (
-      <p key={i} style={{ fontSize: "14px", color: "#374151", lineHeight: "1.7", marginBottom: "4px" }}>
+      <p key={i} style={{ lineHeight: "1.7", marginBottom: "4px" }}>
         {renderBold(line)}
       </p>
     );
@@ -297,7 +297,7 @@ export default function KontenPage() {
   if (loading || wsLoading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "400px" }}>
-        <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>Memuat rekomendasi konten...</p>
+        <p style={{ color: "var(--text-muted)" }}>Memuat rekomendasi konten...</p>
       </div>
     );
   }
@@ -305,8 +305,8 @@ export default function KontenPage() {
   if (recs.length === 0) {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "400px", gap: "12px" }}>
-        <p style={{ fontSize: "16px", fontWeight: 600, color: "var(--text-heading)" }}>Belum ada rekomendasi</p>
-        <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>Jalankan audit untuk mendapatkan rekomendasi konten.</p>
+        <p style={{ fontSize: "16px", fontWeight: 600 }}>Belum ada rekomendasi</p>
+        <p style={{ color: "var(--text-muted)" }}>Jalankan audit untuk mendapatkan rekomendasi konten.</p>
       </div>
     );
   }
@@ -337,10 +337,10 @@ export default function KontenPage() {
 
         {/* ── Header ── */}
         <div>
-          <h1 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-heading)", margin: "0 0 4px 0" }}>
+          <h1 style={{ fontSize: "20px", margin: "0 0 4px 0" }}>
             Konten
           </h1>
-          <p style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0 }}>
+          <p style={{ color: "var(--text-muted)", margin: 0 }}>
             Rekomendasi konten untuk meningkatkan visibilitas AI brand Anda.
           </p>
         </div>
@@ -459,7 +459,7 @@ export default function KontenPage() {
         {/* ── Grouped recommendation cards ── */}
         {filtered.length === 0 ? (
           <div style={{ padding: "48px 16px", textAlign: "center" }}>
-            <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>Tidak ada rekomendasi yang cocok dengan filter.</p>
+            <p style={{ color: "var(--text-muted)" }}>Tidak ada rekomendasi yang cocok dengan filter.</p>
           </div>
         ) : typeFilter !== "all" ? (
           /* Flat list when type is selected */
@@ -543,7 +543,7 @@ export default function KontenPage() {
                     {(TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).label}
                   </span>
                 </div>
-                <h2 style={{ fontSize: "16px", fontWeight: 600, color: "#111827", margin: 0 }}>
+                <h2 style={{ fontSize: "16px", margin: 0 }}>
                   {selectedRec.title}
                 </h2>
               </div>
@@ -596,7 +596,7 @@ export default function KontenPage() {
                 </>
               ) : (
                 <div style={{ textAlign: "center", padding: "40px 0" }}>
-                  <p style={{ fontSize: "14px", color: "var(--text-muted)", marginBottom: "16px" }}>
+                  <p style={{ color: "var(--text-muted)", marginBottom: "16px" }}>
                     Konten belum dibuka. Buka konten ini untuk melihat saran perbaikan.
                   </p>
                   <button
@@ -741,7 +741,7 @@ function RecCard({
             </span>
           )}
         </div>
-        <h3 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-heading)", margin: "0 0 2px 0" }}>
+        <h3 style={{ fontSize: "14px", margin: "0 0 2px 0" }}>
           {rec.title}
         </h3>
         <p style={{

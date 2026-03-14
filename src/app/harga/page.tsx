@@ -151,7 +151,7 @@ export default function HargaPage() {
           <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--purple)" }} />
           Bayar sekali, pakai kapan saja
         </div>
-        <h1 style={{ fontSize: "40px", fontWeight: 700, color: "var(--text-heading)", margin: "0 0 16px 0", lineHeight: 1.2 }}>
+        <h1 style={{ fontSize: "40px", margin: "0 0 16px 0", lineHeight: 1.2 }}>
           Harga yang sederhana,<br />tanpa langganan
         </h1>
         <p style={{ fontSize: "16px", color: "var(--text-muted)", maxWidth: "480px", margin: "0 auto 8px", lineHeight: 1.6 }}>
@@ -242,7 +242,7 @@ export default function HargaPage() {
       {/* Credit Usage Table */}
       <section style={{ background: "var(--surface)", borderTop: "1px solid var(--border-default)", borderBottom: "1px solid var(--border-default)", padding: "64px 24px" }}>
         <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "24px", fontWeight: 700, color: "var(--text-heading)", textAlign: "center", marginBottom: "8px" }}>
+          <h2 style={{ textAlign: "center", marginBottom: "8px" }}>
             Berapa kredit yang dibutuhkan?
           </h2>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", textAlign: "center", marginBottom: "32px" }}>
@@ -281,7 +281,7 @@ export default function HargaPage() {
       {/* Payment Methods */}
       <section style={{ padding: "64px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "24px", fontWeight: 700, color: "var(--text-heading)", marginBottom: "8px" }}>
+          <h2 style={{ marginBottom: "8px" }}>
             Metode pembayaran
           </h2>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", marginBottom: "32px" }}>
@@ -304,7 +304,7 @@ export default function HargaPage() {
       {/* FAQ */}
       <section style={{ background: "var(--surface)", borderTop: "1px solid var(--border-default)", padding: "64px 24px" }}>
         <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "24px", fontWeight: 700, color: "var(--text-heading)", textAlign: "center", marginBottom: "40px" }}>
+          <h2 style={{ textAlign: "center", marginBottom: "40px" }}>
             Pertanyaan yang sering ditanya
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -321,7 +321,7 @@ export default function HargaPage() {
       {/* CTA Banner */}
       <section style={{ padding: "64px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: "560px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "28px", fontWeight: 700, color: "var(--text-heading)", marginBottom: "12px" }}>
+          <h2 style={{ fontSize: "28px", marginBottom: "12px" }}>
             Mulai audit AI pertama Anda — gratis
           </h2>
           <p style={{ fontSize: "15px", color: "var(--text-muted)", marginBottom: "28px" }}>

@@ -96,7 +96,7 @@ function CreditsPageContent() {
             <IconArrowLeft size={16} stroke={1.5} />
             Kembali ke dashboard
           </button>
-          <h1 style={{ fontSize: "28px", fontWeight: 700, color: "var(--text-heading)", margin: "0 0 8px 0" }}>
+          <h1 style={{ fontSize: "28px", margin: "0 0 8px 0" }}>
             Beli Kredit
           </h1>
           <p style={{ fontSize: "15px", color: "var(--text-muted)", margin: 0 }}>
@@ -161,7 +161,7 @@ function CreditsPageContent() {
             background: "var(--surface)", border: "1px solid var(--border-default)",
             borderRadius: "16px", padding: "28px", position: "sticky", top: "72px",
           }}>
-            <h2 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-heading)", margin: "0 0 20px 0" }}>
+            <h2 style={{ fontSize: "16px", margin: "0 0 20px 0" }}>
               Ringkasan Pesanan
             </h2>
 

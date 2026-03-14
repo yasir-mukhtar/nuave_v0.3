@@ -276,7 +276,7 @@ export default function BrandPage() {
   if (loading) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "400px" }}>
-        <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>Memuat data brand...</p>
+        <p style={{ color: "var(--text-muted)" }}>Memuat data brand...</p>
       </div>
     );
   }
@@ -302,10 +302,10 @@ export default function BrandPage() {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
-            <h1 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-heading)", margin: "0 0 4px 0" }}>
+            <h1 style={{ fontSize: "20px", margin: "0 0 4px 0" }}>
               Brand
             </h1>
-            <p style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0 }}>
+            <p style={{ color: "var(--text-muted)", margin: 0 }}>
               Kelola profil brand yang Anda audit di Nuave.
             </p>
           </div>
@@ -329,10 +329,10 @@ export default function BrandPage() {
             justifyContent: "center", height: "320px", gap: "12px",
             border: "1px dashed var(--border-default)", borderRadius: "8px", background: "#ffffff",
           }}>
-            <p style={{ fontSize: "16px", fontWeight: 600, color: "var(--text-heading)" }}>
+            <p style={{ fontSize: "16px", fontWeight: 600 }}>
               Belum ada brand
             </p>
-            <p style={{ fontSize: "14px", color: "var(--text-muted)", textAlign: "center" }}>
+            <p style={{ color: "var(--text-muted)", textAlign: "center" }}>
               Tambahkan brand pertama Anda untuk mulai audit visibilitas AI.
             </p>
             <button
@@ -398,7 +398,7 @@ export default function BrandPage() {
               flexShrink: 0, padding: "20px 24px", borderBottom: "1px solid var(--border-default)",
               display: "flex", justifyContent: "space-between", alignItems: "center",
             }}>
-              <h2 style={{ fontSize: "16px", fontWeight: 600, color: "var(--text-heading)", margin: 0 }}>
+              <h2 style={{ fontSize: "16px", margin: 0 }}>
                 Edit Brand
               </h2>
               <button onClick={closeEdit} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: "4px" }}>
@@ -576,7 +576,7 @@ export default function BrandPage() {
                 <IconAlertTriangle size={20} stroke={1.5} style={{ color: "#DC2626" }} />
               </div>
               <div>
-                <h3 style={{ fontSize: "15px", fontWeight: 600, color: "var(--text-heading)", margin: 0 }}>
+                <h3 style={{ fontSize: "15px", margin: 0 }}>
                   Hapus Brand
                 </h3>
                 <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: "4px 0 0 0" }}>
@@ -664,7 +664,7 @@ function BrandCard({
           <h3
             onClick={onSelect}
             style={{
-              fontSize: "15px", fontWeight: 600, color: "var(--text-heading)",
+              fontSize: "15px",
               margin: 0, cursor: "pointer",
             }}
             onMouseEnter={(e) => { e.currentTarget.style.color = "var(--purple)"; }}

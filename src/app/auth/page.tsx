@@ -119,7 +119,7 @@ export default function AuthPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
           {context === 'upgrade' && (
             <>
-              <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px 0', textAlign: 'center' }}>
+              <h1 style={{ fontSize: '22px', margin: '0 0 8px 0', textAlign: 'center' }}>
                 Aktifkan paket Anda
               </h1>
               {pendingPackage && (
@@ -141,7 +141,7 @@ export default function AuthPage() {
 
           {context === 'audit' && (
             <>
-              <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px 0', textAlign: 'center' }}>
+              <h1 style={{ fontSize: '22px', margin: '0 0 8px 0', textAlign: 'center' }}>
                 Lanjutkan audit gratis kamu
               </h1>
               {pendingBrand && (
@@ -163,7 +163,7 @@ export default function AuthPage() {
 
           {context === 'default' && (
             <>
-              <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px 0', textAlign: 'center' }}>
+              <h1 style={{ fontSize: '22px', margin: '0 0 8px 0', textAlign: 'center' }}>
                 Masuk ke Nuave
               </h1>
               <p style={{ fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', margin: '0 0 24px 0' }}>

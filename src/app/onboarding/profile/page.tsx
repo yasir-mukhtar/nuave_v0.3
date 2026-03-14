@@ -282,8 +282,6 @@ export default function ProfilePage() {
           <h1
             style={{
               fontSize: "var(--text-2xl)",
-              fontWeight: 700,
-              color: "var(--text-heading)",
               margin: 0,
             }}
           >

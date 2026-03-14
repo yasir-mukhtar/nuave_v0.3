@@ -104,7 +104,7 @@ export default function SupportPage() {
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--purple)" }} />
             Kami siap membantu
           </div>
-          <h1 style={{ fontSize: "32px", fontWeight: 700, color: "var(--text-heading)", margin: "0 0 8px 0" }}>
+          <h1 style={{ fontSize: "32px", margin: "0 0 8px 0" }}>
             Hubungi Kami
           </h1>
           <p style={{ fontSize: "15px", color: "var(--text-muted)", margin: 0, maxWidth: "520px" }}>
@@ -133,7 +133,7 @@ export default function SupportPage() {
                 }}>
                   <IconCheck size={28} stroke={2} color="#22C55E" />
                 </div>
-                <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-heading)", marginBottom: "8px" }}>
+                <h2 style={{ fontSize: "20px", marginBottom: "8px" }}>
                   Pesan terkirim!
                 </h2>
                 <p style={{ fontSize: "14px", color: "var(--text-muted)", marginBottom: "24px", lineHeight: 1.6 }}>
@@ -280,7 +280,7 @@ export default function SupportPage() {
               border: "1px solid var(--border-default)", borderRadius: "12px",
               padding: "20px", background: "var(--surface)",
             }}>
-              <h3 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-heading)", marginBottom: "8px" }}>
+              <h3 style={{ fontSize: "14px", marginBottom: "8px" }}>
                 Butuh Respon Cepat?
               </h3>
               <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: "0 0 12px 0", lineHeight: 1.5 }}>
@@ -303,7 +303,7 @@ export default function SupportPage() {
               border: "1px solid var(--border-default)", borderRadius: "12px",
               padding: "20px", background: "var(--surface)",
             }}>
-              <h3 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-heading)", marginBottom: "12px" }}>
+              <h3 style={{ fontSize: "14px", marginBottom: "12px" }}>
                 Email Langsung
               </h3>
               <a href="mailto:hello.nuave@gmail.com" style={{

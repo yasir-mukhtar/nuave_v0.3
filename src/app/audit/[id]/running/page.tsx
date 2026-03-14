@@ -114,7 +114,7 @@ export default function AuditRunningPage() {
         }}>
           <IconAlertTriangle size={48} stroke={1.5} color="#EF4444" />
         </div>
-        <h1 style={{ fontSize: "24px", fontWeight: 700, color: "#111827", margin: "0 0 8px 0" }}>
+        <h1 style={{ fontSize: "24px", margin: "0 0 8px 0" }}>
           Terjadi kesalahan
         </h1>
         <p style={{ fontSize: "16px", color: "#6B7280", margin: "0 0 24px 0" }}>

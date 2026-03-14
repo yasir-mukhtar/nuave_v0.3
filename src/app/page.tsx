@@ -222,10 +222,9 @@ export default function Home() {
           {/* Left column */}
           <div>
             <h1 style={{
-              fontFamily: "var(--font-heading)",
               fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)",
-              fontWeight: 700, lineHeight: 1.15, letterSpacing: "-0.02em",
-              color: "#111827", margin: "0 0 20px 0",
+              lineHeight: 1.15, letterSpacing: "-0.02em",
+              margin: "0 0 20px 0",
             }}>
               Buat brand Anda muncul di setiap jawaban AI — bukan hanya di Google.
             </h1>
@@ -324,7 +323,7 @@ export default function Home() {
                   ) : (
                     <IconX size={16} stroke={2.5} color="#EF4444" style={{ flexShrink: 0 }} />
                   )}
-                  <span style={{ color: "#374151" }}>{p.prompt}</span>
+                  <span>{p.prompt}</span>
                 </div>
               ))}
             </div>
@@ -437,7 +436,7 @@ export default function Home() {
                 }}>
                   {s.step}
                 </div>
-                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#111827", marginBottom: "8px" }}>{s.title}</h3>
+                <h3 style={{ fontSize: "16px", marginBottom: "8px" }}>{s.title}</h3>
                 <p style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.6 }}>{s.desc}</p>
               </div>
             ))}
@@ -466,7 +465,7 @@ export default function Home() {
               }}>
                 <f.icon size={20} stroke={1.5} color="#6C3FF5" />
               </div>
-              <h3 style={{ fontSize: "15px", fontWeight: 600, color: "#111827", marginBottom: "8px" }}>{f.title}</h3>
+              <h3 style={{ fontSize: "15px", marginBottom: "8px" }}>{f.title}</h3>
               <p style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.6 }}>{f.desc}</p>
             </div>
           ))}
@@ -529,7 +528,7 @@ export default function Home() {
                   ) : (
                     <IconX size={16} stroke={2.5} color="#EF4444" style={{ flexShrink: 0 }} />
                   )}
-                  <span style={{ color: "#374151", flex: 1 }}>{p.prompt}</span>
+                  <span style={{ flex: 1 }}>{p.prompt}</span>
                   <span className="lp-score-badge-text" style={{
                     fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "999px",
                     background: p.mentioned ? "#DCFCE7" : "#FEE2E2",
@@ -684,7 +683,7 @@ export default function Home() {
       {/* ──── Final CTA ──── */}
       <section className="lp-section" style={{ background: "#EDE9FF" }}>
         <div style={{ maxWidth: "560px", margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontSize: "28px", fontWeight: 700, color: "#111827", marginBottom: "16px", lineHeight: 1.3 }}>
+          <h2 style={{ fontSize: "28px", marginBottom: "16px", lineHeight: 1.3 }}>
             Jangan biarkan brand Anda tidak terlihat di era AI.
           </h2>
           <p style={{ fontSize: "15px", color: "#6B7280", marginBottom: "32px" }}>
