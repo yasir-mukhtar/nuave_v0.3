@@ -59,7 +59,7 @@ function ChartTooltip({ active, payload }: any) {
         minWidth: '140px',
       }}
     >
-      <div style={{ fontSize: '12px', color: '#9CA3AF', marginBottom: '6px' }}>
+      <div className="text-label-12" style={{ color: '#9CA3AF', marginBottom: '6px' }}>
         {formatDateFull(data.date)}
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
@@ -68,8 +68,8 @@ function ChartTooltip({ active, payload }: any) {
         </span>
         {change != null && change !== 0 && (
           <span
+            className="text-label-12"
             style={{
-              fontSize: '12px',
               fontWeight: 600,
               color: change > 0 ? '#22C55E' : '#EF4444',
             }}
@@ -120,7 +120,6 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
       .filter((d) => new Date(d.date) >= cutoff)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Use timestamp as X value so the axis reflects actual time positioning
     return sorted.map((d, i) => ({
       ...d,
       ts: new Date(d.date).getTime(),
@@ -131,7 +130,6 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
   const isEmpty = filteredData.length === 0;
   const isSinglePoint = filteredData.length === 1;
 
-  // Domain: always show from (now - days) to now
   const xDomain = useMemo(() => {
     const now = new Date();
     const start = new Date(now);
@@ -139,7 +137,6 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
     return [start.getTime(), now.getTime()] as [number, number];
   }, [days]);
 
-  // Generate evenly-spaced tick marks across the date range
   const xTicks = useMemo(() => {
     const tickCount = days <= 7 ? 7 : days <= 14 ? 7 : 6;
     const [start, end] = xDomain;
@@ -174,24 +171,11 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
           padding: '0 24px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span
-            style={{
-              fontSize: '32px',
-              fontWeight: 700,
-              color: 'var(--text-heading)',
-            }}
-          >
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+          <span style={{ fontSize: '32px', fontWeight: 700, color: 'var(--text-heading)' }}>
             {latestScore}%
           </span>
-          <span
-            style={{
-              fontSize: '14px',
-              fontWeight: 400,
-              color: '#8B8B8B',
-              fontFamily: 'var(--font-body, Inter, sans-serif)',
-            }}
-          >
+          <span className="text-label-14" style={{ color: '#8B8B8B' }}>
             AI visibility score
           </span>
         </div>
@@ -200,12 +184,12 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
         <div ref={filterRef} style={{ position: 'relative' }}>
           <button
             onClick={() => dropdownOpen ? closeFilterDropdown() : setDropdownOpen(true)}
+            className="text-label-13"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
               padding: '6px 12px',
-              fontSize: '13px',
               fontWeight: 500,
               color: 'var(--text-body)',
               background: '#ffffff',
@@ -243,18 +227,14 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
                     setFilterIdx(idx);
                     closeFilterDropdown();
                   }}
+                  className="text-label-13"
                   style={{
                     display: 'block',
                     width: '100%',
                     padding: '8px 14px',
-                    fontSize: '13px',
                     fontWeight: idx === filterIdx ? 600 : 400,
-                    color:
-                      idx === filterIdx
-                        ? 'var(--text-heading)'
-                        : 'var(--text-body)',
-                    background:
-                      idx === filterIdx ? '#F5F5F5' : 'transparent',
+                    color: idx === filterIdx ? 'var(--text-heading)' : 'var(--text-body)',
+                    background: idx === filterIdx ? '#F5F5F5' : 'transparent',
                     border: 'none',
                     textAlign: 'left',
                     cursor: 'pointer',
@@ -304,11 +284,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
                 tick={{ fontSize: 12, fill: '#9CA3AF' }}
                 dy={8}
               />
-              <YAxis
-                domain={[0, 100]}
-                ticks={gridYTicks}
-                hide
-              />
+              <YAxis domain={[0, 100]} ticks={gridYTicks} hide />
               <Tooltip
                 content={<ChartTooltip />}
                 cursor={{ stroke: '#D1D5DB', strokeWidth: 1, strokeDasharray: '4 4' }}
@@ -320,12 +296,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
                 strokeWidth={2}
                 fill="url(#scoreGradient)"
                 dot={isSinglePoint ? { r: 5, fill: '#533AFD', stroke: '#ffffff', strokeWidth: 2 } : false}
-                activeDot={{
-                  r: 5,
-                  fill: '#533AFD',
-                  stroke: '#ffffff',
-                  strokeWidth: 2,
-                }}
+                activeDot={{ r: 5, fill: '#533AFD', stroke: '#ffffff', strokeWidth: 2 }}
                 connectNulls={false}
               />
               {isSinglePoint && (
@@ -385,7 +356,7 @@ function EmptyChartState({ days }: { days: number }) {
           />
         ))}
       </svg>
-      {/* Date labels along the bottom */}
+      {/* Date labels */}
       <div
         style={{
           position: 'absolute',
@@ -398,7 +369,7 @@ function EmptyChartState({ days }: { days: number }) {
         }}
       >
         {labels.map((label, i) => (
-          <span key={i} style={{ fontSize: '12px', color: '#9CA3AF' }}>{label}</span>
+          <span key={i} className="text-label-12" style={{ color: '#9CA3AF' }}>{label}</span>
         ))}
       </div>
       <div
@@ -412,10 +383,10 @@ function EmptyChartState({ days }: { days: number }) {
           gap: '8px',
         }}
       >
-        <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0, textAlign: 'center' }}>
+        <p className="text-copy-14" style={{ color: 'var(--text-muted)', margin: 0, textAlign: 'center' }}>
           Belum ada data audit.
         </p>
-        <p style={{ fontSize: '13px', color: '#9CA3AF', margin: 0, textAlign: 'center' }}>
+        <p className="text-copy-13" style={{ color: '#9CA3AF', margin: 0, textAlign: 'center' }}>
           Jalankan audit pertama untuk melihat skor visibilitas Anda.
         </p>
       </div>

@@ -46,7 +46,6 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch user info
       const { data: userData } = await supabase
         .from("users")
         .select("credits_balance, full_name")
@@ -56,7 +55,6 @@ export default function DashboardPage() {
       const firstName = userData?.full_name?.split(" ")[0] ?? "User";
       const brandName = activeWorkspace?.brand_name ?? "—";
 
-      // Fetch audits for the active workspace
       const { data: audits } = await supabase
         .from("audits")
         .select("id, visibility_score, completed_at, status")
@@ -80,7 +78,6 @@ export default function DashboardPage() {
       const latestScore = completeAudits[0]?.visibility_score ?? 0;
       const latestAuditId = completeAudits[0]?.id;
 
-      // Fetch audit results for competitors + mentions
       let competitors: { name: string; score: number }[] = [];
       let mentions: DashboardData["mentions"] = [];
 
@@ -118,7 +115,6 @@ export default function DashboardPage() {
         }
       }
 
-      // Fetch recommendations
       let actionItems: DashboardData["actionItems"] = [];
 
       if (latestAuditId) {
@@ -161,7 +157,7 @@ export default function DashboardPage() {
   if (wsLoading || loading || !data) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "300px" }}>
-        <p style={{ color: "var(--text-muted)" }}>Memuat dashboard...</p>
+        <p className="text-label-14" style={{ color: "var(--text-muted)" }}>Memuat dashboard...</p>
       </div>
     );
   }
@@ -170,10 +166,10 @@ export default function DashboardPage() {
     <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
       {/* Greeting */}
       <div>
-        <h1 style={{ fontSize: "28px", margin: 0, lineHeight: 1.3 }}>
+        <h1 style={{ margin: 0 }}>
           Selamat datang, {data.firstName}
         </h1>
-        <p style={{ fontSize: "15px", color: "var(--text-muted)", margin: "4px 0 0", lineHeight: 1.4 }}>
+        <p className="text-copy-14" style={{ color: "var(--text-muted)", margin: "4px 0 0" }}>
           Berikut performa AI visibility{" "}
           <span style={{ fontWeight: 600, color: "var(--text-heading)" }}>{data.brandName}</span>
         </p>
@@ -212,13 +208,15 @@ export default function DashboardPage() {
 
       {/* Recent Audits */}
       <div>
-        <h2 style={{ fontSize: "18px", marginBottom: "16px" }}>
+        <h2 style={{ marginBottom: "16px" }}>
           Recent Audits
         </h2>
 
         {data.completeAudits.length === 0 ? (
-          <div className="card" style={{ padding: "40px", textAlign: "center", color: "var(--text-muted)" }}>
-            No audits found. Start your first audit to see results here.
+          <div className="card" style={{ padding: "40px", textAlign: "center" }}>
+            <p className="text-label-13" style={{ color: "var(--text-muted)" }}>
+              No audits found. Start your first audit to see results here.
+            </p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -235,7 +233,10 @@ export default function DashboardPage() {
 function StatCard({ label, value, icon }: { label: string; value: string | number; icon: React.ReactNode }) {
   return (
     <div className="card" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)", fontSize: "13px", fontWeight: 500 }}>
+      <div
+        className="text-label-13"
+        style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)", fontWeight: 500 }}
+      >
         {icon}
         {label}
       </div>
@@ -286,25 +287,31 @@ function AuditRow({ audit, brandName }: { audit: any; brandName: string }) {
           {brandName.charAt(0).toUpperCase()}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-          <span style={{ fontSize: "15px", fontWeight: 600, color: "var(--text-heading)" }}>{brandName}</span>
-          <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>Audited on {date}</span>
+          <span className="text-label-16" style={{ fontWeight: 600, color: "var(--text-heading)" }}>
+            {brandName}
+          </span>
+          <span className="text-label-13" style={{ color: "var(--text-muted)" }}>
+            Audited on {date}
+          </span>
         </div>
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-          <span style={{ fontSize: "13px", color: "var(--text-muted)", fontWeight: 500 }}>Visibility Score</span>
+          <span className="text-label-13" style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+            Visibility Score
+          </span>
           <span style={{ fontSize: "16px", fontWeight: 700, color: scoreColor }}>{score}%</span>
         </div>
 
         <Link href={`/audit/${audit.id}/results`} style={{ textDecoration: "none" }}>
           <button
+            className="text-label-13"
             style={{
               background: "white",
               border: "1px solid var(--border-default)",
               borderRadius: "6px",
               padding: "8px 14px",
-              fontSize: "13px",
               fontWeight: 600,
               color: "var(--text-body)",
               cursor: "pointer",
