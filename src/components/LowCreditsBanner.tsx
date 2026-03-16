@@ -40,7 +40,7 @@ export default function LowCreditsBanner() {
             fontWeight: 600,
             color: "#ffffff",
             background: isEmpty ? "#EF4444" : "#D97706",
-            padding: "5px 14px", borderRadius: "6px",
+            padding: "5px 14px", borderRadius: "var(--radius-sm)",
             textDecoration: "none", whiteSpace: "nowrap",
             marginLeft: "4px",
           }}

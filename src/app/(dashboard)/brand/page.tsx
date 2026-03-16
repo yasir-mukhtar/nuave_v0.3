@@ -313,7 +313,7 @@ export default function BrandPage() {
             onClick={() => router.push("/")}
             style={{
               display: "flex", alignItems: "center", gap: "6px",
-              background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: "8px",
+              background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: 'var(--radius-md)',
               padding: "9px 16px", fontSize: "13px", fontWeight: 600, cursor: "pointer",
             }}
           >
@@ -327,7 +327,7 @@ export default function BrandPage() {
           <div style={{
             display: "flex", flexDirection: "column", alignItems: "center",
             justifyContent: "center", height: "320px", gap: "12px",
-            border: "1px dashed var(--border-default)", borderRadius: "8px", background: "#ffffff",
+            border: "1px dashed var(--border-default)", borderRadius: 'var(--radius-md)', background: "#ffffff",
           }}>
             <p style={{ fontSize: "16px", fontWeight: 600 }}>
               Belum ada brand
@@ -339,7 +339,7 @@ export default function BrandPage() {
               onClick={() => router.push("/")}
               style={{
                 display: "flex", alignItems: "center", gap: "6px",
-                background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: "8px",
+                background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: 'var(--radius-md)',
                 padding: "10px 20px", fontSize: "13px", fontWeight: 600, cursor: "pointer",
                 marginTop: "8px",
               }}
@@ -385,7 +385,7 @@ export default function BrandPage() {
               transform: "translate(-50%, -50%)",
               width: "560px", maxWidth: "calc(100vw - 48px)",
               maxHeight: "calc(100vh - 80px)",
-              background: "#ffffff", borderRadius: "12px",
+              background: "#ffffff", borderRadius: 'var(--radius-lg)',
               border: "1px solid var(--border-default)",
               boxShadow: "0 16px 48px rgba(0,0,0,0.12)",
               display: "flex", flexDirection: "column",
@@ -445,7 +445,7 @@ export default function BrandPage() {
                     {editForm.differentiators.map((d, i) => (
                       <span key={i} style={{
                         display: "inline-flex", alignItems: "center", gap: "4px",
-                        padding: "4px 10px", borderRadius: "4px",
+                        padding: "4px 10px", borderRadius: "var(--radius-xs)",
                         background: "#EDE9FF", color: "#533AFD", fontSize: "12px", fontWeight: 500,
                       }}>
                         {d}
@@ -476,7 +476,7 @@ export default function BrandPage() {
                     {editForm.competitors.map((c, i) => (
                       <span key={i} style={{
                         display: "inline-flex", alignItems: "center", gap: "4px",
-                        padding: "4px 10px", borderRadius: "4px",
+                        padding: "4px 10px", borderRadius: "var(--radius-xs)",
                         background: "#F3F4F6", color: "#374151", fontSize: "12px", fontWeight: 500,
                       }}>
                         {c}
@@ -513,7 +513,7 @@ export default function BrandPage() {
                 style={{
                   padding: "8px 16px", fontSize: "13px", fontWeight: 500,
                   background: "var(--surface)", border: "1px solid var(--border-default)",
-                  borderRadius: "8px", cursor: "pointer", color: "var(--text-body)",
+                  borderRadius: 'var(--radius-md)', cursor: "pointer", color: "var(--text-body)",
                 }}
               >
                 Batal
@@ -525,7 +525,7 @@ export default function BrandPage() {
                   display: "flex", alignItems: "center", gap: "6px",
                   padding: "8px 20px", fontSize: "13px", fontWeight: 600,
                   background: "var(--purple)", color: "#ffffff", border: "none",
-                  borderRadius: "8px", cursor: saving ? "not-allowed" : "pointer",
+                  borderRadius: 'var(--radius-md)', cursor: saving ? "not-allowed" : "pointer",
                   opacity: saving || !editForm.brand_name.trim() ? 0.7 : 1,
                 }}
               >
@@ -561,7 +561,7 @@ export default function BrandPage() {
               position: "fixed", top: "50%", left: "50%",
               transform: "translate(-50%, -50%)",
               width: "420px", maxWidth: "calc(100vw - 48px)",
-              background: "#ffffff", borderRadius: "12px",
+              background: "#ffffff", borderRadius: 'var(--radius-lg)',
               border: "1px solid var(--border-default)",
               boxShadow: "0 16px 48px rgba(0,0,0,0.12)",
               padding: "24px", zIndex: 50,
@@ -590,7 +590,7 @@ export default function BrandPage() {
                 style={{
                   padding: "8px 16px", fontSize: "13px", fontWeight: 500,
                   background: "var(--surface)", border: "1px solid var(--border-default)",
-                  borderRadius: "8px", cursor: "pointer", color: "var(--text-body)",
+                  borderRadius: 'var(--radius-md)', cursor: "pointer", color: "var(--text-body)",
                 }}
               >
                 Batal
@@ -602,7 +602,7 @@ export default function BrandPage() {
                   display: "flex", alignItems: "center", gap: "6px",
                   padding: "8px 20px", fontSize: "13px", fontWeight: 600,
                   background: "#DC2626", color: "#ffffff", border: "none",
-                  borderRadius: "8px", cursor: deleting ? "not-allowed" : "pointer",
+                  borderRadius: 'var(--radius-md)', cursor: deleting ? "not-allowed" : "pointer",
                   opacity: deleting ? 0.7 : 1,
                 }}
               >
@@ -639,7 +639,7 @@ function BrandCard({
   return (
     <div
       style={{
-        padding: "24px", borderRadius: "8px",
+        padding: "24px", borderRadius: 'var(--radius-md)',
         border: "1px solid var(--border-default)",
         background: "#ffffff",
         transition: "border-color 0.15s ease",
@@ -651,7 +651,7 @@ function BrandCard({
       <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "16px" }}>
         {/* Avatar */}
         <div style={{
-          width: "40px", height: "40px", borderRadius: "10px",
+          width: "40px", height: "40px", borderRadius: "var(--radius-md)",
           background: "var(--purple)", color: "#ffffff",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: "16px", fontWeight: 700, flexShrink: 0,
@@ -726,7 +726,7 @@ function BrandCard({
         <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "16px" }}>
           {brand.differentiators.map((d, i) => (
             <span key={`d-${i}`} style={{
-              padding: "3px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500,
+              padding: "3px 8px", borderRadius: "var(--radius-xs)", fontSize: "11px", fontWeight: 500,
               background: "#EDE9FF", color: "#533AFD",
             }}>
               {d}
@@ -734,7 +734,7 @@ function BrandCard({
           ))}
           {brand.competitors.map((c, i) => (
             <span key={`c-${i}`} style={{
-              padding: "3px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: 500,
+              padding: "3px 8px", borderRadius: "var(--radius-xs)", fontSize: "11px", fontWeight: 500,
               background: "#F3F4F6", color: "#6B7280",
             }}>
               vs {c}
@@ -801,7 +801,7 @@ function ActionButton({
       title={label}
       style={{
         display: "flex", alignItems: "center", justifyContent: "center",
-        width: "32px", height: "32px", borderRadius: "6px",
+        width: "32px", height: "32px", borderRadius: 'var(--radius-sm)',
         background: "transparent", border: "1px solid transparent",
         cursor: disabled ? "not-allowed" : "pointer",
         color: danger ? "#DC2626" : "var(--text-muted)",

@@ -154,7 +154,7 @@ export default function ResultsPage() {
           background: '#EDE9FF',
           color: '#533AFD',
           fontWeight: 500,
-          borderRadius: '3px',
+          borderRadius: 'var(--radius-xs)',
           padding: '0 2px',
           fontStyle: 'normal'
         }}>{part}</mark>
@@ -268,7 +268,7 @@ export default function ResultsPage() {
             right: 0 !important;
             left: 0 !important;
             transform: none !important;
-            border-radius: 16px 16px 0 0 !important;
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
             padding: 24px !important;
             animation: slideUp 0.3s ease-out !important;
           }
@@ -293,7 +293,7 @@ export default function ResultsPage() {
           style={{
             background: "#ffffff",
             border: "1px solid var(--border-default)",
-            borderRadius: "16px",
+            borderRadius: "var(--radius-xl)",
             padding: "40px",
             display: "flex",
             flexDirection: "column",

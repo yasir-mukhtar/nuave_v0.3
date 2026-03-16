@@ -278,7 +278,7 @@ export default function RecommendationsPage() {
         <div style={{
           background: '#F3F4F6',
           padding: '6px 12px',
-          borderRadius: '999px',
+          borderRadius: 'var(--radius-full)',
           fontSize: '13px',
           fontWeight: 600,
           color: '#374151'
@@ -312,7 +312,7 @@ export default function RecommendationsPage() {
                 style={{
                   background: isActive ? 'var(--purple)' : '#F3F4F6',
                   color: isActive ? 'white' : '#374151',
-                  borderRadius: '999px',
+                  borderRadius: 'var(--radius-full)',
                   padding: '6px 16px',
                   fontSize: '13px',
                   fontWeight: 500,
@@ -340,10 +340,10 @@ export default function RecommendationsPage() {
             {[1,2,3,4].map((i) => (
               <div key={i} className="card" style={{ height: '120px', animation: 'pulse-light 1.5s ease-in-out infinite' }}>
                 <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-                  <div style={{ width: "60px", height: "22px", borderRadius: "6px", background: "#F3F4F6" }} />
-                  <div style={{ width: "80px", height: "22px", borderRadius: "6px", background: "#F3F4F6" }} />
+                  <div style={{ width: "60px", height: "22px", borderRadius: "var(--radius-sm)", background: "#F3F4F6" }} />
+                  <div style={{ width: "80px", height: "22px", borderRadius: "var(--radius-sm)", background: "#F3F4F6" }} />
                 </div>
-                <div style={{ width: "70%", height: "20px", borderRadius: "6px", background: "#F3F4F6", marginBottom: "10px" }} />
+                <div style={{ width: "70%", height: "20px", borderRadius: "var(--radius-sm)", background: "#F3F4F6", marginBottom: "10px" }} />
               </div>
             ))}
             <p style={{ textAlign: "center", fontSize: "13px", color: "var(--text-muted)", marginTop: "16px" }}>
@@ -367,9 +367,9 @@ export default function RecommendationsPage() {
                     <span style={{ 
                       background: priorityInfo.background,
                       color: priorityInfo.color,
-                      borderRadius: '999px', 
-                      padding: '2px 10px', 
-                      fontSize: '11px', 
+                      borderRadius: 'var(--radius-full)',
+                      padding: '2px 10px',
+                      fontSize: '11px',
                       fontWeight: 600,
                       textTransform: 'capitalize'
                     }}>
@@ -378,10 +378,10 @@ export default function RecommendationsPage() {
                     <span style={{ 
                       background: typeStyle.background,
                       color: typeStyle.color,
-                      borderRadius: '999px', 
-                      padding: '2px 10px', 
-                      fontSize: '11px', 
-                      fontWeight: 600 
+                      borderRadius: 'var(--radius-full)',
+                      padding: '2px 10px',
+                      fontSize: '11px',
+                      fontWeight: 600
                     }}>
                       {typeStyle.label}
                     </span>
@@ -409,7 +409,7 @@ export default function RecommendationsPage() {
                         background: 'var(--purple)',
                         color: 'white',
                         border: 'none',
-                        borderRadius: '8px',
+                        borderRadius: 'var(--radius-md)',
                         padding: '8px 16px',
                         fontSize: '13px',
                         fontWeight: 500,
@@ -427,7 +427,7 @@ export default function RecommendationsPage() {
                     marginTop: '12px',
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-md)',
                     padding: '16px'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>

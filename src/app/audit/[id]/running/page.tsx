@@ -126,7 +126,7 @@ export default function AuditRunningPage() {
             background: "#533AFD",
             color: "#ffffff",
             padding: "12px 24px",
-            borderRadius: "8px",
+            borderRadius: "var(--radius-md)",
             fontWeight: 600,
             textDecoration: "none"
           }}

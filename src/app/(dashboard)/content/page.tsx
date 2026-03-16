@@ -347,7 +347,7 @@ export default function KontenPage() {
 
         {/* ── Progress bar ── */}
         <div style={{
-          padding: "20px", borderRadius: "8px",
+          padding: "20px", borderRadius: 'var(--radius-md)',
           border: "1px solid var(--border-default)", background: "#ffffff",
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
@@ -360,10 +360,10 @@ export default function KontenPage() {
             </span>
           </div>
           <div style={{
-            height: "6px", borderRadius: "3px", background: "var(--border-default)", overflow: "hidden",
+            height: "6px", borderRadius: 'var(--radius-xs)', background: "var(--border-default)", overflow: "hidden",
           }}>
             <div style={{
-              height: "100%", borderRadius: "3px",
+              height: "100%", borderRadius: 'var(--radius-xs)',
               background: progressPct === 100 ? "#22C55E" : "var(--purple)",
               width: `${progressPct}%`,
               transition: "width 0.3s ease",
@@ -377,7 +377,7 @@ export default function KontenPage() {
           {/* Type tabs */}
           <div style={{
             display: "flex", background: "var(--surface)",
-            border: "1px solid var(--border-default)", borderRadius: "8px", overflow: "hidden",
+            border: "1px solid var(--border-default)", borderRadius: 'var(--radius-md)', overflow: "hidden",
           }}>
             {([
               { key: "all", label: "Semua" },
@@ -394,7 +394,7 @@ export default function KontenPage() {
                   background: typeFilter === tab.key ? "#ffffff" : "transparent",
                   color: typeFilter === tab.key ? "var(--text-heading)" : "var(--text-muted)",
                   boxShadow: typeFilter === tab.key ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
-                  borderRadius: typeFilter === tab.key ? "6px" : "0",
+                  borderRadius: typeFilter === tab.key ? 'var(--radius-sm)' : "0",
                   transition: "all 0.15s ease",
                 }}
               >
@@ -411,7 +411,7 @@ export default function KontenPage() {
               onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
               style={{
                 padding: "7px 28px 7px 10px", fontSize: "13px",
-                border: "1px solid var(--border-default)", borderRadius: "6px",
+                border: "1px solid var(--border-default)", borderRadius: 'var(--radius-sm)',
                 background: "#ffffff", color: "var(--text-body)",
                 cursor: "pointer", outline: "none", appearance: "none",
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")`,
@@ -434,7 +434,7 @@ export default function KontenPage() {
               onChange={(e) => setWorkspaceFilter(e.target.value)}
               style={{
                 padding: "7px 28px 7px 10px", fontSize: "13px",
-                border: "1px solid var(--border-default)", borderRadius: "6px",
+                border: "1px solid var(--border-default)", borderRadius: 'var(--radius-sm)',
                 background: "#ffffff", color: "var(--text-body)",
                 cursor: "pointer", outline: "none", appearance: "none",
                 backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")`,
@@ -478,7 +478,7 @@ export default function KontenPage() {
               <div key={type}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
                   <span style={{
-                    fontSize: "11px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px",
+                    fontSize: "11px", fontWeight: 600, padding: "3px 10px", borderRadius: "var(--radius-xs)",
                     background: typeInfo.bg, color: typeInfo.color, textTransform: "uppercase", letterSpacing: "0.05em",
                   }}>
                     {typeInfo.label}
@@ -515,7 +515,7 @@ export default function KontenPage() {
             style={{
               display: "flex", flexDirection: "column",
               position: "fixed", top: "24px", right: "24px", bottom: "24px",
-              width: "480px", background: "#ffffff", borderRadius: "6px",
+              width: "480px", background: "#ffffff", borderRadius: 'var(--radius-sm)',
               border: "1px solid #E5E7EB", boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
               overflow: "hidden", zIndex: 50,
               animation: `${panelClosing ? "kontenPanelOut" : "kontenPanelIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
@@ -529,14 +529,14 @@ export default function KontenPage() {
               <div style={{ flex: 1, minWidth: 0, paddingRight: "16px" }}>
                 <div style={{ display: "flex", gap: "6px", marginBottom: "8px" }}>
                   <span style={{
-                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "4px",
+                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "var(--radius-xs)",
                     background: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).bg,
                     color: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).color,
                   }}>
                     Prioritas {(PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).label}
                   </span>
                   <span style={{
-                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "4px",
+                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "var(--radius-xs)",
                     background: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).bg,
                     color: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).color,
                   }}>
@@ -588,7 +588,7 @@ export default function KontenPage() {
 
                   {/* Content */}
                   <div style={{
-                    background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: "8px",
+                    background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 'var(--radius-md)',
                     padding: "16px",
                   }}>
                     {renderMarkdown(selectedRec.suggested_copy)}
@@ -604,7 +604,7 @@ export default function KontenPage() {
                     disabled={revealingId === selectedRec.id}
                     style={{
                       display: "inline-flex", alignItems: "center", gap: "6px",
-                      background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: "8px",
+                      background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: 'var(--radius-md)',
                       padding: "10px 20px", fontSize: "13px", fontWeight: 600,
                       cursor: revealingId === selectedRec.id ? "not-allowed" : "pointer",
                       opacity: revealingId === selectedRec.id ? 0.7 : 1,
@@ -637,7 +637,7 @@ export default function KontenPage() {
                     display: "flex", alignItems: "center", gap: "8px",
                     background: selectedRec.is_applied ? "#F0FDF4" : "var(--surface)",
                     border: `1px solid ${selectedRec.is_applied ? "#BBF7D0" : "var(--border-default)"}`,
-                    borderRadius: "8px", padding: "8px 16px",
+                    borderRadius: 'var(--radius-md)', padding: "8px 16px",
                     fontSize: "13px", fontWeight: 500, cursor: "pointer",
                     color: selectedRec.is_applied ? "#16A34A" : "var(--text-body)",
                     transition: "all 0.15s ease",
@@ -690,7 +690,7 @@ function RecCard({
   return (
     <div
       style={{
-        padding: "16px 20px", borderRadius: "8px",
+        padding: "16px 20px", borderRadius: 'var(--radius-md)',
         border: `1px solid ${isSelected ? "var(--purple)" : rec.is_applied ? "#BBF7D0" : "var(--border-default)"}`,
         background: rec.is_applied ? "#FAFFF9" : "#ffffff",
         display: "flex", alignItems: "center", gap: "16px",
@@ -724,13 +724,13 @@ function RecCard({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
           <span style={{
-            fontSize: "11px", fontWeight: 600, padding: "1px 6px", borderRadius: "3px",
+            fontSize: "11px", fontWeight: 600, padding: "1px 6px", borderRadius: 'var(--radius-xs)',
             background: priorityInfo.bg, color: priorityInfo.color,
           }}>
             {priorityInfo.label}
           </span>
           <span style={{
-            fontSize: "11px", fontWeight: 600, padding: "1px 6px", borderRadius: "3px",
+            fontSize: "11px", fontWeight: 600, padding: "1px 6px", borderRadius: 'var(--radius-xs)',
             background: typeInfo.bg, color: typeInfo.color,
           }}>
             {typeInfo.label}
@@ -764,7 +764,7 @@ function RecCard({
             disabled={isRevealing}
             style={{
               display: "flex", alignItems: "center", gap: "5px",
-              background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: "6px",
+              background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: 'var(--radius-sm)',
               padding: "7px 12px", fontSize: "12px", fontWeight: 600,
               cursor: isRevealing ? "not-allowed" : "pointer",
               opacity: isRevealing ? 0.7 : 1, whiteSpace: "nowrap",

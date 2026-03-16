@@ -52,7 +52,7 @@ export default function PrivacyPage() {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             background: "var(--purple-light)", border: "1px solid #C4B5FD",
-            borderRadius: "999px", padding: "4px 12px",
+            borderRadius: "var(--radius-full)", padding: "4px 12px",
             fontSize: "12px", fontWeight: 500, color: "var(--purple)", marginBottom: "16px",
           }}>
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--purple)" }} />
@@ -113,7 +113,7 @@ export default function PrivacyPage() {
           ["Alamat IP", "Untuk keperluan rate limiting dan keamanan sistem"],
         ]} />
 
-        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: "8px", padding: "16px", margin: "16px 0 32px" }}>
+        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: "var(--radius-md)", padding: "16px", margin: "16px 0 32px" }}>
           <p style={{ fontSize: "14px", color: "#92400E", margin: 0 }}>
             <strong>Catatan:</strong> Kami <strong>tidak</strong> mengumpulkan data sensitif seperti nomor KTP, data kesehatan, data biometrik, orientasi seksual, pandangan politik, atau data keuangan (kartu kredit diproses langsung oleh Stripe dan tidak pernah menyentuh server kami).
           </p>
@@ -167,7 +167,7 @@ export default function PrivacyPage() {
           Sesuai Pasal 56 UU PDP, kami menginformasikan bahwa data Anda diproses oleh penyedia layanan pihak ketiga berikut:
         </p>
         <div style={{ overflowX: "auto", marginBottom: "16px" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px", border: "1px solid var(--border-default)", borderRadius: "8px", overflow: "hidden" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px", border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
             <thead>
               <tr style={{ background: "var(--surface)" }}>
                 {["Penyedia", "Tujuan", "Lokasi Server", "Data yang Dikirim"].map((h, i) => (
@@ -219,13 +219,13 @@ export default function PrivacyPage() {
             ["Hak Menarik Persetujuan", "Menarik persetujuan kapan saja tanpa mempengaruhi keabsahan pemrosesan sebelumnya."],
             ["Hak Mengajukan Keberatan", "Mengajukan keberatan kepada kami atau ke Lembaga Perlindungan Data Pribadi."],
           ].map(([title, desc], i) => (
-            <div key={i} style={{ border: "1px solid var(--border-default)", borderRadius: "8px", padding: "16px" }}>
+            <div key={i} style={{ border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", padding: "16px" }}>
               <p style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-heading)", margin: "0 0 4px 0" }}>{title}</p>
               <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>{desc}</p>
             </div>
           ))}
         </div>
-        <div style={{ background: "var(--purple-light)", border: "1px solid #C4B5FD", borderRadius: "8px", padding: "16px" }}>
+        <div style={{ background: "var(--purple-light)", border: "1px solid #C4B5FD", borderRadius: "var(--radius-md)", padding: "16px" }}>
           <p style={{ fontSize: "14px", color: "#4C1D95", margin: 0 }}>
             Untuk menggunakan hak-hak di atas, kirimkan permintaan ke{" "}
             <a href="mailto:privacy@nuave.ai" style={{ color: "var(--purple)", fontWeight: 600 }}>privacy@nuave.ai</a>.
@@ -282,7 +282,7 @@ export default function PrivacyPage() {
 
         <SectionTitle n="11">Hubungi Kami</SectionTitle>
         <p style={{ fontSize: "14px", color: "var(--text-body)", marginBottom: "16px" }}>Untuk pertanyaan, permintaan hak subjek data, atau keluhan terkait privasi:</p>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border-default)", borderRadius: "12px", padding: "24px" }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border-default)", borderRadius: "var(--radius-lg)", padding: "24px" }}>
           <p style={{ fontSize: "14px", color: "var(--text-body)", margin: "0 0 8px 0" }}><strong>Penanggung Jawab Data:</strong> Nuave</p>
           <p style={{ fontSize: "14px", color: "var(--text-body)", margin: "0 0 8px 0" }}>
             <strong>Email:</strong>{" "}
@@ -306,7 +306,7 @@ function SectionTitle({ n, children }: { n: string; children: React.ReactNode })
   return (
     <h2 style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "20px", marginBottom: "16px" }}>
       <span style={{
-        width: "32px", height: "32px", borderRadius: "8px",
+        width: "32px", height: "32px", borderRadius: "var(--radius-md)",
         background: "var(--purple-light)", color: "var(--purple)",
         fontSize: "14px", fontWeight: 700,
         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
@@ -326,7 +326,7 @@ function SubTitle({ children }: { children: React.ReactNode }) {
 
 function DataTable({ rows }: { rows: string[][] }) {
   return (
-    <div style={{ border: "1px solid var(--border-default)", borderRadius: "8px", overflow: "hidden", marginBottom: "16px" }}>
+    <div style={{ border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "16px" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
         <tbody>
           {rows.map((row, i) => (

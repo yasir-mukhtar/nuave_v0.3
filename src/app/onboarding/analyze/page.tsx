@@ -100,7 +100,7 @@ export default function AnalyzePage() {
                   style={{
                     height: "3px",
                     flex: 1,
-                    borderRadius: "999px",
+                    borderRadius: "var(--radius-full)",
                     background: i < 2 ? "var(--purple)" : "var(--border-default)",
                   }}
                 />
@@ -120,7 +120,7 @@ export default function AnalyzePage() {
                     color: 'white',
                     border: 'none',
                     padding: '8px 16px',
-                    borderRadius: '8px',
+                    borderRadius: 'var(--radius-md)',
                     cursor: 'pointer'
                   }}
                 >

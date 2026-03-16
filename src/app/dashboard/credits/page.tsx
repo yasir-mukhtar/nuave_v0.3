@@ -114,7 +114,7 @@ function CreditsPageContent() {
                 onClick={() => setSelected(pkg.id)}
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "20px 24px", borderRadius: "12px", cursor: "pointer",
+                  padding: "20px 24px", borderRadius: 'var(--radius-lg)', cursor: "pointer",
                   background: selected === pkg.id ? "var(--purple-light)" : "#ffffff",
                   border: `2px solid ${selected === pkg.id ? "var(--purple)" : "var(--border-default)"}`,
                   textAlign: "left", transition: "all 150ms ease",
@@ -139,7 +139,7 @@ function CreditsPageContent() {
                         <span style={{
                           fontSize: "10px", fontWeight: 700, color: "var(--purple)",
                           background: "var(--purple-light)", padding: "2px 8px",
-                          borderRadius: "999px", letterSpacing: "0.05em",
+                          borderRadius: 'var(--radius-full)', letterSpacing: "0.05em",
                         }}>POPULER</span>
                       )}
                     </div>
@@ -159,7 +159,7 @@ function CreditsPageContent() {
           {/* Order summary */}
           <div style={{
             background: "var(--surface)", border: "1px solid var(--border-default)",
-            borderRadius: "16px", padding: "28px", position: "sticky", top: "72px",
+            borderRadius: 'var(--radius-xl)', padding: "28px", position: "sticky", top: "72px",
           }}>
             <h2 style={{ fontSize: "16px", margin: "0 0 20px 0" }}>
               Ringkasan Pesanan
@@ -189,7 +189,7 @@ function CreditsPageContent() {
               onClick={handlePay}
               disabled={paying}
               style={{
-                width: "100%", padding: "14px", borderRadius: "10px",
+                width: "100%", padding: "14px", borderRadius: 'var(--radius-md)',
                 fontSize: "15px", fontWeight: 600, color: "#ffffff",
                 background: paying ? "#9CA3AF" : "var(--purple)",
                 border: "none", cursor: paying ? "not-allowed" : "pointer",
@@ -211,7 +211,7 @@ function CreditsPageContent() {
                   <span key={m} style={{
                     fontSize: "11px", color: "var(--text-muted)",
                     background: "#ffffff", border: "1px solid var(--border-default)",
-                    borderRadius: "4px", padding: "2px 8px",
+                    borderRadius: 'var(--radius-xs)', padding: "2px 8px",
                   }}>{m}</span>
                 ))}
               </div>

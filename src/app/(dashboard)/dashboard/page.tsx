@@ -274,7 +274,7 @@ function AuditRow({ audit, brandName }: { audit: any; brandName: string }) {
           style={{
             width: "40px",
             height: "40px",
-            borderRadius: "6px",
+            borderRadius: "var(--radius-sm)",
             background: "var(--purple-light)",
             color: "var(--purple)",
             display: "flex",
@@ -310,7 +310,7 @@ function AuditRow({ audit, brandName }: { audit: any; brandName: string }) {
             style={{
               background: "white",
               border: "1px solid var(--border-default)",
-              borderRadius: "6px",
+              borderRadius: "var(--radius-sm)",
               padding: "8px 14px",
               fontWeight: 600,
               color: "var(--text-body)",

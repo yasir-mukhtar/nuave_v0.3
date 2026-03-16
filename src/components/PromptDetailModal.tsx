@@ -33,7 +33,7 @@ function highlightBrand(text: string, brand: string) {
           background: '#EDE9FF',
           color: '#533AFD',
           fontWeight: 500,
-          borderRadius: '3px',
+          borderRadius: 'var(--radius-xs)',
           padding: '0 2px',
           fontStyle: 'normal',
         }}
@@ -208,7 +208,7 @@ export default function PromptDetailModal({
             top: auto !important;
             right: 0 !important;
             left: 0 !important;
-            border-radius: 6px 6px 0 0 !important;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0 !important;
           }
         }
       `}</style>
@@ -237,7 +237,7 @@ export default function PromptDetailModal({
           bottom: '24px',
           width: '480px',
           background: '#FFFFFF',
-          borderRadius: '6px',
+          borderRadius: 'var(--radius-sm)',
           border: '1px solid #E5E7EB',
           boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
           overflow: 'hidden',
@@ -297,7 +297,7 @@ export default function PromptDetailModal({
                 marginLeft: 'auto',
                 background: 'var(--purple)',
                 color: 'white',
-                borderRadius: '18px 18px 4px 18px',
+                borderRadius: 'var(--radius-2xl) var(--radius-2xl) var(--radius-xs) var(--radius-2xl)',
                 padding: '10px 14px',
                 maxWidth: '85%',
                 display: 'inline-block',
@@ -322,7 +322,7 @@ export default function PromptDetailModal({
                   alignItems: 'center',
                   gap: '6px',
                   background: '#F4F4F4',
-                  borderRadius: '999px',
+                  borderRadius: 'var(--radius-full)',
                   padding: '6px 12px 6px 6px',
                 }}
               >

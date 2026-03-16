@@ -26,7 +26,7 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
       <div
         style={{
           border: '1px solid var(--border-light)',
-          borderRadius: '6px',
+          borderRadius: 'var(--radius-sm)',
           boxShadow: 'var(--shadow-subtle)',
           background: '#ffffff',
           display: 'flex',
@@ -60,7 +60,7 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
                 color: 'var(--text-heading)',
                 textDecoration: 'none',
                 border: '1px solid var(--border-light)',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-sm)',
                 boxShadow: 'var(--shadow-subtle)',
               }}
             >

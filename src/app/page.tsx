@@ -141,7 +141,7 @@ export default function Home() {
               display: "inline-flex", alignItems: "center", gap: "6px",
               fontWeight: 500, color: "#ffffff",
               background: "#6C3FF5", textDecoration: "none",
-              padding: "8px 20px", borderRadius: "8px",
+              padding: "8px 20px", borderRadius: 'var(--radius-md)',
             }}>
               Dashboard <IconArrowRight size={16} stroke={2} />
             </Link>
@@ -156,7 +156,7 @@ export default function Home() {
               }} className="text-label-14" style={{
                 fontWeight: 500, color: "#ffffff",
                 background: "#6C3FF5", textDecoration: "none",
-                padding: "8px 20px", borderRadius: "8px",
+                padding: "8px 20px", borderRadius: 'var(--radius-md)',
                 whiteSpace: "nowrap",
               }}>
                 Mulai Gratis
@@ -239,7 +239,7 @@ export default function Home() {
               display: "flex", flexDirection: "column", gap: "12px",
               maxWidth: "420px", width: "100%",
               background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)",
-              padding: "24px", borderRadius: "16px",
+              padding: "24px", borderRadius: 'var(--radius-xl)',
               border: "1px solid rgba(108,63,245,0.1)",
               boxShadow: "0 4px 24px rgba(108,63,245,0.06)",
             }}>
@@ -258,7 +258,7 @@ export default function Home() {
                 style={{
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                   width: "100%", fontSize: "15px", fontWeight: 600, color: "#ffffff",
-                  background: "linear-gradient(135deg, #6C3FF5, #8B5CF6)", border: "none", borderRadius: "8px",
+                  background: "linear-gradient(135deg, #6C3FF5, #8B5CF6)", border: "none", borderRadius: 'var(--radius-md)',
                   padding: "14px", cursor: loading ? "not-allowed" : "pointer",
                   opacity: loading ? 0.7 : 1,
                   boxShadow: "0 4px 16px rgba(108,63,245,0.3)",
@@ -280,7 +280,7 @@ export default function Home() {
           {/* Right column — mockup */}
           <div className="lp-hero-mockup" style={{
             background: "rgba(255,255,255,0.75)", backdropFilter: "blur(12px)",
-            border: "1px solid rgba(108,63,245,0.1)", borderRadius: "16px",
+            border: "1px solid rgba(108,63,245,0.1)", borderRadius: 'var(--radius-xl)',
             padding: "32px", display: "flex", flexDirection: "column", gap: "24px",
             boxShadow: "0 8px 32px rgba(108,63,245,0.08)",
           }}>
@@ -301,7 +301,7 @@ export default function Home() {
               </div>
               <span style={{
                 display: "inline-block", background: "#FEE2E2", color: "#DC2626",
-                fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: "999px",
+                fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: 'var(--radius-full)',
               }}>
                 Visibilitas Rendah
               </span>
@@ -315,7 +315,7 @@ export default function Home() {
               {MOCK_PROMPTS.slice(0, 4).map((p, i) => (
                 <div key={i} className="text-label-13" style={{
                   display: "flex", alignItems: "center", gap: "10px",
-                  padding: "10px 14px", background: "rgba(255,255,255,0.8)", borderRadius: "8px",
+                  padding: "10px 14px", background: "rgba(255,255,255,0.8)", borderRadius: 'var(--radius-md)',
                   border: "1px solid rgba(229,231,235,0.8)",
                 }}>
                   {p.mentioned ? (
@@ -342,7 +342,7 @@ export default function Home() {
           {STATS.map((s, i) => (
             <div key={i} style={{
               textAlign: "center", padding: "24px 16px",
-              background: "#ffffff", borderRadius: "12px", border: "1px solid #E5E7EB",
+              background: "#ffffff", borderRadius: 'var(--radius-lg)', border: "1px solid #E5E7EB",
             }}>
               <div style={{ fontSize: "36px", fontWeight: 700, color: "#6C3FF5", marginBottom: "8px" }}>{s.value}</div>
               <div className="text-copy-14" style={{ color: "#6B7280" }}>{s.label}</div>
@@ -363,7 +363,7 @@ export default function Home() {
         <div className="lp-two-col">
           {/* Before */}
           <div style={{
-            padding: "32px", borderRadius: "16px", border: "1px solid #E5E7EB",
+            padding: "32px", borderRadius: 'var(--radius-xl)', border: "1px solid #E5E7EB",
             background: "#F9FAFB", opacity: 0.75,
           }}>
             <div style={{
@@ -382,7 +382,7 @@ export default function Home() {
 
           {/* After */}
           <div style={{
-            padding: "32px", borderRadius: "16px",
+            padding: "32px", borderRadius: 'var(--radius-xl)',
             border: "2px solid #6C3FF5", background: "#ffffff",
             boxShadow: "0 0 0 4px rgba(108,63,245,0.08)",
           }}>
@@ -403,7 +403,7 @@ export default function Home() {
 
         {/* Callout */}
         <div style={{
-          marginTop: "32px", padding: "20px 24px", borderRadius: "12px",
+          marginTop: "32px", padding: "20px 24px", borderRadius: 'var(--radius-lg)',
           background: "#EDE9FF", textAlign: "center",
         }}>
           <p style={{ fontSize: "15px", color: "#111827", margin: 0, lineHeight: 1.6 }}>
@@ -455,11 +455,11 @@ export default function Home() {
         <div className="lp-features-grid">
           {FEATURES.map((f, i) => (
             <div key={i} style={{
-              padding: "28px", borderRadius: "12px",
+              padding: "28px", borderRadius: 'var(--radius-lg)',
               border: "1px solid #E5E7EB", background: "#ffffff",
             }}>
               <div style={{
-                width: "40px", height: "40px", borderRadius: "10px",
+                width: "40px", height: "40px", borderRadius: 'var(--radius-md)',
                 background: "#EDE9FF", display: "flex", alignItems: "center", justifyContent: "center",
                 marginBottom: "16px",
               }}>
@@ -486,7 +486,7 @@ export default function Home() {
 
           {/* Mockup card */}
           <div style={{
-            background: "#ffffff", borderRadius: "16px", border: "1px solid #E5E7EB",
+            background: "#ffffff", borderRadius: 'var(--radius-xl)', border: "1px solid #E5E7EB",
             padding: "32px", boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
           }}>
             {/* Score */}
@@ -505,7 +505,7 @@ export default function Home() {
               </div>
               <span style={{
                 display: "inline-block", background: "#FEE2E2", color: "#DC2626",
-                fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: "999px",
+                fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: 'var(--radius-full)',
               }}>
                 Visibilitas Rendah
               </span>
@@ -519,7 +519,7 @@ export default function Home() {
               {MOCK_PROMPTS.map((p, i) => (
                 <div key={i} className="text-label-14" style={{
                   display: "flex", alignItems: "center", gap: "10px",
-                  padding: "12px 16px", borderRadius: "8px",
+                  padding: "12px 16px", borderRadius: 'var(--radius-md)',
                   border: "1px solid #E5E7EB",
                   background: p.mentioned ? "#F0FDF4" : "#ffffff",
                 }}>
@@ -530,7 +530,7 @@ export default function Home() {
                   )}
                   <span style={{ flex: 1 }}>{p.prompt}</span>
                   <span className="lp-score-badge-text" style={{
-                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "999px",
+                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: 'var(--radius-full)',
                     background: p.mentioned ? "#DCFCE7" : "#FEE2E2",
                     color: p.mentioned ? "#16A34A" : "#DC2626",
                     flexShrink: 0,
@@ -553,7 +553,7 @@ export default function Home() {
               style={{
                 display: "inline-flex", alignItems: "center", gap: "8px",
                 fontSize: "15px", fontWeight: 600, color: "#ffffff",
-                background: "#6C3FF5", border: "none", borderRadius: "8px",
+                background: "#6C3FF5", border: "none", borderRadius: 'var(--radius-md)',
                 padding: "14px 28px", cursor: "pointer",
               }}
             >
@@ -575,7 +575,7 @@ export default function Home() {
           {PRICING.map((pkg) => (
             <div key={pkg.name} style={{
               position: "relative",
-              padding: "32px 28px", borderRadius: "16px",
+              padding: "32px 28px", borderRadius: 'var(--radius-xl)',
               background: pkg.popular ? "#6C3FF5" : "#ffffff",
               border: `1px solid ${pkg.popular ? "#6C3FF5" : "#E5E7EB"}`,
               boxShadow: pkg.popular ? "0 8px 32px rgba(108,63,245,0.25)" : "0 1px 2px rgba(0,0,0,0.05)",
@@ -587,7 +587,7 @@ export default function Home() {
                   position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
                   background: "#ffffff", color: "#6C3FF5",
                   fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em",
-                  padding: "4px 14px", borderRadius: "999px",
+                  padding: "4px 14px", borderRadius: 'var(--radius-full)',
                   border: "1px solid #E5E7EB", boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
                   whiteSpace: "nowrap",
                 }}>
@@ -621,7 +621,7 @@ export default function Home() {
                 className="text-label-14"
                 style={{
                   display: "block", width: "100%", textAlign: "center",
-                  padding: "12px 24px", borderRadius: "8px",
+                  padding: "12px 24px", borderRadius: 'var(--radius-md)',
                   fontWeight: 600, border: "none", cursor: "pointer",
                   background: pkg.popular ? "#ffffff" : "#6C3FF5",
                   color: pkg.popular ? "#6C3FF5" : "#ffffff",
@@ -649,7 +649,7 @@ export default function Home() {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {FAQS.map((faq, i) => (
               <div key={i} style={{
-                background: "#ffffff", border: "1px solid #E5E7EB", borderRadius: "12px",
+                background: "#ffffff", border: "1px solid #E5E7EB", borderRadius: 'var(--radius-lg)',
                 overflow: "hidden",
               }}>
                 <button
@@ -709,7 +709,7 @@ export default function Home() {
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                 width: "100%", fontSize: "15px", fontWeight: 600, color: "#ffffff",
-                background: "#6C3FF5", border: "none", borderRadius: "8px",
+                background: "#6C3FF5", border: "none", borderRadius: 'var(--radius-md)',
                 padding: "14px", cursor: loading2 ? "not-allowed" : "pointer",
                 opacity: loading2 ? 0.7 : 1,
               }}>

@@ -61,7 +61,7 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
     <div
       style={{
         border: '1px solid var(--border-light)',
-        borderRadius: '6px',
+        borderRadius: 'var(--radius-sm)',
         boxShadow: 'var(--shadow-subtle)',
         background: '#ffffff',
         display: 'flex',
@@ -96,7 +96,7 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
               color: 'var(--text-heading)',
               textDecoration: 'none',
               border: '1px solid var(--border-light)',
-              borderRadius: '6px',
+              borderRadius: 'var(--radius-sm)',
               boxShadow: 'var(--shadow-subtle)',
             }}
           >

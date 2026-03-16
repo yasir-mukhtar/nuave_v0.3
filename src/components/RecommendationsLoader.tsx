@@ -187,10 +187,10 @@ export default function RecommendationsLoader() {
       {/* Progress bar */}
       <div style={{
         width: "100%", maxWidth: 480, height: 4, background: "#F3F4F6",
-        borderRadius: 99, overflow: "hidden", marginBottom: 32
+        borderRadius: "var(--radius-full)", overflow: "hidden", marginBottom: 32
       }}>
         <div style={{
-          height: "100%", background: "var(--purple)", borderRadius: 99,
+          height: "100%", background: "var(--purple)", borderRadius: "var(--radius-full)",
           width: `${overallProgress}%`, transition: "width 0.15s linear"
         }} />
       </div>

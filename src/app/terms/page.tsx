@@ -52,7 +52,7 @@ export default function TermsPage() {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             background: "var(--purple-light)", border: "1px solid #C4B5FD",
-            borderRadius: "999px", padding: "4px 12px",
+            borderRadius: "var(--radius-full)", padding: "4px 12px",
             fontSize: "12px", fontWeight: 500, color: "var(--purple)", marginBottom: "16px",
           }}>
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--purple)" }} />
@@ -119,7 +119,7 @@ export default function TermsPage() {
           Nuave menggunakan sistem berbasis kredit. Pengguna baru menerima <strong>10 kredit gratis</strong> saat pendaftaran. Kredit tambahan dapat dibeli dalam paket berikut:
         </p>
 
-        <div style={{ border: "1px solid var(--border-default)", borderRadius: "8px", overflow: "hidden", marginBottom: "16px" }}>
+        <div style={{ border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "16px" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
             <thead>
               <tr style={{ background: "var(--surface)" }}>
@@ -147,7 +147,7 @@ export default function TermsPage() {
         <p style={{ fontSize: "14px", color: "var(--text-body)", lineHeight: 1.7, marginBottom: "12px" }}>
           Penggunaan kredit per tindakan:
         </p>
-        <div style={{ border: "1px solid var(--border-default)", borderRadius: "8px", overflow: "hidden", marginBottom: "16px" }}>
+        <div style={{ border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: "16px" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
             <tbody>
               {[
@@ -167,7 +167,7 @@ export default function TermsPage() {
           </table>
         </div>
 
-        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: "8px", padding: "16px", marginBottom: "8px" }}>
+        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: "var(--radius-md)", padding: "16px", marginBottom: "8px" }}>
           <p style={{ fontSize: "14px", color: "#92400E", margin: 0 }}>
             <strong>Penting:</strong> Kredit yang telah dibeli tidak dapat dikembalikan atau ditukar dengan uang tunai. Kredit tidak memiliki masa kadaluarsa selama akun Anda aktif.
           </p>
@@ -178,7 +178,7 @@ export default function TermsPage() {
         {/* Section 4 - Refund */}
         <SectionTitle n="4">Kebijakan Pengembalian Dana</SectionTitle>
 
-        <div style={{ background: "var(--purple-light)", border: "1px solid #C4B5FD", borderRadius: "8px", padding: "16px", marginBottom: "20px" }}>
+        <div style={{ background: "var(--purple-light)", border: "1px solid #C4B5FD", borderRadius: "var(--radius-md)", padding: "16px", marginBottom: "20px" }}>
           <p style={{ fontSize: "14px", color: "#4C1D95", margin: 0, fontWeight: 500 }}>
             Nuave menjual produk digital (kredit layanan). Sesuai dengan sifat produk digital yang langsung dapat digunakan, berlaku ketentuan pengembalian dana berikut.
           </p>
@@ -346,7 +346,7 @@ export default function TermsPage() {
         <p style={{ fontSize: "14px", color: "var(--text-body)", marginBottom: "16px" }}>
           Untuk pertanyaan terkait Syarat & Ketentuan ini atau pengajuan pengembalian dana:
         </p>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border-default)", borderRadius: "12px", padding: "24px" }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border-default)", borderRadius: "var(--radius-lg)", padding: "24px" }}>
           <p style={{ fontSize: "14px", color: "var(--text-body)", margin: "0 0 8px 0" }}><strong>Nuave</strong></p>
           <p style={{ fontSize: "14px", color: "var(--text-body)", margin: "0 0 8px 0" }}>
             Email: <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: "var(--purple)" }}>{CONTACT_EMAIL}</a>
@@ -368,7 +368,7 @@ function SectionTitle({ n, children }: { n: string; children: React.ReactNode })
   return (
     <h2 style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "20px", marginBottom: "16px" }}>
       <span style={{
-        width: "32px", height: "32px", borderRadius: "8px",
+        width: "32px", height: "32px", borderRadius: "var(--radius-md)",
         background: "var(--purple-light)", color: "var(--purple)",
         fontSize: "14px", fontWeight: 700,
         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,

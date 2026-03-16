@@ -234,7 +234,7 @@ export default function PromptsPage() {
 
         {/* Total prompts */}
         <div style={{
-          padding: "20px", borderRadius: "8px",
+          padding: "20px", borderRadius: 'var(--radius-md)',
           border: "1px solid var(--border-default)", background: "#ffffff",
         }}>
           <p style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -247,7 +247,7 @@ export default function PromptsPage() {
 
         {/* Mention rate */}
         <div style={{
-          padding: "20px", borderRadius: "8px",
+          padding: "20px", borderRadius: 'var(--radius-md)',
           border: "1px solid var(--border-default)", background: "#ffffff",
         }}>
           <p style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -263,7 +263,7 @@ export default function PromptsPage() {
 
         {/* Stage: Awareness */}
         <div style={{
-          padding: "20px", borderRadius: "8px",
+          padding: "20px", borderRadius: 'var(--radius-md)',
           border: "1px solid var(--border-default)", background: "#ffffff",
         }}>
           <p style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -279,7 +279,7 @@ export default function PromptsPage() {
 
         {/* Stage: Decision */}
         <div style={{
-          padding: "20px", borderRadius: "8px",
+          padding: "20px", borderRadius: 'var(--radius-md)',
           border: "1px solid var(--border-default)", background: "#ffffff",
         }}>
           <p style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -300,7 +300,7 @@ export default function PromptsPage() {
         {/* Tabs */}
         <div style={{
           display: "flex", background: "var(--surface)",
-          border: "1px solid var(--border-default)", borderRadius: "8px",
+          border: "1px solid var(--border-default)", borderRadius: 'var(--radius-md)',
           overflow: "hidden",
         }}>
           {tabs.map((tab) => (
@@ -313,7 +313,7 @@ export default function PromptsPage() {
                 background: filterTab === tab.key ? "#ffffff" : "transparent",
                 color: filterTab === tab.key ? "var(--text-heading)" : "var(--text-muted)",
                 boxShadow: filterTab === tab.key ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
-                borderRadius: filterTab === tab.key ? "6px" : "0",
+                borderRadius: filterTab === tab.key ? 'var(--radius-sm)' : "0",
                 transition: "all 0.15s ease",
               }}
             >
@@ -322,7 +322,7 @@ export default function PromptsPage() {
                 marginLeft: "6px", fontSize: "11px", fontWeight: 600,
                 background: filterTab === tab.key ? "var(--purple-light)" : "var(--surface)",
                 color: filterTab === tab.key ? "var(--purple)" : "var(--text-muted)",
-                padding: "2px 6px", borderRadius: "4px",
+                padding: "2px 6px", borderRadius: "var(--radius-xs)",
               }}>
                 {tab.count}
               </span>
@@ -339,7 +339,7 @@ export default function PromptsPage() {
               onChange={(e) => setWorkspaceFilter(e.target.value)}
               style={{
                 padding: "7px 28px 7px 10px", fontSize: "13px",
-                border: "1px solid var(--border-default)", borderRadius: "6px",
+                border: "1px solid var(--border-default)", borderRadius: 'var(--radius-sm)',
                 background: "#ffffff", color: "var(--text-body)",
                 cursor: "pointer", outline: "none",
                 appearance: "none",
@@ -370,7 +370,7 @@ export default function PromptsPage() {
             placeholder="Cari prompt..."
             style={{
               padding: "7px 12px 7px 30px", fontSize: "13px", width: "220px",
-              border: "1px solid var(--border-default)", borderRadius: "6px",
+              border: "1px solid var(--border-default)", borderRadius: 'var(--radius-sm)',
               background: "#ffffff", color: "var(--text-body)", outline: "none",
             }}
           />
@@ -379,7 +379,7 @@ export default function PromptsPage() {
 
       {/* ── Table ── */}
       <div style={{
-        border: "1px solid var(--border-default)", borderRadius: "8px",
+        border: "1px solid var(--border-default)", borderRadius: 'var(--radius-md)',
         background: "#ffffff", overflow: "hidden",
       }}>
         {/* Table header */}
@@ -462,7 +462,7 @@ export default function PromptsPage() {
                 {row.stage ? (
                   <span style={{
                     fontSize: "11px", fontWeight: 500,
-                    padding: "2px 8px", borderRadius: "4px",
+                    padding: "2px 8px", borderRadius: "var(--radius-xs)",
                     background: row.stage === "awareness" ? "#DBEAFE" : row.stage === "consideration" ? "#FEF3C7" : "#DCFCE7",
                     color: row.stage === "awareness" ? "#2563EB" : row.stage === "consideration" ? "#D97706" : "#16A34A",
                   }}>

@@ -98,7 +98,7 @@ export default function SupportPage() {
           <div style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             background: "var(--purple-light)", border: "1px solid #C4B5FD",
-            borderRadius: "999px", padding: "4px 12px",
+            borderRadius: "var(--radius-full)", padding: "4px 12px",
             fontSize: "12px", fontWeight: 500, color: "var(--purple)", marginBottom: "16px",
           }}>
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--purple)" }} />
@@ -123,7 +123,7 @@ export default function SupportPage() {
             {sent ? (
               <div style={{
                 textAlign: "center", padding: "64px 32px",
-                border: "1px solid var(--border-default)", borderRadius: "12px",
+                border: "1px solid var(--border-default)", borderRadius: "var(--radius-lg)",
                 background: "var(--surface)",
               }}>
                 <div style={{
@@ -144,7 +144,7 @@ export default function SupportPage() {
                   style={{
                     fontSize: "14px", fontWeight: 500, color: "var(--purple)",
                     background: "var(--purple-light)", border: "1px solid #C4B5FD",
-                    borderRadius: "8px", padding: "10px 24px", cursor: "pointer",
+                    borderRadius: "var(--radius-md)", padding: "10px 24px", cursor: "pointer",
                   }}
                 >
                   Kirim pesan lain
@@ -164,7 +164,7 @@ export default function SupportPage() {
                       placeholder="Nama lengkap Anda"
                       style={{
                         width: "100%", padding: "10px 14px", fontSize: "14px",
-                        border: "1px solid var(--border-default)", borderRadius: "8px",
+                        border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)",
                         background: "#ffffff", color: "var(--text-body)",
                         outline: "none", boxSizing: "border-box",
                       }}
@@ -179,7 +179,7 @@ export default function SupportPage() {
                       placeholder="email@contoh.com"
                       style={{
                         width: "100%", padding: "10px 14px", fontSize: "14px",
-                        border: "1px solid var(--border-default)", borderRadius: "8px",
+                        border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)",
                         background: "#ffffff", color: "var(--text-body)",
                         outline: "none", boxSizing: "border-box",
                       }}
@@ -196,7 +196,7 @@ export default function SupportPage() {
                     required value={category} onChange={(e) => setCategory(e.target.value)}
                     style={{
                       width: "100%", padding: "10px 14px", fontSize: "14px",
-                      border: "1px solid var(--border-default)", borderRadius: "8px",
+                      border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)",
                       background: "#ffffff", color: category ? "var(--text-body)" : "var(--text-muted)",
                       outline: "none", cursor: "pointer", boxSizing: "border-box",
                       appearance: "none",
@@ -223,7 +223,7 @@ export default function SupportPage() {
                     placeholder="Ringkasan singkat pesan Anda"
                     style={{
                       width: "100%", padding: "10px 14px", fontSize: "14px",
-                      border: "1px solid var(--border-default)", borderRadius: "8px",
+                      border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)",
                       background: "#ffffff", color: "var(--text-body)",
                       outline: "none", boxSizing: "border-box",
                     }}
@@ -241,7 +241,7 @@ export default function SupportPage() {
                     rows={6}
                     style={{
                       width: "100%", padding: "10px 14px", fontSize: "14px",
-                      border: "1px solid var(--border-default)", borderRadius: "8px",
+                      border: "1px solid var(--border-default)", borderRadius: "var(--radius-md)",
                       background: "#ffffff", color: "var(--text-body)",
                       outline: "none", resize: "vertical", boxSizing: "border-box",
                       fontFamily: "inherit", lineHeight: 1.6,
@@ -259,7 +259,7 @@ export default function SupportPage() {
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                     width: "100%", padding: "12px 24px", fontSize: "14px", fontWeight: 600,
-                    color: "#ffffff", background: "#6C3FF5", border: "none", borderRadius: "8px",
+                    color: "#ffffff", background: "#6C3FF5", border: "none", borderRadius: "var(--radius-md)",
                     cursor: sending ? "not-allowed" : "pointer",
                     opacity: sending ? 0.7 : 1,
                   }}
@@ -277,7 +277,7 @@ export default function SupportPage() {
 
             {/* Quick response + social card */}
             <div style={{
-              border: "1px solid var(--border-default)", borderRadius: "12px",
+              border: "1px solid var(--border-default)", borderRadius: "var(--radius-lg)",
               padding: "20px", background: "var(--surface)",
             }}>
               <h3 style={{ fontSize: "14px", marginBottom: "8px" }}>
@@ -300,7 +300,7 @@ export default function SupportPage() {
 
             {/* Email card */}
             <div style={{
-              border: "1px solid var(--border-default)", borderRadius: "12px",
+              border: "1px solid var(--border-default)", borderRadius: "var(--radius-lg)",
               padding: "20px", background: "var(--surface)",
             }}>
               <h3 style={{ fontSize: "14px", marginBottom: "12px" }}>

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { IconPencil, IconArrowLeft, IconRefresh, IconArrowRight } from '@tabler/icons-react';
+import { IconPencil, IconArrowLeft, IconRefresh, IconArrowRight, IconCheck, IconX } from '@tabler/icons-react';
 
 interface Prompt {
   id: string;
@@ -21,7 +21,7 @@ function ProgressBar({ active }: { active: number }) {
           style={{
             height: "3px",
             flex: 1,
-            borderRadius: "999px",
+            borderRadius: "var(--radius-full)",
             background: i < active ? "var(--purple)" : "var(--border-default)",
           }}
         />
@@ -35,6 +35,9 @@ export default function PromptsPage() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const editInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const storedPrompts = sessionStorage.getItem("nuave_prompts");
@@ -57,6 +60,39 @@ export default function PromptsPage() {
       setLoading(false);
     }
   }, [router]);
+
+  const startEditing = (index: number) => {
+    setEditingIndex(index);
+    setEditValue(prompts[index].prompt_text);
+    setTimeout(() => editInputRef.current?.focus(), 0);
+  };
+
+  const saveEdit = () => {
+    if (editingIndex === null) return;
+    const trimmed = editValue.trim();
+    if (!trimmed) return;
+
+    const updated = prompts.map((p, i) =>
+      i === editingIndex ? { ...p, prompt_text: trimmed } : p
+    );
+    setPrompts(updated);
+
+    // Sync sessionStorage
+    const stored = sessionStorage.getItem("nuave_prompts");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        parsed.prompts = updated;
+        sessionStorage.setItem("nuave_prompts", JSON.stringify(parsed));
+      } catch {}
+    }
+
+    setEditingIndex(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingIndex(null);
+  };
 
   const handleRunAudit = () => {
     setError(null);
@@ -244,39 +280,103 @@ export default function PromptsPage() {
                 className="prompt-row"
                 style={{
                   background: "#ffffff",
-                  border: "1px solid var(--border-default)",
+                  border: `1px solid ${editingIndex === index ? "var(--purple)" : "var(--border-default)"}`,
                   borderRadius: "var(--radius-md)",
                   padding: "14px 18px",
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: editingIndex === index ? "flex-end" : "center",
                   justifyContent: "space-between",
-                  gap: "16px",
+                  gap: "12px",
                 }}
               >
-                <span
-                  style={{
-                    fontSize: "var(--text-sm)",
-                    color: "var(--text-body)",
-                    lineHeight: 1.5,
-                    flex: 1,
-                  }}
-                >
-                  {prompt.prompt_text}
-                </span>
-                <button
-                  className="pencil-btn"
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "4px",
-                    flexShrink: 0,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <IconPencil size={18} stroke={1.5} />
-                </button>
+                {editingIndex === index ? (
+                  <>
+                    <textarea
+                      ref={editInputRef}
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); saveEdit(); }
+                        if (e.key === "Escape") cancelEdit();
+                      }}
+                      rows={2}
+                      style={{
+                        flex: 1,
+                        fontSize: "var(--text-sm)",
+                        color: "var(--text-body)",
+                        lineHeight: 1.5,
+                        border: "none",
+                        background: "transparent",
+                        outline: "none",
+                        resize: "none",
+                        fontFamily: "inherit",
+                        padding: 0,
+                      }}
+                    />
+                    <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
+                      <button
+                        onClick={cancelEdit}
+                        style={{
+                          background: "var(--bg-surface)",
+                          border: "1px solid var(--border-default)",
+                          borderRadius: "var(--radius-xs)",
+                          cursor: "pointer",
+                          padding: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          color: "var(--text-muted)",
+                        }}
+                      >
+                        <IconX size={16} stroke={2} />
+                      </button>
+                      <button
+                        onClick={saveEdit}
+                        disabled={!editValue.trim()}
+                        style={{
+                          background: "var(--purple)",
+                          border: "none",
+                          borderRadius: "var(--radius-xs)",
+                          cursor: editValue.trim() ? "pointer" : "not-allowed",
+                          padding: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          color: "#ffffff",
+                          opacity: editValue.trim() ? 1 : 0.4,
+                        }}
+                      >
+                        <IconCheck size={16} stroke={2} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      style={{
+                        fontSize: "var(--text-sm)",
+                        color: "var(--text-body)",
+                        lineHeight: 1.5,
+                        flex: 1,
+                      }}
+                    >
+                      {prompt.prompt_text}
+                    </span>
+                    <button
+                      className="pencil-btn"
+                      onClick={() => startEditing(index)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "4px",
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <IconPencil size={18} stroke={1.5} />
+                    </button>
+                  </>
+                )}
               </div>
             ))}
           </div>

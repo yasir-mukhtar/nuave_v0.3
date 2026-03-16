@@ -53,7 +53,7 @@ function ChartTooltip({ active, payload }: any) {
       style={{
         background: '#ffffff',
         border: '1px solid var(--border-light)',
-        borderRadius: '6px',
+        borderRadius: 'var(--radius-sm)',
         boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
         padding: '10px 14px',
         minWidth: '140px',
@@ -152,7 +152,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
     <div
       style={{
         border: '1px solid var(--border-light)',
-        borderRadius: '6px',
+        borderRadius: 'var(--radius-sm)',
         boxShadow: 'var(--shadow-subtle)',
         background: '#ffffff',
         height: '424px',
@@ -194,7 +194,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
               color: 'var(--text-body)',
               background: '#ffffff',
               border: '1px solid var(--border-light)',
-              borderRadius: '6px',
+              borderRadius: 'var(--radius-sm)',
               boxShadow: 'var(--shadow-subtle)',
               cursor: 'pointer',
             }}
@@ -213,7 +213,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
                 marginTop: '4px',
                 background: '#ffffff',
                 border: '1px solid var(--border-light)',
-                borderRadius: '6px',
+                borderRadius: 'var(--radius-sm)',
                 boxShadow: 'var(--shadow-modal)',
                 overflow: 'hidden',
                 zIndex: 20,

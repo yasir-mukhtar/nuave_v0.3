@@ -145,7 +145,7 @@ export default function HargaPage() {
         <div style={{
           display: "inline-flex", alignItems: "center", gap: "6px",
           background: "var(--purple-light)", border: "1px solid #C4B5FD",
-          borderRadius: "999px", padding: "4px 14px",
+          borderRadius: 'var(--radius-full)', padding: "4px 14px",
           fontSize: "12px", fontWeight: 500, color: "var(--purple)", marginBottom: "24px",
         }}>
           <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--purple)" }} />
@@ -167,7 +167,7 @@ export default function HargaPage() {
               position: "relative",
               background: pkg.popular ? "var(--purple)" : "#ffffff",
               border: `1px solid ${pkg.popular ? "var(--purple)" : "var(--border-default)"}`,
-              borderRadius: "16px",
+              borderRadius: 'var(--radius-xl)',
               padding: "32px 28px",
               boxShadow: pkg.popular ? "0 8px 32px rgba(108,63,245,0.25)" : "0 1px 2px rgba(0,0,0,0.05)",
               transform: pkg.popular ? "scale(1.03)" : "none",
@@ -177,7 +177,7 @@ export default function HargaPage() {
                   position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
                   background: "#ffffff", color: "var(--purple)",
                   fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em",
-                  padding: "4px 14px", borderRadius: "999px",
+                  padding: "4px 14px", borderRadius: 'var(--radius-full)',
                   border: "1px solid var(--border-default)",
                   boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
                   whiteSpace: "nowrap",
@@ -206,7 +206,7 @@ export default function HargaPage() {
                 }}
                 style={{
                   display: "block", width: "100%", textAlign: "center",
-                  padding: "12px 24px", borderRadius: "8px",
+                  padding: "12px 24px", borderRadius: 'var(--radius-md)',
                   fontSize: "14px", fontWeight: 600,
                   background: pkg.popular ? "#ffffff" : "var(--purple)",
                   color: pkg.popular ? "var(--purple)" : "#ffffff",
@@ -248,7 +248,7 @@ export default function HargaPage() {
           <p style={{ fontSize: "14px", color: "var(--text-muted)", textAlign: "center", marginBottom: "32px" }}>
             Setiap tindakan menggunakan kredit sesuai tabel berikut.
           </p>
-          <div style={{ border: "1px solid var(--border-default)", borderRadius: "12px", overflow: "hidden", background: "#ffffff" }}>
+          <div style={{ border: "1px solid var(--border-default)", borderRadius: 'var(--radius-lg)', overflow: "hidden", background: "#ffffff" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
               <thead>
                 <tr style={{ background: "var(--surface)" }}>
@@ -265,7 +265,7 @@ export default function HargaPage() {
                         background: row.credits === "Gratis" ? "#DCFCE7" : "var(--purple-light)",
                         color: row.credits === "Gratis" ? "#16A34A" : "var(--purple)",
                         fontSize: "12px", fontWeight: 600,
-                        padding: "3px 10px", borderRadius: "999px",
+                        padding: "3px 10px", borderRadius: 'var(--radius-full)',
                       }}>
                         {row.credits}
                       </span>
@@ -291,7 +291,7 @@ export default function HargaPage() {
             {["Transfer Bank (VA)", "GoPay", "OVO", "QRIS", "Indomaret", "Alfamart", "Kartu Kredit / Debit"].map((method) => (
               <span key={method} style={{
                 background: "var(--surface)", border: "1px solid var(--border-default)",
-                borderRadius: "8px", padding: "8px 16px",
+                borderRadius: 'var(--radius-md)', padding: "8px 16px",
                 fontSize: "13px", fontWeight: 500, color: "var(--text-body)",
               }}>
                 {method}
@@ -309,7 +309,7 @@ export default function HargaPage() {
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {FAQS.map((faq, i) => (
-              <div key={i} style={{ background: "#ffffff", border: "1px solid var(--border-default)", borderRadius: "12px", padding: "20px 24px" }}>
+              <div key={i} style={{ background: "#ffffff", border: "1px solid var(--border-default)", borderRadius: 'var(--radius-lg)', padding: "20px 24px" }}>
                 <p style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-heading)", margin: "0 0 8px 0" }}>{faq.q}</p>
                 <p style={{ fontSize: "14px", color: "var(--text-body)", margin: 0, lineHeight: 1.6 }}>{faq.a}</p>
               </div>
@@ -331,7 +331,7 @@ export default function HargaPage() {
             display: "inline-block",
             background: "var(--purple)", color: "#ffffff",
             fontSize: "15px", fontWeight: 600, textDecoration: "none",
-            padding: "14px 32px", borderRadius: "10px",
+            padding: "14px 32px", borderRadius: 'var(--radius-md)',
           }}>
             Coba gratis sekarang →
           </Link>

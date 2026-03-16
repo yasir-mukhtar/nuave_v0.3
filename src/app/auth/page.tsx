@@ -73,7 +73,7 @@ export default function AuthPage() {
           height: 44px;
           background: #FFFFFF;
           border: 1px solid #E5E7EB;
-          border-radius: 8px;
+          border-radius: var(--radius-md);
           font-size: 15px;
           font-weight: 500;
           color: #111827;
@@ -126,7 +126,7 @@ export default function AuthPage() {
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: '6px',
                   background: 'var(--purple-light)', border: '1px solid #C4B5FD',
-                  borderRadius: '999px', padding: '4px 14px',
+                  borderRadius: 'var(--radius-full)', padding: '4px 14px',
                   fontSize: '12px', fontWeight: 500, color: 'var(--purple)',
                   marginBottom: '12px',
                 }}>
@@ -148,7 +148,7 @@ export default function AuthPage() {
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: '6px',
                   background: 'var(--purple-light)', border: '1px solid #C4B5FD',
-                  borderRadius: '999px', padding: '4px 14px',
+                  borderRadius: 'var(--radius-full)', padding: '4px 14px',
                   fontSize: '12px', fontWeight: 500, color: 'var(--purple)',
                   marginBottom: '12px',
                 }}>

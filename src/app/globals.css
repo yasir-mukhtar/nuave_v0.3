@@ -6,7 +6,7 @@
 :root {
   --font-heading: var(--font-geist-sans), sans-serif;
   --font-body: var(--font-inter), sans-serif;
-  --radius: 0.625rem;
+  --radius: var(--radius-sm);
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
@@ -144,7 +144,7 @@ label.field-label.disabled {
   font-weight: 400;
   line-height: 1.38462;
   letter-spacing: normal;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border-width: 0px;
   border-style: solid;
   border-color: rgba(0, 0, 0, 0.11);
@@ -211,7 +211,7 @@ label.field-label.disabled {
   gap: 1rem;
   padding: 1.5rem;
   background-color: #FFFFFF;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(225, 228, 234, 1);
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   transition-property: all;
@@ -232,7 +232,7 @@ label.field-label.disabled {
   content: '';
   position: absolute;
   inset: 0px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 2px solid transparent;
   transition-property: all;
   transition-duration: 0.15s;
@@ -252,7 +252,7 @@ label.field-label.disabled {
   gap: 1rem;
   padding: 1rem;
   background-color: #FFFFFF;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(225, 228, 234, 1);
   transition-property: all;
   transition-duration: 0.15s;
@@ -280,7 +280,7 @@ label.field-label.disabled {
 }
 .scroll-subtle::-webkit-scrollbar-thumb {
   background: transparent;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
 }
 .scroll-subtle:hover::-webkit-scrollbar-thumb {
   background: var(--border-strong);
@@ -432,7 +432,7 @@ label.field-label.disabled {
     margin: 0 16px;
     width: calc(100% - 32px) !important;
   }
-  .card { padding: 16px; border-radius: 6px; }
+  .card { padding: 16px; border-radius: var(--radius-sm); }
   .card-row { padding: 12px; min-height: 56px; }
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.25rem; }
@@ -472,13 +472,13 @@ label.field-label.disabled {
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

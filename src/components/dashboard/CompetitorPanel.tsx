@@ -23,7 +23,7 @@ function LogoFallback({ name }: { name: string }) {
       style={{
         width: 24,
         height: 24,
-        borderRadius: '6px',
+        borderRadius: 'var(--radius-sm)',
         background: '#F3F4F6',
         display: 'flex',
         alignItems: 'center',
@@ -44,7 +44,7 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
     <div
       style={{
         border: '1px solid var(--border-light)',
-        borderRadius: '6px',
+        borderRadius: 'var(--radius-sm)',
         boxShadow: 'var(--shadow-subtle)',
         background: '#ffffff',
         display: 'flex',
@@ -76,7 +76,7 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
             color: 'var(--text-heading)',
             background: 'none',
             border: '1px solid var(--border-light)',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-sm)',
             boxShadow: 'var(--shadow-subtle)',
             cursor: 'pointer',
           }}
@@ -150,7 +150,7 @@ function CompetitorLogo({ name }: { name: string }) {
       alt={name}
       width={24}
       height={24}
-      style={{ borderRadius: '6px', flexShrink: 0, background: '#F3F4F6' }}
+      style={{ borderRadius: 'var(--radius-sm)', flexShrink: 0, background: '#F3F4F6' }}
       onError={(e) => {
         const target = e.currentTarget;
         const parent = target.parentElement;
@@ -158,7 +158,7 @@ function CompetitorLogo({ name }: { name: string }) {
           target.style.display = 'none';
           const fallback = document.createElement('div');
           fallback.style.cssText =
-            'width:24px;height:24px;border-radius:6px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#6B7280;flex-shrink:0;';
+            'width:24px;height:24px;border-radius:var(--radius-sm);background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#6B7280;flex-shrink:0;';
           fallback.textContent = name.charAt(0).toUpperCase();
           parent.insertBefore(fallback, target);
         }

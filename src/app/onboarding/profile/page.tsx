@@ -13,7 +13,7 @@ function ProgressBar({ active }: { active: number }) {
           style={{
             height: "3px",
             flex: 1,
-            borderRadius: "999px",
+            borderRadius: "var(--radius-full)",
             background: i < active ? "var(--purple)" : "var(--border-default)",
           }}
         />
