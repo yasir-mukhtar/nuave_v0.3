@@ -554,3 +554,32 @@ label.field-label.disabled {
     @apply bg-background text-foreground;
   }
 }
+
+/* ── Landing page scope resets ── */
+body:has(.lp-root) {
+  background-color: var(--lp-bg) !important;
+}
+.lp-root {
+  background-color: var(--lp-bg) !important;
+  color: var(--lp-text-primary);
+}
+.lp-root h1,
+.lp-root h2,
+.lp-root h3,
+.lp-root h4,
+.lp-root h5,
+.lp-root h6 {
+  font-family: inherit;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+.lp-root p,
+.lp-root span,
+.lp-root div,
+.lp-root button,
+.lp-root a {
+  font-family: inherit;
+}

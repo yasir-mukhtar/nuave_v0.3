@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconCheck, IconX, IconArrowRight, IconChevronDown, IconBrandOpenai, IconTarget, IconMessageChatbot, IconFileText, IconCpu, IconCreditCard } from '@tabler/icons-react';
@@ -77,7 +77,416 @@ const MOCK_PROMPTS = [
   { prompt: "Apa itu AEO dan siapa yang menyediakannya?", mentioned: true },
 ];
 
-/* ───── Component ───── */
+/* ───── Hero Asset URLs (Framer CDN) ───── */
+const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
+const BG_GRADIENT = "https://framerusercontent.com/images/aaSazir73GbncCCLDZdoqquukeY.png";
+const DASHBOARD_IMAGES = [
+  "https://framerusercontent.com/images/6KCcqoV5JsbhhakFNgDWYxdVzBA.png",
+  "https://framerusercontent.com/images/YENU9KLYq8IxQPhP0g23k7epVQ.png",
+  "https://framerusercontent.com/images/5z04w9x5IIQC2aQp3SPkEKtyT4.png",
+];
+const HERO_STEPS = ["Tentukan Prompt", "Audit Brand", "Monitoring Harian"];
+
+/* ───── Nav (Framer design) ───── */
+function Nav() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <nav
+      style={{
+        position: "fixed",
+        top: 0,
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "100%",
+        maxWidth: scrolled ? 834 : 1072,
+        padding: 16,
+        zIndex: 100,
+        transition: "max-width 0.3s ease",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 60,
+          padding: "12px 12px 12px 14px",
+          backgroundColor: scrolled ? "rgba(255, 255, 255, 0.9)" : "transparent",
+          backdropFilter: scrolled ? "blur(10px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(10px)" : "none",
+          borderRadius: 12,
+          border: scrolled ? "1px solid rgba(117, 115, 114, 0.15)" : "1px solid transparent",
+          transition: "background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease",
+        }}
+      >
+        {/* Logo */}
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+          <img src={LOGO_SVG} alt="Nuave logo" width={28} height={28} style={{ objectFit: "contain" }} />
+          <span
+            style={{
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 600,
+              fontSize: 20,
+              color: "#0d0d0d",
+            }}
+          >
+            Nuave
+          </span>
+        </Link>
+
+        {/* Links */}
+        <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+          {[
+            { label: "Cara Kerja", href: "#cara-kerja" },
+            { label: "Harga", href: "#harga" },
+            { label: "FAQ", href: "#faq" },
+          ].map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              style={{
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 500,
+                fontSize: 14,
+                lineHeight: "24px",
+                color: "var(--lp-text-primary)",
+                textDecoration: "none",
+              }}
+            >
+              {link.label}
+            </a>
+          ))}
+          <a
+            href="/support"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 500,
+              fontSize: 14,
+              lineHeight: "24px",
+              color: "var(--lp-text-primary)",
+              textDecoration: "none",
+            }}
+          >
+            Kontak
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginTop: 1 }}>
+              <path d="M3.5 2.5H9.5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M9.5 2.5L2.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </a>
+        </div>
+
+        {/* Masuk button */}
+        <Link
+          href="/login"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "8px 20px",
+            backgroundColor: "var(--lp-text-primary)",
+            color: "#fff",
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 500,
+            fontSize: 14,
+            lineHeight: "1.7em",
+            borderRadius: 6,
+            textDecoration: "none",
+            cursor: "pointer",
+          }}
+        >
+          Masuk
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
+/* ───── Hero Section (Framer design) ───── */
+function HeroSection() {
+  const [activeStep, setActiveStep] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % HERO_STEPS.length);
+    }, 3000);
+  }, []);
+
+  useEffect(() => {
+    startTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [startTimer]);
+
+  const handleStepClick = (i: number) => {
+    setActiveStep(i);
+    startTimer();
+  };
+
+  return (
+    <section
+      className="lp-root"
+      style={{
+        position: "relative",
+        width: "100%",
+        padding: "120px 30px 0",
+        display: "flex",
+        justifyContent: "center",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1200,
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        {/* Text content */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 24,
+          }}
+        >
+          {/* Headline */}
+          <h1
+            style={{
+              maxWidth: 800,
+              fontFamily: "'Inter Display', Inter, sans-serif",
+              fontWeight: 600,
+              fontSize: 60,
+              lineHeight: "1em",
+              letterSpacing: -1,
+              color: "var(--lp-text-primary)",
+              textAlign: "center",
+              margin: 0,
+            }}
+          >
+            Lihat seberapa sering ChatGPT menyebut brand Anda
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            style={{
+              maxWidth: 740,
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 400,
+              fontSize: 18,
+              lineHeight: "1.7em",
+              letterSpacing: -0.5,
+              color: "var(--lp-text-secondary)",
+              textAlign: "center",
+              margin: 0,
+            }}
+          >
+            Jutaan orang kini melakukan pencarian lewat AI. Nuave melacak brand Anda dalam jawaban ChatGPT dan memberi rekomendasi perbaikan.
+          </p>
+
+          {/* CTA Button */}
+          <Link
+            href="/register"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "12px 22px",
+              backgroundColor: "var(--lp-purple)",
+              color: "#fff",
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 500,
+              fontSize: 14,
+              lineHeight: "1.7em",
+              borderRadius: 6,
+              border: "1px solid var(--lp-border)",
+              textDecoration: "none",
+              cursor: "pointer",
+            }}
+          >
+            Audit brand Anda — Gratis!
+          </Link>
+        </div>
+
+        {/* Preview area */}
+        <div
+          style={{
+            marginTop: 64,
+            width: "100%",
+            position: "relative",
+          }}
+        >
+          {/* Purple gradient background */}
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              aspectRatio: "1.82094",
+              borderRadius: 12,
+              border: "1px solid var(--lp-border)",
+              overflow: "hidden",
+            }}
+          >
+            <img
+              src={BG_GRADIENT}
+              alt=""
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center",
+                display: "block",
+              }}
+            />
+
+            {/* Overlay content */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                padding: "40px 40px 0",
+                gap: 24,
+              }}
+            >
+              {/* Stepper bar */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0,
+                  padding: "8px 14px",
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  border: "1px solid var(--lp-border)",
+                  boxShadow: "rgba(0, 0, 0, 0.04) 0px 1px 4px 0px",
+                  height: 43,
+                }}
+              >
+                {HERO_STEPS.map((step, i) => (
+                  <button
+                    key={step}
+                    onClick={() => handleStepClick(i)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      padding: "0 14px 0 0",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontFamily: "Inter, sans-serif",
+                      fontWeight: 500,
+                      fontSize: 16,
+                      lineHeight: "1.7em",
+                      whiteSpace: "nowrap",
+                      color: activeStep === i ? "var(--lp-text-primary)" : "var(--lp-text-secondary)",
+                    }}
+                  >
+                    {/* Fixed 20px indicator box — dot and circle share same center */}
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {activeStep === i ? (
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <circle cx="10" cy="10" r="10" fill="#0a0a0a" />
+                          <text
+                            x="10"
+                            y="10"
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fill="#fff"
+                            fontFamily="Inter, sans-serif"
+                            fontWeight="600"
+                            fontSize="14"
+                            letterSpacing="0em"
+                          >
+                            {i + 1}
+                          </text>
+                        </svg>
+                      ) : (
+                        <div
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 100,
+                            backgroundColor: "var(--lp-border)",
+                          }}
+                        />
+                      )}
+                    </div>
+                    {step}
+                  </button>
+                ))}
+              </div>
+
+              {/* Dashboard mockup card */}
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: 900,
+                  flex: 1,
+                  minHeight: 0,
+                  backdropFilter: "blur(54px)",
+                  WebkitBackdropFilter: "blur(54px)",
+                  backgroundColor: "var(--lp-card-glass)",
+                  borderRadius: 12,
+                  boxShadow: "rgba(0, 0, 0, 0.08) 0px 8px 32px 0px",
+                  overflow: "hidden",
+                  position: "relative",
+                }}
+              >
+                {DASHBOARD_IMAGES.map((src, i) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt="Dashboard"
+                    style={{
+                      position: i === 0 ? "relative" : "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      objectPosition: "top center",
+                      borderRadius: 6,
+                      opacity: activeStep === i ? 1 : 0,
+                      transition: "opacity 0.5s ease",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───── Page ───── */
 
 export default function Home() {
   const router = useRouter();
@@ -123,218 +532,9 @@ export default function Home() {
   return (
     <div style={{ minHeight: "100vh", background: "#ffffff" }}>
 
-      {/* ──── Nav ──── */}
-      <header className="lp-nav" style={{
-        position: "fixed", top: 0, left: 0, right: 0, height: "56px",
-        background: "rgba(255,255,255,0.95)", backdropFilter: "blur(8px)",
-        borderBottom: "1px solid var(--border-default)",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        zIndex: 100,
-      }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-          <img src="/logo-nuave.svg" alt="Nuave" width="32" height="32" style={{ display: 'block' }} />
-          <span style={{ fontWeight: 700, fontSize: "18px", color: "#6C3FF5", textTransform: "lowercase" as const }}>nuave</span>
-        </Link>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          {isLoggedIn ? (
-            <Link href="/dashboard" className="text-label-14" style={{
-              display: "inline-flex", alignItems: "center", gap: "6px",
-              fontWeight: 500, color: "#ffffff",
-              background: "#6C3FF5", textDecoration: "none",
-              padding: "8px 20px", borderRadius: 'var(--radius-md)',
-            }}>
-              Dashboard <IconArrowRight size={16} stroke={2} />
-            </Link>
-          ) : (
-            <>
-              <Link href="/auth" className="lp-nav-cta-text text-label-14" style={{ color: "var(--text-body)", textDecoration: "none", padding: "8px 16px" }}>
-                Masuk
-              </Link>
-              <Link href="/auth" onClick={() => {
-                sessionStorage.removeItem('nuave_pending_brand');
-                sessionStorage.removeItem('nuave_pending_url');
-              }} className="text-label-14" style={{
-                fontWeight: 500, color: "#ffffff",
-                background: "#6C3FF5", textDecoration: "none",
-                padding: "8px 20px", borderRadius: 'var(--radius-md)',
-                whiteSpace: "nowrap",
-              }}>
-                Mulai Gratis
-              </Link>
-            </>
-          )}
-        </div>
-      </header>
-
-      {/* ──── Hero ──── */}
-      <section style={{
-        position: "relative", overflow: "hidden",
-        background: "linear-gradient(135deg, #F5F0FF 0%, #EDE9FF 25%, #F0EAFF 50%, #E8E0FF 75%, #F5F0FF 100%)",
-      }}>
-        {/* Abstract wavy background SVGs */}
-        <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }} preserveAspectRatio="none" viewBox="0 0 1440 800">
-          <defs>
-            <linearGradient id="wave1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#6C3FF5" stopOpacity="0.08" />
-              <stop offset="50%" stopColor="#A78BFA" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#C084FC" stopOpacity="0.06" />
-            </linearGradient>
-            <linearGradient id="wave2" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#EC4899" stopOpacity="0.06" />
-              <stop offset="50%" stopColor="#8B5CF6" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#6C3FF5" stopOpacity="0.05" />
-            </linearGradient>
-            <linearGradient id="wave3" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#6C3FF5" stopOpacity="0.06" />
-              <stop offset="40%" stopColor="#3B82F6" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="#A78BFA" stopOpacity="0.04" />
-            </linearGradient>
-          </defs>
-          {/* Large flowing wave — back */}
-          <path d="M0 400 C200 250, 400 550, 720 350 S1200 500, 1440 300 L1440 800 L0 800Z" fill="url(#wave1)" />
-          {/* Mid wave */}
-          <path d="M0 500 C180 380, 360 620, 600 450 S900 600, 1100 420 C1250 350, 1350 500, 1440 440 L1440 800 L0 800Z" fill="url(#wave2)" />
-          {/* Front wave */}
-          <path d="M0 600 C240 520, 480 700, 720 580 S1080 700, 1440 560 L1440 800 L0 800Z" fill="url(#wave3)" />
-          {/* Subtle top wave */}
-          <path d="M0 100 C300 180, 500 50, 800 130 S1200 60, 1440 120 L1440 0 L0 0Z" fill="url(#wave1)" />
-        </svg>
-
-        {/* Gradient orbs */}
-        <div style={{
-          position: "absolute", top: "-120px", right: "-80px", width: "500px", height: "500px",
-          borderRadius: "50%", background: "radial-gradient(circle, rgba(108,63,245,0.12) 0%, rgba(167,139,250,0.06) 40%, transparent 70%)",
-          filter: "blur(40px)", pointerEvents: "none",
-        }} />
-        <div style={{
-          position: "absolute", bottom: "-60px", left: "-100px", width: "400px", height: "400px",
-          borderRadius: "50%", background: "radial-gradient(circle, rgba(236,72,153,0.1) 0%, rgba(139,92,246,0.06) 40%, transparent 70%)",
-          filter: "blur(50px)", pointerEvents: "none",
-        }} />
-        <div style={{
-          position: "absolute", top: "40%", left: "50%", width: "300px", height: "300px",
-          borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(108,63,245,0.04) 50%, transparent 70%)",
-          filter: "blur(40px)", pointerEvents: "none", transform: "translateX(-50%)",
-        }} />
-
-        {/* Content */}
-        <div className="lp-hero-grid">
-          {/* Left column */}
-          <div>
-            <h1 style={{
-              fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)",
-              lineHeight: 1.15, letterSpacing: "-0.02em",
-              margin: "0 0 20px 0",
-            }}>
-              Buat brand Anda muncul di setiap jawaban AI — bukan hanya di Google.
-            </h1>
-            <p className="text-copy-16" style={{
-              color: "#4B5563", margin: "0 0 32px 0", maxWidth: "480px",
-            }}>
-              Lihat bagaimana ChatGPT melihat brand Anda, bandingkan dengan kompetitor, dan dapatkan rekomendasi yang langsung berdampak.
-            </p>
-
-            {/* Form */}
-            <div id="audit-form" style={{
-              display: "flex", flexDirection: "column", gap: "12px",
-              maxWidth: "420px", width: "100%",
-              background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)",
-              padding: "24px", borderRadius: 'var(--radius-xl)',
-              border: "1px solid rgba(108,63,245,0.1)",
-              boxShadow: "0 4px 24px rgba(108,63,245,0.06)",
-            }}>
-              <div className="form-field">
-                <label>Nama Brand</label>
-                <input className="input-large" type="text" placeholder="misal: Nuave"
-                  value={brandName} onChange={(e) => setBrandName(e.target.value)} />
-              </div>
-              <div className="form-field">
-                <label>URL Website</label>
-                <input className="input-large" type="url" placeholder="misal: https://nuave.ai"
-                  value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} />
-              </div>
-              {error && <p style={{ fontSize: "13px", color: "#e53e3e", margin: 0 }}>{error}</p>}
-              <button type="button" onClick={() => handleSubmit(brandName, websiteUrl, setLoading)} disabled={loading}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                  width: "100%", fontSize: "15px", fontWeight: 600, color: "#ffffff",
-                  background: "linear-gradient(135deg, #6C3FF5, #8B5CF6)", border: "none", borderRadius: 'var(--radius-md)',
-                  padding: "14px", cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                  boxShadow: "0 4px 16px rgba(108,63,245,0.3)",
-                }}>
-                {loading ? "Menganalisis…" : <>Cek Visibilitas AI Anda <IconArrowRight size={18} stroke={1.5} /></>}
-              </button>
-            </div>
-
-            {/* Trust strip */}
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "16px", flexWrap: "wrap" }}>
-              {["Gratis", "60 detik", "Tanpa kartu kredit"].map((t) => (
-                <div key={t} className="text-label-13" style={{ display: "flex", alignItems: "center", gap: "4px", color: "#6B7280" }}>
-                  <IconCheck size={16} stroke={2} color="#6C3FF5" /> {t}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right column — mockup */}
-          <div className="lp-hero-mockup" style={{
-            background: "rgba(255,255,255,0.75)", backdropFilter: "blur(12px)",
-            border: "1px solid rgba(108,63,245,0.1)", borderRadius: 'var(--radius-xl)',
-            padding: "32px", display: "flex", flexDirection: "column", gap: "24px",
-            boxShadow: "0 8px 32px rgba(108,63,245,0.08)",
-          }}>
-            {/* Score gauge */}
-            <div style={{ textAlign: "center" }}>
-              <div style={{
-                width: "120px", height: "120px", borderRadius: "50%", margin: "0 auto 12px",
-                background: `conic-gradient(#EF4444 0deg ${35 * 3.6}deg, #E5E7EB ${35 * 3.6}deg 360deg)`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <div style={{
-                  width: "96px", height: "96px", borderRadius: "50%", background: "rgba(255,255,255,0.9)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexDirection: "column",
-                }}>
-                  <span style={{ fontSize: "32px", fontWeight: 700, color: "#EF4444" }}>35</span>
-                </div>
-              </div>
-              <span style={{
-                display: "inline-block", background: "#FEE2E2", color: "#DC2626",
-                fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: 'var(--radius-full)',
-              }}>
-                Visibilitas Rendah
-              </span>
-              <p className="text-label-13" style={{ color: "#6B7280", marginTop: "8px" }}>
-                2 dari 10 prompt menyebut brand Anda
-              </p>
-            </div>
-
-            {/* Prompt rows */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {MOCK_PROMPTS.slice(0, 4).map((p, i) => (
-                <div key={i} className="text-label-13" style={{
-                  display: "flex", alignItems: "center", gap: "10px",
-                  padding: "10px 14px", background: "rgba(255,255,255,0.8)", borderRadius: 'var(--radius-md)',
-                  border: "1px solid rgba(229,231,235,0.8)",
-                }}>
-                  {p.mentioned ? (
-                    <IconCheck size={16} stroke={2.5} color="#22C55E" style={{ flexShrink: 0 }} />
-                  ) : (
-                    <IconX size={16} stroke={2.5} color="#EF4444" style={{ flexShrink: 0 }} />
-                  )}
-                  <span>{p.prompt}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom wave divider */}
-        <svg style={{ display: "block", width: "100%", height: "60px", position: "relative", zIndex: 1 }} preserveAspectRatio="none" viewBox="0 0 1440 60">
-          <path d="M0 0 C360 50, 720 60, 1080 30 S1440 50, 1440 0 L1440 60 L0 60Z" fill="#ffffff" />
-        </svg>
-      </section>
+      {/* ──── Nav + Hero (Framer design) ──── */}
+      <Nav />
+      <HeroSection />
 
       {/* ──── Stats ──── */}
       <section className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
@@ -415,7 +615,7 @@ export default function Home() {
       </section>
 
       {/* ──── How it works ──── */}
-      <section className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
+      <section id="cara-kerja" className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
         <div className="lp-section-inner">
           <h2 className="lp-section-heading">
             Bagaimana Nuave bekerja
@@ -564,7 +764,7 @@ export default function Home() {
       </section>
 
       {/* ──── Pricing ──── */}
-      <section className="lp-section" style={{ maxWidth: "960px", margin: "0 auto" }}>
+      <section id="harga" className="lp-section" style={{ maxWidth: "960px", margin: "0 auto" }}>
         <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
           Harga sederhana, tanpa langganan
         </h2>
@@ -641,7 +841,7 @@ export default function Home() {
       </section>
 
       {/* ──── FAQ ──── */}
-      <section className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
+      <section id="faq" className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
         <div style={{ maxWidth: "640px", margin: "0 auto" }}>
           <h2 className="lp-section-heading" style={{ marginBottom: "40px" }}>
             Pertanyaan yang sering ditanya
@@ -691,7 +891,7 @@ export default function Home() {
             Cek sekarang apakah ChatGPT menyebut brand Anda — gratis.
           </p>
 
-          <div style={{
+          <div id="audit-form" style={{
             display: "flex", flexDirection: "column", gap: "12px",
             maxWidth: "400px", margin: "0 auto", textAlign: "left",
           }}>
