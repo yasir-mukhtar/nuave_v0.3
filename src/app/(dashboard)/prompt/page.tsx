@@ -1,498 +1,566 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
+  IconChevronDown,
+  IconChevronRight,
   IconCircleCheckFilled,
   IconCircleXFilled,
   IconSearch,
-  IconFilter,
+  IconSparkles,
+  IconPlus,
+  IconFileText,
+  IconArchive,
+  IconTrash,
+  IconClock,
 } from "@tabler/icons-react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
-import PromptDetailModal, { type PromptDetail } from "@/components/PromptDetailModal";
 
-/* ── Types ── */
+/* ── Mock data ── */
 
-type PromptRow = {
-  id: string;
-  prompt_text: string;
-  ai_response: string;
-  brand_mentioned: boolean;
-  mention_context: string | null;
-  created_at: string;
-  audit_id: string;
-  audit_date: string;
-  stage: string | null;
-};
+const MOCK_TOPICS = [
+  { id: "t1", name: "Best CRM tools", language: "en" },
+  { id: "t2", name: "Rekomendasi alat pemasaran", language: "id" },
+  { id: "t3", name: "Small business solutions", language: "en" },
+];
 
-type FilterTab = "all" | "mentioned" | "not_mentioned";
+const MOCK_PROMPTS = [
+  { id: "p1", topicId: "t1", text: "What are the best CRM tools for startups in 2026?", mentioned: true, archived: false },
+  { id: "p2", topicId: "t1", text: "Top CRM software for small teams with limited budget", mentioned: false, archived: false },
+  { id: "p3", topicId: "t1", text: "Compare the best CRM platforms for B2B companies", mentioned: true, archived: true },
+  { id: "p4", topicId: "t2", text: "Apa saja alat pemasaran digital terbaik untuk UKM?", mentioned: true, archived: false },
+  { id: "p5", topicId: "t2", text: "Rekomendasi platform email marketing untuk bisnis kecil", mentioned: false, archived: false },
+  { id: "p6", topicId: "t3", text: "Best accounting software for freelancers", mentioned: false, archived: false },
+  { id: "p7", topicId: "t3", text: "What project management tools do small businesses use?", mentioned: true, archived: false },
+  { id: "p8", topicId: null, text: "How to improve brand visibility in AI search results?", mentioned: false, archived: false },
+];
 
-/* ── Component ── */
+const MOCK_RESPONSE = `## Top CRM Tools for Startups in 2026
+
+Here are the most recommended CRM platforms for startups:
+
+- **HubSpot CRM** — Free tier with robust features, great for small teams starting out
+- **Salesforce Essentials** — Enterprise-grade features scaled down for startups
+- **Pipedrive** — Focused on sales pipeline management with intuitive interface
+- **Zoho CRM** — Affordable with extensive customization options
+
+### Key Factors to Consider
+
+When choosing a CRM for your startup, consider:
+
+- **Pricing** — Look for free tiers or startup-friendly pricing
+- **Scalability** — Can it grow with your team?
+- **Integrations** — Does it connect with your existing tools?
+- **Ease of use** — Your team should adopt it quickly
+
+---
+
+Most startups find success with HubSpot CRM or Pipedrive as their first CRM solution.`;
+
+/* ── Page ── */
+
+type FilterTab = "all" | "active" | "archived";
 
 export default function PromptsPage() {
-  const { workspaces, activeWorkspaceId, activeWorkspace, loading: wsLoading } = useActiveWorkspace();
-
-  const [prompts, setPrompts] = useState<PromptRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set(MOCK_TOPICS.map((t) => t.id)));
   const [filterTab, setFilterTab] = useState<FilterTab>("all");
-  const [workspaceFilter, setWorkspaceFilter] = useState<string>("all");
-  const [selectedPrompt, setSelectedPrompt] = useState<PromptDetail | null>(null);
+  const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    if (wsLoading) return;
+  const selectedType = selectedPromptId ? "prompt" : selectedTopicId ? "topic" : null;
 
-    const supabase = createSupabaseBrowserClient();
+  const toggleExpand = (id: string) => {
+    setExpandedTopics((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
-    async function fetchPrompts() {
-      setLoading(true);
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Get all workspaces for this user
-      const { data: userWorkspaces } = await supabase
-        .from("workspaces")
-        .select("id, brand_name")
-        .eq("user_id", user.id);
-
-      if (!userWorkspaces || userWorkspaces.length === 0) {
-        setPrompts([]);
-        setLoading(false);
-        return;
-      }
-
-      const wsIds = userWorkspaces.map((w) => w.id);
-      const wsMap = Object.fromEntries(userWorkspaces.map((w) => [w.id, w.brand_name]));
-
-      // Get all complete audits for these workspaces
-      const { data: audits } = await supabase
-        .from("audits")
-        .select("id, workspace_id, completed_at")
-        .in("workspace_id", wsIds)
-        .eq("status", "complete")
-        .order("completed_at", { ascending: false });
-
-      if (!audits || audits.length === 0) {
-        setPrompts([]);
-        setLoading(false);
-        return;
-      }
-
-      const auditIds = audits.map((a) => a.id);
-      const auditMap = Object.fromEntries(
-        audits.map((a) => [a.id, { date: a.completed_at, wsId: a.workspace_id }])
-      );
-
-      // Get all audit results
-      const { data: results } = await supabase
-        .from("audit_results")
-        .select("id, audit_id, prompt_text, ai_response, brand_mentioned, mention_context, created_at")
-        .in("audit_id", auditIds)
-        .order("created_at", { ascending: true });
-
-      // Get prompts table for stage info
-      const { data: promptRecords } = await supabase
-        .from("prompts")
-        .select("id, prompt_text, stage")
-        .in("workspace_id", wsIds);
-
-      const stageMap = new Map<string, string>();
-      if (promptRecords) {
-        for (const p of promptRecords) {
-          stageMap.set(p.prompt_text, p.stage ?? "");
-        }
-      }
-
-      if (!results) {
-        setPrompts([]);
-        setLoading(false);
-        return;
-      }
-
-      const rows: PromptRow[] = results.map((r) => {
-        const audit = auditMap[r.audit_id];
-        return {
-          id: r.id,
-          prompt_text: r.prompt_text ?? "",
-          ai_response: r.ai_response ?? "",
-          brand_mentioned: r.brand_mentioned ?? false,
-          mention_context: r.mention_context ?? null,
-          created_at: r.created_at ?? "",
-          audit_id: r.audit_id,
-          audit_date: audit?.date ?? "",
-          stage: stageMap.get(r.prompt_text ?? "") || null,
-          // attach workspace info via audit
-          ...({ _wsId: audit?.wsId } as Record<string, unknown>),
-        };
-      });
-
-      // Attach workspace name
-      const enriched: PromptRow[] = rows.map((r) => ({
-        ...r,
-        _brandName: wsMap[(r as unknown as { _wsId: string })._wsId] ?? "",
-        _wsId: (r as unknown as { _wsId: string })._wsId,
-      })) as unknown as PromptRow[];
-
-      setPrompts(enriched);
-      setLoading(false);
-    }
-
-    fetchPrompts();
-  }, [wsLoading]);
-
-  /* ── Derived data ── */
-
-  const getBrandName = (row: PromptRow) =>
-    (row as unknown as { _brandName: string })._brandName ?? "";
-  const getWsId = (row: PromptRow) =>
-    (row as unknown as { _wsId: string })._wsId ?? "";
-
-  // Apply filters
-  const filtered = prompts.filter((p) => {
-    if (workspaceFilter !== "all" && getWsId(p) !== workspaceFilter) return false;
-    if (filterTab === "mentioned" && !p.brand_mentioned) return false;
-    if (filterTab === "not_mentioned" && p.brand_mentioned) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      if (!p.prompt_text.toLowerCase().includes(q) && !getBrandName(p).toLowerCase().includes(q)) {
-        return false;
-      }
-    }
+  const filteredPrompts = MOCK_PROMPTS.filter((p) => {
+    if (filterTab === "active" && p.archived) return false;
+    if (filterTab === "archived" && !p.archived) return false;
+    if (search && !p.text.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
-  const totalCount = prompts.length;
-  const mentionedCount = prompts.filter((p) => p.brand_mentioned).length;
-  const mentionRate = totalCount > 0 ? Math.round((mentionedCount / totalCount) * 100) : 0;
+  const promptsForTopic = (topicId: string | null) =>
+    filteredPrompts.filter((p) => p.topicId === topicId);
 
-  // Filtered stats for active workspace filter
-  const filteredByWs = workspaceFilter === "all" ? prompts : prompts.filter((p) => getWsId(p) === workspaceFilter);
-  const filteredTotal = filteredByWs.length;
-  const filteredMentioned = filteredByWs.filter((p) => p.brand_mentioned).length;
-  const filteredRate = filteredTotal > 0 ? Math.round((filteredMentioned / filteredTotal) * 100) : 0;
+  const counts = {
+    all: MOCK_PROMPTS.filter((p) => !search || p.text.toLowerCase().includes(search.toLowerCase())).length,
+    active: MOCK_PROMPTS.filter((p) => !p.archived && (!search || p.text.toLowerCase().includes(search.toLowerCase()))).length,
+    archived: MOCK_PROMPTS.filter((p) => p.archived && (!search || p.text.toLowerCase().includes(search.toLowerCase()))).length,
+  };
 
-  // Stage breakdown for filtered set
-  const stageStats = { awareness: { total: 0, mentioned: 0 }, consideration: { total: 0, mentioned: 0 }, decision: { total: 0, mentioned: 0 } };
-  for (const p of filteredByWs) {
-    const s = p.stage as keyof typeof stageStats;
-    if (s && stageStats[s]) {
-      stageStats[s].total++;
-      if (p.brand_mentioned) stageStats[s].mentioned++;
-    }
-  }
+  const selectedPrompt = MOCK_PROMPTS.find((p) => p.id === selectedPromptId);
+  const selectedTopic = MOCK_TOPICS.find((t) => t.id === selectedTopicId);
 
-  // Unique workspaces from data
-  const uniqueWorkspaces = Array.from(
-    new Map(prompts.map((p) => [getWsId(p), getBrandName(p)])).entries()
-  ).filter(([id]) => id);
-
-  const brandName = activeWorkspace?.brand_name ?? "";
-
-  /* ── Tab config ── */
-
-  const tabs: { key: FilterTab; label: string; count: number }[] = [
-    { key: "all", label: "Semua", count: filtered.length },
-    { key: "mentioned", label: "Disebut", count: filtered.filter((p) => p.brand_mentioned).length },
-    { key: "not_mentioned", label: "Tidak disebut", count: filtered.filter((p) => !p.brand_mentioned).length },
+  const TABS: { key: FilterTab; label: string }[] = [
+    { key: "all", label: "Semua" },
+    { key: "active", label: "Aktif" },
+    { key: "archived", label: "Diarsipkan" },
   ];
 
-  /* ── Render ── */
-
-  if (loading || wsLoading) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "400px" }}>
-        <p style={{ color: "var(--text-muted)" }}>Memuat data prompt...</p>
-      </div>
-    );
-  }
-
-  if (prompts.length === 0) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "400px", gap: "12px" }}>
-        <p style={{ fontSize: "16px", fontWeight: 600 }}>Belum ada prompt</p>
-        <p style={{ color: "var(--text-muted)" }}>Jalankan audit pertama Anda untuk melihat data di sini.</p>
-      </div>
-    );
-  }
+  const LANG: Record<string, string> = { en: "EN", id: "ID", ms: "MS" };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div style={{
+      display: "flex",
+      height: "calc(100vh - 120px)",
+      margin: "-32px",
+      background: "#ffffff",
+      borderRadius: "var(--radius-md)",
+      border: "1px solid var(--border-default, #E5E7EB)",
+      overflow: "hidden",
+    }}>
 
-      {/* ── Header ── */}
-      <div>
-        <h1 style={{ fontSize: "20px", margin: "0 0 4px 0" }}>
-          Prompt
-        </h1>
-        <p style={{ color: "var(--text-muted)", margin: 0 }}>
-          Semua pertanyaan yang diajukan AI saat mengaudit brand Anda.
-        </p>
-      </div>
-
-      {/* ── Summary cards ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
-
-        {/* Total prompts */}
-        <div style={{
-          padding: "20px", borderRadius: 'var(--radius-md)',
-          border: "1px solid var(--border-default)", background: "#ffffff",
-        }}>
-          <p style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Total Prompt
-          </p>
-          <p style={{ fontSize: "28px", fontWeight: 700, color: "var(--text-heading)", margin: 0 }}>
-            {filteredTotal}
-          </p>
-        </div>
-
-        {/* Mention rate */}
-        <div style={{
-          padding: "20px", borderRadius: 'var(--radius-md)',
-          border: "1px solid var(--border-default)", background: "#ffffff",
-        }}>
-          <p style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Tingkat Sebutan
-          </p>
-          <p style={{ fontSize: "28px", fontWeight: 700, margin: 0, color: filteredRate >= 70 ? "#22C55E" : filteredRate >= 40 ? "#F59E0B" : "#EF4444" }}>
-            {filteredRate}%
-          </p>
-          <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "4px 0 0 0" }}>
-            {filteredMentioned} dari {filteredTotal} disebut
-          </p>
-        </div>
-
-        {/* Stage: Awareness */}
-        <div style={{
-          padding: "20px", borderRadius: 'var(--radius-md)',
-          border: "1px solid var(--border-default)", background: "#ffffff",
-        }}>
-          <p style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Awareness
-          </p>
-          <p style={{ fontSize: "28px", fontWeight: 700, color: "var(--text-heading)", margin: 0 }}>
-            {stageStats.awareness.total > 0 ? `${Math.round((stageStats.awareness.mentioned / stageStats.awareness.total) * 100)}%` : "—"}
-          </p>
-          <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "4px 0 0 0" }}>
-            {stageStats.awareness.mentioned}/{stageStats.awareness.total} disebut
-          </p>
-        </div>
-
-        {/* Stage: Decision */}
-        <div style={{
-          padding: "20px", borderRadius: 'var(--radius-md)',
-          border: "1px solid var(--border-default)", background: "#ffffff",
-        }}>
-          <p style={{ fontSize: "12px", fontWeight: 500, color: "var(--text-muted)", margin: "0 0 4px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Decision
-          </p>
-          <p style={{ fontSize: "28px", fontWeight: 700, color: "var(--text-heading)", margin: 0 }}>
-            {stageStats.decision.total > 0 ? `${Math.round((stageStats.decision.mentioned / stageStats.decision.total) * 100)}%` : "—"}
-          </p>
-          <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "4px 0 0 0" }}>
-            {stageStats.decision.mentioned}/{stageStats.decision.total} disebut
-          </p>
-        </div>
-      </div>
-
-      {/* ── Filters row ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-
-        {/* Tabs */}
-        <div style={{
-          display: "flex", background: "var(--surface)",
-          border: "1px solid var(--border-default)", borderRadius: 'var(--radius-md)',
-          overflow: "hidden",
-        }}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setFilterTab(tab.key)}
-              style={{
-                padding: "8px 14px", fontSize: "13px", fontWeight: 500,
-                border: "none", cursor: "pointer",
-                background: filterTab === tab.key ? "#ffffff" : "transparent",
-                color: filterTab === tab.key ? "var(--text-heading)" : "var(--text-muted)",
-                boxShadow: filterTab === tab.key ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
-                borderRadius: filterTab === tab.key ? 'var(--radius-sm)' : "0",
-                transition: "all 0.15s ease",
-              }}
-            >
-              {tab.label}
-              <span style={{
-                marginLeft: "6px", fontSize: "11px", fontWeight: 600,
-                background: filterTab === tab.key ? "var(--purple-light)" : "var(--surface)",
-                color: filterTab === tab.key ? "var(--purple)" : "var(--text-muted)",
-                padding: "2px 6px", borderRadius: "var(--radius-xs)",
-              }}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Workspace filter */}
-        {uniqueWorkspaces.length > 1 && (
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <IconFilter size={14} stroke={1.5} color="var(--text-muted)" />
-            <select
-              value={workspaceFilter}
-              onChange={(e) => setWorkspaceFilter(e.target.value)}
-              style={{
-                padding: "7px 28px 7px 10px", fontSize: "13px",
-                border: "1px solid var(--border-default)", borderRadius: 'var(--radius-sm)',
-                background: "#ffffff", color: "var(--text-body)",
-                cursor: "pointer", outline: "none",
-                appearance: "none",
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")`,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right 8px center",
-                backgroundSize: "12px 9px",
-              }}
-            >
-              <option value="all">Semua brand</option>
-              {uniqueWorkspaces.map(([id, name]) => (
-                <option key={id} value={id}>{name}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Search */}
-        <div style={{ marginLeft: "auto", position: "relative" }}>
-          <IconSearch size={14} stroke={1.5} style={{
-            position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)",
-            color: "var(--text-muted)", pointerEvents: "none",
-          }} />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari prompt..."
-            style={{
-              padding: "7px 12px 7px 30px", fontSize: "13px", width: "220px",
-              border: "1px solid var(--border-default)", borderRadius: 'var(--radius-sm)',
-              background: "#ffffff", color: "var(--text-body)", outline: "none",
-            }}
-          />
-        </div>
-      </div>
-
-      {/* ── Table ── */}
+      {/* ═══════ LEFT PANEL ═══════ */}
       <div style={{
-        border: "1px solid var(--border-default)", borderRadius: 'var(--radius-md)',
-        background: "#ffffff", overflow: "hidden",
+        width: 400,
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column",
+        borderRight: "1px solid var(--border-default, #E5E7EB)",
+        height: "100%",
       }}>
-        {/* Table header */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "36px 1fr 120px 100px 140px",
-          gap: "0",
-          padding: "10px 16px",
-          background: "var(--surface)",
-          borderBottom: "1px solid var(--border-default)",
-          fontSize: "11px", fontWeight: 600, color: "var(--text-muted)",
-          textTransform: "uppercase", letterSpacing: "0.05em",
-        }}>
-          <span />
-          <span>Prompt</span>
-          <span>Brand</span>
-          <span>Stage</span>
-          <span>Tanggal Audit</span>
+        {/* Header */}
+        <div style={{ padding: "20px 20px 0" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Prompt</h1>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                padding: "6px 12px", fontSize: 12, fontWeight: 600,
+                color: "#fff", background: "var(--purple, #533AFD)",
+                border: "none", borderRadius: "var(--radius-sm)", cursor: "pointer",
+              }}>
+                <IconSparkles size={14} stroke={2} />
+                Generate Topik
+              </button>
+              <button style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                padding: "6px 12px", fontSize: 12, fontWeight: 600,
+                color: "var(--text-body, #374151)", background: "transparent",
+                border: "1px solid var(--border-default, #E5E7EB)",
+                borderRadius: "var(--radius-sm)", cursor: "pointer",
+              }}>
+                <IconPlus size={14} stroke={2} />
+                Tambah Topik
+              </button>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div style={{
+            display: "flex", background: "var(--surface, #F9FAFB)",
+            border: "1px solid var(--border-default, #E5E7EB)",
+            borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: 12,
+          }}>
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setFilterTab(tab.key)}
+                style={{
+                  flex: 1, padding: "7px 10px", fontSize: 12, fontWeight: 500,
+                  border: "none", cursor: "pointer",
+                  background: filterTab === tab.key ? "#fff" : "transparent",
+                  color: filterTab === tab.key ? "var(--text-heading)" : "var(--text-muted)",
+                  boxShadow: filterTab === tab.key ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
+                  borderRadius: filterTab === tab.key ? "var(--radius-sm)" : 0,
+                }}
+              >
+                {tab.label}
+                <span style={{
+                  marginLeft: 5, fontSize: 10, fontWeight: 600,
+                  background: filterTab === tab.key ? "var(--purple-light, #F3F0FF)" : "var(--surface, #F9FAFB)",
+                  color: filterTab === tab.key ? "var(--purple, #533AFD)" : "var(--text-muted)",
+                  padding: "1px 5px", borderRadius: "var(--radius-xs)",
+                }}>
+                  {counts[tab.key]}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div style={{ position: "relative", marginBottom: 12 }}>
+            <IconSearch size={14} stroke={1.5} style={{
+              position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
+              color: "var(--text-muted)", pointerEvents: "none",
+            }} />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari prompt..."
+              style={{
+                width: "100%", padding: "7px 12px 7px 30px", fontSize: 13,
+                border: "1px solid var(--border-default, #E5E7EB)",
+                borderRadius: "var(--radius-sm)", background: "#fff",
+                color: "var(--text-body)", outline: "none", boxSizing: "border-box",
+              }}
+            />
+          </div>
         </div>
 
-        {/* Table rows */}
-        {filtered.length === 0 ? (
-          <div style={{ padding: "48px 16px", textAlign: "center" }}>
-            <p style={{ color: "var(--text-muted)" }}>
-              Tidak ada prompt yang cocok dengan filter.
+        {/* Topic list */}
+        <div className="scroll-subtle" style={{ flex: 1, overflowY: "auto", padding: "0 8px 12px" }}>
+          {MOCK_TOPICS.map((topic) => {
+            const tp = promptsForTopic(topic.id);
+            const isExpanded = expandedTopics.has(topic.id);
+            const isSelected = selectedType === "topic" && selectedTopicId === topic.id;
+            return (
+              <div key={topic.id} style={{ marginBottom: 4 }}>
+                <div
+                  onClick={() => {
+                    setSelectedTopicId(topic.id);
+                    setSelectedPromptId(null);
+                    toggleExpand(topic.id);
+                  }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "8px 12px", cursor: "pointer",
+                    borderRadius: "var(--radius-sm)",
+                    background: isSelected ? "var(--purple-light, #F3F0FF)" : "transparent",
+                  }}
+                >
+                  <span style={{ color: "var(--text-muted)" }}>
+                    {isExpanded ? <IconChevronDown size={14} stroke={2} /> : <IconChevronRight size={14} stroke={2} />}
+                  </span>
+                  <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "var(--text-heading)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {topic.name}
+                  </span>
+                  <span style={{ fontSize: 10, fontWeight: 600, padding: "1px 5px", borderRadius: "var(--radius-xs)", background: "#EDE9FF", color: "#533AFD" }}>
+                    {LANG[topic.language] ?? topic.language.toUpperCase()}
+                  </span>
+                  <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>{tp.length}</span>
+                </div>
+                {isExpanded && (
+                  <div style={{ paddingLeft: 4 }}>
+                    {tp.length === 0 ? (
+                      <p style={{ padding: "8px 12px 8px 32px", fontSize: 12, color: "var(--text-muted)", fontStyle: "italic" }}>
+                        Tidak ada prompt yang cocok
+                      </p>
+                    ) : tp.map((p) => (
+                      <div
+                        key={p.id}
+                        onClick={() => { setSelectedPromptId(p.id); setSelectedTopicId(null); }}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 8,
+                          padding: "8px 12px 8px 32px", cursor: "pointer",
+                          borderRadius: "var(--radius-sm)",
+                          background: selectedPromptId === p.id ? "var(--purple-light, #F3F0FF)" : "transparent",
+                        }}
+                      >
+                        {p.mentioned
+                          ? <IconCircleCheckFilled size={16} style={{ color: "#22C55E", flexShrink: 0 }} />
+                          : <IconCircleXFilled size={16} style={{ color: "#EF4444", flexShrink: 0 }} />
+                        }
+                        <span style={{ flex: 1, fontSize: 13, color: "var(--text-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {p.text}
+                        </span>
+                        {p.archived && (
+                          <span style={{ fontSize: 10, fontWeight: 500, padding: "1px 6px", borderRadius: "var(--radius-xs)", background: "#F3F4F6", color: "#9CA3AF" }}>
+                            Arsip
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Uncategorized */}
+          {promptsForTopic(null).length > 0 && (
+            <div style={{ marginBottom: 4 }}>
+              <div
+                onClick={() => {
+                  setSelectedTopicId(null);
+                  setSelectedPromptId(null);
+                }}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "8px 12px", cursor: "pointer",
+                  borderRadius: "var(--radius-sm)", background: "transparent",
+                }}
+              >
+                <span style={{ color: "var(--text-muted)" }}>
+                  <IconChevronDown size={14} stroke={2} />
+                </span>
+                <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "var(--text-muted)" }}>
+                  Tanpa Topik
+                </span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>
+                  {promptsForTopic(null).length}
+                </span>
+              </div>
+              <div style={{ paddingLeft: 4 }}>
+                {promptsForTopic(null).map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => { setSelectedPromptId(p.id); setSelectedTopicId(null); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 8,
+                      padding: "8px 12px 8px 32px", cursor: "pointer",
+                      borderRadius: "var(--radius-sm)",
+                      background: selectedPromptId === p.id ? "var(--purple-light, #F3F0FF)" : "transparent",
+                    }}
+                  >
+                    {p.mentioned
+                      ? <IconCircleCheckFilled size={16} style={{ color: "#22C55E", flexShrink: 0 }} />
+                      : <IconCircleXFilled size={16} style={{ color: "#EF4444", flexShrink: 0 }} />
+                    }
+                    <span style={{ flex: 1, fontSize: 13, color: "var(--text-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {p.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══════ RIGHT PANEL ═══════ */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#FAFAFA" }}>
+
+        {/* Empty state */}
+        {!selectedPrompt && !selectedTopic && (
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12 }}>
+            <IconFileText size={40} stroke={1} style={{ color: "#D1D5DB" }} />
+            <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>
+              Pilih prompt atau topik untuk melihat detail
             </p>
           </div>
-        ) : (
-          filtered.map((row, i) => (
-            <div
-              key={row.id}
-              onClick={() => setSelectedPrompt({
-                prompt_text: row.prompt_text,
-                ai_response: row.ai_response,
-                brand_mentioned: row.brand_mentioned,
-                mention_context: row.mention_context,
-                created_at: row.created_at,
-              })}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "36px 1fr 120px 100px 140px",
-                gap: "0",
-                padding: "12px 16px",
-                alignItems: "center",
-                borderBottom: i < filtered.length - 1 ? "1px solid var(--border-default)" : "none",
-                cursor: "pointer",
-                transition: "background 0.1s ease",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--surface)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-            >
-              {/* Status icon */}
-              <span>
-                {row.brand_mentioned ? (
-                  <IconCircleCheckFilled size={18} style={{ color: "#22C55E" }} />
-                ) : (
-                  <IconCircleXFilled size={18} style={{ color: "#EF4444" }} />
-                )}
-              </span>
+        )}
 
-              {/* Prompt text */}
-              <span style={{
-                fontSize: "13px", color: "var(--text-body)", lineHeight: 1.5,
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                paddingRight: "16px",
+        {/* Prompt detail */}
+        {selectedPrompt && (
+          <div className="scroll-subtle" style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* Chat bubble */}
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <div style={{
+                background: "var(--purple, #533AFD)", color: "white",
+                borderRadius: "var(--radius-2xl) var(--radius-2xl) var(--radius-xs) var(--radius-2xl)",
+                padding: "10px 14px", maxWidth: "85%", fontSize: 14, lineHeight: 1.5,
+                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
               }}>
-                {row.prompt_text}
-              </span>
+                {selectedPrompt.text}
+              </div>
+            </div>
 
-              {/* Brand name */}
-              <span style={{
-                fontSize: "12px", color: "var(--text-muted)",
-                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            {/* Mention badge */}
+            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                background: "#F4F4F4", borderRadius: "var(--radius-full)",
+                padding: "6px 12px 6px 6px",
               }}>
-                {getBrandName(row)}
-              </span>
-
-              {/* Stage badge */}
-              <span>
-                {row.stage ? (
-                  <span style={{
-                    fontSize: "11px", fontWeight: 500,
-                    padding: "2px 8px", borderRadius: "var(--radius-xs)",
-                    background: row.stage === "awareness" ? "#DBEAFE" : row.stage === "consideration" ? "#FEF3C7" : "#DCFCE7",
-                    color: row.stage === "awareness" ? "#2563EB" : row.stage === "consideration" ? "#D97706" : "#16A34A",
-                  }}>
-                    {row.stage.charAt(0).toUpperCase() + row.stage.slice(1)}
-                  </span>
-                ) : (
-                  <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>—</span>
-                )}
-              </span>
-
-              {/* Audit date */}
-              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                {row.audit_date
-                  ? new Date(row.audit_date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
-                  : "—"
+                {selectedPrompt.mentioned
+                  ? <IconCircleCheckFilled size={18} color="#16A34A" />
+                  : <IconCircleXFilled size={18} color="#DC2626" />
                 }
+                <span style={{ fontSize: 13, fontWeight: 500, color: "#111827" }}>
+                  Brand {selectedPrompt.mentioned ? "disebutkan" : "tidak disebutkan"}
+                </span>
+              </div>
+              {selectedPrompt.mentioned && (
+                <div style={{
+                  display: "inline-flex", alignItems: "center",
+                  background: "#DCFCE7", color: "#16A34A",
+                  borderRadius: "var(--radius-full)", padding: "6px 12px",
+                  fontSize: 12, fontWeight: 600,
+                }}>
+                  Positif
+                </div>
+              )}
+            </div>
+
+            {/* AI response */}
+            <div style={{
+              border: "1px solid var(--border-default, #E5E7EB)",
+              borderRadius: "var(--radius-md)", padding: 20, background: "#fff",
+            }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 12px" }}>
+                Respons AI
+              </p>
+              <div style={{ fontSize: 14, color: "#374151", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+                {MOCK_RESPONSE.split("\n").map((line, i) => {
+                  if (line.startsWith("## ")) return <p key={i} style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "16px 0 8px" }}>{line.slice(3)}</p>;
+                  if (line.startsWith("### ")) return <p key={i} style={{ fontSize: 14, fontWeight: 600, color: "#111827", margin: "12px 0 4px" }}>{line.slice(4)}</p>;
+                  if (line.startsWith("- ")) return <div key={i} style={{ display: "flex", gap: 8, marginBottom: 4 }}><span style={{ color: "#533AFD" }}>•</span><span>{line.slice(2)}</span></div>;
+                  if (line.startsWith("---")) return <hr key={i} style={{ border: "none", borderTop: "1px solid #E5E7EB", margin: "12px 0" }} />;
+                  if (line.trim() === "") return <div key={i} style={{ height: 8 }} />;
+                  return <p key={i} style={{ margin: "0 0 4px" }}>{line}</p>;
+                })}
+              </div>
+              <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #E5E7EB", fontSize: 11, color: "#9CA3AF" }}>
+                Respons oleh GPT-4o dengan pencarian web · 17 Mar 2026
+              </div>
+            </div>
+
+            {/* Competitor mentions */}
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 8px" }}>
+                Kompetitor yang Disebutkan
+              </p>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {["HubSpot", "Salesforce", "Pipedrive", "Zoho"].map((c) => (
+                  <span key={c} style={{ fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: "var(--radius-full)", background: "#FEE2E2", color: "#DC2626" }}>
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Response history placeholder */}
+            <div style={{ border: "1px solid var(--border-default, #E5E7EB)", borderRadius: "var(--radius-md)", padding: 20, background: "#FAFAFA" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
+                <IconClock size={16} stroke={1.5} style={{ color: "var(--text-muted)" }} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-heading)" }}>Riwayat Respons</span>
+                <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: "var(--radius-full)", background: "#FEF3C7", color: "#D97706" }}>
+                  Segera hadir
+                </span>
+              </div>
+              <div style={{ opacity: 0.4 }}>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} style={{ display: "flex", gap: 12, paddingBottom: 12, marginBottom: 12, borderBottom: i < 3 ? "1px solid #E5E7EB" : "none" }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#D1D5DB", marginTop: 4 }} />
+                    <div>
+                      <div style={{ height: 10, width: 80, background: "#E5E7EB", borderRadius: 4, marginBottom: 6 }} />
+                      <div style={{ height: 10, width: 160, background: "#E5E7EB", borderRadius: 4 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 8, paddingTop: 8, borderTop: "1px solid var(--border-default, #E5E7EB)" }}>
+              <button style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "8px 14px", fontSize: 12, fontWeight: 600,
+                color: "var(--text-body)", background: "transparent",
+                border: "1px solid var(--border-default, #E5E7EB)",
+                borderRadius: "var(--radius-sm)", cursor: "pointer",
+              }}>
+                <IconArchive size={14} stroke={1.5} />
+                Arsipkan
+              </button>
+              <button style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "8px 14px", fontSize: 12, fontWeight: 600,
+                color: "#DC2626", background: "transparent",
+                border: "1px solid #FCA5A5",
+                borderRadius: "var(--radius-sm)", cursor: "pointer",
+              }}>
+                <IconTrash size={14} stroke={1.5} />
+                Hapus
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Topic detail */}
+        {selectedTopic && !selectedPrompt && (
+          <div className="scroll-subtle" style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+            <div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 6px" }}>{selectedTopic.name}</h2>
+              <span style={{ fontSize: 12, fontWeight: 500, padding: "2px 8px", borderRadius: "var(--radius-xs)", background: "#EDE9FF", color: "#533AFD" }}>
+                {LANG[selectedTopic.language] ?? selectedTopic.language}
               </span>
             </div>
-          ))
+
+            {/* Stats */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+              {[
+                { label: "Total Prompt", value: String(promptsForTopic(selectedTopic.id).length), color: "var(--text-heading)" },
+                { label: "Aktif", value: String(MOCK_PROMPTS.filter((p) => p.topicId === selectedTopic.id && !p.archived).length), color: "#22C55E" },
+                { label: "Tingkat Sebutan", value: "67%", color: "#F59E0B" },
+              ].map((s) => (
+                <div key={s.label} style={{ padding: 16, borderRadius: "var(--radius-md)", border: "1px solid var(--border-default, #E5E7EB)", background: "#fff" }}>
+                  <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{s.label}</p>
+                  <p style={{ fontSize: 24, fontWeight: 700, margin: 0, color: s.color }}>{s.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 8 }}>
+              <button style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                padding: "8px 14px", fontSize: 12, fontWeight: 600,
+                color: "#fff", background: "var(--purple, #533AFD)",
+                border: "none", borderRadius: "var(--radius-sm)", cursor: "pointer",
+              }}>
+                <IconSparkles size={14} stroke={2} />
+                Generate Prompt
+              </button>
+              <button style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                padding: "8px 14px", fontSize: 12, fontWeight: 600,
+                color: "var(--text-body)", background: "transparent",
+                border: "1px solid var(--border-default, #E5E7EB)",
+                borderRadius: "var(--radius-sm)", cursor: "pointer",
+              }}>
+                <IconPlus size={14} stroke={2} />
+                Tambah Prompt
+              </button>
+            </div>
+
+            {/* Prompts list */}
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 8px" }}>
+                Prompt dalam Topik
+              </p>
+              <div style={{ border: "1px solid var(--border-default, #E5E7EB)", borderRadius: "var(--radius-md)", background: "#fff", overflow: "hidden" }}>
+                {MOCK_PROMPTS.filter((p) => p.topicId === selectedTopic.id).map((p, i, arr) => (
+                  <div
+                    key={p.id}
+                    onClick={() => { setSelectedPromptId(p.id); setSelectedTopicId(null); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 8,
+                      padding: "10px 14px", cursor: "pointer",
+                      borderBottom: i < arr.length - 1 ? "1px solid var(--border-default, #E5E7EB)" : "none",
+                    }}
+                  >
+                    {p.mentioned
+                      ? <IconCircleCheckFilled size={16} style={{ color: "#22C55E", flexShrink: 0 }} />
+                      : <IconCircleXFilled size={16} style={{ color: "#EF4444", flexShrink: 0 }} />
+                    }
+                    <span style={{ flex: 1, fontSize: 13, color: "var(--text-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {p.text}
+                    </span>
+                    {p.archived && (
+                      <span style={{ fontSize: 10, fontWeight: 500, padding: "1px 6px", borderRadius: "var(--radius-xs)", background: "#F3F4F6", color: "#9CA3AF" }}>
+                        Arsip
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Delete topic */}
+            <div style={{ paddingTop: 8, borderTop: "1px solid var(--border-default, #E5E7EB)" }}>
+              <button style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "8px 14px", fontSize: 12, fontWeight: 600,
+                color: "#DC2626", background: "transparent",
+                border: "1px solid #FCA5A5",
+                borderRadius: "var(--radius-sm)", cursor: "pointer",
+              }}>
+                <IconTrash size={14} stroke={1.5} />
+                Hapus Topik
+              </button>
+            </div>
+          </div>
         )}
       </div>
-
-      {/* ── Detail Modal ── */}
-      {selectedPrompt && (
-        <PromptDetailModal
-          result={selectedPrompt}
-          brandName={brandName}
-          onClose={() => setSelectedPrompt(null)}
-        />
-      )}
     </div>
   );
 }
