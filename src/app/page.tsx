@@ -9,10 +9,21 @@ import Footer from "@/components/Footer";
 /* ───── Data ───── */
 
 const STATS = [
-  { value: "17%", label: "rata-rata respons AI yang menyebut sebuah brand" },
-  { value: "3×", label: "keunggulan brand teratas vs rata-rata industri" },
-  { value: "50%+", label: "penurunan traffic Google sejak AI mengambil alih" },
-  { value: "~15%", label: "respons AI yang mengutip domain brand" },
+  {
+    number: "9x",
+    title: "Conversion Rate",
+    body: "Traffic dari AI memiliki conversion rate lebih tinggi dibanding search tradisional.",
+  },
+  {
+    number: "4x",
+    title: "Leads Quality",
+    body: "Leads dari AI lebih siap untuk melakukan pembelian.",
+  },
+  {
+    number: "1%",
+    title: "Pertumbuhan Bulanan",
+    body: "Pencarian melalui AI tumbuh 1% setiap bulan.",
+  },
 ];
 
 const FEATURES = [
@@ -596,24 +607,6 @@ export default function Home() {
       </section>
       </div>{/* end Framer hero+marquee wrapper */}
 
-      {/* ──── Stats ──── */}
-      <section className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
-        <div className="lp-stats-grid">
-          {STATS.map((s, i) => (
-            <div key={i} style={{
-              textAlign: "center", padding: "24px 16px",
-              background: "#ffffff", borderRadius: 'var(--radius-lg)', border: "1px solid #E5E7EB",
-            }}>
-              <div style={{ fontSize: "36px", fontWeight: 700, color: "#6C3FF5", marginBottom: "8px" }}>{s.value}</div>
-              <div className="text-copy-14" style={{ color: "#6B7280" }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-        <p className="text-label-12" style={{ textAlign: "center", color: "#9CA3AF", marginTop: "20px" }}>
-          Sumber: Analisis 8 juta respons AI — State of AI Search 2026
-        </p>
-      </section>
-
       {/* ──── SEO vs AEO ──── */}
       <section className="lp-section">
         <div className="lp-section-inner">
@@ -822,6 +815,92 @@ export default function Home() {
             </button>
           </div>
         </div>
+      </section>
+
+      {/* ──── Stats ──── */}
+      <section style={{ background: "#F9FAFB", paddingTop: 120, paddingBottom: 120 }}>
+
+        {/* Heading + subtitle — padded inward */}
+        <div style={{ padding: "0 32px", textAlign: "center", marginBottom: 40 }}>
+          <h2 style={{
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 500,
+            fontSize: 48,
+            letterSpacing: "-2px",
+            lineHeight: "1.2em",
+            color: "#111827",
+            margin: "0 0 20px 0",
+          }}>
+            Platform AI adalah <em>search engine</em> baru.
+          </h2>
+          <p style={{
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 400,
+            fontSize: 20,
+            letterSpacing: "-0.5px",
+            lineHeight: "1.7em",
+            color: "#6B7280",
+            margin: 0,
+          }}>
+            Bangun visibilitas brand Anda di mata AI dengan <em>Answer Engine Optimization</em> (AEO) <em>tool</em> Nuave.
+          </p>
+        </div>
+
+        {/* Top divider — full width */}
+        <div style={{ height: 1, background: "#E5E7EB" }} />
+
+        {/* Stats grid — max-width 1044px, centered */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          maxWidth: 1044,
+          margin: "0 auto",
+        }}>
+          {STATS.map((stat, i) => (
+            <div key={i} style={{
+              padding: "48px 40px",
+              borderLeft: i === 0 ? "1px solid #E5E7EB" : "none",
+              borderRight: "1px solid #E5E7EB",
+            }}>
+              <p style={{
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 600,
+                fontSize: 40,
+                letterSpacing: "-1px",
+                lineHeight: "1.4em",
+                color: "#111827",
+                margin: "0 0 8px 0",
+              }}>
+                {stat.number}
+              </p>
+              <p style={{
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 500,
+                fontSize: 24,
+                letterSpacing: "-0.5px",
+                lineHeight: "1.4em",
+                color: "#111827",
+                margin: "0 0 12px 0",
+              }}>
+                {stat.title}
+              </p>
+              <p style={{
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 400,
+                fontSize: 16,
+                lineHeight: "1.7em",
+                color: "#6B7280",
+                margin: 0,
+              }}>
+                {stat.body}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom divider — full width */}
+        <div style={{ height: 1, background: "#E5E7EB" }} />
+
       </section>
 
       {/* ──── Pricing ──── */}
