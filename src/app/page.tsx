@@ -904,40 +904,84 @@ export default function Home() {
       </section>
 
       {/* ──── FAQ ──── */}
-      <section id="faq" className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
-        <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <h2 className="lp-section-heading" style={{ marginBottom: "40px" }}>
-            Pertanyaan yang sering ditanya
+      <section id="faq" style={{ background: "#F9FAFB", padding: "72px 32px 80px" }}>
+        <div style={{ maxWidth: 740, margin: "0 auto" }}>
+          <h2 style={{
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 500,
+            fontSize: 36,
+            letterSpacing: "-1px",
+            lineHeight: "1.4em",
+            color: "#111827",
+            textAlign: "center",
+            marginBottom: 48,
+          }}>
+            Frequently Asked Questions (FAQ)
           </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {FAQS.map((faq, i) => (
               <div key={i} style={{
-                background: "#ffffff", border: "1px solid #E5E7EB", borderRadius: 'var(--radius-lg)',
+                background: "#ffffff",
+                border: "1px solid #E5E7EB",
+                borderRadius: 12,
                 overflow: "hidden",
               }}>
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    width: "100%", padding: "18px 24px", background: "none", border: "none",
-                    cursor: "pointer", textAlign: "left",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    width: "100%",
+                    padding: 24,
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
                   }}
                 >
-                  <span className="text-label-14" style={{ fontWeight: 600, color: "#111827" }}>{faq.q}</span>
+                  <span style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 600,
+                    fontSize: 18,
+                    letterSpacing: "-0.5px",
+                    lineHeight: "1.7em",
+                    color: "#111827",
+                  }}>
+                    {faq.q}
+                  </span>
                   <IconChevronDown
-                    size={18} stroke={2} color="#6B7280"
+                    size={20}
+                    stroke={1.5}
+                    color="#6B7280"
                     style={{
-                      flexShrink: 0, marginLeft: "12px",
+                      flexShrink: 0,
                       transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.2s ease",
+                      transition: "transform 0.3s ease",
                     }}
                   />
                 </button>
-                {openFaq === i && (
-                  <div style={{ padding: "0 24px 18px" }}>
-                    <p className="text-copy-14" style={{ color: "#6B7280", margin: 0 }}>{faq.a}</p>
+                {/* Smooth expand/collapse via CSS grid trick */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateRows: openFaq === i ? "1fr" : "0fr",
+                  transition: "grid-template-rows 0.3s ease",
+                }}>
+                  <div style={{ overflow: "hidden" }}>
+                    <p style={{
+                      fontFamily: "Inter, sans-serif",
+                      fontWeight: 400,
+                      fontSize: 14,
+                      lineHeight: "1.6em",
+                      color: "#6B7280",
+                      margin: 0,
+                      padding: "0 24px 24px",
+                    }}>
+                      {faq.a}
+                    </p>
                   </div>
-                )}
+                </div>
               </div>
             ))}
           </div>
