@@ -555,6 +555,23 @@ label.field-label.disabled {
   }
 }
 
+/* ── Landing page CTA button variants ── */
+.btn-lp-purple {
+  background-color: var(--lp-purple);
+  transition: background-color 0.15s ease;
+}
+.btn-lp-purple:hover {
+  background-color: var(--lp-purple-dark);
+}
+
+.btn-lp-black {
+  background-color: var(--lp-text-primary);
+  transition: background-color 0.15s ease;
+}
+.btn-lp-black:hover {
+  background-color: var(--black-hover);
+}
+
 /* ── Landing page scope resets ── */
 body:has(.lp-root) {
   background-color: var(--lp-bg) !important;

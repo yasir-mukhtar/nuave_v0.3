@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { IconCheck, IconX, IconArrowRight, IconChevronDown, IconBrandOpenai, IconTarget, IconMessageChatbot, IconFileText, IconCpu, IconCreditCard } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Footer from "@/components/Footer";
@@ -95,9 +94,42 @@ const AI_LOGOS = [
   { src: "https://framerusercontent.com/images/2WjKGtr45KhKPD7xLIEf4X0qRM.svg", alt: "ChatGPT", w: 110, h: 24 },
 ];
 
+/* ───── Nav helpers ───── */
+function scrollToSection(id: string) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: "smooth" });
+}
+
+function NavAnchor({ label, sectionId }: { label: string; sectionId: string }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={() => scrollToSection(sectionId)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: "pointer",
+        fontFamily: "Inter, sans-serif",
+        fontWeight: 500,
+        fontSize: 14,
+        lineHeight: "24px",
+        color: hovered ? "#6C3FF5" : "var(--lp-text-primary)",
+        textDecoration: "none",
+        transition: "color 0.15s ease",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
 /* ───── Nav (Framer design) ───── */
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const [kontakHovered, setKontakHovered] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -152,28 +184,13 @@ function Nav() {
 
         {/* Links */}
         <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-          {[
-            { label: "Cara Kerja", href: "#cara-kerja" },
-            { label: "Harga", href: "#harga" },
-            { label: "FAQ", href: "#faq" },
-          ].map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 500,
-                fontSize: 14,
-                lineHeight: "24px",
-                color: "var(--lp-text-primary)",
-                textDecoration: "none",
-              }}
-            >
-              {link.label}
-            </a>
-          ))}
+          <NavAnchor label="Cara Kerja" sectionId="cara-kerja" />
+          <NavAnchor label="Harga" sectionId="harga" />
+          <NavAnchor label="FAQ" sectionId="faq" />
           <a
             href="/support"
+            onMouseEnter={() => setKontakHovered(true)}
+            onMouseLeave={() => setKontakHovered(false)}
             style={{
               display: "flex",
               alignItems: "center",
@@ -182,8 +199,9 @@ function Nav() {
               fontWeight: 500,
               fontSize: 14,
               lineHeight: "24px",
-              color: "var(--lp-text-primary)",
+              color: kontakHovered ? "#6C3FF5" : "var(--lp-text-primary)",
               textDecoration: "none",
+              transition: "color 0.15s ease",
             }}
           >
             Kontak
@@ -197,12 +215,12 @@ function Nav() {
         {/* Masuk button */}
         <Link
           href="/auth"
+          className="btn-lp-black"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             padding: "8px 20px",
-            backgroundColor: "var(--lp-text-primary)",
             color: "#fff",
             fontFamily: "Inter, sans-serif",
             fontWeight: 500,
@@ -309,11 +327,11 @@ function HeroSection() {
           {/* CTA Button */}
           <Link
             href="/auth"
+            className="btn-lp-purple"
             style={{
               display: "inline-flex",
               alignItems: "center",
               padding: "12px 22px",
-              backgroundColor: "var(--lp-purple)",
               color: "#fff",
               fontFamily: "Inter, sans-serif",
               fontWeight: 500,
@@ -497,45 +515,7 @@ function HeroSection() {
 /* ───── Page ───── */
 
 export default function Home() {
-  const router = useRouter();
-  const [brandName, setBrandName] = useState("");
-  const [websiteUrl, setWebsiteUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  // Bottom CTA form state
-  const [brandName2, setBrandName2] = useState("");
-  const [websiteUrl2, setWebsiteUrl2] = useState("");
-  const [loading2, setLoading2] = useState(false);
-
-  useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setIsLoggedIn(!!data.user);
-    });
-  }, []);
-
-  async function handleSubmit(brand: string, url: string, setLoadingFn: (v: boolean) => void) {
-    setError(null);
-    setLoadingFn(true);
-    try {
-      sessionStorage.setItem('nuave_pending_brand', brand);
-      sessionStorage.setItem('nuave_pending_url', url);
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        router.push('/onboarding/analyze');
-      } else {
-        router.push('/auth');
-      }
-    } catch {
-      setError("Terjadi kesalahan. Silakan coba lagi.");
-    } finally {
-      setLoadingFn(false);
-    }
-  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#ffffff" }}>
@@ -832,10 +812,11 @@ export default function Home() {
                 if (form) form.scrollIntoView({ behavior: 'smooth' });
                 else window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              className="btn-lp-purple"
               style={{
                 display: "inline-flex", alignItems: "center", gap: "8px",
                 fontSize: "15px", fontWeight: 600, color: "#ffffff",
-                background: "#6C3FF5", border: "none", borderRadius: 'var(--radius-md)',
+                border: "none", borderRadius: 'var(--radius-md)',
                 padding: "14px 28px", cursor: "pointer",
               }}
             >
@@ -900,12 +881,12 @@ export default function Home() {
                   sessionStorage.setItem('nuave_pending_package', pkg.name.toLowerCase());
                   window.location.href = '/auth';
                 }}
-                className="text-label-14"
+                className={`text-label-14${!pkg.popular ? " btn-lp-purple" : ""}`}
                 style={{
                   display: "block", width: "100%", textAlign: "center",
                   padding: "12px 24px", borderRadius: 'var(--radius-md)',
                   fontWeight: 600, border: "none", cursor: "pointer",
-                  background: pkg.popular ? "#ffffff" : "#6C3FF5",
+                  background: pkg.popular ? "#ffffff" : undefined,
                   color: pkg.popular ? "#6C3FF5" : "#ffffff",
                 }}
               >
@@ -964,48 +945,56 @@ export default function Home() {
       </section>
 
       {/* ──── Final CTA ──── */}
-      <section className="lp-section" style={{ background: "#EDE9FF" }}>
-        <div style={{ maxWidth: "560px", margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontSize: "28px", marginBottom: "16px", lineHeight: 1.3 }}>
-            Jangan biarkan brand Anda tidak terlihat di era AI.
-          </h2>
-          <p style={{ fontSize: "15px", color: "#6B7280", marginBottom: "32px" }}>
-            Cek sekarang apakah ChatGPT menyebut brand Anda — gratis.
-          </p>
-
-          <div id="audit-form" style={{
-            display: "flex", flexDirection: "column", gap: "12px",
-            maxWidth: "400px", margin: "0 auto", textAlign: "left",
+      <section style={{
+        width: "100%",
+        minHeight: 516,
+        padding: "144px 32px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        overflow: "hidden",
+        backgroundImage: "url('/bg-cta.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 40,
+          textAlign: "center",
+        }}>
+          <h2 style={{
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 500,
+            fontSize: 60,
+            letterSpacing: "-2px",
+            lineHeight: "1.2em",
+            color: "#0a0a0a",
+            margin: 0,
+            maxWidth: 720,
           }}>
-            <div className="form-field">
-              <label>Nama Brand</label>
-              <input className="input-large" type="text" placeholder="misal: Nuave"
-                value={brandName2} onChange={(e) => setBrandName2(e.target.value)} />
-            </div>
-            <div className="form-field">
-              <label>URL Website</label>
-              <input className="input-large" type="url" placeholder="misal: https://nuave.ai"
-                value={websiteUrl2} onChange={(e) => setWebsiteUrl2(e.target.value)} />
-            </div>
-            <button type="button" onClick={() => handleSubmit(brandName2, websiteUrl2, setLoading2)} disabled={loading2}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                width: "100%", fontSize: "15px", fontWeight: 600, color: "#ffffff",
-                background: "#6C3FF5", border: "none", borderRadius: 'var(--radius-md)',
-                padding: "14px", cursor: loading2 ? "not-allowed" : "pointer",
-                opacity: loading2 ? 0.7 : 1,
-              }}>
-              {loading2 ? "Menganalisis…" : <>Cek Visibilitas AI Anda <IconArrowRight size={18} stroke={1.5} /></>}
-            </button>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "center", marginTop: "16px", flexWrap: "wrap" }}>
-            {["Gratis", "60 detik", "Tanpa kartu kredit"].map((t) => (
-              <div key={t} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "13px", color: "#6B7280" }}>
-                <IconCheck size={16} stroke={2} color="#6C3FF5" /> {t}
-              </div>
-            ))}
-          </div>
+            Siap menjadi jawaban pertama ChatGPT?
+          </h2>
+          <Link
+            href="/auth"
+            className="btn-lp-black"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "14px 28px",
+              color: "#fff",
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 500,
+              fontSize: 14,
+              borderRadius: 8,
+              textDecoration: "none",
+              cursor: "pointer",
+            }}
+          >
+            Audit brand Anda — Gratis
+          </Link>
         </div>
       </section>
 
