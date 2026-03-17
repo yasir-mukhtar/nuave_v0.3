@@ -607,6 +607,108 @@ export default function Home() {
       </section>
       </div>{/* end Framer hero+marquee wrapper */}
 
+      {/* ──── Problem Section ──── */}
+      <section style={{ background: "#ffffff", padding: "120px 32px" }}>
+        <div style={{ maxWidth: 1044, margin: "0 auto" }}>
+
+          {/* Heading */}
+          <h2 style={{
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 500,
+            fontSize: 48,
+            letterSpacing: "-2px",
+            lineHeight: "1.2em",
+            color: "#111827",
+            textAlign: "center",
+            margin: "0 0 56px 0",
+          }}>
+            Apakah brand Anda muncul di ChatGPT?
+          </h2>
+
+          {/* Two cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+
+            {/* Card 1 — purple */}
+            {[
+              {
+                bg: "/bg-purple.png",
+                number: "49%",
+                desc: "pencarian di ChatGPT meminta panduan dan rekomendasi",
+                chips: ["Sepatu lari merek lokal terbaik", "Klinik kecantikan terpercaya di Jakarta", "Aplikasi budgeting terbaik untuk orang awam"],
+              },
+              {
+                bg: "/bg-orange.png",
+                number: "90%",
+                desc: "klien B2B menggunakan ChatGPT untuk riset pembelian",
+                chips: ["Jasa digital marketing untuk startup", "Software akuntansi terbaik untuk UMKM", "Vendor cloud storage terpercaya di Indonesia"],
+              },
+            ].map((card) => (
+              <div key={card.number} style={{
+                position: "relative",
+                borderRadius: 16,
+                border: "1px solid #E5E7EB",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                minHeight: 480,
+                backgroundImage: `url('${card.bg}')`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}>
+                {/* Top content */}
+                <div style={{ padding: "40px 40px 0" }}>
+                  <p style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 400,
+                    fontSize: 72,
+                    letterSpacing: "-3px",
+                    lineHeight: "1em",
+                    color: "#111827",
+                    margin: "0 0 20px 0",
+                  }}>
+                    {card.number}
+                  </p>
+                  <p style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 500,
+                    fontSize: 22,
+                    letterSpacing: "-0.5px",
+                    lineHeight: "1.4em",
+                    color: "#111827",
+                    margin: 0,
+                    maxWidth: 340,
+                  }}>
+                    {card.desc}
+                  </p>
+                </div>
+
+                {/* Bottom chips */}
+                <div style={{ padding: "0 40px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {card.chips.map((chip) => (
+                    <span key={chip} style={{
+                      display: "inline-block",
+                      alignSelf: "flex-start",
+                      fontFamily: "Inter, sans-serif",
+                      fontWeight: 400,
+                      fontSize: 14,
+                      color: "#374151",
+                      background: "rgba(255,255,255,0.85)",
+                      border: "1px solid rgba(0,0,0,0.08)",
+                      borderRadius: 999,
+                      padding: "8px 16px",
+                      backdropFilter: "blur(4px)",
+                    }}>
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ──── SEO vs AEO ──── */}
       <section className="lp-section">
         <div className="lp-section-inner">
