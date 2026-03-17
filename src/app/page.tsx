@@ -87,6 +87,14 @@ const DASHBOARD_IMAGES = [
 ];
 const HERO_STEPS = ["Tentukan Prompt", "Audit Brand", "Monitoring Harian"];
 
+const AI_LOGOS = [
+  { src: "https://framerusercontent.com/images/1Qy4nO9eawrvXqYd9ILHfHG5VA.svg", alt: "Claude", w: 98, h: 24 },
+  { src: "https://framerusercontent.com/images/PdwCanOeNG0AbS4iruy4sPRfdas.svg", alt: "Gemini", w: 110, h: 24 },
+  { src: "https://framerusercontent.com/images/qQyt0pI4hotJKK8RE7TMneKyptI.svg", alt: "Perplexity", w: 94, h: 24 },
+  { src: "https://framerusercontent.com/images/5UMspUrrkMvfl7lWs0vuweD8Tyk.svg", alt: "Meta AI", w: 89, h: 24 },
+  { src: "https://framerusercontent.com/images/2WjKGtr45KhKPD7xLIEf4X0qRM.svg", alt: "ChatGPT", w: 110, h: 24 },
+];
+
 /* ───── Nav (Framer design) ───── */
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -188,7 +196,7 @@ function Nav() {
 
         {/* Masuk button */}
         <Link
-          href="/login"
+          href="/auth"
           style={{
             display: "flex",
             alignItems: "center",
@@ -300,7 +308,7 @@ function HeroSection() {
 
           {/* CTA Button */}
           <Link
-            href="/register"
+            href="/auth"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -442,16 +450,16 @@ function HeroSection() {
                 ))}
               </div>
 
-              {/* Dashboard mockup card */}
+              {/* Dashboard mockup card — outer container */}
               <div
                 style={{
                   width: "100%",
                   maxWidth: 900,
-                  flex: 1,
-                  minHeight: 0,
+                  height: 504,
+                  padding: 16,
                   backdropFilter: "blur(54px)",
                   WebkitBackdropFilter: "blur(54px)",
-                  backgroundColor: "var(--lp-card-glass)",
+                  backgroundColor: "rgba(255, 255, 255, 0.54)",
                   borderRadius: 12,
                   boxShadow: "rgba(0, 0, 0, 0.08) 0px 8px 32px 0px",
                   overflow: "hidden",
@@ -465,10 +473,10 @@ function HeroSection() {
                     alt="Dashboard"
                     style={{
                       position: i === 0 ? "relative" : "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
+                      top: i === 0 ? 0 : 16,
+                      left: i === 0 ? 0 : 16,
+                      width: i === 0 ? "100%" : "calc(100% - 32px)",
+                      height: i === 0 ? "100%" : "calc(100% - 32px)",
                       objectFit: "cover",
                       objectPosition: "top center",
                       borderRadius: 6,
@@ -532,9 +540,83 @@ export default function Home() {
   return (
     <div style={{ minHeight: "100vh", background: "#ffffff" }}>
 
-      {/* ──── Nav + Hero (Framer design) ──── */}
+      {/* ──── Nav + Hero + AI Logos (Framer design) ──── */}
+      <div style={{ background: "var(--lp-bg, #f7f7f5)" }}>
       <Nav />
       <HeroSection />
+
+      {/* ──── AI Logos Marquee ──── */}
+      <style>{`
+        @keyframes marquee-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+      <section
+        style={{
+          width: "100%",
+          paddingTop: 120,
+          paddingBottom: 96,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 32,
+          overflow: "hidden",
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 400,
+            fontSize: 18,
+            lineHeight: "1.5em",
+            color: "#0A0A0A",
+            textAlign: "center",
+            margin: 0,
+            padding: "0 30px",
+          }}
+        >
+          Dikembangkan untuk pencarian berbasis AI — sekarang dan di masa depan
+        </p>
+
+        {/* Marquee track */}
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 1045,
+            margin: "0 auto",
+            overflow: "hidden",
+            maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+            WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 96,
+              width: "max-content",
+              animation: "marquee-scroll 60s linear infinite",
+            }}
+          >
+            {/* Duplicate the set 4× for seamless loop */}
+            {[...AI_LOGOS, ...AI_LOGOS, ...AI_LOGOS, ...AI_LOGOS].map((logo, i) => (
+              <img
+                key={`${logo.alt}-${i}`}
+                src={logo.src}
+                alt={logo.alt}
+                style={{
+                  display: "block",
+                  flexShrink: 0,
+                  height: 28,
+                  width: "auto",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+      </div>{/* end Framer hero+marquee wrapper */}
 
       {/* ──── Stats ──── */}
       <section className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
