@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { IconCheck, IconX, IconArrowRight, IconChevronDown, IconBrandOpenai, IconTarget, IconMessageChatbot, IconFileText, IconCpu, IconCreditCard } from '@tabler/icons-react';
+import { IconCheck, IconX, IconArrowRight, IconChevronDown, IconBrandOpenai, IconTarget, IconMessageChatbot, IconFileText, IconCpu, IconCreditCard, IconCoins } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Footer from "@/components/Footer";
 
@@ -26,22 +26,20 @@ const FEATURES = [
 
 const PRICING = [
   {
-    name: "Starter",
+    name: "Lite",
+    desc: "Track prompt selama satu minggu",
     credits: 50,
-    price: "Rp 75.000",
-    popular: false,
+    price: "Rp75.000",
+    highlight: false,
+    badge: null,
   },
   {
-    name: "Growth",
+    name: "Standar",
+    desc: "Track prompt selama satu bulan",
     credits: 150,
-    price: "Rp 199.000",
-    popular: true,
-  },
-  {
-    name: "Agency",
-    credits: 500,
-    price: "Rp 599.000",
-    popular: false,
+    price: "Rp200.000",
+    highlight: true,
+    badge: "Lebih Hemat",
   },
 ];
 
@@ -827,80 +825,146 @@ export default function Home() {
       </section>
 
       {/* ──── Pricing ──── */}
-      <section id="harga" className="lp-section" style={{ maxWidth: "960px", margin: "0 auto" }}>
-        <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
-          Harga sederhana, tanpa langganan
-        </h2>
-        <p className="text-copy-16" style={{ color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
-          1 audit = 10 kredit. Daftar gratis = 10 kredit = 1 audit lengkap.
-        </p>
-        <div className="lp-pricing-grid">
-          {PRICING.map((pkg) => (
-            <div key={pkg.name} style={{
-              position: "relative",
-              padding: "32px 28px", borderRadius: 'var(--radius-xl)',
-              background: pkg.popular ? "#6C3FF5" : "#ffffff",
-              border: `1px solid ${pkg.popular ? "#6C3FF5" : "#E5E7EB"}`,
-              boxShadow: pkg.popular ? "0 8px 32px rgba(108,63,245,0.25)" : "0 1px 2px rgba(0,0,0,0.05)",
-              transform: pkg.popular ? "scale(1.03)" : "none",
-              textAlign: "center",
+      <section id="harga" style={{ background: "#ffffff", padding: "72px 32px" }}>
+        <div style={{ maxWidth: 740, margin: "0 auto" }}>
+
+          {/* Title + subtitle */}
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <h2 style={{
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 500,
+              fontSize: 48,
+              lineHeight: "58px",
+              color: "#111827",
+              margin: "0 0 16px 0",
             }}>
-              {pkg.popular && (
-                <div style={{
-                  position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
-                  background: "#ffffff", color: "#6C3FF5",
-                  fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em",
-                  padding: "4px 14px", borderRadius: 'var(--radius-full)',
-                  border: "1px solid #E5E7EB", boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                  whiteSpace: "nowrap",
+              Harga
+            </h2>
+            <p style={{
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 400,
+              fontSize: 16,
+              lineHeight: "1.6em",
+              color: "#6B7280",
+              margin: 0,
+            }}>
+              Nuave menggunakan sistem kredit yang lebih fleksibel dari sistem langganan.
+            </p>
+          </div>
+
+          {/* Cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+            {PRICING.map((pkg) => (
+              <div key={pkg.name} style={{
+                position: "relative",
+                padding: 32,
+                borderRadius: 16,
+                background: "#ffffff",
+                border: "1px solid #E5E7EB",
+                display: "flex",
+                flexDirection: "column",
+              }}>
+                {/* Badge */}
+                {pkg.badge && (
+                  <div style={{
+                    position: "absolute",
+                    top: 24,
+                    right: 24,
+                    background: "#6C3FF5",
+                    color: "#ffffff",
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 500,
+                    fontSize: 13,
+                    padding: "5px 14px",
+                    borderRadius: 999,
+                    whiteSpace: "nowrap",
+                  }}>
+                    {pkg.badge}
+                  </div>
+                )}
+
+                {/* Plan name */}
+                <p style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 600,
+                  fontSize: 20,
+                  color: "#111827",
+                  margin: "0 0 8px 0",
                 }}>
-                  Paling Populer
+                  {pkg.name}
+                </p>
+
+                {/* Description */}
+                <p style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 400,
+                  fontSize: 14,
+                  color: "#6B7280",
+                  margin: "0 0 24px 0",
+                }}>
+                  {pkg.desc}
+                </p>
+
+                {/* Price */}
+                <p style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: 500,
+                  fontSize: 60,
+                  letterSpacing: "-2px",
+                  lineHeight: "72px",
+                  color: "#111827",
+                  margin: "0 0 24px 0",
+                }}>
+                  {pkg.price}
+                </p>
+
+                {/* Credits */}
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 32,
+                }}>
+                  <IconCoins size={18} stroke={1.5} color="#6B7280" />
+                  <span style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 400,
+                    fontSize: 16,
+                    lineHeight: "28px",
+                    color: "#374151",
+                  }}>
+                    {pkg.credits} kredit
+                  </span>
                 </div>
-              )}
-              <p style={{
-                fontSize: "13px", fontWeight: 600, textTransform: "uppercase" as const,
-                letterSpacing: "0.05em", margin: "0 0 8px 0",
-                color: pkg.popular ? "rgba(255,255,255,0.7)" : "#6B7280",
-              }}>
-                {pkg.name}
-              </p>
-              <p style={{
-                fontSize: "36px", fontWeight: 700, margin: "0 0 4px 0",
-                color: pkg.popular ? "#ffffff" : "#111827",
-              }}>
-                {pkg.price}
-              </p>
-              <p className="text-copy-14" style={{
-                margin: "0 0 24px 0",
-                color: pkg.popular ? "rgba(255,255,255,0.6)" : "#6B7280",
-              }}>
-                {pkg.credits} kredit
-              </p>
-              <button
-                onClick={() => {
-                  sessionStorage.setItem('nuave_pending_package', pkg.name.toLowerCase());
-                  window.location.href = '/auth';
-                }}
-                className={`text-label-14${!pkg.popular ? " btn-lp-purple" : ""}`}
-                style={{
-                  display: "block", width: "100%", textAlign: "center",
-                  padding: "12px 24px", borderRadius: 'var(--radius-md)',
-                  fontWeight: 600, border: "none", cursor: "pointer",
-                  background: pkg.popular ? "#ffffff" : undefined,
-                  color: pkg.popular ? "#6C3FF5" : "#ffffff",
-                }}
-              >
-                Beli {pkg.name} →
-              </button>
-            </div>
-          ))}
+
+                {/* Button */}
+                <button
+                  onClick={() => {
+                    sessionStorage.setItem('nuave_pending_package', pkg.name.toLowerCase());
+                    window.location.href = '/auth';
+                  }}
+                  className={pkg.highlight ? "btn-lp-purple" : undefined}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "14px 24px",
+                    borderRadius: 10,
+                    fontFamily: "Inter, sans-serif",
+                    fontWeight: 500,
+                    fontSize: 14,
+                    cursor: "pointer",
+                    background: pkg.highlight ? undefined : "#ffffff",
+                    color: pkg.highlight ? "#ffffff" : "#111827",
+                    border: pkg.highlight ? "none" : "1px solid #E5E7EB",
+                    marginTop: "auto",
+                  }}
+                >
+                  Beli paket {pkg.name}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-        <p className="text-label-13" style={{ textAlign: "center", color: "#9CA3AF", marginTop: "24px" }}>
-          Belum yakin?{" "}
-          <Link href="/auth" style={{ color: "#6C3FF5", fontWeight: 500, textDecoration: "none" }}>
-            Mulai dengan 10 kredit gratis →
-          </Link>
-        </p>
       </section>
 
       {/* ──── FAQ ──── */}
