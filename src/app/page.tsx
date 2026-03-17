@@ -657,13 +657,13 @@ export default function Home() {
                 backgroundPosition: "center",
               }}>
                 {/* Top content */}
-                <div style={{ padding: "40px 40px 0" }}>
+                <div style={{ padding: "40px 40px 0 40px" }}>
                   <p style={{
                     fontFamily: "Inter, sans-serif",
-                    fontWeight: 400,
-                    fontSize: 72,
-                    letterSpacing: "-3px",
-                    lineHeight: "1em",
+                    fontWeight: 500,
+                    fontSize: 48,
+                    letterSpacing: "-2px",
+                    lineHeight: "1.2em",
                     color: "#111827",
                     margin: "0 0 20px 0",
                   }}>
@@ -684,15 +684,15 @@ export default function Home() {
                 </div>
 
                 {/* Bottom chips */}
-                <div style={{ padding: "0 40px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ padding: "120px 40px 40px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
                   {card.chips.map((chip) => (
                     <span key={chip} style={{
                       display: "inline-block",
                       alignSelf: "flex-start",
                       fontFamily: "Inter, sans-serif",
                       fontWeight: 400,
-                      fontSize: 14,
-                      color: "#374151",
+                      fontSize: 16,
+                      color: "#111827",
                       background: "rgba(255,255,255,0.85)",
                       border: "1px solid rgba(0,0,0,0.08)",
                       borderRadius: 999,
