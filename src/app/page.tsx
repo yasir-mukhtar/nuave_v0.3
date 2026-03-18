@@ -5,6 +5,7 @@ import Link from "next/link";
 import { IconCheck, IconX, IconArrowRight, IconChevronDown, IconBrandOpenai, IconTarget, IconMessageChatbot, IconFileText, IconCpu, IconCreditCard, IconCoins } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Footer from "@/components/Footer";
+import HowItWorks from "@/components/HowItWorks";
 
 /* ───── Data ───── */
 
@@ -709,215 +710,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ──── SEO vs AEO ──── */}
-      <section className="lp-section">
-        <div className="lp-section-inner">
-        <h2 className="lp-section-heading">
-          SEO saja tidak cukup lagi.
-        </h2>
-        <div className="lp-two-col">
-          {/* Before */}
-          <div style={{
-            padding: "32px", borderRadius: 'var(--radius-xl)', border: "1px solid #E5E7EB",
-            background: "#F9FAFB", opacity: 0.75,
-          }}>
-            <div style={{
-              fontSize: "12px", fontWeight: 600, color: "#9CA3AF",
-              textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: "20px",
-            }}>
-              Sebelum
-            </div>
-            {["Riset keyword", "10 blue links di Google", "Traffic stabil dari SEO", "Fokus ranking halaman", "Click-Through Rate (CTR)"].map((item, i) => (
-              <div key={i} className="text-label-14" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", color: "#6B7280" }}>
-                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#D1D5DB", flexShrink: 0 }} />
-                {item}
-              </div>
-            ))}
-          </div>
-
-          {/* After */}
-          <div style={{
-            padding: "32px", borderRadius: 'var(--radius-xl)',
-            border: "2px solid #6C3FF5", background: "#ffffff",
-            boxShadow: "0 0 0 4px rgba(108,63,245,0.08)",
-          }}>
-            <div style={{
-              fontSize: "12px", fontWeight: 600, color: "#6C3FF5",
-              textTransform: "uppercase" as const, letterSpacing: "0.05em", marginBottom: "20px",
-            }}>
-              Sekarang
-            </div>
-            {["Orang bertanya langsung ke ChatGPT", "AI memberi jawaban langsung", "50%+ traffic Google menurun", "Disebut di jawaban AI", "Share of Voice di AI"].map((item, i) => (
-              <div key={i} className="text-label-14" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px", color: "#111827", fontWeight: 500 }}>
-                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#6C3FF5", flexShrink: 0 }} />
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Callout */}
-        <div style={{
-          marginTop: "32px", padding: "20px 24px", borderRadius: 'var(--radius-lg)',
-          background: "#EDE9FF", textAlign: "center",
-        }}>
-          <p style={{ fontSize: "15px", color: "#111827", margin: 0, lineHeight: 1.6 }}>
-            <strong>AEO</strong> memastikan brand Anda muncul ketika AI menjawab pertanyaan pelanggan.
-            <br />Nuave mengukur dan memperbaiki hal ini.
-          </p>
-        </div>
-        </div>
-      </section>
 
       {/* ──── How it works ──── */}
-      <section id="cara-kerja" className="lp-section" style={{ background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB" }}>
-        <div className="lp-section-inner">
-          <h2 className="lp-section-heading">
-            Bagaimana Nuave bekerja
-          </h2>
-          <div className="lp-steps-grid">
-            {[
-              { step: "1", title: "Masukkan brand & URL", desc: "Isi nama brand dan URL website Anda. Hanya butuh 5 detik." },
-              { step: "2", title: "AI mengirim 10 pertanyaan", desc: "Nuave mengirim 10 pertanyaan realistis ke ChatGPT dan menganalisis apakah brand Anda disebut." },
-              { step: "3", title: "Terima skor & rekomendasi", desc: "Dapatkan Visibility Score 0–100 dan rekomendasi konten spesifik untuk meningkatkan visibilitas AI." },
-            ].map((s) => (
-              <div key={s.step} style={{ textAlign: "center" }}>
-                <div style={{
-                  width: "48px", height: "48px", borderRadius: "50%",
-                  background: "#6C3FF5", color: "#ffffff",
-                  fontSize: "20px", fontWeight: 700,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  margin: "0 auto 16px",
-                }}>
-                  {s.step}
-                </div>
-                <h3 style={{ fontSize: "16px", marginBottom: "8px" }}>{s.title}</h3>
-                <p className="text-copy-14" style={{ color: "#6B7280" }}>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HowItWorks />
 
-      {/* ──── Features ──── */}
-      <section className="lp-section" style={{ maxWidth: "1040px", margin: "0 auto" }}>
-        <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
-          Semua yang Anda butuhkan
-        </h2>
-        <p className="text-copy-16" style={{ color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
-          Fitur lengkap untuk mengukur dan meningkatkan visibilitas brand di AI.
-        </p>
-        <div className="lp-features-grid">
-          {FEATURES.map((f, i) => (
-            <div key={i} style={{
-              padding: "28px", borderRadius: 'var(--radius-lg)',
-              border: "1px solid #E5E7EB", background: "#ffffff",
-            }}>
-              <div style={{
-                width: "40px", height: "40px", borderRadius: 'var(--radius-md)',
-                background: "#EDE9FF", display: "flex", alignItems: "center", justifyContent: "center",
-                marginBottom: "16px",
-              }}>
-                <f.icon size={20} stroke={1.5} color="#6C3FF5" />
-              </div>
-              <h3 style={{ fontSize: "15px", marginBottom: "8px" }}>{f.title}</h3>
-              <p className="text-copy-14" style={{ color: "#6B7280" }}>{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ──── Score Preview ──── */}
-      <section className="lp-section" style={{
-        background: "#F9FAFB", borderTop: "1px solid #E5E7EB", borderBottom: "1px solid #E5E7EB",
-      }}>
-        <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <h2 className="lp-section-heading" style={{ marginBottom: "12px" }}>
-            Ini yang akan Anda lihat
-          </h2>
-          <p className="text-copy-16" style={{ color: "#6B7280", textAlign: "center", marginBottom: "48px" }}>
-            Laporan detail dengan skor, analisis prompt, dan rekomendasi.
-          </p>
-
-          {/* Mockup card */}
-          <div style={{
-            background: "#ffffff", borderRadius: 'var(--radius-xl)', border: "1px solid #E5E7EB",
-            padding: "32px", boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-          }}>
-            {/* Score */}
-            <div style={{ textAlign: "center", marginBottom: "32px" }}>
-              <div style={{
-                width: "100px", height: "100px", borderRadius: "50%", margin: "0 auto 12px",
-                background: `conic-gradient(#EF4444 0deg ${35 * 3.6}deg, #E5E7EB ${35 * 3.6}deg 360deg)`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <div style={{
-                  width: "80px", height: "80px", borderRadius: "50%", background: "#ffffff",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  <span style={{ fontSize: "28px", fontWeight: 700, color: "#EF4444" }}>35</span>
-                </div>
-              </div>
-              <span style={{
-                display: "inline-block", background: "#FEE2E2", color: "#DC2626",
-                fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: 'var(--radius-full)',
-              }}>
-                Visibilitas Rendah
-              </span>
-              <p className="text-copy-14" style={{ color: "#6B7280", marginTop: "8px" }}>
-                2 dari 10 prompt menyebut brand Anda
-              </p>
-            </div>
-
-            {/* Prompt rows */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {MOCK_PROMPTS.map((p, i) => (
-                <div key={i} className="text-label-14" style={{
-                  display: "flex", alignItems: "center", gap: "10px",
-                  padding: "12px 16px", borderRadius: 'var(--radius-md)',
-                  border: "1px solid #E5E7EB",
-                  background: p.mentioned ? "#F0FDF4" : "#ffffff",
-                }}>
-                  {p.mentioned ? (
-                    <IconCheck size={16} stroke={2.5} color="#22C55E" style={{ flexShrink: 0 }} />
-                  ) : (
-                    <IconX size={16} stroke={2.5} color="#EF4444" style={{ flexShrink: 0 }} />
-                  )}
-                  <span style={{ flex: 1 }}>{p.prompt}</span>
-                  <span className="lp-score-badge-text" style={{
-                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: 'var(--radius-full)',
-                    background: p.mentioned ? "#DCFCE7" : "#FEE2E2",
-                    color: p.mentioned ? "#16A34A" : "#DC2626",
-                    flexShrink: 0,
-                  }}>
-                    {p.mentioned ? "Disebut" : "Tidak disebut"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div style={{ textAlign: "center", marginTop: "32px" }}>
-            <button
-              onClick={() => {
-                const form = document.getElementById('audit-form');
-                if (form) form.scrollIntoView({ behavior: 'smooth' });
-                else window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="btn-lp-purple"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: "8px",
-                fontSize: "15px", fontWeight: 600, color: "#ffffff",
-                border: "none", borderRadius: 'var(--radius-md)',
-                padding: "14px 28px", cursor: "pointer",
-              }}
-            >
-              Cek skor brand Anda sekarang <IconArrowRight size={18} stroke={1.5} />
-            </button>
-          </div>
-        </div>
-      </section>
 
       {/* ──── Stats ──── */}
       <section style={{ background: "#F9FAFB", paddingTop: 120, paddingBottom: 120 }}>
@@ -1217,7 +1013,7 @@ export default function Home() {
                     <p style={{
                       fontFamily: "Inter, sans-serif",
                       fontWeight: 400,
-                      fontSize: 14,
+                      fontSize: 16,
                       lineHeight: "1.6em",
                       color: "#6B7280",
                       margin: 0,
