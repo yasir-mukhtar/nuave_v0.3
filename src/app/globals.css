@@ -461,11 +461,20 @@ label.field-label.disabled {
 
   /* Nav */
   .lp-nav-links { display: none !important; }
-
+  .lp-nav-masuk { display: none !important; }
+  .lp-nav-hamburger { display: flex !important; }
+  .lp-nav-bar { max-width: 100% !important; box-sizing: border-box !important; }
+  .lp-nav-inner {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(117, 115, 114, 0.15) !important;
+  }
   /* Hero */
-  .lp-hero-section { padding: 80px 20px 0 !important; }
+  .lp-hero-section { padding: 120px 20px 0 !important; }
   .lp-hero-heading { font-size: 36px !important; letter-spacing: -1px !important; line-height: 1.1em !important; }
-  .lp-hero-subtitle { font-size: 15px !important; }
+  .lp-hero-subtitle { font-size: 14px !important; }
+  .lp-marquee-text { font-size: 14px !important; }
   .lp-hero-preview { display: none !important; }
 
   /* Marquee */
@@ -476,6 +485,8 @@ label.field-label.disabled {
   .lp-problem-grid { grid-template-columns: 1fr !important; }
   .lp-problem-heading { font-size: 28px !important; letter-spacing: -1px !important; }
   .lp-problem-card { min-height: 320px !important; }
+  .lp-problem-card > div { padding: 24px !important; }
+  .lp-problem-card span { font-size: 14px !important; }
 
   /* Stats */
   .lp-stats-section { padding-top: 60px !important; padding-bottom: 60px !important; }

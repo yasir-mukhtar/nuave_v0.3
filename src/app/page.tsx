@@ -140,6 +140,7 @@ function NavAnchor({ label, sectionId }: { label: string; sectionId: string }) {
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [kontakHovered, setKontakHovered] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -148,103 +149,246 @@ function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 768) setMobileMenuOpen(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
+
   return (
-    <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "100%",
-        maxWidth: scrolled ? 834 : 1072,
-        padding: 16,
-        zIndex: 100,
-        transition: "max-width 0.3s ease",
-      }}
-    >
-      <div
+    <>
+      <nav
+        className="lp-nav-bar"
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          height: 60,
-          padding: "12px 12px 12px 14px",
-          backgroundColor: scrolled ? "rgba(255, 255, 255, 0.9)" : "transparent",
-          backdropFilter: scrolled ? "blur(10px)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(10px)" : "none",
-          borderRadius: 12,
-          border: scrolled ? "1px solid rgba(117, 115, 114, 0.15)" : "1px solid transparent",
-          transition: "background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease",
+          position: "fixed",
+          top: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "100%",
+          maxWidth: scrolled ? 834 : 1072,
+          padding: 16,
+          zIndex: 100,
+          transition: "max-width 0.3s ease",
         }}
       >
-        {/* Logo */}
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-          <img src={LOGO_SVG} alt="Nuave logo" width={28} height={28} style={{ objectFit: "contain" }} />
-          <span
-            style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 600,
-              fontSize: 20,
-              color: "#0d0d0d",
-            }}
-          >
-            Nuave
-          </span>
-        </Link>
-
-        {/* Links */}
-        <div className="lp-nav-links" style={{ display: "flex", alignItems: "center", gap: 32 }}>
-          <NavAnchor label="Cara Kerja" sectionId="cara-kerja" />
-          <NavAnchor label="Harga" sectionId="harga" />
-          <NavAnchor label="FAQ" sectionId="faq" />
-          <a
-            href="/support"
-            onMouseEnter={() => setKontakHovered(true)}
-            onMouseLeave={() => setKontakHovered(false)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 500,
-              fontSize: 14,
-              lineHeight: "24px",
-              color: kontakHovered ? "#6C3FF5" : "var(--lp-text-primary)",
-              textDecoration: "none",
-              transition: "color 0.15s ease",
-            }}
-          >
-            Kontak
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginTop: 1 }}>
-              <path d="M3.5 2.5H9.5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M9.5 2.5L2.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
-        </div>
-
-        {/* Masuk button */}
-        <Link
-          href="/auth"
-          className="btn-lp-black"
+        <div
+          className="lp-nav-inner"
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            padding: "8px 20px",
-            color: "#fff",
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 500,
-            fontSize: 14,
-            lineHeight: "1.7em",
-            borderRadius: 6,
-            textDecoration: "none",
-            cursor: "pointer",
+            justifyContent: "space-between",
+            height: 60,
+            padding: "12px 12px 12px 14px",
+            backgroundColor: scrolled ? "rgba(255, 255, 255, 0.9)" : "transparent",
+            backdropFilter: scrolled ? "blur(10px)" : "none",
+            WebkitBackdropFilter: scrolled ? "blur(10px)" : "none",
+            borderRadius: 12,
+            border: scrolled ? "1px solid rgba(117, 115, 114, 0.15)" : "1px solid transparent",
+            transition: "background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease",
           }}
         >
-          Masuk
-        </Link>
+          {/* Logo */}
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+            <img src={LOGO_SVG} alt="Nuave logo" width={28} height={28} style={{ objectFit: "contain" }} />
+            <span
+              style={{
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 600,
+                fontSize: 20,
+                color: "#0d0d0d",
+              }}
+            >
+              Nuave
+            </span>
+          </Link>
+
+          {/* Links (desktop) */}
+          <div className="lp-nav-links" style={{ display: "flex", alignItems: "center", gap: 32 }}>
+            <NavAnchor label="Cara Kerja" sectionId="cara-kerja" />
+            <NavAnchor label="Harga" sectionId="harga" />
+            <NavAnchor label="FAQ" sectionId="faq" />
+            <a
+              href="/support"
+              onMouseEnter={() => setKontakHovered(true)}
+              onMouseLeave={() => setKontakHovered(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 500,
+                fontSize: 14,
+                lineHeight: "24px",
+                color: kontakHovered ? "#6C3FF5" : "var(--lp-text-primary)",
+                textDecoration: "none",
+                transition: "color 0.15s ease",
+              }}
+            >
+              Kontak
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginTop: 1 }}>
+                <path d="M3.5 2.5H9.5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9.5 2.5L2.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+          </div>
+
+          {/* Masuk button (desktop) */}
+          <Link
+            href="/auth"
+            className="btn-lp-black lp-nav-masuk"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "8px 20px",
+              color: "#fff",
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 500,
+              fontSize: 14,
+              lineHeight: "1.7em",
+              borderRadius: 6,
+              textDecoration: "none",
+              cursor: "pointer",
+            }}
+          >
+            Masuk
+          </Link>
+
+          {/* Hamburger button (mobile) */}
+          <button
+            className="lp-nav-hamburger"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menu"
+            style={{
+              display: "none",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 8,
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              {mobileMenuOpen ? (
+                <>
+                  <path d="M6 6L18 18" stroke="#0d0d0d" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M18 6L6 18" stroke="#0d0d0d" strokeWidth="2" strokeLinecap="round" />
+                </>
+              ) : (
+                <>
+                  <path d="M4 8H20" stroke="#0d0d0d" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M4 16H20" stroke="#0d0d0d" strokeWidth="2" strokeLinecap="round" />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile menu overlay */}
+      <div
+        className="lp-mobile-menu-overlay"
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 99,
+          background: "rgba(0,0,0,0.2)",
+          backdropFilter: mobileMenuOpen ? "blur(1px)" : "blur(0px)",
+          WebkitBackdropFilter: mobileMenuOpen ? "blur(1px)" : "blur(0px)",
+          opacity: mobileMenuOpen ? 1 : 0,
+          pointerEvents: mobileMenuOpen ? "auto" : "none",
+          transition: "opacity 0.3s ease, backdrop-filter 0.35s ease, -webkit-backdrop-filter 0.35s ease",
+        }}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
+      {/* Mobile menu drawer */}
+      <div
+        className="lp-mobile-menu"
+        style={{
+          position: "fixed",
+          top: 92,
+          left: 16,
+          right: 16,
+          zIndex: 101,
+          background: "#ffffff",
+          borderRadius: 12,
+          border: "1px solid rgba(117, 115, 114, 0.15)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          padding: "8px 0",
+          flexDirection: "column",
+          alignItems: "center",
+          display: "flex",
+          opacity: mobileMenuOpen ? 1 : 0,
+          transform: mobileMenuOpen ? "translateY(0) scale(1)" : "translateY(-12px) scale(0.97)",
+          pointerEvents: mobileMenuOpen ? "auto" : "none",
+          transition: "opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}
+      >
+        <button
+          onClick={() => { scrollToSection("cara-kerja"); setMobileMenuOpen(false); }}
+          style={{
+            background: "none", border: "none", cursor: "pointer", textAlign: "center",
+            padding: "14px 20px", fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: 16, width: "100%",
+            color: "var(--lp-text-primary)",
+          }}
+        >
+          Cara Kerja
+        </button>
+        <button
+          onClick={() => { scrollToSection("harga"); setMobileMenuOpen(false); }}
+          style={{
+            background: "none", border: "none", cursor: "pointer", textAlign: "center",
+            padding: "14px 20px", fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: 16, width: "100%",
+            color: "var(--lp-text-primary)",
+          }}
+        >
+          Harga
+        </button>
+        <button
+          onClick={() => { scrollToSection("faq"); setMobileMenuOpen(false); }}
+          style={{
+            background: "none", border: "none", cursor: "pointer", textAlign: "center",
+            padding: "14px 20px", fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: 16, width: "100%",
+            color: "var(--lp-text-primary)",
+          }}
+        >
+          FAQ
+        </button>
+        <a
+          href="/support"
+          onClick={() => setMobileMenuOpen(false)}
+          style={{
+            padding: "14px 20px", fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: 16,
+            color: "var(--lp-text-primary)", textDecoration: "none", textAlign: "center", display: "block", width: "100%",
+          }}
+        >
+          Kontak
+        </a>
+        <div style={{ height: 1, background: "#E5E7EB", margin: "4px 16px" }} />
+        <div style={{ padding: "12px 16px", width: "100%", boxSizing: "border-box" }}>
+          <Link
+            href="/auth"
+            onClick={() => setMobileMenuOpen(false)}
+            className="btn-lp-black"
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: "12px 20px", color: "#fff", fontFamily: "Inter, sans-serif",
+              fontWeight: 500, fontSize: 15, borderRadius: 8, textDecoration: "none",
+              cursor: "pointer", width: "100%",
+            }}
+          >
+            Masuk
+          </Link>
+        </div>
       </div>
-    </nav>
+    </>
   );
 }
 
@@ -559,6 +703,7 @@ export default function Home() {
         }}
       >
         <p
+          className="lp-marquee-text"
           style={{
             fontFamily: "Inter, sans-serif",
             fontWeight: 400,
