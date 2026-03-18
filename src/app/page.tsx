@@ -525,7 +525,7 @@ function HeroSection() {
 /* ───── Page ───── */
 
 export default function Home() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
     <div style={{ minHeight: "100vh", background: "#ffffff" }}>
@@ -845,8 +845,8 @@ export default function Home() {
                 {pkg.badge && (
                   <div style={{
                     position: "absolute",
-                    top: 24,
-                    right: 24,
+                    top: 16,
+                    right: 16,
                     background: "#6C3FF5",
                     color: "#ffffff",
                     fontFamily: "Inter, sans-serif",

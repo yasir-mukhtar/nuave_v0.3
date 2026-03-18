@@ -107,35 +107,23 @@ export default function Footer() {
         {/* Divider */}
         <div style={{ height: 1, background: "#E5E7EB" }} />
 
-        {/* Row 2: Logo + tagline (left) + copyright (right) */}
+        {/* Row 2: Logo + tagline + copyright */}
         <div style={{
           marginTop: 56,
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          gap: 32,
         }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <img src={LOGO_SVG} alt="Nuave" width={28} height={28} style={{ objectFit: "contain" }} />
-              <span style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 600,
-                fontSize: 18,
-                color: "#111827",
-              }}>
-                Nuave
-              </span>
-            </div>
-            <p style={{
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <img src={LOGO_SVG} alt="Nuave" width={28} height={28} style={{ objectFit: "contain" }} />
+            <span style={{
               fontFamily: "Inter, sans-serif",
-              fontWeight: 400,
-              fontSize: 14,
-              lineHeight: "20px",
-              color: "#374151",
-              margin: 0,
+              fontWeight: 600,
+              fontSize: 18,
+              color: "#111827",
             }}>
-              Nuave membantu brand Anda muncul dalam pencarian di ChatGPT
-            </p>
+              Nuave
+            </span>
           </div>
 
           <p style={{
@@ -145,6 +133,18 @@ export default function Footer() {
             lineHeight: "20px",
             color: "#374151",
             margin: 0,
+          }}>
+            Nuave membantu brand Anda muncul dalam pencarian di ChatGPT
+          </p>
+
+          <p style={{
+            fontFamily: "Inter, sans-serif",
+            fontWeight: 400,
+            fontSize: 14,
+            lineHeight: "20px",
+            color: "#374151",
+            margin: 0,
+            marginLeft: "auto",
           }}>
             © {new Date().getFullYear()} Nuave · Hak cipta dilindungi
           </p>

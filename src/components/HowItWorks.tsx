@@ -120,11 +120,7 @@ export default function HowItWorks() {
       <div style={{ paddingBottom: 120 }}>
         {CARDS.map((card, i) => {
           const isLast = i === CARDS.length - 1;
-          // Scale down by 10% for each card stacked on top
-          const scale = CARDS.slice(i + 1).reduce(
-            (s, _, j) => s - scrollProgress[i + 1 + j] * 0.1,
-            1.0
-          );
+          const scale = 1;
           const opacity = 1;
 
           return (
