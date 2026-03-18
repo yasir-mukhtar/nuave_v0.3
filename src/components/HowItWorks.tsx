@@ -88,9 +88,9 @@ export default function HowItWorks() {
   }, []);
 
   return (
-    <div id="cara-kerja" ref={sectionRef} style={{ position: "relative", background: "var(--lp-bg)", paddingTop: 120 }}>
+    <div id="cara-kerja" ref={sectionRef} className="lp-hiw-section" style={{ position: "relative", background: "var(--lp-bg)", paddingTop: 120 }}>
       {/* Sticky heading */}
-      <div style={{
+      <div className="lp-hiw-sticky-heading" style={{
         position: "sticky",
         top: 80,
         zIndex: 10,
@@ -103,7 +103,7 @@ export default function HowItWorks() {
         transition: "opacity 0.1s linear",
       }}>
         <div style={{ maxWidth: 868, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{
+          <h2 className="lp-hiw-heading" style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: 40,
             fontWeight: 500,
@@ -126,6 +126,7 @@ export default function HowItWorks() {
           return (
             <div
               key={i}
+              className="lp-hiw-card-wrapper"
               style={{
                 position: "sticky",
                 top: 232,
@@ -136,7 +137,7 @@ export default function HowItWorks() {
                 marginBottom: 24,
               }}
             >
-              <div style={{
+              <div className="lp-hiw-card-grid" style={{
                 maxWidth: 868,
                 margin: "0 auto",
                 display: "grid",
@@ -152,7 +153,7 @@ export default function HowItWorks() {
                 minHeight: 360,
               }}>
                 {/* Left panel — white */}
-                <div style={{
+                <div className="lp-hiw-left-panel" style={{
                   background: "#ffffff",
                   padding: 40,
                   display: "flex",
@@ -211,7 +212,7 @@ export default function HowItWorks() {
                 </div>
 
                 {/* Right panel — image bg with preview */}
-                <div style={{
+                <div className="lp-hiw-right-panel" style={{
                   backgroundImage: card.rightBg,
                   backgroundSize: "cover",
                   backgroundPosition: "center",

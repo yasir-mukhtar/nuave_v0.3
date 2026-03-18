@@ -71,11 +71,11 @@ function SocialIcon({ icon: Icon, href, label }: { icon: typeof IconBrandX; href
 
 export default function Footer() {
   return (
-    <footer style={{ padding: "110px 32px", background: "#ffffff" }}>
+    <footer className="lp-footer" style={{ padding: "110px 32px", background: "#ffffff" }}>
       <div style={{ maxWidth: 1045, margin: "0 auto" }}>
 
         {/* Row 1: Footer menu + Social icons */}
-        <div style={{
+        <div className="lp-footer-row1" style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -108,7 +108,7 @@ export default function Footer() {
         <div style={{ height: 1, background: "#E5E7EB" }} />
 
         {/* Row 2: Logo + tagline + copyright */}
-        <div style={{
+        <div className="lp-footer-row2" style={{
           marginTop: 56,
           display: "flex",
           alignItems: "center",
@@ -137,7 +137,7 @@ export default function Footer() {
             Nuave membantu brand Anda muncul dalam pencarian di ChatGPT
           </p>
 
-          <p style={{
+          <p className="lp-footer-copyright" style={{
             fontFamily: "Inter, sans-serif",
             fontWeight: 400,
             fontSize: 14,

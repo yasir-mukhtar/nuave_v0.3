@@ -193,7 +193,7 @@ function Nav() {
         </Link>
 
         {/* Links */}
-        <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+        <div className="lp-nav-links" style={{ display: "flex", alignItems: "center", gap: 32 }}>
           <NavAnchor label="Cara Kerja" sectionId="cara-kerja" />
           <NavAnchor label="Harga" sectionId="harga" />
           <NavAnchor label="FAQ" sectionId="faq" />
@@ -272,7 +272,7 @@ function HeroSection() {
 
   return (
     <section
-      className="lp-root"
+      className="lp-root lp-hero-section"
       style={{
         position: "relative",
         width: "100%",
@@ -302,6 +302,7 @@ function HeroSection() {
         >
           {/* Headline */}
           <h1
+            className="lp-hero-heading"
             style={{
               maxWidth: 800,
               fontFamily: "'Inter Display', Inter, sans-serif",
@@ -319,6 +320,7 @@ function HeroSection() {
 
           {/* Subtitle */}
           <p
+            className="lp-hero-subtitle"
             style={{
               maxWidth: 740,
               fontFamily: "Inter, sans-serif",
@@ -359,6 +361,7 @@ function HeroSection() {
 
         {/* Preview area */}
         <div
+          className="lp-hero-preview"
           style={{
             marginTop: 64,
             width: "100%",
@@ -543,6 +546,7 @@ export default function Home() {
         }
       `}</style>
       <section
+        className="lp-marquee-section"
         style={{
           width: "100%",
           paddingTop: 120,
@@ -609,11 +613,11 @@ export default function Home() {
       </div>{/* end Framer hero+marquee wrapper */}
 
       {/* ──── Problem Section ──── */}
-      <section style={{ background: "#ffffff", padding: "120px 32px" }}>
+      <section className="lp-problem-section" style={{ background: "#ffffff", padding: "120px 32px" }}>
         <div style={{ maxWidth: 1044, margin: "0 auto" }}>
 
           {/* Heading */}
-          <h2 style={{
+          <h2 className="lp-problem-heading" style={{
             fontFamily: "Inter, sans-serif",
             fontWeight: 500,
             fontSize: 48,
@@ -627,7 +631,7 @@ export default function Home() {
           </h2>
 
           {/* Two cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          <div className="lp-problem-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
 
             {/* Card 1 — purple */}
             {[
@@ -644,7 +648,7 @@ export default function Home() {
                 chips: ["Jasa digital marketing untuk startup", "Software akuntansi terbaik untuk UMKM", "Vendor cloud storage terpercaya di Indonesia"],
               },
             ].map((card) => (
-              <div key={card.number} style={{
+              <div key={card.number} className="lp-problem-card" style={{
                 position: "relative",
                 borderRadius: 16,
                 border: "1px solid #E5E7EB",
@@ -716,11 +720,11 @@ export default function Home() {
 
 
       {/* ──── Stats ──── */}
-      <section style={{ background: "#F9FAFB", paddingTop: 120, paddingBottom: 120 }}>
+      <section className="lp-stats-section" style={{ background: "#F9FAFB", paddingTop: 120, paddingBottom: 120 }}>
 
         {/* Heading + subtitle — padded inward */}
         <div style={{ padding: "0 32px", textAlign: "center", marginBottom: 40 }}>
-          <h2 style={{
+          <h2 className="lp-stats-heading" style={{
             fontFamily: "Inter, sans-serif",
             fontWeight: 500,
             fontSize: 48,
@@ -731,7 +735,7 @@ export default function Home() {
           }}>
             Platform AI adalah <em>search engine</em> baru.
           </h2>
-          <p style={{
+          <p className="lp-stats-subtitle" style={{
             fontFamily: "Inter, sans-serif",
             fontWeight: 400,
             fontSize: 20,
@@ -748,14 +752,14 @@ export default function Home() {
         <div style={{ height: 1, background: "#E5E7EB" }} />
 
         {/* Stats grid — max-width 1044px, centered */}
-        <div style={{
+        <div className="lp-stats-grid-inner" style={{
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           maxWidth: 1044,
           margin: "0 auto",
         }}>
           {STATS.map((stat, i) => (
-            <div key={i} style={{
+            <div key={i} className="lp-stat-item" style={{
               padding: "48px 40px",
               borderLeft: i === 0 ? "1px solid #E5E7EB" : "none",
               borderRight: "1px solid #E5E7EB",
@@ -802,7 +806,7 @@ export default function Home() {
       </section>
 
       {/* ──── Pricing ──── */}
-      <section id="harga" style={{ background: "#ffffff", padding: "72px 32px" }}>
+      <section id="harga" className="lp-pricing-section" style={{ background: "#ffffff", padding: "72px 32px" }}>
         <div style={{ maxWidth: 740, margin: "0 auto" }}>
 
           {/* Title + subtitle */}
@@ -830,7 +834,7 @@ export default function Home() {
           </div>
 
           {/* Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          <div className="lp-pricing-grid-inner" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
             {PRICING.map((pkg) => (
               <div key={pkg.name} style={{
                 position: "relative",
@@ -945,9 +949,9 @@ export default function Home() {
       </section>
 
       {/* ──── FAQ ──── */}
-      <section id="faq" style={{ background: "#F9FAFB", padding: "72px 32px 80px" }}>
+      <section id="faq" className="lp-faq-section" style={{ background: "#F9FAFB", padding: "72px 32px 80px" }}>
         <div style={{ maxWidth: 740, margin: "0 auto" }}>
-          <h2 style={{
+          <h2 className="lp-faq-heading" style={{
             fontFamily: "Inter, sans-serif",
             fontWeight: 500,
             fontSize: 36,
@@ -1030,7 +1034,7 @@ export default function Home() {
       </section>
 
       {/* ──── Final CTA ──── */}
-      <section style={{
+      <section className="lp-cta-section" style={{
         width: "100%",
         minHeight: 516,
         padding: "144px 32px",
@@ -1050,7 +1054,7 @@ export default function Home() {
           gap: 40,
           textAlign: "center",
         }}>
-          <h2 style={{
+          <h2 className="lp-cta-heading" style={{
             fontFamily: "Inter, sans-serif",
             fontWeight: 500,
             fontSize: 60,

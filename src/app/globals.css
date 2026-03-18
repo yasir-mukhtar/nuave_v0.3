@@ -458,6 +458,58 @@ label.field-label.disabled {
   .lp-nav-cta-text { display: none; }
   .lp-score-badge-text { display: none; }
   .lp-pricing-grid > div { transform: none !important; }
+
+  /* Nav */
+  .lp-nav-links { display: none !important; }
+
+  /* Hero */
+  .lp-hero-section { padding: 80px 20px 0 !important; }
+  .lp-hero-heading { font-size: 36px !important; letter-spacing: -1px !important; line-height: 1.1em !important; }
+  .lp-hero-subtitle { font-size: 15px !important; }
+  .lp-hero-preview { display: none !important; }
+
+  /* Marquee */
+  .lp-marquee-section { padding-top: 48px !important; padding-bottom: 48px !important; }
+
+  /* Problem */
+  .lp-problem-section { padding: 60px 20px !important; }
+  .lp-problem-grid { grid-template-columns: 1fr !important; }
+  .lp-problem-heading { font-size: 28px !important; letter-spacing: -1px !important; }
+  .lp-problem-card { min-height: 320px !important; }
+
+  /* Stats */
+  .lp-stats-section { padding-top: 60px !important; padding-bottom: 60px !important; }
+  .lp-stats-heading { font-size: 28px !important; letter-spacing: -1px !important; }
+  .lp-stats-subtitle { font-size: 16px !important; }
+  .lp-stats-grid-inner { grid-template-columns: 1fr !important; }
+  .lp-stat-item { border-left: 1px solid #E5E7EB !important; border-right: 1px solid #E5E7EB !important; padding: 32px 24px !important; }
+
+  /* Pricing */
+  .lp-pricing-section { padding: 48px 20px !important; }
+  .lp-pricing-grid-inner { grid-template-columns: 1fr !important; }
+
+  /* FAQ */
+  .lp-faq-section { padding: 48px 20px 60px !important; }
+  .lp-faq-heading { font-size: 24px !important; }
+
+  /* CTA */
+  .lp-cta-section { padding: 80px 20px !important; min-height: auto !important; }
+  .lp-cta-heading { font-size: 36px !important; letter-spacing: -1px !important; }
+
+  /* HowItWorks */
+  .lp-hiw-section { padding-top: 60px !important; }
+  .lp-hiw-sticky-heading { position: relative !important; top: auto !important; padding-left: 20px !important; padding-right: 20px !important; }
+  .lp-hiw-heading { font-size: 24px !important; }
+  .lp-hiw-card-wrapper { position: relative !important; top: auto !important; padding-left: 20px !important; padding-right: 20px !important; padding-bottom: 16px !important; margin-bottom: 0 !important; }
+  .lp-hiw-card-grid { grid-template-columns: 1fr !important; }
+  .lp-hiw-right-panel { display: none !important; }
+  .lp-hiw-left-panel { padding: 24px !important; }
+
+  /* Footer */
+  .lp-footer { padding: 60px 20px !important; }
+  .lp-footer-row1 { flex-direction: column !important; align-items: flex-start !important; gap: 24px !important; }
+  .lp-footer-row2 { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+  .lp-footer-copyright { margin-left: 0 !important; }
 }
 
 /* Footer responsive */
