@@ -19,6 +19,8 @@ interface GeneratedPrompt {
   prompt_text: string;
   stage: "awareness" | "consideration" | "decision";
   language: string;
+  core_keyword?: string;
+  demand_tier?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -83,12 +85,18 @@ RULES:
 - Language: 7 prompts in English, 3 in ${localLanguage}
 - Each prompt should sound like a real user asking ChatGPT
 
+For each prompt, also provide:
+- "core_keyword": A short (2-5 word) keyword phrase that captures the search intent. Use the language of the prompt.
+- "demand_tier": Estimate relative search demand: "high" (decision-stage, competitive, commercial intent), "medium" (consideration-stage, industry-specific), or "low" (awareness-stage, niche, long-tail)
+
 Return JSON array of 10 objects:
 [
   {
     "prompt_text": "the question",
     "stage": "awareness|consideration|decision",
-    "language": "en|id|ms"
+    "language": "en|id|ms",
+    "core_keyword": "short keyword phrase",
+    "demand_tier": "high|medium|low"
   }
 ]`;
 
@@ -143,6 +151,8 @@ Return JSON array of 10 objects:
     language: prompt.language,
     is_active: true,
     display_order: index + 1,
+    core_keyword: prompt.core_keyword || null,
+    demand_tier: prompt.demand_tier || "medium",
   }));
 
   let savedPrompts = rows;

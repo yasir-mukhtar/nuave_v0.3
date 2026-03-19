@@ -22,7 +22,16 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `You are an AI visibility strategist. Given a brand name and a list of audit topics, generate exactly 5 realistic search prompts per topic that a real user would ask an AI assistant. Prompts should be in ${langLabel}. Return ONLY a JSON object where keys are topic names and values are arrays of 5 prompt strings. No explanation.`,
+          content: `You are an AI visibility strategist. Given a brand name and a list of audit topics, generate exactly 5 realistic search prompts per topic that a real user would ask an AI assistant. Prompts should be in ${langLabel}. NEVER mention the brand name "${brand_name}" in any prompt.
+
+For each prompt, also provide:
+- "core_keyword": A short (2-5 word) keyword phrase that captures the search intent. This should be what someone would type into Google. Use the language of the prompt. Examples: "best POS system restaurant", "software akuntansi UMKM".
+- "demand_tier": Estimate the relative search demand:
+  - "high": Decision-stage queries in competitive industries, clear commercial intent, popular categories
+  - "medium": Consideration-stage queries, industry-specific but not hyper-niche
+  - "low": Awareness-stage queries in niche industries, very long-tail, emerging categories
+
+Return ONLY a JSON object where keys are topic names and values are arrays of 5 objects with "text", "core_keyword", and "demand_tier" fields. No explanation.`,
         },
         {
           role: "user",
@@ -32,11 +41,10 @@ export async function POST(request: NextRequest) {
     });
 
     const raw = completion.choices[0]?.message?.content?.trim() || "{}";
-    let result: Record<string, string[]>;
+    let result: Record<string, Array<{ text: string; core_keyword: string; demand_tier: string } | string>>;
     try {
       result = JSON.parse(raw.replace(/```json?\n?/g, "").replace(/```/g, ""));
     } catch {
-      // Fallback: create empty structure
       result = {};
       for (const t of topics) {
         result[t] = [];
