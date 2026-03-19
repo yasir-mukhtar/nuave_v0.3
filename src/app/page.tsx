@@ -449,11 +449,11 @@ function HeroSection() {
             className="lp-hero-heading"
             style={{
               maxWidth: 800,
-              fontFamily: "'Inter Display', Inter, sans-serif",
+              fontFamily: "var(--font-geist-sans), sans-serif",
               fontWeight: 600,
               fontSize: 60,
               lineHeight: "1em",
-              letterSpacing: -1,
+              letterSpacing: -2,
               color: "var(--lp-text-primary)",
               textAlign: "center",
               margin: 0,
@@ -763,7 +763,7 @@ export default function Home() {
 
           {/* Heading */}
           <h2 className="lp-problem-heading" style={{
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "var(--font-geist-sans), sans-serif",
             fontWeight: 500,
             fontSize: 48,
             letterSpacing: "-2px",
@@ -870,7 +870,7 @@ export default function Home() {
         {/* Heading + subtitle — padded inward */}
         <div style={{ padding: "0 32px", textAlign: "center", marginBottom: 40 }}>
           <h2 className="lp-stats-heading" style={{
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "var(--font-geist-sans), sans-serif",
             fontWeight: 500,
             fontSize: 48,
             letterSpacing: "-2px",
@@ -957,7 +957,7 @@ export default function Home() {
           {/* Title + subtitle */}
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <h2 style={{
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "var(--font-geist-sans), sans-serif",
               fontWeight: 500,
               fontSize: 48,
               lineHeight: "58px",
@@ -1097,7 +1097,7 @@ export default function Home() {
       <section id="faq" className="lp-faq-section" style={{ background: "#F9FAFB", padding: "72px 32px 80px" }}>
         <div style={{ maxWidth: 740, margin: "0 auto" }}>
           <h2 className="lp-faq-heading" style={{
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "var(--font-geist-sans), sans-serif",
             fontWeight: 500,
             fontSize: 36,
             letterSpacing: "-1px",
@@ -1200,7 +1200,7 @@ export default function Home() {
           textAlign: "center",
         }}>
           <h2 className="lp-cta-heading" style={{
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "var(--font-geist-sans), sans-serif",
             fontWeight: 500,
             fontSize: 60,
             letterSpacing: "-2px",

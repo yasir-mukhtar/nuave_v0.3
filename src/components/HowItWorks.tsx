@@ -104,11 +104,11 @@ export default function HowItWorks() {
       }}>
         <div style={{ maxWidth: 868, margin: "0 auto", textAlign: "center" }}>
           <h2 className="lp-hiw-heading" style={{
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 40,
+            fontFamily: "var(--font-geist-sans), sans-serif",
+            fontSize: 48,
             fontWeight: 500,
-            lineHeight: 1.4,
-            letterSpacing: "-1px",
+            lineHeight: "1.2em",
+            letterSpacing: "-2px",
             color: "var(--lp-text-primary)",
           }}>
             Nuave membantu brand Anda muncul dalam jawaban ChatGPT
