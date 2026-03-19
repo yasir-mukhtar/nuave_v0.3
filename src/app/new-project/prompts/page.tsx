@@ -6,7 +6,9 @@ import { IconChevronUp, IconChevronDown, IconPlus } from "@tabler/icons-react";
 import WizardLayout from "@/components/new-project/WizardLayout";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
 
-const REQUEST_TIMEOUT_MS = 120_000; // audit submission can be slow
+const REQUEST_TIMEOUT_MS = 120_000;
+const DEFAULT_SELECTION = 10;
+const MIN_PER_TOPIC = 2;
 
 interface Prompt {
   id: string;
@@ -23,13 +25,98 @@ interface TopicGroup {
   expanded: boolean;
 }
 
-const MAX_PROMPTS = 10;
-
 const TIER_STYLES: Record<string, { bg: string; color: string; label: string }> = {
   high: { bg: "#EDE9FE", color: "#7C3AED", label: "Volume tinggi" },
   medium: { bg: "#FEF3C7", color: "#D97706", label: "Volume sedang" },
   low: { bg: "#F3F4F6", color: "#374151", label: "Volume rendah" },
 };
+
+const TIER_PRIORITY: Record<string, number> = { high: 3, medium: 2, low: 1 };
+
+/** Auto-select top N prompts by demand tier, ensuring ≥MIN_PER_TOPIC per topic */
+function autoSelectPrompts(groups: TopicGroup[], maxSelect: number): TopicGroup[] {
+  // Flatten all prompts with their group index
+  const all: { groupIdx: number; promptIdx: number; tier: number; order: number }[] = [];
+  groups.forEach((g, gi) => {
+    g.prompts.forEach((p, pi) => {
+      all.push({
+        groupIdx: gi,
+        promptIdx: pi,
+        tier: TIER_PRIORITY[p.demand_tier || "medium"] || 2,
+        order: pi,
+      });
+    });
+  });
+
+  const totalPrompts = all.length;
+  const selectCount = Math.min(maxSelect, totalPrompts);
+
+  // Sort by tier descending, then by order ascending
+  all.sort((a, b) => {
+    if (b.tier !== a.tier) return b.tier - a.tier;
+    return a.order - b.order;
+  });
+
+  // Select top N
+  const selected = new Set<string>();
+  for (let i = 0; i < selectCount; i++) {
+    selected.add(`${all[i].groupIdx}-${all[i].promptIdx}`);
+  }
+
+  // Topic balance: ensure ≥MIN_PER_TOPIC per topic
+  const topicCounts: Record<number, number> = {};
+  groups.forEach((_, gi) => { topicCounts[gi] = 0; });
+  selected.forEach((key) => {
+    const gi = parseInt(key.split("-")[0]);
+    topicCounts[gi] = (topicCounts[gi] || 0) + 1;
+  });
+
+  // Find underrepresented topics
+  for (const gi of Object.keys(topicCounts).map(Number)) {
+    while (topicCounts[gi] < MIN_PER_TOPIC) {
+      // Find highest-tier unselected prompt from this topic
+      const candidates = all.filter(
+        (a) => a.groupIdx === gi && !selected.has(`${a.groupIdx}-${a.promptIdx}`)
+      );
+      if (candidates.length === 0) break;
+      candidates.sort((a, b) => b.tier - a.tier || a.order - b.order);
+      const toAdd = candidates[0];
+
+      // Find the topic with the most selected prompts (that has >MIN_PER_TOPIC)
+      let maxTopic = -1;
+      let maxCount = 0;
+      for (const [tgi, count] of Object.entries(topicCounts)) {
+        const tgiNum = parseInt(tgi);
+        if (tgiNum !== gi && count > MIN_PER_TOPIC && count > maxCount) {
+          maxTopic = tgiNum;
+          maxCount = count;
+        }
+      }
+      if (maxTopic === -1) break; // Can't swap
+
+      // Find lowest-tier selected prompt from that topic to swap out
+      const swapCandidates = all.filter(
+        (a) => a.groupIdx === maxTopic && selected.has(`${a.groupIdx}-${a.promptIdx}`)
+      );
+      swapCandidates.sort((a, b) => a.tier - b.tier || b.order - a.order);
+      const toRemove = swapCandidates[0];
+
+      selected.delete(`${toRemove.groupIdx}-${toRemove.promptIdx}`);
+      selected.add(`${toAdd.groupIdx}-${toAdd.promptIdx}`);
+      topicCounts[gi]++;
+      topicCounts[maxTopic]--;
+    }
+  }
+
+  // Apply selection to groups
+  return groups.map((g, gi) => ({
+    ...g,
+    prompts: g.prompts.map((p, pi) => ({
+      ...p,
+      checked: selected.has(`${gi}-${pi}`),
+    })),
+  }));
+}
 
 export default function PromptsPage() {
   const router = useRouter();
@@ -38,6 +125,21 @@ export default function PromptsPage() {
   const [customPrompt, setCustomPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingPrompts, setLoadingPrompts] = useState(true);
+  const [error, setError] = useState("");
+  const [credits, setCredits] = useState<number | null>(null);
+
+  // Fetch user credits
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/user/credits");
+        const data = await res.json();
+        if (typeof data.credits === "number") setCredits(data.credits);
+      } catch {
+        // Credits unknown — don't block
+      }
+    })();
+  }, []);
 
   // Load topics from session and fetch AI-generated prompts
   useEffect(() => {
@@ -59,18 +161,18 @@ export default function PromptsPage() {
             brand_name: project.brandName,
             topics: topics.map((t) => t.name),
             language: project.language || "id",
+            workspace_id: project.workspaceId,
           }),
         });
         const data = await res.json();
 
         if (data.success && data.prompts) {
-          const groups: TopicGroup[] = topics.map((t, i) => {
+          let groups: TopicGroup[] = topics.map((t, i) => {
             const topicPrompts = data.prompts[t.name] || [];
             return {
               id: t.id,
               name: t.name,
               prompts: topicPrompts.map((item: string | { text: string; core_keyword?: string; demand_tier?: string }, j: number) => {
-                // Handle both old (string) and new (object) response shapes
                 if (typeof item === "string") {
                   return { id: `${i}-${j}`, text: item, checked: true };
                 }
@@ -85,6 +187,8 @@ export default function PromptsPage() {
               expanded: i === 0,
             };
           });
+          // Auto-select top 10 by volume tier
+          groups = autoSelectPrompts(groups, DEFAULT_SELECTION);
           setTopicGroups(groups);
         } else {
           setTopicGroups(topics.map((t, i) => ({
@@ -106,10 +210,12 @@ export default function PromptsPage() {
     })();
   }, [router]);
 
+  const totalPrompts = topicGroups.reduce((sum, g) => sum + g.prompts.length, 0);
   const totalSelected = topicGroups.reduce(
     (sum, g) => sum + g.prompts.filter((p) => p.checked).length,
     0
   );
+  const insufficientCredits = credits !== null && credits < totalSelected;
 
   const toggleExpand = (groupId: string) => {
     setTopicGroups((prev) =>
@@ -121,14 +227,8 @@ export default function PromptsPage() {
     setTopicGroups((prev) =>
       prev.map((g) => {
         if (g.id !== groupId) return g;
-        const otherSelected = prev
-          .filter((og) => og.id !== groupId)
-          .reduce((s, og) => s + og.prompts.filter((p) => p.checked).length, 0);
-        const thisGroupSelected = g.prompts.filter((p) => p.checked).length;
         const target = g.prompts.find((p) => p.id === promptId);
         if (!target) return g;
-
-        if (!target.checked && otherSelected + thisGroupSelected >= MAX_PROMPTS) return g;
 
         return {
           ...g,
@@ -143,7 +243,6 @@ export default function PromptsPage() {
   const addCustomPrompt = (groupId: string) => {
     const text = customPrompt.trim();
     if (!text) return;
-    if (totalSelected >= MAX_PROMPTS) return;
 
     setTopicGroups((prev) =>
       prev.map((g) => {
@@ -164,10 +263,8 @@ export default function PromptsPage() {
   const selectedCountForGroup = (group: TopicGroup) =>
     group.prompts.filter((p) => p.checked).length;
 
-  const [error, setError] = useState("");
-
   const handleSubmit = async () => {
-    if (totalSelected === 0 || loading) return;
+    if (totalSelected === 0 || loading || insufficientCredits) return;
     setLoading(true);
     setError("");
 
@@ -202,20 +299,7 @@ export default function PromptsPage() {
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
-      await fetch("/api/generate-prompts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workspace_id: project.workspaceId,
-          profile: {
-            ...project.profile,
-            brand_name: project.brandName,
-            website_url: project.url,
-          },
-        }),
-        signal: controller.signal,
-      });
-
+      // Prompts are already saved to DB by /api/generate-topic-prompts — skip redundant generation
       const auditRes = await fetch("/api/run-audit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -247,6 +331,8 @@ export default function PromptsPage() {
       setLoading(false);
     }
   };
+
+  const canSubmit = totalSelected > 0 && !loading && !insufficientCredits;
 
   return (
     <WizardLayout
@@ -292,10 +378,9 @@ export default function PromptsPage() {
         <span style={{
           fontFamily: "var(--font-body)",
           fontSize: 13,
-          color: totalSelected >= MAX_PROMPTS ? "var(--purple)" : "var(--text-muted)",
-          fontWeight: totalSelected >= MAX_PROMPTS ? 600 : 400,
+          color: "var(--text-muted)",
         }}>
-          {totalSelected}/{MAX_PROMPTS}
+          {totalSelected} dari {totalPrompts} prompt dipilih · {totalSelected} kredit
         </span>
       </div>
 
@@ -488,18 +573,18 @@ export default function PromptsPage() {
                       <button
                         type="button"
                         onClick={() => addCustomPrompt(group.id)}
-                        disabled={!customPrompt.trim() || totalSelected >= MAX_PROMPTS}
+                        disabled={!customPrompt.trim()}
                         style={{
                           height: 40,
                           padding: "0 14px",
                           borderRadius: 6,
                           border: "none",
-                          backgroundColor: customPrompt.trim() && totalSelected < MAX_PROMPTS ? "var(--purple)" : "#D1D5DB",
+                          backgroundColor: customPrompt.trim() ? "var(--purple)" : "#D1D5DB",
                           color: "#fff",
                           fontFamily: "var(--font-body)",
                           fontSize: 13,
                           fontWeight: 500,
-                          cursor: customPrompt.trim() && totalSelected < MAX_PROMPTS ? "pointer" : "not-allowed",
+                          cursor: customPrompt.trim() ? "pointer" : "not-allowed",
                         }}
                       >
                         Tambah
@@ -509,7 +594,6 @@ export default function PromptsPage() {
                     <button
                       type="button"
                       onClick={() => { setAddingTo(group.id); setCustomPrompt(""); }}
-                      disabled={totalSelected >= MAX_PROMPTS}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -521,18 +605,15 @@ export default function PromptsPage() {
                         borderRadius: 6,
                         border: "1.5px dashed var(--border-strong)",
                         background: "none",
-                        cursor: totalSelected >= MAX_PROMPTS ? "not-allowed" : "pointer",
+                        cursor: "pointer",
                         fontFamily: "var(--font-body)",
                         fontSize: 13,
                         color: "var(--text-muted)",
-                        opacity: totalSelected >= MAX_PROMPTS ? 0.5 : 1,
                         transition: "border-color 0.15s ease, color 0.15s ease",
                       }}
                       onMouseEnter={(e) => {
-                        if (totalSelected < MAX_PROMPTS) {
-                          e.currentTarget.style.borderColor = "var(--purple)";
-                          e.currentTarget.style.color = "var(--purple)";
-                        }
+                        e.currentTarget.style.borderColor = "var(--purple)";
+                        e.currentTarget.style.color = "var(--purple)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.borderColor = "var(--border-strong)";
@@ -548,6 +629,31 @@ export default function PromptsPage() {
             </div>
         ))}
       </div>
+
+      {/* Warnings */}
+      {totalSelected === 0 && !loadingPrompts && (
+        <p style={{
+          fontFamily: "var(--font-body)",
+          fontSize: 13,
+          color: "var(--amber, #F59E0B)",
+          marginBottom: 12,
+        }}>
+          Pilih minimal 1 prompt untuk menjalankan audit
+        </p>
+      )}
+      {insufficientCredits && (
+        <p style={{
+          fontFamily: "var(--font-body)",
+          fontSize: 13,
+          color: "var(--red, #EF4444)",
+          marginBottom: 12,
+        }}>
+          Kredit tidak cukup. Anda butuh {totalSelected} kredit.{" "}
+          <a href="/dashboard/credits" style={{ color: "var(--purple)", textDecoration: "underline" }}>
+            Tambah kredit
+          </a>
+        </p>
+      )}
 
       {/* Error message */}
       {error && (
@@ -590,29 +696,29 @@ export default function PromptsPage() {
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={totalSelected === 0 || loading}
+          disabled={!canSubmit}
           style={{
             height: 48,
             borderRadius: 8,
             border: "none",
-            backgroundColor: totalSelected > 0 && !loading ? "var(--purple)" : "#D1D5DB",
+            backgroundColor: canSubmit ? "var(--purple)" : "#D1D5DB",
             color: "#ffffff",
             fontFamily: "var(--font-body)",
             fontSize: 15,
             fontWeight: 500,
-            cursor: totalSelected > 0 && !loading ? "pointer" : "not-allowed",
+            cursor: canSubmit ? "pointer" : "not-allowed",
             transition: "background-color 0.15s ease",
           }}
           onMouseEnter={(e) => {
-            if (totalSelected > 0 && !loading) e.currentTarget.style.backgroundColor = "var(--purple-dark)";
+            if (canSubmit) e.currentTarget.style.backgroundColor = "var(--purple-dark)";
           }}
           onMouseLeave={(e) => {
-            if (totalSelected > 0 && !loading) e.currentTarget.style.backgroundColor = "var(--purple)";
+            if (canSubmit) e.currentTarget.style.backgroundColor = "var(--purple)";
           }}
         >
           <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
             {loading && <ButtonSpinner size={16} />}
-            {loading ? "Memproses..." : "Jalankan audit"}
+            {loading ? "Memproses..." : `Jalankan Audit — ${totalSelected} kredit`}
           </span>
         </button>
       </div>

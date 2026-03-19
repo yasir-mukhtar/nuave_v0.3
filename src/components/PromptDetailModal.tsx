@@ -177,6 +177,7 @@ export default function PromptDetailModal({
 
         {/* Scrollable content */}
         <div
+          onWheel={(e) => e.stopPropagation()}
           style={{
             flex: 1,
             overflowY: 'auto',
