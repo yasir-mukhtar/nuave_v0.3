@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { IconDownload, IconArrowRight } from "@tabler/icons-react";
+import { ButtonSpinner } from "@/components/ButtonSpinner";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 
@@ -17,8 +18,14 @@ interface ReportData {
   mentionedCount: number;
   totalPrompts: number;
   competitors: string[];
-  results: { prompt: string; mentioned: boolean }[];
+  results: { prompt: string; mentioned: boolean; demand_tier?: string }[];
 }
+
+const TIER_STYLES: Record<string, { bg: string; color: string; label: string }> = {
+  high: { bg: "#EDE9FE", color: "#7C3AED", label: "Volume tinggi" },
+  medium: { bg: "#FEF3C7", color: "#D97706", label: "Volume sedang" },
+  low: { bg: "#F3F4F6", color: "#374151", label: "Volume rendah" },
+};
 
 function getVisibilityLevel(score: number): string {
   if (score >= 80) return "Visibilitas Tinggi";
@@ -35,10 +42,19 @@ function buildReport(): ReportData {
   const audit = auditRaw ? JSON.parse(auditRaw) : {};
 
   const score = audit.visibility_score ?? 0;
-  const results = (audit.results || []).map((r: { prompt_text: string; brand_mentioned: boolean }) => ({
-    prompt: r.prompt_text,
-    mentioned: r.brand_mentioned,
-  }));
+  // Load saved prompts data for demand_tier
+  const savedPromptsRaw = sessionStorage.getItem("nuave_new_project_prompts");
+  const savedPrompts: { prompt: string; demand_tier?: string }[] = savedPromptsRaw ? JSON.parse(savedPromptsRaw) : [];
+
+  const results = (audit.results || []).map((r: { prompt_text: string; brand_mentioned: boolean }) => {
+    // Match demand_tier from saved prompts
+    const match = savedPrompts.find((sp) => sp.prompt === r.prompt_text);
+    return {
+      prompt: r.prompt_text,
+      mentioned: r.brand_mentioned,
+      demand_tier: match?.demand_tier || undefined,
+    };
+  });
   const mentionedCount = results.filter((r: { mentioned: boolean }) => r.mentioned).length;
 
   // Extract unique competitor names from audit results
@@ -319,7 +335,7 @@ export default function ReportPage() {
               cursor: "pointer",
             }}
           >
-            <IconDownload size={16} stroke={1.5} />
+            {downloading ? <ButtonSpinner size={14} color="var(--purple)" /> : <IconDownload size={16} stroke={1.5} />}
             {downloading ? "Mengunduh..." : "Unduh laporan"}
           </button>
           <button
@@ -548,15 +564,33 @@ export default function ReportPage() {
                   }}>
                     {r.prompt}
                   </span>
-                  <span style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: r.mentioned ? "var(--green)" : "var(--red)",
-                    flexShrink: 0,
-                  }}>
-                    {r.mentioned ? "Muncul" : "Tidak muncul"}
-                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                    {r.demand_tier && TIER_STYLES[r.demand_tier] && (
+                      <span style={{
+                        display: "inline-block",
+                        padding: "2px 8px",
+                        borderRadius: 6,
+                        backgroundColor: TIER_STYLES[r.demand_tier].bg,
+                        fontFamily: "var(--font-body)",
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: TIER_STYLES[r.demand_tier].color,
+                        lineHeight: "16px",
+                        whiteSpace: "nowrap",
+                      }}>
+                        {TIER_STYLES[r.demand_tier].label}
+                      </span>
+                    )}
+                    <span style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: r.mentioned ? "var(--green)" : "var(--red)",
+                      whiteSpace: "nowrap",
+                    }}>
+                      {r.mentioned ? "Muncul" : "Tidak muncul"}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -592,6 +626,7 @@ export default function ReportPage() {
           </div>
         </div>
       </main>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

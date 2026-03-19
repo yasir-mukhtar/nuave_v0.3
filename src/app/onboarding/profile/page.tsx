@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IconPencil, IconX, IconPlus, IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
+import { ButtonSpinner } from "@/components/ButtonSpinner";
 
 function ProgressBar({ active }: { active: number }) {
   return (
@@ -189,6 +190,9 @@ export default function ProfilePage() {
     console.log('profile:', profile);
     setError(null);
     setLoading(true);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60_000);
+
     try {
       if (!workspaceId) {
         throw new Error("ID workspace tidak ditemukan. Silakan coba ulangi audit.");
@@ -197,7 +201,9 @@ export default function ProfilePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ workspace_id: workspaceId, profile }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Terjadi kesalahan.");
@@ -210,11 +216,18 @@ export default function ProfilePage() {
         parsed.profile = profile;
         sessionStorage.setItem("nuave_profile", JSON.stringify(parsed));
       }
-      
+
       sessionStorage.setItem("nuave_prompts", JSON.stringify(data));
       router.push("/onboarding/prompts");
-    } catch {
-      setError("Kesalahan jaringan. Silakan coba lagi.");
+    } catch (err) {
+      clearTimeout(timeout);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setError("Permintaan melebihi batas waktu. Silakan coba lagi.");
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Kesalahan jaringan. Silakan coba lagi.");
+      }
     } finally {
       setLoading(false);
     }
@@ -434,7 +447,11 @@ export default function ProfilePage() {
                   opacity: loading ? 0.7 : 1,
                 }}
               >
-                {loading ? "Menyiapkan…" : (
+                {loading ? (
+                  <>
+                    <ButtonSpinner size={16} /> Menyiapkan…
+                  </>
+                ) : (
                   <>
                     Buat Prompt <IconArrowRight size={18} stroke={1.5} />
                   </>
@@ -538,6 +555,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

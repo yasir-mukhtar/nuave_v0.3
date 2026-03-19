@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { ButtonSpinner } from "@/components/ButtonSpinner";
 import {
   IconSparkles,
   IconCopy,
@@ -612,7 +613,7 @@ export default function KontenPage() {
                   >
                     {revealingId === selectedRec.id ? (
                       <>
-                        <span style={{ width: "14px", height: "14px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#ffffff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+                        <ButtonSpinner size={14} />
                         Membuat konten...
                       </>
                     ) : (
@@ -772,7 +773,7 @@ function RecCard({
           >
             {isRevealing ? (
               <>
-                <span style={{ width: "12px", height: "12px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+                <ButtonSpinner size={12} />
                 Membuat...
               </>
             ) : (

@@ -4,6 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import WizardLayout from "@/components/new-project/WizardLayout";
 import SearchableSelect from "@/components/new-project/SearchableSelect";
+import { ButtonSpinner } from "@/components/ButtonSpinner";
+
+const REQUEST_TIMEOUT_MS = 60_000;
 
 const COUNTRIES = [
   { code: "GLOBAL", name: "Global", flag: "🌐" },
@@ -169,12 +172,17 @@ export default function NewProjectPage() {
 
     const fullUrl = url.startsWith("http") ? url : `https://${url}`;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
     try {
       const res = await fetch("/api/scrape", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ website_url: fullUrl, brand_name: brandName.trim() }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       const data = await res.json();
 
       if (!data.success) {
@@ -193,8 +201,13 @@ export default function NewProjectPage() {
       };
       sessionStorage.setItem("nuave_new_project", JSON.stringify(projectData));
       router.push("/new-project/topics");
-    } catch {
-      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } catch (err) {
+      clearTimeout(timeout);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setError("Permintaan melebihi batas waktu. Silakan coba lagi.");
+      } else {
+        setError("Terjadi kesalahan. Silakan coba lagi.");
+      }
       setLoading(false);
     }
   };
@@ -424,7 +437,10 @@ export default function NewProjectPage() {
             if (isValid && !loading) e.currentTarget.style.backgroundColor = "var(--purple)";
           }}
         >
-          {loading ? "Memproses..." : "Lanjutkan"}
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            {loading && <ButtonSpinner size={16} />}
+            {loading ? "Memproses..." : "Lanjutkan"}
+          </span>
         </button>
       </form>
 

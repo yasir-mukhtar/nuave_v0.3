@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { 
-  IconSparkles, 
-  IconCopy, 
-  IconArrowLeft 
+import {
+  IconSparkles,
+  IconCopy,
+  IconArrowLeft
 } from '@tabler/icons-react';
+import { ButtonSpinner } from "@/components/ButtonSpinner";
 import { createBrowserClient } from '@supabase/ssr';
 
 interface Recommendation {
@@ -29,6 +30,7 @@ export default function RecommendationsPage() {
   const [polling, setPolling] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'web_copy' | 'content_gap' | 'structure'>('all');
   const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
+  const [revealingId, setRevealingId] = useState<string | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
   const [brandName, setBrandName] = useState('Brand');
   
@@ -138,31 +140,44 @@ export default function RecommendationsPage() {
   }, [loading, recommendations.length, polling, auditId]);
 
   async function handleReveal(recId: string) {
-    setRevealedIds(prev => new Set([...prev, recId]));
-    
+    setRevealingId(recId);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60_000);
+
     try {
       const res = await fetch('/api/recommendations/reveal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recommendation_id: recId })
+        body: JSON.stringify({ recommendation_id: recId }),
+        signal: controller.signal,
       });
-      
+      clearTimeout(timeout);
+
       const data = await res.json();
-      
+
       if (data.suggested_copy) {
-        setRecommendations(prev => 
-          prev.map(r => r.id === recId 
+        setRevealedIds(prev => new Set([...prev, recId]));
+        setRecommendations(prev =>
+          prev.map(r => r.id === recId
             ? { ...r, suggested_copy: data.suggested_copy }
             : r
           )
         );
-        
+
         if (typeof credits === 'number') {
           setCredits(Math.max(0, credits - 1));
         }
       }
     } catch (error) {
-      console.error('Failed to reveal recommendation:', error);
+      clearTimeout(timeout);
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.error('Reveal request timed out');
+      } else {
+        console.error('Failed to reveal recommendation:', error);
+      }
+    } finally {
+      setRevealingId(null);
     }
   }
 
@@ -405,6 +420,7 @@ export default function RecommendationsPage() {
                   <div style={{ marginTop: 'auto' }}>
                     <button
                       onClick={() => handleReveal(rec.id)}
+                      disabled={revealingId === rec.id}
                       style={{
                         background: 'var(--purple)',
                         color: 'white',
@@ -416,10 +432,15 @@ export default function RecommendationsPage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
-                        cursor: 'pointer'
+                        cursor: revealingId === rec.id ? 'not-allowed' : 'pointer',
+                        opacity: revealingId === rec.id ? 0.7 : 1,
                       }}
                     >
-                      <IconSparkles size={14} /> Tampilkan Solusi · 1 kredit
+                      {revealingId === rec.id ? (
+                        <><ButtonSpinner size={14} /> Memproses...</>
+                      ) : (
+                        <><IconSparkles size={14} /> Tampilkan Solusi · 1 kredit</>
+                      )}
                     </button>
                   </div>
                 ) : (
