@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { GeistSans } from 'geist/font/sans';
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({
   subsets: ["latin"],
