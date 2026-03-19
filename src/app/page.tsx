@@ -11,19 +11,19 @@ import HowItWorks from "@/components/HowItWorks";
 
 const STATS = [
   {
-    number: "9x",
-    title: "Conversion Rate",
-    body: "Traffic dari AI memiliki conversion rate lebih tinggi dibanding search tradisional.",
+    number: "5x",
+    title: "Konversi Lebih Tinggi",
+    body: "Traffic dari pencarian lewat AI rata-rata menghasilkan konversi 14,2% dibanding 2,8% pencarian lewat Google search.",
   },
   {
-    number: "4x",
-    title: "Leads Quality",
-    body: "Leads dari AI lebih siap untuk melakukan pembelian.",
+    number: "67%",
+    title: "CLV Lebih Tinggi",
+    body: "Pelanggan yang datang dari pencarian lewat AI membeli hingga 67% lebih banyak dalam jangka panjang.",
   },
   {
-    number: "1%",
-    title: "Pertumbuhan Bulanan",
-    body: "Pencarian melalui AI tumbuh 1% setiap bulan.",
+    number: "73%",
+    title: "Pembelian di Kunjungan Pertama",
+    body: "73% pengunjung yang datang dari pencarian AI langsung membeli pada kunjungan pertama.",
   },
 ];
 
@@ -878,7 +878,7 @@ export default function Home() {
             color: "#111827",
             margin: "0 0 20px 0",
           }}>
-            Platform AI adalah <em>search engine</em> baru.
+            Jadi yang Pertama Ditemukan di Era <em>Answer Engine</em>
           </h2>
           <p className="lp-stats-subtitle" style={{
             fontFamily: "Inter, sans-serif",
@@ -889,7 +889,7 @@ export default function Home() {
             color: "#6B7280",
             margin: 0,
           }}>
-            Bangun visibilitas brand Anda di mata AI dengan <em>Answer Engine Optimization</em> (AEO) <em>tool</em> Nuave.
+            Nuave membantu brand Anda ditemukan, dipercaya, dan langsung dipilih di pencarian AI.
           </p>
         </div>
 
@@ -947,6 +947,34 @@ export default function Home() {
 
         {/* Bottom divider — full width */}
         <div style={{ height: 1, background: "#E5E7EB" }} />
+
+        {/* Source reference */}
+        <p style={{
+          textAlign: "center",
+          marginTop: 24,
+          fontFamily: "Inter, sans-serif",
+          fontSize: 13,
+          color: "#9CA3AF",
+        }}>
+          Sumber:{" "}
+          <a
+            href="https://mybrandi.ai/referrals-from-ai-vs-google/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#9CA3AF", textDecoration: "underline" }}
+          >
+            MyBrandi.ai
+          </a>
+          ,{" "}
+          <a
+            href="https://superprompt.com/blog/ai-search-traffic-conversion-rates-5x-higher-than-google-2025-data"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#9CA3AF", textDecoration: "underline" }}
+          >
+            Superprompt
+          </a>
+        </p>
 
       </section>
 
