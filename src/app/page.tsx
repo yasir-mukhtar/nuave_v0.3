@@ -803,7 +803,7 @@ export default function Home() {
             ].map((card) => (
               <div key={card.number} className="lp-problem-card" style={{
                 position: "relative",
-                borderRadius: 16,
+                borderRadius: 12,
                 border: "1px solid #E5E7EB",
                 overflow: "hidden",
                 display: "flex",
@@ -1009,7 +1009,7 @@ export default function Home() {
               <div key={pkg.name} style={{
                 position: "relative",
                 padding: 32,
-                borderRadius: 16,
+                borderRadius: 12,
                 background: "#ffffff",
                 border: "1px solid #E5E7EB",
                 display: "flex",
@@ -1099,7 +1099,7 @@ export default function Home() {
                     display: "block",
                     width: "100%",
                     padding: "14px 24px",
-                    borderRadius: 10,
+                    borderRadius: 8,
                     fontFamily: "Inter, sans-serif",
                     fontWeight: 500,
                     fontSize: 14,

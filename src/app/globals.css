@@ -148,13 +148,13 @@ label.field-label.disabled {
   border-width: 0px;
   border-style: solid;
   border-color: rgba(0, 0, 0, 0.11);
-  box-shadow: 
+  box-shadow:
     0px 0px 0px 1px rgba(0, 0, 0, 0.11),
     0px 0px 1px 0px rgba(0, 0, 0, 0.07);
   outline: transparent solid 2px;
   outline-offset: 2px;
   appearance: none;
-  transition-property: background-color, border-color, 
+  transition-property: background-color, border-color,
     color, fill, stroke, opacity, box-shadow, transform;
   transition-timing-function: ease;
   transition-duration: 200ms;
@@ -164,7 +164,7 @@ label.field-label.disabled {
 .form-field textarea:hover,
 .form-field select:hover {
   border-color: rgba(0, 0, 0, 0.28);
-  box-shadow: 
+  box-shadow:
     0px 0px 0px 1px rgba(0, 0, 0, 0.28),
     0px 0px 1px 0px rgba(0, 0, 0, 0.11);
 }
@@ -173,7 +173,7 @@ label.field-label.disabled {
 .form-field textarea:focus,
 .form-field select:focus {
   border-color: rgba(0, 0, 0, 0.28);
-  box-shadow: 
+  box-shadow:
     0px 0px 0px 1px rgba(0, 0, 0, 0.28),
     0px 0px 1px 0px rgba(0, 0, 0, 0.11),
     0px 0px 0px 4px rgba(0, 0, 0, 0.15);
@@ -422,6 +422,7 @@ label.field-label.disabled {
 .lp-nav-cta-text { display: inline; }
 .lp-section-heading { font-size: 32px; font-weight: 600; color: #111827; text-align: center; margin-bottom: 48px; letter-spacing: -0.04em; line-height: 1.25; }
 .lp-score-badge-text { display: inline; }
+.lp-hiw-mobile-preview { display: none; }
 
 @media (max-width: 768px) {
   .hero-section {
@@ -470,31 +471,41 @@ label.field-label.disabled {
     -webkit-backdrop-filter: blur(10px) !important;
     border: 1px solid rgba(117, 115, 114, 0.15) !important;
   }
+
+  /* ── Mobile typography scale ── */
+  /* Display: 36px — hero h1, CTA h2 */
+  .lp-hero-heading { font-size: 36px !important; letter-spacing: -1px !important; line-height: 1.1em !important; }
+  .lp-cta-heading { font-size: 36px !important; line-height: 1.1em !important; }
+
+  /* Section: 28px — all other h2 */
+  h2 { letter-spacing: -1px !important; }
+  .lp-problem-heading,
+  .lp-stats-heading,
+  .lp-hiw-heading,
+  .lp-faq-heading { font-size: 28px !important; }
+
+  /* Body: 16px — subtitles, card text */
+  .lp-hero-subtitle,
+  .lp-marquee-text,
+  .lp-stats-subtitle,
+  .lp-problem-card span { font-size: 16px !important; }
+
+  /* ── Mobile layout ── */
   /* Hero */
   .lp-hero-section { padding: 120px 20px 0 !important; }
-  .lp-hero-heading { font-size: 36px !important; letter-spacing: -1px !important; line-height: 1.1em !important; }
-  .lp-hero-subtitle { font-size: 14px !important; }
-  .lp-marquee-text { font-size: 14px !important; }
   .lp-hero-preview { display: none !important; }
 
   /* Marquee */
   .lp-marquee-section { padding-top: 48px !important; padding-bottom: 48px !important; }
 
-  /* All h2 headings */
-  h2 { letter-spacing: -1px !important; }
-
   /* Problem */
   .lp-problem-section { padding: 60px 16px !important; }
   .lp-problem-grid { grid-template-columns: 1fr !important; }
-  .lp-problem-heading { font-size: 28px !important; }
   .lp-problem-card { min-height: 320px !important; }
   .lp-problem-card > div { padding: 24px !important; }
-  .lp-problem-card span { font-size: 14px !important; }
 
   /* Stats */
   .lp-stats-section { padding-top: 60px !important; padding-bottom: 60px !important; }
-  .lp-stats-heading { font-size: 28px !important; }
-  .lp-stats-subtitle { font-size: 16px !important; }
   .lp-stats-br { display: none; }
   .lp-stats-grid-inner { grid-template-columns: 1fr !important; margin: 0 16px !important; }
   .lp-stat-item { border-left: 1px solid #E5E7EB !important; border-right: 1px solid #E5E7EB !important; border-bottom: none !important; padding: 32px 24px !important; }
@@ -507,19 +518,17 @@ label.field-label.disabled {
 
   /* FAQ */
   .lp-faq-section { padding: 48px 16px 60px !important; }
-  .lp-faq-heading { font-size: 24px !important; }
 
   /* CTA */
   .lp-cta-section { padding: 80px 20px !important; min-height: auto !important; }
-  .lp-cta-heading { font-size: 36px !important; }
 
   /* HowItWorks */
   .lp-hiw-section { padding-top: 60px !important; }
   .lp-hiw-sticky-heading { position: relative !important; top: auto !important; padding-left: 16px !important; padding-right: 16px !important; }
-  .lp-hiw-heading { font-size: 24px !important; }
   .lp-hiw-card-wrapper { position: relative !important; top: auto !important; padding-left: 16px !important; padding-right: 16px !important; padding-bottom: 16px !important; margin-bottom: 0 !important; }
   .lp-hiw-card-grid { grid-template-columns: 1fr !important; }
   .lp-hiw-right-panel { display: none !important; }
+  .lp-hiw-mobile-preview { display: flex !important; }
   .lp-hiw-left-panel { padding: 24px !important; }
 
   /* Footer */

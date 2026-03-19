@@ -135,7 +135,7 @@ export default function HowItWorks() {
                 margin: "0 auto",
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                borderRadius: 20,
+                borderRadius: 12,
                 overflow: "hidden",
                 background: "#ffffff",
                 border: "1px solid #E5E7EB",
@@ -198,7 +198,7 @@ export default function HowItWorks() {
                   </div>
                 </div>
 
-                {/* Right panel — image bg with preview */}
+                {/* Right panel — image bg with preview (desktop) */}
                 <div className="lp-hiw-right-panel" style={{
                   backgroundImage: card.rightBg,
                   backgroundSize: "cover",
@@ -217,6 +217,31 @@ export default function HowItWorks() {
                     height={360}
                     style={{ width: "75%", height: "auto", objectFit: "contain", borderRadius: "8px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}
                   />
+                </div>
+
+                {/* Mobile preview image */}
+                <div className="lp-hiw-mobile-preview" style={{
+                  padding: 12,
+                  order: 3,
+                }}>
+                  <div style={{
+                    backgroundImage: card.rightBg,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    borderRadius: 8,
+                    padding: 24,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}>
+                    <Image
+                      src={card.preview}
+                      alt={card.title}
+                      width={480}
+                      height={360}
+                      style={{ width: "80%", height: "auto", objectFit: "contain", borderRadius: "8px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
