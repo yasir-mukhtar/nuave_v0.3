@@ -152,7 +152,7 @@ export default function TopicsPage() {
       )}
 
       {/* Topic list */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 8, ...( loadingTopics ? { display: "none" } : {}) }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 8, ...(loadingTopics ? { display: "none" } : {}) }}>
         {topics.map((topic) => (
           <button
             key={topic.id}
@@ -165,7 +165,7 @@ export default function TopicsPage() {
               width: "100%",
               padding: "14px 16px",
               borderRadius: 8,
-              border: topic.checked ? "1.5px solid var(--purple)" : "1px solid var(--border-default)",
+              border: "1px solid var(--border-default)",
               background: "#ffffff",
               cursor: "pointer",
               textAlign: "left",
@@ -174,8 +174,8 @@ export default function TopicsPage() {
           >
             {/* Checkbox */}
             <div style={{
-              width: 20,
-              height: 20,
+              width: 18,
+              height: 18,
               borderRadius: 4,
               border: topic.checked ? "none" : "1.5px solid var(--border-strong)",
               backgroundColor: topic.checked ? "var(--purple)" : "#ffffff",
@@ -186,7 +186,7 @@ export default function TopicsPage() {
               transition: "background-color 0.15s ease, border-color 0.15s ease",
             }}>
               {topic.checked && (
-                <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                <svg width="10" height="8" viewBox="0 0 12 9" fill="none">
                   <path d="M1 4L4.5 7.5L11 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               )}
@@ -222,13 +222,13 @@ export default function TopicsPage() {
             autoFocus
             style={{
               flex: 1,
-              height: 44,
-              padding: "0 14px",
+              height: 40,
+              padding: "0 12px",
               fontFamily: "var(--font-body)",
               fontSize: 14,
               color: "#111827",
               border: "1px solid var(--purple)",
-              borderRadius: 8,
+              borderRadius: 6,
               outline: "none",
               boxShadow: "var(--shadow-focus)",
             }}
@@ -238,14 +238,14 @@ export default function TopicsPage() {
             onClick={addCustomTopic}
             disabled={!customName.trim()}
             style={{
-              height: 44,
-              padding: "0 16px",
-              borderRadius: 8,
+              height: 40,
+              padding: "0 14px",
+              borderRadius: 6,
               border: "none",
               backgroundColor: customName.trim() ? "var(--purple)" : "#D1D5DB",
               color: "#fff",
               fontFamily: "var(--font-body)",
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 500,
               cursor: customName.trim() ? "pointer" : "not-allowed",
             }}

@@ -401,29 +401,41 @@ export default function PromptsPage() {
       )}
 
       {/* Topic accordions */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 36, ...(loadingPrompts ? { display: "none" } : {}) }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 36, ...(loadingPrompts ? { display: "none" } : {}) }}>
         {topicGroups.map((group) => (
             <div
               key={group.id}
-              style={{
-                border: group.expanded ? "1.5px solid var(--purple)" : "1px solid var(--border-default)",
-                borderRadius: 8,
-                overflow: "hidden",
-                transition: "border-color 0.15s ease",
-              }}
+              style={{ position: "relative" }}
             >
-              {/* Accordion header */}
+              {/* Prompts container (behind, wider) */}
+              {group.expanded && (
+                <div style={{
+                  position: "absolute",
+                  top: 24,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  border: "1px solid var(--border-default)",
+                  borderRadius: 10,
+                  pointerEvents: "none",
+                }} />
+              )}
+
+              {/* Topic header card (on top) */}
               <button
                 type="button"
                 onClick={() => toggleExpand(group.id)}
                 style={{
+                  position: "relative",
+                  zIndex: 1,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                   width: "100%",
                   padding: "14px 16px",
-                  background: "none",
-                  border: "none",
+                  background: "#ffffff",
+                  border: "1px solid var(--border-default)",
+                  borderRadius: 8,
                   cursor: "pointer",
                   textAlign: "left",
                 }}
@@ -452,9 +464,9 @@ export default function PromptsPage() {
                 )}
               </button>
 
-              {/* Expanded content */}
+              {/* Expanded content (inside the wider container) */}
               {group.expanded && (
-                <div style={{ padding: "0 16px 16px" }}>
+                <div style={{ position: "relative", zIndex: 0, padding: "12px 12px 16px" }}>
                   {/* Prompts label */}
                   <p style={{
                     fontFamily: "var(--font-body)",
@@ -510,6 +522,7 @@ export default function PromptsPage() {
                             fontSize: 14,
                             color: "#111827",
                             lineHeight: 1.5,
+                            display: "block",
                           }}>
                             {prompt.text}
                           </span>
@@ -517,19 +530,19 @@ export default function PromptsPage() {
                             const tier = prompt.demand_tier || "medium";
                             const style = TIER_STYLES[tier];
                             if (!style) return null;
+                            const isLow = tier === "low";
                             return (
                               <span style={{
                                 display: "inline-block",
-                                marginLeft: 8,
-                                padding: "2px 8px",
-                                borderRadius: 6,
-                                backgroundColor: style.bg,
+                                marginTop: 4,
+                                padding: isLow ? 0 : "2px 8px",
+                                borderRadius: isLow ? 0 : 6,
+                                backgroundColor: isLow ? "transparent" : style.bg,
                                 fontFamily: "var(--font-body)",
                                 fontSize: 11,
-                                fontWeight: 600,
+                                fontWeight: isLow ? 400 : 600,
                                 color: style.color,
                                 lineHeight: "16px",
-                                verticalAlign: "middle",
                               }}>
                                 {style.label}
                               </span>
