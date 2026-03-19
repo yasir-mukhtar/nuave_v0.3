@@ -77,6 +77,13 @@ Return ONLY a JSON object where keys are topic names and values are arrays of 5 
       }
     }
 
+    // Enforce max 5 prompts per topic
+    for (const key of Object.keys(result)) {
+      if (result[key].length > 5) {
+        result[key] = result[key].slice(0, 5);
+      }
+    }
+
     // Save to DB if workspace_id provided
     if (workspace_id) {
       const supabase = createSupabaseAdminClient();
