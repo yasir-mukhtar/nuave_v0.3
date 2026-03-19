@@ -480,47 +480,56 @@ label.field-label.disabled {
   /* Marquee */
   .lp-marquee-section { padding-top: 48px !important; padding-bottom: 48px !important; }
 
+  /* All h2 headings */
+  h2 { letter-spacing: -1px !important; }
+
   /* Problem */
-  .lp-problem-section { padding: 60px 20px !important; }
+  .lp-problem-section { padding: 60px 16px !important; }
   .lp-problem-grid { grid-template-columns: 1fr !important; }
-  .lp-problem-heading { font-size: 28px !important; letter-spacing: -1px !important; }
+  .lp-problem-heading { font-size: 28px !important; }
   .lp-problem-card { min-height: 320px !important; }
   .lp-problem-card > div { padding: 24px !important; }
   .lp-problem-card span { font-size: 14px !important; }
 
   /* Stats */
   .lp-stats-section { padding-top: 60px !important; padding-bottom: 60px !important; }
-  .lp-stats-heading { font-size: 28px !important; letter-spacing: -1px !important; }
+  .lp-stats-heading { font-size: 28px !important; }
   .lp-stats-subtitle { font-size: 16px !important; }
-  .lp-stats-grid-inner { grid-template-columns: 1fr !important; }
-  .lp-stat-item { border-left: 1px solid #E5E7EB !important; border-right: 1px solid #E5E7EB !important; padding: 32px 24px !important; }
+  .lp-stats-br { display: none; }
+  .lp-stats-grid-inner { grid-template-columns: 1fr !important; margin: 0 16px !important; }
+  .lp-stat-item { border-left: 1px solid #E5E7EB !important; border-right: 1px solid #E5E7EB !important; border-bottom: none !important; padding: 32px 24px !important; }
+  .lp-stat-item:nth-child(1),
+  .lp-stat-item:nth-child(2) { border-bottom: 1px solid #E5E7EB !important; }
 
   /* Pricing */
-  .lp-pricing-section { padding: 48px 20px !important; }
+  .lp-pricing-section { padding: 48px 16px !important; }
   .lp-pricing-grid-inner { grid-template-columns: 1fr !important; }
 
   /* FAQ */
-  .lp-faq-section { padding: 48px 20px 60px !important; }
+  .lp-faq-section { padding: 48px 16px 60px !important; }
   .lp-faq-heading { font-size: 24px !important; }
 
   /* CTA */
   .lp-cta-section { padding: 80px 20px !important; min-height: auto !important; }
-  .lp-cta-heading { font-size: 36px !important; letter-spacing: -1px !important; }
+  .lp-cta-heading { font-size: 36px !important; }
 
   /* HowItWorks */
   .lp-hiw-section { padding-top: 60px !important; }
-  .lp-hiw-sticky-heading { position: relative !important; top: auto !important; padding-left: 20px !important; padding-right: 20px !important; }
+  .lp-hiw-sticky-heading { position: relative !important; top: auto !important; padding-left: 16px !important; padding-right: 16px !important; }
   .lp-hiw-heading { font-size: 24px !important; }
-  .lp-hiw-card-wrapper { position: relative !important; top: auto !important; padding-left: 20px !important; padding-right: 20px !important; padding-bottom: 16px !important; margin-bottom: 0 !important; }
+  .lp-hiw-card-wrapper { position: relative !important; top: auto !important; padding-left: 16px !important; padding-right: 16px !important; padding-bottom: 16px !important; margin-bottom: 0 !important; }
   .lp-hiw-card-grid { grid-template-columns: 1fr !important; }
   .lp-hiw-right-panel { display: none !important; }
   .lp-hiw-left-panel { padding: 24px !important; }
 
   /* Footer */
-  .lp-footer { padding: 60px 20px !important; }
-  .lp-footer-row1 { flex-direction: column !important; align-items: flex-start !important; gap: 24px !important; }
+  .lp-footer { padding: 60px 16px !important; }
+  .lp-footer-row1 { flex-direction: column !important; align-items: flex-start !important; gap: 40px !important; }
   .lp-footer-row2 { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
   .lp-footer-copyright { margin-left: 0 !important; }
+  .lp-footer-nav { display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 20px !important; }
+  .lp-footer-social { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+  .lp-footer-social-label { margin-right: 0 !important; }
 }
 
 /* Footer responsive */
@@ -643,18 +652,49 @@ body:has(.lp-root) {
   background-color: var(--lp-bg) !important;
   color: var(--lp-text-primary);
 }
-.lp-root h1,
-.lp-root h2,
-.lp-root h3,
-.lp-root h4,
-.lp-root h5,
-.lp-root h6 {
-  font-family: inherit;
-  color: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-  letter-spacing: inherit;
+/* Landing page heading system */
+.lp-page h1,
+.lp-page h2,
+.lp-page h3 {
+  font-family: var(--font-geist-sans), sans-serif;
+  color: var(--lp-text-primary);
+}
+
+.lp-page h1 {
+  font-size: 60px;
+  font-weight: 600;
+  line-height: 1em;
+  letter-spacing: -2px;
+}
+
+.lp-page h2 {
+  font-size: 48px;
+  font-weight: 500;
+  line-height: 1.2em;
+  letter-spacing: -2px;
+}
+
+.lp-page h3 {
+  font-family: Inter, sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 34px;
+}
+
+/* Display tier — hero and CTA */
+.lp-page .lp-hero-heading,
+.lp-page .lp-cta-heading {
+  font-size: 60px;
+  font-weight: 600;
+  line-height: 1em;
+  letter-spacing: -2px;
+}
+
+/* FAQ — smaller variant */
+.lp-page .lp-faq-heading {
+  font-size: 36px;
+  letter-spacing: -1px;
+  line-height: 1.4em;
 }
 .lp-root p,
 .lp-root span,

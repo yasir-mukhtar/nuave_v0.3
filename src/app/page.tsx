@@ -449,12 +449,6 @@ function HeroSection() {
             className="lp-hero-heading"
             style={{
               maxWidth: 800,
-              fontFamily: "var(--font-geist-sans), sans-serif",
-              fontWeight: 600,
-              fontSize: 60,
-              lineHeight: "1em",
-              letterSpacing: -2,
-              color: "var(--lp-text-primary)",
               textAlign: "center",
               margin: 0,
             }}
@@ -675,7 +669,7 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#ffffff" }}>
+    <div className="lp-page" style={{ minHeight: "100vh", background: "#ffffff" }}>
 
       {/* ──── Nav + Hero + AI Logos (Framer design) ──── */}
       <div style={{ background: "var(--lp-bg, #f7f7f5)" }}>
@@ -763,12 +757,6 @@ export default function Home() {
 
           {/* Heading */}
           <h2 className="lp-problem-heading" style={{
-            fontFamily: "var(--font-geist-sans), sans-serif",
-            fontWeight: 500,
-            fontSize: 48,
-            letterSpacing: "-2px",
-            lineHeight: "1.2em",
-            color: "#111827",
             textAlign: "center",
             margin: "0 0 56px 0",
           }}>
@@ -868,17 +856,11 @@ export default function Home() {
       <section className="lp-stats-section" style={{ background: "#F9FAFB", paddingTop: 120, paddingBottom: 120 }}>
 
         {/* Heading + subtitle — padded inward */}
-        <div style={{ padding: "0 32px", textAlign: "center", marginBottom: 40 }}>
+        <div style={{ padding: "0 32px", textAlign: "center", marginBottom: 24 }}>
           <h2 className="lp-stats-heading" style={{
-            fontFamily: "var(--font-geist-sans), sans-serif",
-            fontWeight: 500,
-            fontSize: 48,
-            letterSpacing: "-2px",
-            lineHeight: "1.2em",
-            color: "#111827",
             margin: "0 0 20px 0",
           }}>
-            Jadi yang Pertama Ditemukan di Era <em>Answer Engine</em>
+            Jadi yang Pertama Ditemukan<br className="lp-stats-br" />di Era <em>Answer Engine</em>
           </h2>
           <p className="lp-stats-subtitle" style={{
             fontFamily: "Inter, sans-serif",
@@ -889,7 +871,7 @@ export default function Home() {
             color: "#6B7280",
             margin: 0,
           }}>
-            Nuave membantu brand Anda ditemukan, dipercaya, dan langsung dipilih di pencarian AI.
+            Nuave membantu brand Anda ditemukan, dipercaya,<br className="lp-stats-br" />dan langsung dipilih di pencarian AI.
           </p>
         </div>
 
@@ -984,12 +966,7 @@ export default function Home() {
 
           {/* Title + subtitle */}
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <h2 style={{
-              fontFamily: "var(--font-geist-sans), sans-serif",
-              fontWeight: 500,
-              fontSize: 48,
-              lineHeight: "58px",
-              color: "#111827",
+            <h2 className="lp-pricing-heading" style={{
               margin: "0 0 16px 0",
             }}>
               Harga
@@ -1125,12 +1102,6 @@ export default function Home() {
       <section id="faq" className="lp-faq-section" style={{ background: "#F9FAFB", padding: "72px 32px 80px" }}>
         <div style={{ maxWidth: 740, margin: "0 auto" }}>
           <h2 className="lp-faq-heading" style={{
-            fontFamily: "var(--font-geist-sans), sans-serif",
-            fontWeight: 500,
-            fontSize: 36,
-            letterSpacing: "-1px",
-            lineHeight: "1.4em",
-            color: "#111827",
             textAlign: "center",
             marginBottom: 48,
           }}>
@@ -1228,12 +1199,6 @@ export default function Home() {
           textAlign: "center",
         }}>
           <h2 className="lp-cta-heading" style={{
-            fontFamily: "var(--font-geist-sans), sans-serif",
-            fontWeight: 500,
-            fontSize: 60,
-            letterSpacing: "-2px",
-            lineHeight: "1.2em",
-            color: "#0a0a0a",
             margin: 0,
             maxWidth: 720,
           }}>

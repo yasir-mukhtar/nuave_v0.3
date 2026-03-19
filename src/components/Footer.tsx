@@ -81,14 +81,14 @@ export default function Footer() {
           justifyContent: "space-between",
           marginBottom: 72,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+          <div className="lp-footer-nav" style={{ display: "flex", alignItems: "center", gap: 32 }}>
             {NAV_LINKS.map((link) => (
               <NavLink key={link.label} {...link} />
             ))}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{
+          <div className="lp-footer-social" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span className="lp-footer-social-label" style={{
               fontFamily: "Inter, sans-serif",
               fontWeight: 600,
               fontSize: 14,
@@ -98,9 +98,11 @@ export default function Footer() {
             }}>
               Ikuti Kami
             </span>
-            {SOCIAL.map((s) => (
-              <SocialIcon key={s.label} {...s} />
-            ))}
+            <div className="lp-footer-social-icons" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {SOCIAL.map((s) => (
+                <SocialIcon key={s.label} {...s} />
+              ))}
+            </div>
           </div>
         </div>
 

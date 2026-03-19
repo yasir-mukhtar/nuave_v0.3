@@ -103,14 +103,7 @@ export default function HowItWorks() {
         transition: "opacity 0.1s linear",
       }}>
         <div style={{ maxWidth: 868, margin: "0 auto", textAlign: "center" }}>
-          <h2 className="lp-hiw-heading" style={{
-            fontFamily: "var(--font-geist-sans), sans-serif",
-            fontSize: 48,
-            fontWeight: 500,
-            lineHeight: "1.2em",
-            letterSpacing: "-2px",
-            color: "var(--lp-text-primary)",
-          }}>
+          <h2 className="lp-hiw-heading">
             Nuave membantu brand Anda muncul dalam jawaban ChatGPT
           </h2>
         </div>
@@ -145,6 +138,7 @@ export default function HowItWorks() {
                 borderRadius: 20,
                 overflow: "hidden",
                 background: "#ffffff",
+                border: "1px solid #E5E7EB",
                 boxShadow: "0 8px 40px rgba(0,0,0,0.10)",
                 transform: `scale(${scale})`,
                 opacity,
@@ -181,14 +175,7 @@ export default function HowItWorks() {
                     }}>
                       {card.step}
                     </div>
-                    <h3 style={{
-                      fontFamily: "'Inter', sans-serif",
-                      fontSize: 24,
-                      fontWeight: 500,
-                      lineHeight: "34px",
-                      color: "var(--lp-text-primary)",
-                      marginBottom: 12,
-                    }}>
+                    <h3 style={{ marginBottom: 12 }}>
                       {card.title}
                     </h3>
                     <p style={{
