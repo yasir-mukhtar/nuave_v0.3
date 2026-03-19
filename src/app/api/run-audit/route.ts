@@ -81,6 +81,29 @@ export async function POST(req: NextRequest) {
         .eq('id', workspace_id);
     }
 
+    // STEP 0.5 — Atomic credit check + deduction (prevents race conditions)
+    const creditsNeeded = prompts.length;
+
+    if (user) {
+      const { data: newBalance, error: rpcError } = await supabase
+        .rpc('deduct_credits', { p_user_id: user.id, p_amount: creditsNeeded });
+
+      if (rpcError) {
+        console.error('Credit deduction RPC failed:', rpcError);
+        return NextResponse.json(
+          { success: false, error: 'Gagal memproses kredit. Silakan coba lagi.' },
+          { status: 500 }
+        );
+      }
+
+      if (newBalance === -1) {
+        return NextResponse.json(
+          { success: false, error: `Kredit tidak cukup. Anda butuh ${creditsNeeded} kredit.` },
+          { status: 402 }
+        );
+      }
+    }
+
     // STEP 1 — Create audit record in Supabase
     const { data: audit, error: auditError } = await supabase
       .from('audits')
@@ -89,7 +112,7 @@ export async function POST(req: NextRequest) {
         status: 'running',
         total_prompts: prompts.length,
         brand_mention_count: 0,
-        credits_used: prompts.length,
+        credits_used: creditsNeeded,
       })
       .select('id')
       .single();
@@ -112,7 +135,9 @@ export async function POST(req: NextRequest) {
       auditId,
       workspace_id,
       prompts,
-      brandName
+      brandName,
+      user?.id || null,
+      creditsNeeded
     );
 
     // Use waitUntil if available (Edge Runtime)
@@ -149,7 +174,9 @@ async function processAuditInBackground(
   auditId: string,
   workspaceId: string,
   prompts: PromptRequest[],
-  brandName: string
+  brandName: string,
+  userId: string | null,
+  creditsUsed: number
 ) {
   const supabase = createSupabaseAdminClient();
   let totalBrandMentionCount = 0;
@@ -288,5 +315,16 @@ async function processAuditInBackground(
       .from('audits')
       .update({ status: 'failed' })
       .eq('id', auditId);
+
+    // Refund credits on complete failure
+    if (userId && creditsUsed > 0) {
+      const { error: refundError } = await supabase
+        .rpc('refund_credits', { p_user_id: userId, p_amount: creditsUsed });
+      if (refundError) {
+        console.error('Credit refund failed:', refundError);
+      } else {
+        console.log(`Refunded ${creditsUsed} credits to user ${userId} after audit failure`);
+      }
+    }
   }
 }
