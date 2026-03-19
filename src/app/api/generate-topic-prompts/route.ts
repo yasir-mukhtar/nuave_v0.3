@@ -124,6 +124,14 @@ Return ONLY a JSON object where keys are topic names and values are arrays of 5 
         if (insertError) {
           console.error("Failed to save draft prompts:", insertError);
           // Non-fatal — prompts still returned to client
+        } else {
+          // Fire-and-forget: enrich keywords with Google Ads volume data
+          const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+          fetch(`${baseUrl}/api/enrich-keywords`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ workspace_id }),
+          }).catch((err) => console.error("Keyword enrichment trigger failed:", err));
         }
       }
     }
