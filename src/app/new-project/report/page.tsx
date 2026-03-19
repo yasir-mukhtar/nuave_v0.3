@@ -11,6 +11,7 @@ const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1Q
 interface ReportData {
   brandName: string;
   brandUrl: string;
+  faviconUrl: string | null;
   date: string;
   title: string;
   score: number;
@@ -66,6 +67,7 @@ function buildReport(): ReportData {
   return {
     brandName: project.brandName || "Brand",
     brandUrl: project.url || "",
+    faviconUrl: project.faviconUrl || null,
     date: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }),
     title: "Laporan Visibilitas AI",
     score,
@@ -385,22 +387,53 @@ export default function ReportPage() {
             padding: "32px 32px 24px",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              {/* Brand logo placeholder */}
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                background: "var(--bg-surface-raised)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 18,
-                fontWeight: 600,
-                color: "var(--purple)",
-                fontFamily: "var(--font-heading)",
-              }}>
-                {REPORT.brandName.charAt(0)}
-              </div>
+              {/* Brand logo */}
+              {REPORT.faviconUrl ? (
+                <img
+                  src={REPORT.faviconUrl}
+                  alt={REPORT.brandName}
+                  width={40}
+                  height={40}
+                  style={{
+                    borderRadius: 8,
+                    objectFit: "contain",
+                    background: "var(--bg-surface-raised)",
+                  }}
+                  onError={(e) => {
+                    // Fallback to initial letter if favicon fails to load
+                    const el = e.currentTarget;
+                    const parent = el.parentElement;
+                    if (parent) {
+                      const fallback = document.createElement("div");
+                      fallback.textContent = REPORT.brandName.charAt(0);
+                      Object.assign(fallback.style, {
+                        width: "40px", height: "40px", borderRadius: "8px",
+                        background: "var(--bg-surface-raised)", display: "flex",
+                        alignItems: "center", justifyContent: "center",
+                        fontSize: "18px", fontWeight: "600",
+                        color: "var(--purple)", fontFamily: "var(--font-heading)",
+                      });
+                      parent.replaceChild(fallback, el);
+                    }
+                  }}
+                />
+              ) : (
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: "var(--bg-surface-raised)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 18,
+                  fontWeight: 600,
+                  color: "var(--purple)",
+                  fontFamily: "var(--font-heading)",
+                }}>
+                  {REPORT.brandName.charAt(0)}
+                </div>
+              )}
               <div>
                 <p style={{
                   fontFamily: "var(--font-body)",

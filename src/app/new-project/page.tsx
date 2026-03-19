@@ -198,6 +198,7 @@ export default function NewProjectPage() {
         language,
         workspaceId: data.workspace_id,
         profile: data.profile,
+        faviconUrl: faviconUrl || null,
       };
       sessionStorage.setItem("nuave_new_project", JSON.stringify(projectData));
       router.push("/new-project/topics");
