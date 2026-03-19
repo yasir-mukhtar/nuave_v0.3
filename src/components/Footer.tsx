@@ -5,6 +5,7 @@ import { IconBrandX, IconBrandInstagram, IconBrandLinkedin } from "@tabler/icons
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 const PURPLE = "#6C3FF5";
+const MUTED = "#6B7280";
 
 const NAV_LINKS = [
   { label: "Syarat dan Ketentuan", href: "/terms" },
@@ -13,9 +14,9 @@ const NAV_LINKS = [
 ];
 
 const SOCIAL = [
+  { icon: IconBrandLinkedin, href: "https://linkedin.com/company/nuave", label: "LinkedIn" },
   { icon: IconBrandX, href: "https://x.com/nuaveAI", label: "X" },
   { icon: IconBrandInstagram, href: "https://instagram.com/nuave.ai", label: "Instagram" },
-  { icon: IconBrandLinkedin, href: "https://linkedin.com/company/nuave", label: "LinkedIn" },
 ];
 
 function NavLink({ label, href }: { label: string; href: string }) {
@@ -30,7 +31,7 @@ function NavLink({ label, href }: { label: string; href: string }) {
         fontWeight: 400,
         fontSize: 14,
         lineHeight: "20px",
-        color: hovered ? PURPLE : "#6B7280",
+        color: hovered ? PURPLE : MUTED,
         textDecoration: "none",
         transition: "color 0.15s ease",
       }}
@@ -54,9 +55,9 @@ function SocialIcon({ icon: Icon, href, label }: { icon: typeof IconBrandX; href
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: 40,
-        height: 40,
-        borderRadius: "50%",
+        width: 36,
+        height: 36,
+        borderRadius: 8,
         backgroundColor: hovered ? PURPLE : "#111827",
         color: "#ffffff",
         textDecoration: "none",
@@ -90,10 +91,10 @@ export default function Footer() {
           <div className="lp-footer-social" style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span className="lp-footer-social-label" style={{
               fontFamily: "Inter, sans-serif",
-              fontWeight: 600,
+              fontWeight: 400,
               fontSize: 14,
               lineHeight: "20px",
-              color: "#111827",
+              color: MUTED,
               marginRight: 4,
             }}>
               Ikuti Kami
@@ -133,7 +134,7 @@ export default function Footer() {
             fontWeight: 400,
             fontSize: 14,
             lineHeight: "20px",
-            color: "#374151",
+            color: MUTED,
             margin: 0,
           }}>
             Nuave membantu brand Anda muncul dalam pencarian di ChatGPT
@@ -144,7 +145,7 @@ export default function Footer() {
             fontWeight: 400,
             fontSize: 14,
             lineHeight: "20px",
-            color: "#374151",
+            color: MUTED,
             margin: 0,
             marginLeft: "auto",
           }}>
