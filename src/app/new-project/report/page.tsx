@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { Suspense, useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { IconDownload, IconArrowRight } from "@tabler/icons-react";
@@ -139,6 +139,18 @@ function ScoreRing({ score }: { score: number }) {
 }
 
 export default function ReportPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>Memuat laporan...</p>
+      </div>
+    }>
+      <ReportPageContent />
+    </Suspense>
+  );
+}
+
+function ReportPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [REPORT, setReport] = useState<ReportData | null>(null);
