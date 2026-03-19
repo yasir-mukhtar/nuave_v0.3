@@ -57,24 +57,44 @@ const PRICING = [
 
 const FAQS = [
   {
+    q: "Apa itu Nuave?",
+    a: "Nuave adalah platform AEO (Answer Engine Optimization) yang mengukur seberapa sering AI seperti ChatGPT menyebut brand Anda saat pengguna bertanya tentang kategori bisnis Anda. Anda mendapat skor visibilitas 0–100 beserta rekomendasi konten untuk meningkatkannya.",
+  },
+  {
     q: "Apa itu AEO?",
-    a: "AEO (Answer Engine Optimization) adalah proses mengoptimalkan konten agar brand Anda muncul di jawaban mesin AI seperti ChatGPT, bukan hanya di hasil pencarian Google tradisional.",
+    a: "AEO atau Answer Engine Optimization adalah strategi agar brand Anda disebut oleh AI seperti ChatGPT, Perplexity, dan Gemini saat menjawab pertanyaan pengguna. Berbeda dari SEO yang fokus ke ranking Google, AEO fokus ke \"apakah AI tahu dan merekomendasikan bisnis Anda?\"",
   },
   {
-    q: "Apakah Nuave gratis?",
-    a: "Ya, Anda mendapat 10 kredit gratis saat mendaftar — cukup untuk 1 audit lengkap. Tidak perlu kartu kredit.",
+    q: "Apa bedanya AEO dengan SEO?",
+    a: "SEO membantu website Anda muncul di Google. AEO membuat brand Anda disebut oleh AI. Keduanya penting, tapi semakin banyak orang yang langsung tanya ke ChatGPT tanpa buka Google sama sekali.",
   },
   {
-    q: "Berapa lama proses audit?",
-    a: "Sekitar 60 detik. Nuave mengirim 10 pertanyaan realistis ke ChatGPT, menganalisis jawabannya, dan menghasilkan laporan lengkap.",
+    q: "Kenapa saya perlu tahu apakah AI menyebut brand saya?",
+    a: "Karena jutaan orang sekarang tanya ke AI: \"Software akuntansi terbaik untuk restoran kecil apa?\". Kalau brand Anda tidak disebut, Anda tidak ada di benak calon pelanggan itu. Padahal mereka sedang siap membeli.",
   },
   {
-    q: "Bagaimana cara meningkatkan skor saya?",
-    a: "Setelah audit, Nuave memberikan rekomendasi konten spesifik yang bisa Anda terapkan di website untuk meningkatkan visibilitas brand Anda di jawaban AI.",
+    q: "Bagaimana cara kerja Nuave?",
+    a: "Anda masukkan nama brand dan URL website. Nuave akan otomatis menganalisis website Anda, membuat 10 pertanyaan yang relevan dengan bisnis Anda, lalu mengirimnya ke GPT-4o untuk melihat apakah brand Anda disebut. Hasilnya keluar dalam hitungan menit.",
   },
   {
-    q: "Apakah data saya aman?",
-    a: "Ya, Nuave hanya menganalisis konten publik dari website Anda. Kami tidak mengakses data internal atau informasi sensitif.",
+    q: "Berapa biayanya?",
+    a: "Nuave pakai sistem kredit, bukan langganan bulanan. Daftar gratis dan langsung dapat 10 kredit — cukup untuk satu audit penuh. Paket tambahan mulai dari Rp 75.000.",
+  },
+  {
+    q: "AI mana saja yang dianalisis Nuave?",
+    a: "Saat ini Nuave mensimulasikan hasil dari GPT-4o (ChatGPT). Dukungan untuk Perplexity, Gemini, Meta AI, dan model lainnya akan menyusul.",
+  },
+  {
+    q: "Apakah saya perlu keahlian teknis?",
+    a: "Tidak sama sekali. Cukup masukkan nama brand dan URL website Anda, sisanya Nuave yang urus.",
+  },
+  {
+    q: "Apakah saya harus punya website untuk menggunakan Nuave?",
+    a: "Ya. Nuave membutuhkan URL website untuk menganalisis konten bisnis Anda secara otomatis.",
+  },
+  {
+    q: "Saya belum punya website — apakah Nuave tetap berguna untuk saya?",
+    a: "Bisa, tapi hasilnya hampir pasti rendah. Tanpa website, AI tidak punya sumber informasi yang jelas sehingga brand Anda sulit dikenali atau dipercaya.",
   },
 ];
 
