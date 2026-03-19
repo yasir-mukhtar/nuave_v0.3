@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { IconDownload, IconArrowRight } from "@tabler/icons-react";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
+import PromptDetailModal, { type PromptDetail } from "@/components/PromptDetailModal";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 
@@ -19,7 +20,7 @@ interface ReportData {
   mentionedCount: number;
   totalPrompts: number;
   competitors: string[];
-  results: { prompt: string; mentioned: boolean; demand_tier?: string }[];
+  results: { prompt: string; mentioned: boolean; demand_tier?: string; ai_response?: string }[];
 }
 
 const TIER_STYLES: Record<string, { bg: string; color: string; label: string }> = {
@@ -47,13 +48,13 @@ function buildReport(): ReportData {
   const savedPromptsRaw = sessionStorage.getItem("nuave_new_project_prompts");
   const savedPrompts: { prompt: string; demand_tier?: string }[] = savedPromptsRaw ? JSON.parse(savedPromptsRaw) : [];
 
-  const results = (audit.results || []).map((r: { prompt_text: string; brand_mentioned: boolean }) => {
-    // Match demand_tier from saved prompts
+  const results = (audit.results || []).map((r: { prompt_text: string; brand_mentioned: boolean; ai_response?: string; mention_context?: string }) => {
     const match = savedPrompts.find((sp) => sp.prompt === r.prompt_text);
     return {
       prompt: r.prompt_text,
       mentioned: r.brand_mentioned,
       demand_tier: match?.demand_tier || undefined,
+      ai_response: r.ai_response || "",
     };
   });
   const mentionedCount = results.filter((r: { mentioned: boolean }) => r.mentioned).length;
@@ -94,29 +95,31 @@ function ScoreRing({ score }: { score: number }) {
 
   return (
     <div style={{ position: "relative", width: size, height: size }}>
-      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        {/* Background ring */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="#E5E7EB"
-          strokeWidth={stroke}
-        />
-        {/* Score arc */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 0.6s ease" }}
-        />
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
+          {/* Background ring */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="#E5E7EB"
+            strokeWidth={stroke}
+          />
+          {/* Score arc */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={color}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            style={{ transition: "stroke-dashoffset 0.6s ease" }}
+          />
+        </g>
       </svg>
       <span style={{
         position: "absolute",
@@ -140,6 +143,7 @@ export default function ReportPage() {
   const searchParams = useSearchParams();
   const [REPORT, setReport] = useState<ReportData | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [selectedPrompt, setSelectedPrompt] = useState<PromptDetail | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = useCallback(async () => {
@@ -579,6 +583,11 @@ export default function ReportPage() {
               {REPORT.results.map((r, i) => (
                 <div
                   key={i}
+                  onClick={() => setSelectedPrompt({
+                    prompt_text: r.prompt,
+                    ai_response: r.ai_response || "",
+                    brand_mentioned: r.mentioned,
+                  })}
                   style={{
                     display: "flex",
                     alignItems: "flex-start",
@@ -587,7 +596,12 @@ export default function ReportPage() {
                     padding: "12px 0",
                     borderTop: "none",
                     borderBottom: "none",
+                    cursor: "pointer",
+                    borderRadius: 6,
+                    transition: "background-color 0.1s ease",
                   }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--bg-surface)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
                 >
                   <span style={{
                     fontFamily: "var(--font-body)",
@@ -660,6 +674,15 @@ export default function ReportPage() {
         </div>
       </main>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+      {/* Prompt detail sidebar */}
+      {selectedPrompt && (
+        <PromptDetailModal
+          result={selectedPrompt}
+          brandName={REPORT.brandName}
+          onClose={() => setSelectedPrompt(null)}
+        />
+      )}
     </div>
   );
 }
