@@ -1,12 +1,24 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 
 export default function RunningPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>Memuat...</p>
+      </div>
+    }>
+      <RunningPageContent />
+    </Suspense>
+  );
+}
+
+function RunningPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const auditId = searchParams.get("audit_id");
