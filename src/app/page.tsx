@@ -161,6 +161,15 @@ function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [kontakHovered, setKontakHovered] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Check auth state on mount
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+    });
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -259,9 +268,9 @@ function Nav() {
             </a>
           </div>
 
-          {/* Masuk button (desktop) */}
+          {/* Masuk / Dashboard button (desktop) */}
           <Link
-            href="/auth"
+            href={isLoggedIn ? "/dashboard" : "/auth"}
             className="btn-lp-black lp-nav-masuk"
             style={{
               display: "flex",
@@ -278,7 +287,7 @@ function Nav() {
               cursor: "pointer",
             }}
           >
-            Masuk
+            {isLoggedIn ? "Dashboard" : "Masuk"}
           </Link>
 
           {/* Hamburger button (mobile) */}
@@ -394,7 +403,7 @@ function Nav() {
         <div style={{ height: 1, background: "#E5E7EB", margin: "4px 16px" }} />
         <div style={{ padding: "12px 16px", width: "100%", boxSizing: "border-box" }}>
           <Link
-            href="/auth"
+            href={isLoggedIn ? "/dashboard" : "/auth"}
             onClick={() => setMobileMenuOpen(false)}
             className="btn-lp-black"
             style={{
@@ -404,7 +413,7 @@ function Nav() {
               cursor: "pointer", width: "100%",
             }}
           >
-            Masuk
+            {isLoggedIn ? "Dashboard" : "Masuk"}
           </Link>
         </div>
       </div>
