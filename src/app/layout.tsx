@@ -35,6 +35,7 @@ export default function RootLayout({
       <body className="antialiased">
         <SmoothScroll />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
