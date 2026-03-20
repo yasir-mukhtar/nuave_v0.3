@@ -26,15 +26,15 @@ export default function Error({
       `}</style>
 
       {/* ── Mobile layout (< md) ── */}
-      <div className="min-h-screen bg-white flex md:hidden flex-col px-8 pt-32">
-        <div className="flex flex-col justify-between h-[340px]">
-          <div className="flex items-center gap-[10px]">
+      <div className="min-h-screen bg-white flex md:hidden flex-col px-6 pt-24">
+        <div className="max-w-[360px]">
+          <div className="flex items-center gap-2.5 mb-16">
             <div className="dot-blink w-2 h-2 rounded-[2px] bg-[#EF4444] shrink-0" />
             <span style={{
               fontFamily: 'Inter, sans-serif',
-              fontSize: '24px',
+              fontSize: '20px',
               fontWeight: 600,
-              letterSpacing: '-0.48px',
+              letterSpacing: '-0.4px',
               color: '#EF4444',
               lineHeight: 1,
             }}>
@@ -42,45 +42,43 @@ export default function Error({
             </span>
           </div>
 
-          <div className="flex flex-col gap-12">
-            <div className="flex flex-col gap-[2px]">
-              <h1 style={{ margin: 0, lineHeight: 1 }}>
-                <span style={{
-                  fontFamily: 'Geist, GeistSans, sans-serif',
-                  fontSize: '48px',
-                  fontWeight: 500,
-                  letterSpacing: '-1.92px',
-                  color: '#111827',
-                }}>
-                  Oops
-                </span>
-              </h1>
-              <p style={{
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '20px',
-                fontWeight: 400,
-                color: '#6B7280',
-                margin: 0,
-              }}>
-                Terjadi kesalahan. Silakan coba lagi.
-              </p>
-            </div>
+          <h1 style={{ margin: 0, marginBottom: '4px', lineHeight: 1 }}>
+            <span style={{
+              fontFamily: 'var(--font-geist-sans), Geist, sans-serif',
+              fontSize: '40px',
+              fontWeight: 500,
+              letterSpacing: '-1.6px',
+              color: '#111827',
+            }}>
+              Oops
+            </span>
+          </h1>
 
-            <button
-              onClick={reset}
-              className="flex items-center justify-center w-full bg-[#111827] text-white rounded-[6px] px-[14px] py-[12px] hover:opacity-90 transition-opacity cursor-pointer border-none"
-              style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500 }}
-            >
-              Coba lagi
-            </button>
-          </div>
+          <p style={{
+            fontFamily: 'Inter, sans-serif',
+            fontSize: '18px',
+            fontWeight: 400,
+            color: '#6B7280',
+            margin: 0,
+            lineHeight: 1.4,
+          }}>
+            Terjadi kesalahan. Silakan coba lagi.
+          </p>
+
+          <button
+            onClick={reset}
+            className="flex items-center justify-center w-full bg-[#111827] text-white rounded-[10px] px-4 py-3 mt-10 hover:opacity-90 transition-opacity cursor-pointer border-none"
+            style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500 }}
+          >
+            Coba lagi
+          </button>
         </div>
       </div>
 
-      {/* ── Desktop layout (≥ md) ── */}
+      {/* ── Desktop layout (>= md) ── */}
       <div className="min-h-screen bg-white hidden md:flex items-center justify-center">
         <div className="flex items-start gap-16">
-          <div className="flex items-center gap-[10px] pt-3">
+          <div className="flex items-center gap-2.5 pt-2">
             <div className="dot-blink w-2 h-2 rounded-[2px] bg-[#EF4444] shrink-0" />
             <span style={{
               fontFamily: 'Inter, sans-serif',
@@ -95,9 +93,9 @@ export default function Error({
           </div>
 
           <div className="flex flex-col">
-            <h1 style={{ margin: 0, marginBottom: '20px', lineHeight: 1 }}>
+            <h1 style={{ margin: 0, marginBottom: '6px', lineHeight: 1 }}>
               <span style={{
-                fontFamily: 'Geist, GeistSans, sans-serif',
+                fontFamily: 'var(--font-geist-sans), Geist, sans-serif',
                 fontSize: '48px',
                 fontWeight: 500,
                 letterSpacing: '-1.92px',
@@ -106,19 +104,20 @@ export default function Error({
                 Oops
               </span>
             </h1>
+
             <p style={{
               fontFamily: 'Inter, sans-serif',
               fontSize: '20px',
               fontWeight: 400,
               color: '#6B7280',
               margin: 0,
-              marginBottom: '72px',
             }}>
               Terjadi kesalahan. Silakan coba lagi.
             </p>
+
             <button
               onClick={reset}
-              className="inline-flex items-center justify-center bg-[#111827] text-white rounded-[6px] px-[14px] py-[12px] w-fit hover:opacity-90 transition-opacity cursor-pointer border-none"
+              className="inline-flex items-center justify-center bg-[#111827] text-white rounded-[8px] px-5 py-3 w-fit mt-10 hover:opacity-90 transition-opacity cursor-pointer border-none"
               style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500 }}
             >
               Coba lagi
