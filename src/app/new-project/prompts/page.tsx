@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { IconChevronUp, IconChevronDown, IconPlus } from "@tabler/icons-react";
 import WizardLayout from "@/components/new-project/WizardLayout";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
+import { cn } from "@/lib/utils";
 
 const REQUEST_TIMEOUT_MS = 120_000;
 const DEFAULT_SELECTION = 10;
@@ -367,119 +368,58 @@ export default function PromptsPage() {
       onClose={() => router.push("/dashboard")}
     >
       {/* Heading */}
-      <h1 style={{
-        fontFamily: "var(--font-heading)",
-        fontSize: 24,
-        fontWeight: 600,
-        color: "#111827",
-        marginBottom: 8,
-        letterSpacing: "-0.02em",
-      }}>
+      <h1 className="font-heading text-[24px] leading-[32px] font-semibold text-text-heading mb-2 tracking-[-0.02em]">
         Tentukan Pertanyaan
       </h1>
-      <p style={{
-        fontFamily: "var(--font-body)",
-        fontSize: 15,
-        color: "var(--text-muted)",
-        marginBottom: 36,
-        lineHeight: 1.6,
-      }}>
+      <p className="font-body text-[15px] leading-[24px] text-text-muted mb-9">
         Kami akan mengajukan pertanyaan ini ke AI untuk melihat apakah brand Anda direkomendasikan.
       </p>
 
       {/* Label + counter */}
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 12,
-      }}>
-        <span style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 13,
-          color: "var(--text-muted)",
-        }}>
+      <div className="flex justify-between items-center mb-3">
+        <span className="font-body text-[13px] leading-[18px] text-text-muted">
           Topik
         </span>
-        <span style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 13,
-          color: "var(--text-muted)",
-        }}>
+        <span className="font-body text-[13px] leading-[18px] text-text-muted">
           {totalSelected} dari {totalPrompts} prompt dipilih · {totalSelected} kredit
         </span>
       </div>
 
       {/* Loading state */}
       {loadingPrompts && (
-        <div style={{ textAlign: "center", padding: "32px 0" }}>
-          <div style={{
-            width: 32, height: 32,
-            border: "3px solid #E5E7EB", borderTop: "3px solid var(--purple)",
-            borderRadius: "50%", animation: "spin 1s linear infinite",
-            margin: "0 auto 12px",
-          }} />
-          <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--text-muted)" }}>
+        <div className="text-center py-8">
+          <div className="w-8 h-8 border-[3px] border-border-default border-t-brand rounded-full animate-spin mx-auto mb-3" />
+          <p className="font-body text-[13px] leading-[18px] text-text-muted">
             Membuat pertanyaan audit...
           </p>
+          {/* NOTE: Embedded @keyframes spin — consider moving to global CSS */}
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       )}
 
       {/* Topic accordions */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 36, ...(loadingPrompts ? { display: "none" } : {}) }}>
+      <div className={cn("flex flex-col gap-3 mb-9", loadingPrompts && "hidden")}>
         {topicGroups.map((group) => (
             <div
               key={group.id}
-              style={{ position: "relative" }}
+              className="relative"
             >
               {/* Prompts container (behind, wider) */}
               {group.expanded && (
-                <div style={{
-                  position: "absolute",
-                  top: 24,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  border: "1px solid var(--border-default)",
-                  borderRadius: 10,
-                  pointerEvents: "none",
-                }} />
+                <div className="absolute top-6 left-0 right-0 bottom-0 border border-border-default rounded-[10px] pointer-events-none" />
               )}
 
               {/* Topic header card (on top) */}
               <button
                 type="button"
                 onClick={() => toggleExpand(group.id)}
-                style={{
-                  position: "relative",
-                  zIndex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  width: "100%",
-                  padding: "14px 16px",
-                  background: "#ffffff",
-                  border: "1px solid var(--border-default)",
-                  borderRadius: 8,
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
+                className="relative z-[1] flex items-center justify-between w-full py-3.5 px-4 bg-white border border-border-default rounded-md cursor-pointer text-left"
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: "#111827",
-                  }}>
+                <div className="flex items-center gap-2">
+                  <span className="font-body text-[14px] leading-[20px] font-medium text-text-heading">
                     {group.name}
                   </span>
-                  <span style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: 13,
-                    color: "var(--text-muted)",
-                  }}>
+                  <span className="font-body text-[13px] leading-[18px] text-text-muted">
                     -  {selectedCountForGroup(group)} {group.expanded ? "prompts dipilih" : "dipilih"}
                   </span>
                 </div>
@@ -492,85 +432,57 @@ export default function PromptsPage() {
 
               {/* Expanded content (inside the wider container) */}
               {group.expanded && (
-                <div style={{ position: "relative", zIndex: 0, padding: "12px 12px 16px" }}>
+                <div className="relative z-0 px-3 pb-4 pt-3">
                   {/* Prompts label */}
-                  <p style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: 12,
-                    color: "var(--text-muted)",
-                    marginBottom: 12,
-                  }}>
+                  <p className="font-body text-[12px] leading-[16px] text-text-muted mb-3">
                     Prompts
                   </p>
 
                   {/* Prompt list */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div className="flex flex-col gap-2">
                     {group.prompts.map((prompt) => (
                       <button
                         key={prompt.id}
                         type="button"
                         onClick={() => togglePrompt(group.id, prompt.id)}
-                        style={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: 10,
-                          width: "100%",
-                          padding: "10px 0",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          textAlign: "left",
-                        }}
+                        className="flex items-start gap-2.5 w-full py-2.5 px-0 bg-transparent border-none cursor-pointer text-left"
                       >
                         {/* Checkbox */}
-                        <div style={{
-                          width: 18,
-                          height: 18,
-                          borderRadius: 4,
-                          border: prompt.checked ? "none" : "1.5px solid var(--border-strong)",
-                          backgroundColor: prompt.checked ? "var(--purple)" : "#ffffff",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                          marginTop: 1,
-                          transition: "background-color 0.15s ease",
-                        }}>
+                        <div
+                          className={cn(
+                            "w-[18px] h-[18px] rounded-[4px] flex items-center justify-center shrink-0 mt-px transition-colors duration-100 ease-in-out",
+                            prompt.checked
+                              ? "bg-brand border-none"
+                              : "bg-white border-[1.5px] border-border-strong"
+                          )}
+                        >
                           {prompt.checked && (
                             <svg width="10" height="8" viewBox="0 0 12 9" fill="none">
                               <path d="M1 4L4.5 7.5L11 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           )}
                         </div>
-                        <div style={{ flex: 1 }}>
-                          <span style={{
-                            fontFamily: "var(--font-body)",
-                            fontSize: 14,
-                            color: "#111827",
-                            lineHeight: 1.5,
-                            display: "block",
-                          }}>
+                        <div className="flex-1">
+                          <span className="font-body text-[14px] leading-[21px] text-text-heading block">
                             {prompt.text}
                           </span>
                           {(() => {
                             const tier = prompt.demand_tier || "medium";
-                            const style = TIER_STYLES[tier];
-                            if (!style) return null;
+                            const tierStyle = TIER_STYLES[tier];
+                            if (!tierStyle) return null;
                             const isLow = tier === "low";
                             return (
-                              <span style={{
-                                display: "inline-block",
-                                marginTop: 4,
-                                padding: isLow ? 0 : "2px 8px",
-                                borderRadius: isLow ? 0 : 6,
-                                backgroundColor: isLow ? "transparent" : style.bg,
-                                fontFamily: "var(--font-body)",
-                                fontSize: 11,
-                                fontWeight: isLow ? 400 : 600,
-                                color: style.color,
-                                lineHeight: "16px",
-                              }}>
-                                {style.label}
+                              <span
+                                className={cn(
+                                  "inline-block mt-1 font-body text-[11px] leading-[16px]",
+                                  isLow ? "p-0 rounded-none bg-transparent font-normal" : "px-2 py-0.5 rounded-sm font-semibold"
+                                )}
+                                style={{
+                                  backgroundColor: isLow ? undefined : tierStyle.bg,
+                                  color: tierStyle.color,
+                                }}
+                              >
+                                {tierStyle.label}
                               </span>
                             );
                           })()}
@@ -581,11 +493,7 @@ export default function PromptsPage() {
 
                   {/* Add custom prompt */}
                   {addingTo === group.id ? (
-                    <div style={{
-                      display: "flex",
-                      gap: 8,
-                      marginTop: 8,
-                    }}>
+                    <div className="flex gap-2 mt-2">
                       <input
                         type="text"
                         value={customPrompt}
@@ -596,35 +504,18 @@ export default function PromptsPage() {
                         }}
                         placeholder="Tulis pertanyaan..."
                         autoFocus
-                        style={{
-                          flex: 1,
-                          height: 40,
-                          padding: "0 12px",
-                          fontFamily: "var(--font-body)",
-                          fontSize: 14,
-                          color: "#111827",
-                          border: "1px solid var(--purple)",
-                          borderRadius: 6,
-                          outline: "none",
-                          boxShadow: "var(--shadow-focus)",
-                        }}
+                        className="flex-1 h-10 px-3 font-body text-[14px] leading-[20px] text-text-heading border border-brand rounded-sm outline-none shadow-app-focus"
                       />
                       <button
                         type="button"
                         onClick={() => addCustomPrompt(group.id)}
                         disabled={!customPrompt.trim()}
-                        style={{
-                          height: 40,
-                          padding: "0 14px",
-                          borderRadius: 6,
-                          border: "none",
-                          backgroundColor: customPrompt.trim() ? "var(--purple)" : "#D1D5DB",
-                          color: "#fff",
-                          fontFamily: "var(--font-body)",
-                          fontSize: 13,
-                          fontWeight: 500,
-                          cursor: customPrompt.trim() ? "pointer" : "not-allowed",
-                        }}
+                        className={cn(
+                          "h-10 px-3.5 rounded-sm border-none font-body text-[13px] leading-[18px] font-medium text-white",
+                          customPrompt.trim()
+                            ? "bg-brand cursor-pointer"
+                            : "bg-border-strong cursor-not-allowed"
+                        )}
                       >
                         Tambah
                       </button>
@@ -633,31 +524,7 @@ export default function PromptsPage() {
                     <button
                       type="button"
                       onClick={() => { setAddingTo(group.id); setCustomPrompt(""); }}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 6,
-                        width: "100%",
-                        padding: "12px 16px",
-                        marginTop: 8,
-                        borderRadius: 6,
-                        border: "1.5px dashed var(--border-strong)",
-                        background: "none",
-                        cursor: "pointer",
-                        fontFamily: "var(--font-body)",
-                        fontSize: 13,
-                        color: "var(--text-muted)",
-                        transition: "border-color 0.15s ease, color 0.15s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "var(--purple)";
-                        e.currentTarget.style.color = "var(--purple)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "var(--border-strong)";
-                        e.currentTarget.style.color = "var(--text-muted)";
-                      }}
+                      className="flex items-center justify-center gap-1.5 w-full py-3 px-4 mt-2 rounded-sm border-[1.5px] border-dashed border-border-strong bg-transparent cursor-pointer font-body text-[13px] leading-[18px] text-text-muted transition-colors duration-100 ease-in-out hover:border-brand hover:text-brand"
                     >
                       <IconPlus size={14} stroke={2} />
                       Tambah pertanyaan
@@ -671,24 +538,14 @@ export default function PromptsPage() {
 
       {/* Warnings */}
       {totalSelected === 0 && !loadingPrompts && (
-        <p style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 13,
-          color: "var(--amber, #F59E0B)",
-          marginBottom: 12,
-        }}>
+        <p className="font-body text-[13px] leading-[18px] text-warning mb-3">
           Pilih minimal 1 prompt untuk menjalankan audit
         </p>
       )}
       {insufficientCredits && (
-        <p style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 13,
-          color: "var(--red, #EF4444)",
-          marginBottom: 12,
-        }}>
+        <p className="font-body text-[13px] leading-[18px] text-error mb-3">
           Kredit tidak cukup. Anda butuh {totalSelected} kredit.{" "}
-          <a href="/dashboard/credits" style={{ color: "var(--purple)", textDecoration: "underline" }}>
+          <a href="/dashboard/credits" className="text-brand underline">
             Tambah kredit
           </a>
         </p>
@@ -696,39 +553,17 @@ export default function PromptsPage() {
 
       {/* Error message */}
       {error && (
-        <p style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 13,
-          color: "var(--red, #EF4444)",
-          marginBottom: 12,
-        }}>
+        <p className="font-body text-[13px] leading-[18px] text-error mb-3">
           {error}
         </p>
       )}
 
       {/* Action buttons */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: 12,
-      }}>
+      <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
           onClick={() => router.back()}
-          style={{
-            height: 48,
-            borderRadius: 8,
-            border: "1px solid var(--border-default)",
-            background: "#ffffff",
-            color: "#111827",
-            fontFamily: "var(--font-body)",
-            fontSize: 15,
-            fontWeight: 500,
-            cursor: "pointer",
-            transition: "border-color 0.15s ease",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--border-strong)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-default)"; }}
+          className="h-12 rounded-md border border-border-default bg-white text-text-heading font-body text-[15px] leading-[22px] font-medium cursor-pointer transition-colors duration-100 ease-in-out hover:border-border-strong"
         >
           Kembali
         </button>
@@ -736,26 +571,14 @@ export default function PromptsPage() {
           type="button"
           onClick={handleSubmit}
           disabled={!canSubmit}
-          style={{
-            height: 48,
-            borderRadius: 8,
-            border: "none",
-            backgroundColor: canSubmit ? "var(--purple)" : "#D1D5DB",
-            color: "#ffffff",
-            fontFamily: "var(--font-body)",
-            fontSize: 15,
-            fontWeight: 500,
-            cursor: canSubmit ? "pointer" : "not-allowed",
-            transition: "background-color 0.15s ease",
-          }}
-          onMouseEnter={(e) => {
-            if (canSubmit) e.currentTarget.style.backgroundColor = "var(--purple-dark)";
-          }}
-          onMouseLeave={(e) => {
-            if (canSubmit) e.currentTarget.style.backgroundColor = "var(--purple)";
-          }}
+          className={cn(
+            "h-12 rounded-md border-none font-body text-[15px] leading-[22px] font-medium text-white transition-colors duration-100 ease-in-out",
+            canSubmit
+              ? "bg-brand cursor-pointer hover:bg-brand-dark"
+              : "bg-border-strong cursor-not-allowed"
+          )}
         >
-          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <span className="flex items-center justify-center gap-2">
             {loading && <ButtonSpinner size={16} />}
             {loading ? "Memproses..." : `Jalankan Audit — ${totalSelected} kredit`}
           </span>

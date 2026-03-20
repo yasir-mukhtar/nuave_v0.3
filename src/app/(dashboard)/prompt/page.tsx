@@ -14,6 +14,7 @@ import {
   IconTrash,
   IconClock,
 } from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
 
 /* ── Mock data ── */
 
@@ -106,46 +107,20 @@ export default function PromptsPage() {
   const LANG: Record<string, string> = { en: "EN", id: "ID", ms: "MS" };
 
   return (
-    <div style={{
-      display: "flex",
-      height: "calc(100vh - 120px)",
-      margin: "-32px",
-      background: "#ffffff",
-      borderRadius: "var(--radius-md)",
-      border: "1px solid var(--border-default, #E5E7EB)",
-      overflow: "hidden",
-    }}>
+    <div className="flex h-[calc(100vh-120px)] -m-8 bg-white rounded-md border border-border-default overflow-hidden">
 
       {/* ═══════ LEFT PANEL ═══════ */}
-      <div style={{
-        width: 400,
-        flexShrink: 0,
-        display: "flex",
-        flexDirection: "column",
-        borderRight: "1px solid var(--border-default, #E5E7EB)",
-        height: "100%",
-      }}>
+      <div className="w-[400px] shrink-0 flex flex-col border-r border-border-default h-full">
         {/* Header */}
-        <div style={{ padding: "20px 20px 0" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-            <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Prompt</h1>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "6px 12px", fontSize: 12, fontWeight: 600,
-                color: "#fff", background: "var(--purple, #533AFD)",
-                border: "none", borderRadius: "var(--radius-sm)", cursor: "pointer",
-              }}>
+        <div className="px-5 pt-5">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-[18px] leading-6 font-bold m-0">Prompt</h1>
+            <div className="flex gap-2">
+              <button className="inline-flex items-center gap-[5px] px-3 py-1.5 text-[12px] leading-4 font-semibold text-white bg-brand border-none rounded-sm cursor-pointer">
                 <IconSparkles size={14} stroke={2} />
                 Generate Topik
               </button>
-              <button style={{
-                display: "inline-flex", alignItems: "center", gap: 4,
-                padding: "6px 12px", fontSize: 12, fontWeight: 600,
-                color: "var(--text-body, #374151)", background: "transparent",
-                border: "1px solid var(--border-default, #E5E7EB)",
-                borderRadius: "var(--radius-sm)", cursor: "pointer",
-              }}>
+              <button className="inline-flex items-center gap-1 px-3 py-1.5 text-[12px] leading-4 font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer">
                 <IconPlus size={14} stroke={2} />
                 Tambah Topik
               </button>
@@ -153,31 +128,25 @@ export default function PromptsPage() {
           </div>
 
           {/* Tabs */}
-          <div style={{
-            display: "flex", background: "var(--surface, #F9FAFB)",
-            border: "1px solid var(--border-default, #E5E7EB)",
-            borderRadius: "var(--radius-md)", overflow: "hidden", marginBottom: 12,
-          }}>
+          <div className="flex bg-surface border border-border-default rounded-md overflow-hidden mb-3">
             {TABS.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setFilterTab(tab.key)}
-                style={{
-                  flex: 1, padding: "7px 10px", fontSize: 12, fontWeight: 500,
-                  border: "none", cursor: "pointer",
-                  background: filterTab === tab.key ? "#fff" : "transparent",
-                  color: filterTab === tab.key ? "var(--text-heading)" : "var(--text-muted)",
-                  boxShadow: filterTab === tab.key ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
-                  borderRadius: filterTab === tab.key ? "var(--radius-sm)" : 0,
-                }}
+                className={cn(
+                  "flex-1 px-2.5 py-[7px] text-[12px] leading-4 font-medium border-none cursor-pointer",
+                  filterTab === tab.key
+                    ? "bg-white text-text-heading shadow-[0_1px_2px_rgba(0,0,0,0.06)] rounded-sm"
+                    : "bg-transparent text-text-muted rounded-none"
+                )}
               >
                 {tab.label}
-                <span style={{
-                  marginLeft: 5, fontSize: 10, fontWeight: 600,
-                  background: filterTab === tab.key ? "var(--purple-light, #F3F0FF)" : "var(--surface, #F9FAFB)",
-                  color: filterTab === tab.key ? "var(--purple, #533AFD)" : "var(--text-muted)",
-                  padding: "1px 5px", borderRadius: "var(--radius-xs)",
-                }}>
+                <span className={cn(
+                  "ml-[5px] text-[10px] leading-3 font-semibold px-[5px] py-px rounded-xs",
+                  filterTab === tab.key
+                    ? "bg-brand-light text-brand"
+                    : "bg-surface text-text-muted"
+                )}>
                   {counts[tab.key]}
                 </span>
               </button>
@@ -185,84 +154,72 @@ export default function PromptsPage() {
           </div>
 
           {/* Search */}
-          <div style={{ position: "relative", marginBottom: 12 }}>
-            <IconSearch size={14} stroke={1.5} style={{
-              position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-              color: "var(--text-muted)", pointerEvents: "none",
-            }} />
+          <div className="relative mb-3">
+            <IconSearch size={14} stroke={1.5} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari prompt..."
-              style={{
-                width: "100%", padding: "7px 12px 7px 30px", fontSize: 13,
-                border: "1px solid var(--border-default, #E5E7EB)",
-                borderRadius: "var(--radius-sm)", background: "#fff",
-                color: "var(--text-body)", outline: "none", boxSizing: "border-box",
-              }}
+              className="w-full py-[7px] pl-[30px] pr-3 text-[13px] leading-5 border border-border-default rounded-sm bg-white text-text-body outline-none box-border"
             />
           </div>
         </div>
 
         {/* Topic list */}
-        <div className="scroll-subtle" style={{ flex: 1, overflowY: "auto", padding: "0 8px 12px" }}>
+        <div className="scroll-subtle flex-1 overflow-y-auto px-2 pb-3">
           {MOCK_TOPICS.map((topic) => {
             const tp = promptsForTopic(topic.id);
             const isExpanded = expandedTopics.has(topic.id);
             const isSelected = selectedType === "topic" && selectedTopicId === topic.id;
             return (
-              <div key={topic.id} style={{ marginBottom: 4 }}>
+              <div key={topic.id} className="mb-1">
                 <div
                   onClick={() => {
                     setSelectedTopicId(topic.id);
                     setSelectedPromptId(null);
                     toggleExpand(topic.id);
                   }}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 8,
-                    padding: "8px 12px", cursor: "pointer",
-                    borderRadius: "var(--radius-sm)",
-                    background: isSelected ? "var(--purple-light, #F3F0FF)" : "transparent",
-                  }}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-sm",
+                    isSelected ? "bg-brand-light" : "bg-transparent"
+                  )}
                 >
-                  <span style={{ color: "var(--text-muted)" }}>
+                  <span className="text-text-muted">
                     {isExpanded ? <IconChevronDown size={14} stroke={2} /> : <IconChevronRight size={14} stroke={2} />}
                   </span>
-                  <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "var(--text-heading)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span className="flex-1 text-[13px] leading-4 font-semibold text-text-heading overflow-hidden text-ellipsis whitespace-nowrap">
                     {topic.name}
                   </span>
-                  <span style={{ fontSize: 10, fontWeight: 600, padding: "1px 5px", borderRadius: "var(--radius-xs)", background: "#EDE9FF", color: "#533AFD" }}>
+                  <span className="text-[10px] leading-3 font-semibold px-[5px] py-px rounded-xs bg-brand-light text-brand">
                     {LANG[topic.language] ?? topic.language.toUpperCase()}
                   </span>
-                  <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>{tp.length}</span>
+                  <span className="text-[11px] leading-4 font-medium text-text-muted">{tp.length}</span>
                 </div>
                 {isExpanded && (
-                  <div style={{ paddingLeft: 4 }}>
+                  <div className="pl-1">
                     {tp.length === 0 ? (
-                      <p style={{ padding: "8px 12px 8px 32px", fontSize: 12, color: "var(--text-muted)", fontStyle: "italic" }}>
+                      <p className="py-2 px-3 pl-8 text-[12px] leading-4 text-text-muted italic">
                         Tidak ada prompt yang cocok
                       </p>
                     ) : tp.map((p) => (
                       <div
                         key={p.id}
                         onClick={() => { setSelectedPromptId(p.id); setSelectedTopicId(null); }}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 8,
-                          padding: "8px 12px 8px 32px", cursor: "pointer",
-                          borderRadius: "var(--radius-sm)",
-                          background: selectedPromptId === p.id ? "var(--purple-light, #F3F0FF)" : "transparent",
-                        }}
+                        className={cn(
+                          "flex items-center gap-2 py-2 px-3 pl-8 cursor-pointer rounded-sm",
+                          selectedPromptId === p.id ? "bg-brand-light" : "bg-transparent"
+                        )}
                       >
                         {p.mentioned
-                          ? <IconCircleCheckFilled size={16} style={{ color: "#22C55E", flexShrink: 0 }} />
-                          : <IconCircleXFilled size={16} style={{ color: "#EF4444", flexShrink: 0 }} />
+                          ? <IconCircleCheckFilled size={16} className="text-success shrink-0" />
+                          : <IconCircleXFilled size={16} className="text-error shrink-0" />
                         }
-                        <span style={{ flex: 1, fontSize: 13, color: "var(--text-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span className="flex-1 text-[13px] leading-4 text-text-body overflow-hidden text-ellipsis whitespace-nowrap">
                           {p.text}
                         </span>
                         {p.archived && (
-                          <span style={{ fontSize: 10, fontWeight: 500, padding: "1px 6px", borderRadius: "var(--radius-xs)", background: "#F3F4F6", color: "#9CA3AF" }}>
+                          <span className="text-[10px] leading-3 font-medium px-1.5 py-px rounded-xs bg-surface-raised text-text-placeholder">
                             Arsip
                           </span>
                         )}
@@ -276,45 +233,39 @@ export default function PromptsPage() {
 
           {/* Uncategorized */}
           {promptsForTopic(null).length > 0 && (
-            <div style={{ marginBottom: 4 }}>
+            <div className="mb-1">
               <div
                 onClick={() => {
                   setSelectedTopicId(null);
                   setSelectedPromptId(null);
                 }}
-                style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  padding: "8px 12px", cursor: "pointer",
-                  borderRadius: "var(--radius-sm)", background: "transparent",
-                }}
+                className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-sm bg-transparent"
               >
-                <span style={{ color: "var(--text-muted)" }}>
+                <span className="text-text-muted">
                   <IconChevronDown size={14} stroke={2} />
                 </span>
-                <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "var(--text-muted)" }}>
+                <span className="flex-1 text-[13px] leading-4 font-semibold text-text-muted">
                   Tanpa Topik
                 </span>
-                <span style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)" }}>
+                <span className="text-[11px] leading-4 font-medium text-text-muted">
                   {promptsForTopic(null).length}
                 </span>
               </div>
-              <div style={{ paddingLeft: 4 }}>
+              <div className="pl-1">
                 {promptsForTopic(null).map((p) => (
                   <div
                     key={p.id}
                     onClick={() => { setSelectedPromptId(p.id); setSelectedTopicId(null); }}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      padding: "8px 12px 8px 32px", cursor: "pointer",
-                      borderRadius: "var(--radius-sm)",
-                      background: selectedPromptId === p.id ? "var(--purple-light, #F3F0FF)" : "transparent",
-                    }}
+                    className={cn(
+                      "flex items-center gap-2 py-2 px-3 pl-8 cursor-pointer rounded-sm",
+                      selectedPromptId === p.id ? "bg-brand-light" : "bg-transparent"
+                    )}
                   >
                     {p.mentioned
-                      ? <IconCircleCheckFilled size={16} style={{ color: "#22C55E", flexShrink: 0 }} />
-                      : <IconCircleXFilled size={16} style={{ color: "#EF4444", flexShrink: 0 }} />
+                      ? <IconCircleCheckFilled size={16} className="text-success shrink-0" />
+                      : <IconCircleXFilled size={16} className="text-error shrink-0" />
                     }
-                    <span style={{ flex: 1, fontSize: 13, color: "var(--text-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span className="flex-1 text-[13px] leading-4 text-text-body overflow-hidden text-ellipsis whitespace-nowrap">
                       {p.text}
                     </span>
                   </div>
@@ -326,13 +277,13 @@ export default function PromptsPage() {
       </div>
 
       {/* ═══════ RIGHT PANEL ═══════ */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#FAFAFA" }}>
+      <div className="flex-1 flex flex-col bg-[#FAFAFA]">
 
         {/* Empty state */}
         {!selectedPrompt && !selectedTopic && (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12 }}>
-            <IconFileText size={40} stroke={1} style={{ color: "#D1D5DB" }} />
-            <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>
+          <div className="flex-1 flex flex-col items-center justify-center gap-3">
+            <IconFileText size={40} stroke={1} className="text-border-strong" />
+            <p className="text-[14px] leading-5 text-text-muted m-0">
               Pilih prompt atau topik untuk melihat detail
             </p>
           </div>
@@ -340,77 +291,60 @@ export default function PromptsPage() {
 
         {/* Prompt detail */}
         {selectedPrompt && (
-          <div className="scroll-subtle" style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="scroll-subtle flex-1 overflow-y-auto p-6 flex flex-col gap-5">
             {/* Chat bubble */}
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <div style={{
-                background: "var(--purple, #533AFD)", color: "white",
-                borderRadius: "var(--radius-2xl) var(--radius-2xl) var(--radius-xs) var(--radius-2xl)",
-                padding: "10px 14px", maxWidth: "85%", fontSize: 14, lineHeight: 1.5,
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-              }}>
+            <div className="flex justify-end">
+              <div className="bg-brand text-white rounded-[var(--radius-2xl)] rounded-br-xs px-3.5 py-2.5 max-w-[85%] text-[14px] leading-6 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
                 {selectedPrompt.text}
               </div>
             </div>
 
             {/* Mention badge */}
-            <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                background: "#F4F4F4", borderRadius: "var(--radius-full)",
-                padding: "6px 12px 6px 6px",
-              }}>
+            <div className="flex gap-2 justify-end">
+              <div className="inline-flex items-center gap-1.5 bg-[#F4F4F4] rounded-full py-1.5 pl-1.5 pr-3">
                 {selectedPrompt.mentioned
                   ? <IconCircleCheckFilled size={18} color="#16A34A" />
                   : <IconCircleXFilled size={18} color="#DC2626" />
                 }
-                <span style={{ fontSize: 13, fontWeight: 500, color: "#111827" }}>
+                <span className="text-[13px] leading-4 font-medium text-text-heading">
                   Brand {selectedPrompt.mentioned ? "disebutkan" : "tidak disebutkan"}
                 </span>
               </div>
               {selectedPrompt.mentioned && (
-                <div style={{
-                  display: "inline-flex", alignItems: "center",
-                  background: "#DCFCE7", color: "#16A34A",
-                  borderRadius: "var(--radius-full)", padding: "6px 12px",
-                  fontSize: 12, fontWeight: 600,
-                }}>
+                <div className="inline-flex items-center bg-[#DCFCE7] text-[#16A34A] rounded-full px-3 py-1.5 text-[12px] leading-4 font-semibold">
                   Positif
                 </div>
               )}
             </div>
 
             {/* AI response */}
-            <div style={{
-              border: "1px solid var(--border-default, #E5E7EB)",
-              borderRadius: "var(--radius-md)", padding: 20, background: "#fff",
-            }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 12px" }}>
+            <div className="border border-border-default rounded-md p-5 bg-white">
+              <p className="text-[11px] leading-4 font-semibold text-text-muted uppercase tracking-wide mb-3 mt-0">
                 Respons AI
               </p>
-              <div style={{ fontSize: 14, color: "#374151", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+              <div className="text-[14px] leading-6 text-text-body whitespace-pre-wrap">
                 {MOCK_RESPONSE.split("\n").map((line, i) => {
-                  if (line.startsWith("## ")) return <p key={i} style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "16px 0 8px" }}>{line.slice(3)}</p>;
-                  if (line.startsWith("### ")) return <p key={i} style={{ fontSize: 14, fontWeight: 600, color: "#111827", margin: "12px 0 4px" }}>{line.slice(4)}</p>;
-                  if (line.startsWith("- ")) return <div key={i} style={{ display: "flex", gap: 8, marginBottom: 4 }}><span style={{ color: "#533AFD" }}>•</span><span>{line.slice(2)}</span></div>;
-                  if (line.startsWith("---")) return <hr key={i} style={{ border: "none", borderTop: "1px solid #E5E7EB", margin: "12px 0" }} />;
-                  if (line.trim() === "") return <div key={i} style={{ height: 8 }} />;
-                  return <p key={i} style={{ margin: "0 0 4px" }}>{line}</p>;
+                  if (line.startsWith("## ")) return <p key={i} className="text-[16px] leading-6 font-bold text-text-heading mt-4 mb-2">{line.slice(3)}</p>;
+                  if (line.startsWith("### ")) return <p key={i} className="text-[14px] leading-5 font-semibold text-text-heading mt-3 mb-1">{line.slice(4)}</p>;
+                  if (line.startsWith("- ")) return <div key={i} className="flex gap-2 mb-1"><span className="text-brand">&#8226;</span><span>{line.slice(2)}</span></div>;
+                  if (line.startsWith("---")) return <hr key={i} className="border-none border-t border-border-default my-3" />;
+                  if (line.trim() === "") return <div key={i} className="h-2" />;
+                  return <p key={i} className="mb-1 mt-0">{line}</p>;
                 })}
               </div>
-              <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #E5E7EB", fontSize: 11, color: "#9CA3AF" }}>
-                Respons oleh GPT-4o dengan pencarian web · 17 Mar 2026
+              <div className="mt-3 pt-3 border-t border-border-default text-[11px] leading-4 text-text-placeholder">
+                Respons oleh GPT-4o dengan pencarian web &middot; 17 Mar 2026
               </div>
             </div>
 
             {/* Competitor mentions */}
             <div>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 8px" }}>
+              <p className="text-[11px] leading-4 font-semibold text-text-muted uppercase tracking-wide mb-2 mt-0">
                 Kompetitor yang Disebutkan
               </p>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <div className="flex gap-1.5 flex-wrap">
                 {["HubSpot", "Salesforce", "Pipedrive", "Zoho"].map((c) => (
-                  <span key={c} style={{ fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: "var(--radius-full)", background: "#FEE2E2", color: "#DC2626" }}>
+                  <span key={c} className="text-[12px] leading-4 font-medium px-2.5 py-1 rounded-full bg-[#FEE2E2] text-red-600">
                     {c}
                   </span>
                 ))}
@@ -418,21 +352,21 @@ export default function PromptsPage() {
             </div>
 
             {/* Response history placeholder */}
-            <div style={{ border: "1px solid var(--border-default, #E5E7EB)", borderRadius: "var(--radius-md)", padding: 20, background: "#FAFAFA" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 16 }}>
-                <IconClock size={16} stroke={1.5} style={{ color: "var(--text-muted)" }} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-heading)" }}>Riwayat Respons</span>
-                <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: "var(--radius-full)", background: "#FEF3C7", color: "#D97706" }}>
+            <div className="border border-border-default rounded-md p-5 bg-[#FAFAFA]">
+              <div className="flex items-center gap-1.5 mb-4">
+                <IconClock size={16} stroke={1.5} className="text-text-muted" />
+                <span className="text-[13px] leading-4 font-semibold text-text-heading">Riwayat Respons</span>
+                <span className="text-[10px] leading-3 font-semibold px-2 py-0.5 rounded-full bg-[#FEF3C7] text-amber-600">
                   Segera hadir
                 </span>
               </div>
-              <div style={{ opacity: 0.4 }}>
+              <div className="opacity-40">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} style={{ display: "flex", gap: 12, paddingBottom: 12, marginBottom: 12, borderBottom: i < 3 ? "1px solid #E5E7EB" : "none" }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#D1D5DB", marginTop: 4 }} />
+                  <div key={i} className={cn("flex gap-3 pb-3 mb-3", i < 3 ? "border-b border-border-default" : "border-none")}>
+                    <div className="w-2 h-2 rounded-full bg-border-strong mt-1" />
                     <div>
-                      <div style={{ height: 10, width: 80, background: "#E5E7EB", borderRadius: 4, marginBottom: 6 }} />
-                      <div style={{ height: 10, width: 160, background: "#E5E7EB", borderRadius: 4 }} />
+                      <div className="h-2.5 w-20 bg-border-default rounded-[4px] mb-1.5" />
+                      <div className="h-2.5 w-40 bg-border-default rounded-[4px]" />
                     </div>
                   </div>
                 ))}
@@ -440,24 +374,12 @@ export default function PromptsPage() {
             </div>
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 8, paddingTop: 8, borderTop: "1px solid var(--border-default, #E5E7EB)" }}>
-              <button style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                padding: "8px 14px", fontSize: 12, fontWeight: 600,
-                color: "var(--text-body)", background: "transparent",
-                border: "1px solid var(--border-default, #E5E7EB)",
-                borderRadius: "var(--radius-sm)", cursor: "pointer",
-              }}>
+            <div className="flex gap-2 pt-2 border-t border-border-default">
+              <button className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] leading-4 font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer">
                 <IconArchive size={14} stroke={1.5} />
                 Arsipkan
               </button>
-              <button style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                padding: "8px 14px", fontSize: 12, fontWeight: 600,
-                color: "#DC2626", background: "transparent",
-                border: "1px solid #FCA5A5",
-                borderRadius: "var(--radius-sm)", cursor: "pointer",
-              }}>
+              <button className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] leading-4 font-semibold text-red-600 bg-transparent border border-[#FCA5A5] rounded-sm cursor-pointer">
                 <IconTrash size={14} stroke={1.5} />
                 Hapus
               </button>
@@ -467,46 +389,35 @@ export default function PromptsPage() {
 
         {/* Topic detail */}
         {selectedTopic && !selectedPrompt && (
-          <div className="scroll-subtle" style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="scroll-subtle flex-1 overflow-y-auto p-6 flex flex-col gap-5">
             <div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 6px" }}>{selectedTopic.name}</h2>
-              <span style={{ fontSize: 12, fontWeight: 500, padding: "2px 8px", borderRadius: "var(--radius-xs)", background: "#EDE9FF", color: "#533AFD" }}>
+              <h2 className="text-[20px] leading-7 font-bold mb-1.5 mt-0">{selectedTopic.name}</h2>
+              <span className="text-[12px] leading-4 font-medium px-2 py-0.5 rounded-xs bg-brand-light text-brand">
                 {LANG[selectedTopic.language] ?? selectedTopic.language}
               </span>
             </div>
 
             {/* Stats */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            <div className="grid grid-cols-3 gap-3">
               {[
-                { label: "Total Prompt", value: String(promptsForTopic(selectedTopic.id).length), color: "var(--text-heading)" },
-                { label: "Aktif", value: String(MOCK_PROMPTS.filter((p) => p.topicId === selectedTopic.id && !p.archived).length), color: "#22C55E" },
-                { label: "Tingkat Sebutan", value: "67%", color: "#F59E0B" },
+                { label: "Total Prompt", value: String(promptsForTopic(selectedTopic.id).length), color: "text-text-heading" },
+                { label: "Aktif", value: String(MOCK_PROMPTS.filter((p) => p.topicId === selectedTopic.id && !p.archived).length), color: "text-success" },
+                { label: "Tingkat Sebutan", value: "67%", color: "text-warning" },
               ].map((s) => (
-                <div key={s.label} style={{ padding: 16, borderRadius: "var(--radius-md)", border: "1px solid var(--border-default, #E5E7EB)", background: "#fff" }}>
-                  <p style={{ fontSize: 11, fontWeight: 500, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px" }}>{s.label}</p>
-                  <p style={{ fontSize: 24, fontWeight: 700, margin: 0, color: s.color }}>{s.value}</p>
+                <div key={s.label} className="p-4 rounded-md border border-border-default bg-white">
+                  <p className="text-[11px] leading-4 font-medium text-text-muted uppercase tracking-wide mb-1 mt-0">{s.label}</p>
+                  <p className={cn("text-[24px] leading-7 font-bold m-0", s.color)}>{s.value}</p>
                 </div>
               ))}
             </div>
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 8 }}>
-              <button style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "8px 14px", fontSize: 12, fontWeight: 600,
-                color: "#fff", background: "var(--purple, #533AFD)",
-                border: "none", borderRadius: "var(--radius-sm)", cursor: "pointer",
-              }}>
+            <div className="flex gap-2">
+              <button className="inline-flex items-center gap-[5px] px-3.5 py-2 text-[12px] leading-4 font-semibold text-white bg-brand border-none rounded-sm cursor-pointer">
                 <IconSparkles size={14} stroke={2} />
                 Generate Prompt
               </button>
-              <button style={{
-                display: "inline-flex", alignItems: "center", gap: 4,
-                padding: "8px 14px", fontSize: 12, fontWeight: 600,
-                color: "var(--text-body)", background: "transparent",
-                border: "1px solid var(--border-default, #E5E7EB)",
-                borderRadius: "var(--radius-sm)", cursor: "pointer",
-              }}>
+              <button className="inline-flex items-center gap-1 px-3.5 py-2 text-[12px] leading-4 font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer">
                 <IconPlus size={14} stroke={2} />
                 Tambah Prompt
               </button>
@@ -514,29 +425,28 @@ export default function PromptsPage() {
 
             {/* Prompts list */}
             <div>
-              <p style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 8px" }}>
+              <p className="text-[11px] leading-4 font-semibold text-text-muted uppercase tracking-wide mb-2 mt-0">
                 Prompt dalam Topik
               </p>
-              <div style={{ border: "1px solid var(--border-default, #E5E7EB)", borderRadius: "var(--radius-md)", background: "#fff", overflow: "hidden" }}>
+              <div className="border border-border-default rounded-md bg-white overflow-hidden">
                 {MOCK_PROMPTS.filter((p) => p.topicId === selectedTopic.id).map((p, i, arr) => (
                   <div
                     key={p.id}
                     onClick={() => { setSelectedPromptId(p.id); setSelectedTopicId(null); }}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      padding: "10px 14px", cursor: "pointer",
-                      borderBottom: i < arr.length - 1 ? "1px solid var(--border-default, #E5E7EB)" : "none",
-                    }}
+                    className={cn(
+                      "flex items-center gap-2 px-3.5 py-2.5 cursor-pointer",
+                      i < arr.length - 1 ? "border-b border-border-default" : ""
+                    )}
                   >
                     {p.mentioned
-                      ? <IconCircleCheckFilled size={16} style={{ color: "#22C55E", flexShrink: 0 }} />
-                      : <IconCircleXFilled size={16} style={{ color: "#EF4444", flexShrink: 0 }} />
+                      ? <IconCircleCheckFilled size={16} className="text-success shrink-0" />
+                      : <IconCircleXFilled size={16} className="text-error shrink-0" />
                     }
-                    <span style={{ flex: 1, fontSize: 13, color: "var(--text-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span className="flex-1 text-[13px] leading-4 text-text-body overflow-hidden text-ellipsis whitespace-nowrap">
                       {p.text}
                     </span>
                     {p.archived && (
-                      <span style={{ fontSize: 10, fontWeight: 500, padding: "1px 6px", borderRadius: "var(--radius-xs)", background: "#F3F4F6", color: "#9CA3AF" }}>
+                      <span className="text-[10px] leading-3 font-medium px-1.5 py-px rounded-xs bg-surface-raised text-text-placeholder">
                         Arsip
                       </span>
                     )}
@@ -546,14 +456,8 @@ export default function PromptsPage() {
             </div>
 
             {/* Delete topic */}
-            <div style={{ paddingTop: 8, borderTop: "1px solid var(--border-default, #E5E7EB)" }}>
-              <button style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                padding: "8px 14px", fontSize: 12, fontWeight: 600,
-                color: "#DC2626", background: "transparent",
-                border: "1px solid #FCA5A5",
-                borderRadius: "var(--radius-sm)", cursor: "pointer",
-              }}>
+            <div className="pt-2 border-t border-border-default">
+              <button className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] leading-4 font-semibold text-red-600 bg-transparent border border-[#FCA5A5] rounded-sm cursor-pointer">
                 <IconTrash size={14} stroke={1.5} />
                 Hapus Topik
               </button>

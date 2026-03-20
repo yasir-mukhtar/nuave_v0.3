@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { IconCheck, IconSelector } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,8 +54,8 @@ export default function SearchableSelect({
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "h-11 w-full justify-between rounded-lg border px-3.5 text-sm font-normal",
-              !selected && "text-muted-foreground"
+              "h-11 w-full justify-between rounded-md border px-3.5 text-sm font-normal",
+              !selected && "text-text-placeholder"
             )}
           >
             <span className="flex items-center gap-2 truncate">
@@ -64,7 +64,7 @@ export default function SearchableSelect({
               )}
               <span>{selected ? selected.label : placeholder}</span>
             </span>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-40" />
+            <IconSelector size={16} stroke={2} className="ml-2 shrink-0 opacity-40" />
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -86,9 +86,11 @@ export default function SearchableSelect({
                       setOpen(false);
                     }}
                   >
-                    <Check
+                    <IconCheck
+                      size={16}
+                      stroke={2}
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2",
                         value === option.value ? "opacity-100" : "opacity-0"
                       )}
                     />

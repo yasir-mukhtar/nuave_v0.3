@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useCreditsBalance } from "@/hooks/useCreditsBalance";
-import { Coins, X } from "lucide-react";
+import { IconCoins, IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 export default function LowCreditsBanner() {
@@ -25,8 +25,9 @@ export default function LowCreditsBanner() {
     >
       {/* Centered content */}
       <div className="flex items-center gap-2.5">
-        <Coins
-          className={cn("h-4 w-4", isEmpty ? "text-red-900" : "text-amber-800")}
+        <IconCoins
+          size={16}
+          className={cn(isEmpty ? "text-red-900" : "text-amber-800")}
         />
         <p
           className={cn(
@@ -57,7 +58,7 @@ export default function LowCreditsBanner() {
           isEmpty ? "text-error" : "text-amber-600"
         )}
       >
-        <X className="h-4 w-4" />
+        <IconX size={16} />
       </button>
     </div>
   );

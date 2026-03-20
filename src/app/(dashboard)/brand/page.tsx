@@ -14,6 +14,7 @@ import {
 } from "@tabler/icons-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
+import { cn } from "@/lib/utils";
 
 /* ── Types ── */
 
@@ -275,8 +276,8 @@ export default function BrandPage() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "400px" }}>
-        <p style={{ color: "var(--text-muted)" }}>Memuat data brand...</p>
+      <div className="flex items-center justify-center h-[400px]">
+        <p className="text-text-muted">Memuat data brand...</p>
       </div>
     );
   }
@@ -297,25 +298,21 @@ export default function BrandPage() {
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "24px", minWidth: 0, maxWidth: "100%" }}>
+      <div className="flex flex-col gap-6 min-w-0 max-w-full">
 
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div className="flex justify-between items-start">
           <div>
-            <h1 style={{ fontSize: "20px", margin: "0 0 4px 0" }}>
+            <h1 className="text-[20px] leading-7 mb-1 mt-0">
               Brand
             </h1>
-            <p style={{ color: "var(--text-muted)", margin: 0 }}>
+            <p className="text-text-muted m-0">
               Kelola profil brand yang Anda audit di Nuave.
             </p>
           </div>
           <button
             onClick={() => router.push("/")}
-            style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: 'var(--radius-md)',
-              padding: "9px 16px", fontSize: "13px", fontWeight: 600, cursor: "pointer",
-            }}
+            className="flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-4 py-[9px] text-[13px] leading-4 font-semibold cursor-pointer"
           >
             <IconPlus size={15} stroke={2} />
             Tambah Brand
@@ -324,25 +321,16 @@ export default function BrandPage() {
 
         {/* Empty state */}
         {brands.length === 0 ? (
-          <div style={{
-            display: "flex", flexDirection: "column", alignItems: "center",
-            justifyContent: "center", height: "320px", gap: "12px",
-            border: "1px dashed var(--border-default)", borderRadius: 'var(--radius-md)', background: "#ffffff",
-          }}>
-            <p style={{ fontSize: "16px", fontWeight: 600 }}>
+          <div className="flex flex-col items-center justify-center h-[320px] gap-3 border border-dashed border-border-default rounded-md bg-white">
+            <p className="text-[16px] leading-6 font-semibold">
               Belum ada brand
             </p>
-            <p style={{ color: "var(--text-muted)", textAlign: "center" }}>
+            <p className="text-text-muted text-center">
               Tambahkan brand pertama Anda untuk mulai audit visibilitas AI.
             </p>
             <button
               onClick={() => router.push("/")}
-              style={{
-                display: "flex", alignItems: "center", gap: "6px",
-                background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: 'var(--radius-md)',
-                padding: "10px 20px", fontSize: "13px", fontWeight: 600, cursor: "pointer",
-                marginTop: "8px",
-              }}
+              className="flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-5 py-2.5 text-[13px] leading-4 font-semibold cursor-pointer mt-2"
             >
               <IconPlus size={15} stroke={2} />
               Tambah Brand
@@ -350,7 +338,7 @@ export default function BrandPage() {
           </div>
         ) : (
           /* Brand cards */
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div className="flex flex-col gap-4">
             {brands.map((brand) => (
               <BrandCard
                 key={brand.id}
@@ -374,41 +362,30 @@ export default function BrandPage() {
         <>
           <div
             onClick={closeEdit}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
             style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.18)", zIndex: 49,
               animation: `${editClosing ? "brandOverlayOut" : "brandOverlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
             }}
           />
           <div
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] max-w-[calc(100vw-48px)] max-h-[calc(100vh-80px)] bg-white rounded-lg border border-border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)] flex flex-col overflow-hidden z-50"
             style={{
-              position: "fixed", top: "50%", left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "560px", maxWidth: "calc(100vw - 48px)",
-              maxHeight: "calc(100vh - 80px)",
-              background: "#ffffff", borderRadius: 'var(--radius-lg)',
-              border: "1px solid var(--border-default)",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.12)",
-              display: "flex", flexDirection: "column",
-              overflow: "hidden", zIndex: 50,
               animation: `${editClosing ? "brandModalOut" : "brandModalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
             }}
           >
             {/* Modal header */}
-            <div style={{
-              flexShrink: 0, padding: "20px 24px", borderBottom: "1px solid var(--border-default)",
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-            }}>
-              <h2 style={{ fontSize: "16px", margin: 0 }}>
+            <div className="shrink-0 px-6 py-5 border-b border-border-default flex justify-between items-center">
+              <h2 className="text-[16px] leading-6 m-0">
                 Edit Brand
               </h2>
-              <button onClick={closeEdit} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: "4px" }}>
+              <button onClick={closeEdit} className="bg-none border-none cursor-pointer text-text-muted p-1">
                 <IconX size={18} stroke={1.5} />
               </button>
             </div>
 
             {/* Modal body */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex flex-col gap-5">
 
                 {/* Brand name */}
                 <div className="form-field">
@@ -441,30 +418,26 @@ export default function BrandPage() {
                 {/* Differentiators */}
                 <div className="form-field">
                   <label>Keunggulan</label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: editForm.differentiators.length > 0 ? "8px" : 0 }}>
+                  <div className={cn("flex flex-wrap gap-1.5", editForm.differentiators.length > 0 ? "mb-2" : "mb-0")}>
                     {editForm.differentiators.map((d, i) => (
-                      <span key={i} style={{
-                        display: "inline-flex", alignItems: "center", gap: "4px",
-                        padding: "4px 10px", borderRadius: "var(--radius-xs)",
-                        background: "#EDE9FF", color: "#533AFD", fontSize: "12px", fontWeight: 500,
-                      }}>
+                      <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-brand-light text-brand text-[12px] leading-4 font-medium">
                         {d}
                         <button
                           onClick={() => removeChip("differentiators", i)}
-                          style={{ background: "none", border: "none", cursor: "pointer", color: "#533AFD", padding: 0, display: "flex" }}
+                          className="bg-none border-none cursor-pointer text-brand p-0 flex"
                         >
                           <IconX size={12} stroke={2} />
                         </button>
                       </span>
                     ))}
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
+                  <div className="flex gap-2">
                     <input
                       value={newDiff}
                       onChange={(e) => setNewDiff(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addChip("differentiators", newDiff); } }}
                       placeholder="Tambah keunggulan, tekan Enter"
-                      style={{ flex: 1 }}
+                      className="flex-1"
                     />
                   </div>
                 </div>
@@ -472,30 +445,26 @@ export default function BrandPage() {
                 {/* Competitors */}
                 <div className="form-field">
                   <label>Kompetitor</label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: editForm.competitors.length > 0 ? "8px" : 0 }}>
+                  <div className={cn("flex flex-wrap gap-1.5", editForm.competitors.length > 0 ? "mb-2" : "mb-0")}>
                     {editForm.competitors.map((c, i) => (
-                      <span key={i} style={{
-                        display: "inline-flex", alignItems: "center", gap: "4px",
-                        padding: "4px 10px", borderRadius: "var(--radius-xs)",
-                        background: "#F3F4F6", color: "#374151", fontSize: "12px", fontWeight: 500,
-                      }}>
+                      <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-surface-raised text-text-body text-[12px] leading-4 font-medium">
                         {c}
                         <button
                           onClick={() => removeChip("competitors", i)}
-                          style={{ background: "none", border: "none", cursor: "pointer", color: "#6B7280", padding: 0, display: "flex" }}
+                          className="bg-none border-none cursor-pointer text-text-muted p-0 flex"
                         >
                           <IconX size={12} stroke={2} />
                         </button>
                       </span>
                     ))}
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
+                  <div className="flex gap-2">
                     <input
                       value={newComp}
                       onChange={(e) => setNewComp(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addChip("competitors", newComp); } }}
                       placeholder="Tambah kompetitor, tekan Enter"
-                      style={{ flex: 1 }}
+                      className="flex-1"
                     />
                   </div>
                 </div>
@@ -504,34 +473,24 @@ export default function BrandPage() {
             </div>
 
             {/* Modal footer */}
-            <div style={{
-              flexShrink: 0, padding: "16px 24px", borderTop: "1px solid var(--border-default)",
-              display: "flex", justifyContent: "flex-end", gap: "10px",
-            }}>
+            <div className="shrink-0 px-6 py-4 border-t border-border-default flex justify-end gap-2.5">
               <button
                 onClick={closeEdit}
-                style={{
-                  padding: "8px 16px", fontSize: "13px", fontWeight: 500,
-                  background: "var(--surface)", border: "1px solid var(--border-default)",
-                  borderRadius: 'var(--radius-md)', cursor: "pointer", color: "var(--text-body)",
-                }}
+                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-md cursor-pointer text-text-body"
               >
                 Batal
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !editForm.brand_name.trim()}
-                style={{
-                  display: "flex", alignItems: "center", gap: "6px",
-                  padding: "8px 20px", fontSize: "13px", fontWeight: 600,
-                  background: "var(--purple)", color: "#ffffff", border: "none",
-                  borderRadius: 'var(--radius-md)', cursor: saving ? "not-allowed" : "pointer",
-                  opacity: saving || !editForm.brand_name.trim() ? 0.7 : 1,
-                }}
+                className={cn(
+                  "flex items-center gap-1.5 px-5 py-2 text-[13px] leading-4 font-semibold bg-brand text-white border-none rounded-md",
+                  saving || !editForm.brand_name.trim() ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
+                )}
               >
                 {saving ? (
                   <>
-                    <span style={{ width: "14px", height: "14px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#ffffff", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Menyimpan...
                   </>
                 ) : (
@@ -551,60 +510,44 @@ export default function BrandPage() {
         <>
           <div
             onClick={closeDelete}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
             style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.18)", zIndex: 49,
               animation: `${deleteClosing ? "brandOverlayOut" : "brandOverlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
             }}
           />
           <div
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[calc(100vw-48px)] bg-white rounded-lg border border-border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)] p-6 z-50"
             style={{
-              position: "fixed", top: "50%", left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "420px", maxWidth: "calc(100vw - 48px)",
-              background: "#ffffff", borderRadius: 'var(--radius-lg)',
-              border: "1px solid var(--border-default)",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.12)",
-              padding: "24px", zIndex: 50,
               animation: `${deleteClosing ? "brandModalOut" : "brandModalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-              <div style={{
-                width: "40px", height: "40px", borderRadius: "50%",
-                background: "#FEE2E2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-              }}>
-                <IconAlertTriangle size={20} stroke={1.5} style={{ color: "#DC2626" }} />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-[#FEE2E2] flex items-center justify-center shrink-0">
+                <IconAlertTriangle size={20} stroke={1.5} className="text-red-600" />
               </div>
               <div>
-                <h3 style={{ fontSize: "15px", margin: 0 }}>
+                <h3 className="text-[15px] leading-5 m-0">
                   Hapus Brand
                 </h3>
-                <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: "4px 0 0 0" }}>
+                <p className="text-[13px] leading-5 text-text-muted mt-1 mb-0">
                   Semua data audit, prompt, dan rekomendasi untuk brand <strong>{brands.find((b) => b.id === deletingId)?.brand_name}</strong> akan dihapus permanen.
                 </p>
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
+            <div className="flex justify-end gap-2.5 mt-5">
               <button
                 onClick={closeDelete}
-                style={{
-                  padding: "8px 16px", fontSize: "13px", fontWeight: 500,
-                  background: "var(--surface)", border: "1px solid var(--border-default)",
-                  borderRadius: 'var(--radius-md)', cursor: "pointer", color: "var(--text-body)",
-                }}
+                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-md cursor-pointer text-text-body"
               >
                 Batal
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                style={{
-                  display: "flex", alignItems: "center", gap: "6px",
-                  padding: "8px 20px", fontSize: "13px", fontWeight: 600,
-                  background: "#DC2626", color: "#ffffff", border: "none",
-                  borderRadius: 'var(--radius-md)', cursor: deleting ? "not-allowed" : "pointer",
-                  opacity: deleting ? 0.7 : 1,
-                }}
+                className={cn(
+                  "flex items-center gap-1.5 px-5 py-2 text-[13px] leading-4 font-semibold bg-red-600 text-white border-none rounded-md",
+                  deleting ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
+                )}
               >
                 {deleting ? "Menghapus..." : "Hapus Brand"}
               </button>
@@ -637,38 +580,19 @@ function BrandCard({
   const hasStats = brand._totalAudits > 0;
 
   return (
-    <div
-      style={{
-        padding: "24px", borderRadius: 'var(--radius-md)',
-        border: "1px solid var(--border-default)",
-        background: "#ffffff",
-        transition: "border-color 0.15s ease",
-      }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C4B5FD"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border-default)"; }}
-    >
+    <div className="p-6 rounded-md border border-border-default bg-white transition-colors duration-100 hover:border-[#C4B5FD]">
       {/* Top row: avatar + name + URL + actions */}
-      <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "16px" }}>
+      <div className="flex items-center gap-3.5 mb-4">
         {/* Avatar */}
-        <div style={{
-          width: "40px", height: "40px", borderRadius: "var(--radius-md)",
-          background: "var(--purple)", color: "#ffffff",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "16px", fontWeight: 700, flexShrink: 0,
-        }}>
+        <div className="w-10 h-10 rounded-md bg-brand text-white flex items-center justify-center text-[16px] leading-5 font-bold shrink-0">
           {getInitial(brand.brand_name)}
         </div>
 
         {/* Name + URL */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="flex-1 min-w-0">
           <h3
             onClick={onSelect}
-            style={{
-              fontSize: "15px",
-              margin: 0, cursor: "pointer",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--purple)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-heading)"; }}
+            className="text-[15px] leading-5 m-0 cursor-pointer hover:text-brand"
           >
             {brand.brand_name}
           </h3>
@@ -676,12 +600,7 @@ function BrandCard({
             href={brand.website_url}
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              fontSize: "12px", color: "var(--text-muted)",
-              textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "3px",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--purple)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; }}
+            className="text-[12px] leading-4 text-text-muted no-underline inline-flex items-center gap-[3px] hover:text-brand"
           >
             {brand.website_url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
             <IconExternalLink size={11} stroke={1.5} />
@@ -689,9 +608,9 @@ function BrandCard({
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
+        <div className="flex gap-1 shrink-0">
           <ActionButton
-            icon={<IconRefresh size={15} stroke={1.5} style={isRescraping ? { animation: "spin 1s linear infinite" } : undefined} />}
+            icon={<IconRefresh size={15} stroke={1.5} className={isRescraping ? "animate-spin" : ""} />}
             label="Refresh data"
             onClick={onRescrape}
             disabled={isRescraping}
@@ -712,31 +631,21 @@ function BrandCard({
 
       {/* Overview */}
       {brand.company_overview && (
-        <p style={{
-          fontSize: "13px", color: "var(--text-body)", lineHeight: 1.6,
-          margin: "0 0 16px 0",
-          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
-        }}>
+        <p className="text-[13px] leading-5 text-text-body mb-4 mt-0 line-clamp-2">
           {brand.company_overview}
         </p>
       )}
 
       {/* Chips: differentiators + competitors */}
       {(brand.differentiators.length > 0 || brand.competitors.length > 0) && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "16px" }}>
+        <div className="flex flex-wrap gap-[5px] mb-4">
           {brand.differentiators.map((d, i) => (
-            <span key={`d-${i}`} style={{
-              padding: "3px 8px", borderRadius: "var(--radius-xs)", fontSize: "11px", fontWeight: 500,
-              background: "#EDE9FF", color: "#533AFD",
-            }}>
+            <span key={`d-${i}`} className="px-2 py-[3px] rounded-xs text-[11px] leading-4 font-medium bg-brand-light text-brand">
               {d}
             </span>
           ))}
           {brand.competitors.map((c, i) => (
-            <span key={`c-${i}`} style={{
-              padding: "3px 8px", borderRadius: "var(--radius-xs)", fontSize: "11px", fontWeight: 500,
-              background: "#F3F4F6", color: "#6B7280",
-            }}>
+            <span key={`c-${i}`} className="px-2 py-[3px] rounded-xs text-[11px] leading-4 font-medium bg-surface-raised text-text-muted">
               vs {c}
             </span>
           ))}
@@ -744,26 +653,23 @@ function BrandCard({
       )}
 
       {/* Stats row */}
-      <div style={{
-        display: "flex", gap: "24px", paddingTop: "14px",
-        borderTop: "1px solid var(--border-default)",
-      }}>
+      <div className="flex gap-6 pt-3.5 border-t border-border-default">
         <StatItem
           label="Skor"
-          value={hasStats && brand._latestScore !== null ? `${brand._latestScore}%` : "—"}
+          value={hasStats && brand._latestScore !== null ? `${brand._latestScore}%` : "\u2014"}
           color={hasStats && brand._latestScore !== null
-            ? (brand._latestScore >= 60 ? "#22C55E" : brand._latestScore >= 30 ? "#F59E0B" : "#EF4444")
+            ? (brand._latestScore >= 60 ? "text-success" : brand._latestScore >= 30 ? "text-warning" : "text-error")
             : undefined
           }
         />
-        <StatItem label="Audit" value={hasStats ? `${brand._totalAudits}` : "—"} />
+        <StatItem label="Audit" value={hasStats ? `${brand._totalAudits}` : "\u2014"} />
         <StatItem
           label="Tingkat Sebutan"
-          value={hasStats && brand._mentionRate !== null ? `${brand._mentionRate}%` : "—"}
+          value={hasStats && brand._mentionRate !== null ? `${brand._mentionRate}%` : "\u2014"}
         />
         <StatItem
           label="Rekomendasi"
-          value={hasStats ? `${brand._appliedCount}/${brand._totalRecs} selesai` : "—"}
+          value={hasStats ? `${brand._appliedCount}/${brand._totalRecs} selesai` : "\u2014"}
         />
       </div>
     </div>
@@ -775,8 +681,8 @@ function BrandCard({
 function StatItem({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div>
-      <div style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "2px" }}>{label}</div>
-      <div style={{ fontSize: "14px", fontWeight: 600, color: color ?? "var(--text-heading)" }}>{value}</div>
+      <div className="text-[11px] leading-4 text-text-muted mb-0.5">{label}</div>
+      <div className={cn("text-[14px] leading-5 font-semibold", color ?? "text-text-heading")}>{value}</div>
     </div>
   );
 }
@@ -799,25 +705,13 @@ function ActionButton({
       onClick={onClick}
       disabled={disabled}
       title={label}
-      style={{
-        display: "flex", alignItems: "center", justifyContent: "center",
-        width: "32px", height: "32px", borderRadius: 'var(--radius-sm)',
-        background: "transparent", border: "1px solid transparent",
-        cursor: disabled ? "not-allowed" : "pointer",
-        color: danger ? "#DC2626" : "var(--text-muted)",
-        opacity: disabled ? 0.5 : 1,
-        transition: "all 0.12s ease",
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.background = danger ? "#FEF2F2" : "var(--surface)";
-          e.currentTarget.style.borderColor = danger ? "#FECACA" : "var(--border-default)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = "transparent";
-        e.currentTarget.style.borderColor = "transparent";
-      }}
+      className={cn(
+        "flex items-center justify-center w-8 h-8 rounded-sm bg-transparent border border-transparent transition-all duration-100",
+        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100",
+        danger ? "text-red-600" : "text-text-muted",
+        !disabled && !danger && "hover:bg-surface hover:border-border-default",
+        !disabled && danger && "hover:bg-[#FEF2F2] hover:border-red-200"
+      )}
     >
       {icon}
     </button>

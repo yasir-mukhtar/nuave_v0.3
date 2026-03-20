@@ -29,8 +29,12 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Frontend
+
+Tailwind v4 utility classes with shadcn/ui components. Design tokens defined in `src/styles/tokens.css`, mapped to Tailwind via `@theme inline` in `src/app/globals.css`. Icons from `@tabler/icons-react` only.
+
+See `project context/CLAUDE.md` for full styling conventions, design token reference, and critical rules.
+
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Auto-deploys from `main` branch on Vercel.

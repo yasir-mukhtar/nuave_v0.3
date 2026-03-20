@@ -80,7 +80,7 @@ function buildReport(): ReportData {
   };
 }
 
-/* ── Score ring component ── */
+/* -- Score ring component -- */
 function ScoreRing({ score }: { score: number }) {
   const size = 100;
   const stroke = 8;
@@ -94,7 +94,7 @@ function ScoreRing({ score }: { score: number }) {
   if (score >= 70) color = "#22c55e"; // green
 
   return (
-    <div style={{ position: "relative", width: size, height: size }}>
+    <div className="relative w-[100px] h-[100px]">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
           {/* Background ring */}
@@ -121,17 +121,7 @@ function ScoreRing({ score }: { score: number }) {
           />
         </g>
       </svg>
-      <span style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "var(--font-heading)",
-        fontSize: 28,
-        fontWeight: 700,
-        color: "#111827",
-      }}>
+      <span className="absolute inset-0 flex items-center justify-center font-heading text-[28px] leading-[36px] font-bold text-text-heading">
         {score}
       </span>
     </div>
@@ -141,8 +131,8 @@ function ScoreRing({ score }: { score: number }) {
 export default function ReportPage() {
   return (
     <Suspense fallback={
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>Memuat laporan...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="font-body text-text-muted">Memuat laporan...</p>
       </div>
     }>
       <ReportPageContent />
@@ -304,78 +294,35 @@ function ReportPageContent() {
 
   if (!REPORT) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>Memuat laporan...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="font-body text-text-muted">Memuat laporan...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F3F4F6" }}>
+    <div className="min-h-screen bg-surface-raised">
       {/* Top bar */}
-      <header style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "16px 32px",
-        background: "#ffffff",
-        borderBottom: "1px solid var(--border-default)",
-      }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-          <img src={LOGO_SVG} alt="Nuave" width={24} height={24} style={{ objectFit: "contain" }} />
-          <span style={{
-            fontFamily: "var(--font-heading)",
-            fontWeight: 600,
-            fontSize: 18,
-            color: "#111827",
-          }}>
+      <header className="flex items-center justify-between py-4 px-8 bg-white border-b border-border-default">
+        <Link href="/" className="flex items-center gap-2 no-underline">
+          <img src={LOGO_SVG} alt="Nuave" width={24} height={24} className="object-contain" />
+          <span className="font-heading font-semibold text-[18px] leading-[26px] text-text-heading">
             Nuave
           </span>
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="flex items-center gap-3">
           <button
             onClick={handleDownload}
             disabled={downloading}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              height: 36,
-              padding: "0 14px",
-              borderRadius: 8,
-              border: "1px solid var(--border-default)",
-              background: "#ffffff",
-              color: "#374151",
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-md border border-border-default bg-white text-text-body font-body text-[13px] leading-[18px] font-medium cursor-pointer"
           >
             {downloading ? <ButtonSpinner size={14} color="var(--purple)" /> : <IconDownload size={16} stroke={1.5} />}
             {downloading ? "Mengunduh..." : "Unduh laporan"}
           </button>
           <button
             onClick={() => router.push("/dashboard")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              height: 36,
-              padding: "0 16px",
-              borderRadius: 8,
-              border: "none",
-              background: "var(--purple)",
-              color: "#ffffff",
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: "pointer",
-              transition: "background-color 0.15s ease",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--purple-dark)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--purple)"; }}
+            className="flex items-center gap-1.5 h-9 px-4 rounded-md border-none bg-brand text-white font-body text-[13px] leading-[18px] font-medium cursor-pointer transition-colors duration-100 ease-in-out hover:bg-brand-dark"
           >
             Dashboard
             <IconArrowRight size={16} stroke={1.5} />
@@ -384,25 +331,11 @@ function ReportPageContent() {
       </header>
 
       {/* Report card */}
-      <main style={{
-        maxWidth: 680,
-        margin: "40px auto",
-        padding: "0 24px 80px",
-      }}>
-        <div ref={reportRef} style={{
-          background: "#ffffff",
-          borderRadius: 12,
-          border: "1px solid var(--border-default)",
-          overflow: "hidden",
-        }}>
+      <main className="max-w-[680px] mx-auto mt-10 px-6 pb-20">
+        <div ref={reportRef} className="bg-white rounded-lg border border-border-default overflow-hidden">
           {/* Header row — brand + title */}
-          <div data-pdf-pad style={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            padding: "32px 32px 24px",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div data-pdf-pad className="flex items-start justify-between pt-8 px-8 pb-6">
+            <div className="flex items-center gap-3">
               {/* Brand logo */}
               {REPORT.faviconUrl ? (
                 <img
@@ -410,11 +343,7 @@ function ReportPageContent() {
                   alt={REPORT.brandName}
                   width={40}
                   height={40}
-                  style={{
-                    borderRadius: 8,
-                    objectFit: "contain",
-                    background: "var(--bg-surface-raised)",
-                  }}
+                  className="rounded-md object-contain bg-surface-raised"
                   onError={(e) => {
                     // Fallback to initial letter if favicon fails to load
                     const el = e.currentTarget;
@@ -434,133 +363,59 @@ function ReportPageContent() {
                   }}
                 />
               ) : (
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  background: "var(--bg-surface-raised)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 18,
-                  fontWeight: 600,
-                  color: "var(--purple)",
-                  fontFamily: "var(--font-heading)",
-                }}>
+                <div className="w-10 h-10 rounded-md bg-surface-raised flex items-center justify-center text-[18px] leading-[26px] font-semibold text-brand font-heading">
                   {REPORT.brandName.charAt(0)}
                 </div>
               )}
               <div>
-                <p style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  color: "#111827",
-                  margin: 0,
-                }}>
+                <p className="font-body text-[15px] leading-[22px] font-semibold text-text-heading m-0">
                   {REPORT.brandName}
                 </p>
-                <p style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: 13,
-                  color: "var(--text-muted)",
-                  margin: 0,
-                }}>
+                <p className="font-body text-[13px] leading-[18px] text-text-muted m-0">
                   {REPORT.brandUrl}
                 </p>
               </div>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <p style={{
-                fontFamily: "var(--font-body)",
-                fontSize: 14,
-                fontWeight: 600,
-                color: "#111827",
-                margin: 0,
-              }}>
+            <div className="text-right">
+              <p className="font-body text-[14px] leading-[20px] font-semibold text-text-heading m-0">
                 {REPORT.title}
               </p>
-              <p style={{
-                fontFamily: "var(--font-body)",
-                fontSize: 13,
-                color: "var(--text-muted)",
-                margin: 0,
-              }}>
+              <p className="font-body text-[13px] leading-[18px] text-text-muted m-0">
                 {REPORT.date}
               </p>
             </div>
           </div>
 
           {/* Score section */}
-          <div data-pdf-pad style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "16px 32px 32px",
-          }}>
+          <div data-pdf-pad className="flex flex-col items-center pt-4 px-8 pb-8">
             <ScoreRing score={REPORT.score} />
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 12,
-              color: "var(--text-muted)",
-              margin: "12px 0 4px",
-            }}>
+            <p className="font-body text-[12px] leading-[16px] text-text-muted mt-3 mb-1">
               Skor Visibilitas AI
             </p>
-            <p style={{
-              fontFamily: "var(--font-heading)",
-              fontSize: 18,
-              fontWeight: 600,
-              color: "#111827",
-              margin: "0 0 4px",
-            }}>
+            <p className="font-heading text-[18px] leading-[26px] font-semibold text-text-heading mb-1">
               {REPORT.level}
             </p>
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              color: "var(--text-muted)",
-              margin: 0,
-            }}>
+            <p className="font-body text-[13px] leading-[18px] text-text-muted m-0">
               Brand Anda muncul di {REPORT.mentionedCount} dari {REPORT.totalPrompts} pertanyaan
             </p>
           </div>
 
           {/* Divider */}
-          <div data-pdf-divider style={{ height: 1, background: "#E5E7EB", margin: "0 32px" }} />
+          <div data-pdf-divider className="h-px bg-border-default mx-8" />
 
           {/* Competitors section */}
-          <div data-pdf-pad style={{ padding: "24px 32px" }}>
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#111827",
-              margin: "0 0 4px",
-            }}>
+          <div data-pdf-pad className="py-6 px-8">
+            <p className="font-body text-[13px] leading-[18px] font-semibold text-text-heading mb-1">
               Kompetitor
             </p>
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              color: "var(--text-muted)",
-              margin: "0 0 12px",
-            }}>
+            <p className="font-body text-[13px] leading-[18px] text-text-muted mb-3">
               AI juga merekomendasikan brand berikut:
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <div className="flex flex-wrap gap-2">
               {REPORT.competitors.map((name) => (
                 <span
                   key={name}
-                  style={{
-                    display: "inline-block",
-                    padding: "6px 14px",
-                    borderRadius: 6,
-                    background: "var(--bg-surface-raised)",
-                    fontFamily: "var(--font-body)",
-                    fontSize: 13,
-                    color: "#374151",
-                  }}
+                  className="inline-block py-1.5 px-3.5 rounded-sm bg-surface-raised font-body text-[13px] leading-[18px] text-text-body"
                 >
                   {name}
                 </span>
@@ -569,29 +424,18 @@ function ReportPageContent() {
           </div>
 
           {/* Divider */}
-          <div data-pdf-divider style={{ height: 1, background: "#E5E7EB", margin: "0 32px" }} />
+          <div data-pdf-divider className="h-px bg-border-default mx-8" />
 
           {/* Results section */}
-          <div data-pdf-pad style={{ padding: "24px 32px 32px" }}>
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#111827",
-              margin: "0 0 4px",
-            }}>
+          <div data-pdf-pad className="pt-6 px-8 pb-8">
+            <p className="font-body text-[13px] leading-[18px] font-semibold text-text-heading mb-1">
               Hasil Uji
             </p>
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              color: "var(--text-muted)",
-              margin: "0 0 16px",
-            }}>
+            <p className="font-body text-[13px] leading-[18px] text-text-muted mb-4">
               Berikut hasil setiap pertanyaan:
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div className="flex flex-col">
               {REPORT.results.map((r, i) => (
                 <div
                   key={i}
@@ -600,53 +444,24 @@ function ReportPageContent() {
                     ai_response: r.ai_response || "",
                     brand_mentioned: r.mentioned,
                   })}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
-                    gap: 16,
-                    padding: "12px 0",
-                    borderTop: "none",
-                    borderBottom: "none",
-                    cursor: "pointer",
-                    borderRadius: 6,
-                    transition: "background-color 0.1s ease",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--bg-surface)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+                  className="flex items-start justify-between gap-4 py-3 cursor-pointer rounded-sm transition-colors duration-100 ease-in-out hover:bg-surface"
                 >
-                  <span style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: 14,
-                    color: "#111827",
-                    flex: 1,
-                  }}>
+                  <span className="font-body text-[14px] leading-[20px] text-text-heading flex-1">
                     {r.prompt}
                   </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  <div className="flex items-center gap-2 shrink-0">
                     {r.demand_tier && TIER_STYLES[r.demand_tier] && (
-                      <span style={{
-                        display: "inline-block",
-                        padding: "2px 8px",
-                        borderRadius: 6,
-                        backgroundColor: TIER_STYLES[r.demand_tier].bg,
-                        fontFamily: "var(--font-body)",
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: TIER_STYLES[r.demand_tier].color,
-                        lineHeight: "16px",
-                        whiteSpace: "nowrap",
-                      }}>
+                      <span
+                        className="inline-block py-0.5 px-2 rounded-sm font-body text-[11px] leading-[16px] font-semibold whitespace-nowrap"
+                        style={{
+                          backgroundColor: TIER_STYLES[r.demand_tier].bg,
+                          color: TIER_STYLES[r.demand_tier].color,
+                        }}
+                      >
                         {TIER_STYLES[r.demand_tier].label}
                       </span>
                     )}
-                    <span style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: r.mentioned ? "var(--green)" : "var(--red)",
-                      whiteSpace: "nowrap",
-                    }}>
+                    <span className={`font-body text-[13px] leading-[18px] font-medium whitespace-nowrap ${r.mentioned ? "text-success" : "text-error"}`}>
                       {r.mentioned ? "Muncul" : "Tidak muncul"}
                     </span>
                   </div>
@@ -656,35 +471,20 @@ function ReportPageContent() {
           </div>
 
           {/* Footer */}
-          <div data-pdf-pad data-pdf-footer style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "20px 32px",
-            borderTop: "1px solid #E5E7EB",
-            background: "var(--bg-surface)",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <img src={LOGO_SVG} alt="Nuave" width={18} height={18} style={{ objectFit: "contain" }} />
-              <span style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: 600,
-                fontSize: 14,
-                color: "#111827",
-              }}>
+          <div data-pdf-pad data-pdf-footer className="flex items-center justify-between py-5 px-8 border-t border-border-default bg-surface">
+            <div className="flex items-center gap-1.5">
+              <img src={LOGO_SVG} alt="Nuave" width={18} height={18} className="object-contain" />
+              <span className="font-heading font-semibold text-[14px] leading-[20px] text-text-heading">
                 Nuave
               </span>
             </div>
-            <span style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              color: "var(--text-muted)",
-            }}>
-              Dibuat dengan <strong style={{ color: "#111827" }}>nuave.ai</strong>
+            <span className="font-body text-[13px] leading-[18px] text-text-muted">
+              Dibuat dengan <strong className="text-text-heading">nuave.ai</strong>
             </span>
           </div>
         </div>
       </main>
+      {/* NOTE: Embedded @keyframes spin — consider moving to global CSS */}
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       {/* Prompt detail sidebar */}

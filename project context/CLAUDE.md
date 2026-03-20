@@ -1,6 +1,6 @@
 # CLAUDE.md — Nuave Project Context
 
-> Last updated: March 9, 2026
+> Last updated: March 20, 2026
 
 ## What is Nuave?
 
@@ -15,10 +15,10 @@ Credits-based (not subscription). 10 free credits on signup. IDR pricing via Mid
 | Layer | Technology |
 |-------|-----------|
 | Framework | Next.js 16 App Router (TypeScript) |
-| Styling | Tailwind CSS 4 + `src/app/globals.css` + `src/styles/tokens.css` |
-| Components | shadcn/ui — **new screens only**, never retrofit existing |
-| Fonts | Geist (headings) + Inter (body) |
-| Icons | `@tabler/icons-react` — `size={18}` `stroke={1.5}` |
+| Styling | Tailwind v4 utility classes only — tokens via `@theme inline` in `globals.css`, source of truth in `tokens.css` |
+| Components | shadcn/ui (18 components in `components/ui/`) — Radix UI primitives |
+| Fonts | Geist Sans (`font-heading`) + Inter (`font-body`) |
+| Icons | `@tabler/icons-react` only — `lucide-react` has been removed |
 | Database | Supabase PostgreSQL — Singapore (sin1) |
 | Auth | Supabase Auth — Google OAuth only |
 | AI — Scraping & Recs | Anthropic **`claude-sonnet-4-5-20250929`** (exact string required) |
@@ -69,8 +69,10 @@ src/
 9. **Next.js 16 params:** Dynamic route params must be awaited: `const { id } = await params;`
 10. **After schema changes:** Run `NOTIFY pgrst, 'reload schema';` in Supabase SQL editor
 11. **UI language:** All user-facing strings in Bahasa Indonesia
-12. **Sidebar layout:** `.sidebar` must be sibling of `.main`, never nested
+12. **Sidebar layout:** Sidebar is `fixed left-0`, main content uses `ml-64` offset
 13. **UI work:** Always read `DESIGN_SYSTEM.md` before building or modifying any UI (pages, components, layouts)
+14. **No lucide-react:** Package has been removed. Use `@tabler/icons-react` exclusively
+15. **CSS layers:** Never add unlayered `*`, `body`, or element selectors to globals.css — they override Tailwind utilities. Always use `@layer base`
 
 ---
 
@@ -107,16 +109,48 @@ Types: `web_copy`, `content_gap`, `meta_structure`.
 
 Light mode only. Accent: `#6C3FF5`. Reference: Acctual.com.
 
-| Token | Hex | | Token | Hex |
-|-------|-----|-|-------|-----|
-| Background | `#FFFFFF` | | Accent | `#6C3FF5` |
-| Surface | `#F9FAFB` | | Accent light | `#EDE9FF` |
-| Border | `#E5E7EB` | | Success | `#22C55E` |
-| Text heading | `#111827` | | Warning | `#F59E0B` |
-| Text body | `#374151` | | Error | `#EF4444` |
-| Text muted | `#6B7280` | | | |
+| Token | Hex | Tailwind class | | Token | Hex | Tailwind class |
+|-------|-----|---------------|-|-------|-----|---------------|
+| Background | `#FFFFFF` | `bg-page` | | Accent | `#533AFD` | `bg-brand` / `text-brand` |
+| Surface | `#F9FAFB` | `bg-surface` | | Accent dark | `#3d2bc7` | `bg-brand-dark` |
+| Surface raised | `#F3F4F6` | `bg-surface-raised` | | Accent light | `#EDE9FF` | `bg-brand-light` |
+| Border default | `#E5E7EB` | `border-border-default` | | Success | `#22C55E` | `text-success` |
+| Border light | `#ECECEC` | `border-border-light` | | Warning | `#F59E0B` | `text-warning` |
+| Border strong | `#D1D5DB` | `border-border-strong` | | Error | `#EF4444` | `text-error` |
+| Text heading | `#111827` | `text-text-heading` | | | | |
+| Text body | `#374151` | `text-text-body` | | | | |
+| Text muted | `#6B7280` | `text-text-muted` | | | | |
+| Text placeholder | `#9CA3AF` | `text-text-placeholder` | | | | |
 
 **Score:** 0–39 red, 40–69 amber, 70–100 green.
+
+---
+
+## Styling Conventions
+
+**All new components and pages must follow these rules:**
+
+1. **Tailwind classes only** — no inline `style={{}}` except for truly dynamic runtime values (e.g. progress bar width from state, animation names from config objects, colors from runtime lookup tables)
+2. **Design token classes** — use `text-text-muted` not `text-muted-foreground`, `border-border-default` not `border-input`. Exception: inside `components/ui/` shadcn files, leave shadcn tokens untouched
+3. **No hardcoded hex values** — always use design token classes from the table above
+4. **Arbitrary font-sizes** — every `text-[Xpx]` must have an explicit `leading-*` companion (e.g. `text-[13px] leading-4`)
+5. **Transitions** — use `duration-100` (matches `var(--transition-fast)` = 100ms)
+6. **Border radius** — `rounded-sm` (6px) for small elements, `rounded-md` (8px) for inputs/cards, `rounded-lg` (12px) for modals
+7. **Icons** — import from `@tabler/icons-react` only. PascalCase with `Icon` prefix (e.g. `IconSearch`, `IconX`, `IconPlus`). Use `size` and `stroke` props (not `className` for sizing)
+8. **Conditional classes** — use `cn()` from `@/lib/utils` (clsx + tailwind-merge)
+9. **Hover states** — use Tailwind `hover:` variants, not `onMouseEnter`/`onMouseLeave` handlers
+10. **CSS cascade layers** — all global element resets MUST be inside `@layer base` in globals.css. Unlayered styles override all Tailwind utilities
+
+### Token architecture
+
+```
+tokens.css (source of truth) → @theme inline in globals.css → Tailwind utility classes
+```
+
+- `tokens.css` defines raw values as CSS custom properties
+- `@theme inline` maps them into Tailwind's theme system
+- Components use Tailwind classes like `bg-brand`, `text-text-heading`, `shadow-app-subtle`
+- Shadows use `shadow-app-*` prefix (e.g. `shadow-app-subtle`, `shadow-app-modal`) to avoid circular reference with same-named `:root` variables
 
 ---
 
@@ -161,10 +195,12 @@ Supabase project: `bromdpwhiyqpffqxlzcu` | RLS enabled, server inserts use admin
 
 ```
 Project: Nuave — AEO SaaS | Domain: nuave.ai
-Stack: Next.js 16 + TypeScript + Tailwind 4 + Supabase + Vercel
-UI Language: Bahasa Indonesia | Theme: Light only | Accent: #6C3FF5
-Icons: @tabler/icons-react | Fonts: Geist + Inter
+Stack: Next.js 16 + TypeScript + Tailwind v4 + shadcn/ui + Supabase + Vercel
+Styling: Tailwind utility classes only (no inline styles) — tokens in tokens.css, mapped via @theme inline
+UI Language: Bahasa Indonesia | Theme: Light only | Brand: bg-brand (#533AFD)
+Icons: @tabler/icons-react ONLY (lucide-react removed) | Fonts: Geist Sans + Inter
 AI: Claude claude-sonnet-4-5-20250929 + GPT-4o (web_search)
 Middleware: src/middleware.ts (NOT root) | Auth: getUser() not getSession()
 Supabase client: createSupabaseBrowserClient() | Admin: createSupabaseAdminClient()
+CSS layers: all base resets must be in @layer base — unlayered styles override Tailwind
 ```

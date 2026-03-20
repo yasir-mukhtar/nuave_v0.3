@@ -13,6 +13,7 @@ import {
 } from "@tabler/icons-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
+import { cn } from "@/lib/utils";
 
 /* ── Types ── */
 
@@ -59,23 +60,23 @@ function renderMarkdown(text: string) {
     if (line.match(/^#{1,3}\s/)) {
       const content = line.replace(/^#{1,3}\s/, "");
       return (
-        <p key={i} style={{ fontWeight: 600, marginTop: "12px", marginBottom: "4px" }}>
+        <p key={i} className="font-semibold mt-3 mb-1">
           {renderBold(content)}
         </p>
       );
     }
-    if (line.match(/^[\-\*•]\s/)) {
-      const content = line.replace(/^[\-\*•]\s/, "");
+    if (line.match(/^[\-\*\u2022]\s/)) {
+      const content = line.replace(/^[\-\*\u2022]\s/, "");
       return (
-        <div key={i} style={{ display: "flex", gap: "8px", marginBottom: "3px", fontSize: "14px" }}>
-          <span style={{ color: "#533AFD", flexShrink: 0 }}>•</span>
+        <div key={i} className="flex gap-2 mb-[3px] text-[14px] leading-6">
+          <span className="text-brand shrink-0">&#8226;</span>
           <span>{renderBold(content)}</span>
         </div>
       );
     }
-    if (line.trim() === "") return <div key={i} style={{ height: "6px" }} />;
+    if (line.trim() === "") return <div key={i} className="h-1.5" />;
     return (
-      <p key={i} style={{ lineHeight: "1.7", marginBottom: "4px" }}>
+      <p key={i} className="leading-[1.7] mb-1 mt-0">
         {renderBold(line)}
       </p>
     );
@@ -86,7 +87,7 @@ function renderBold(text: string) {
   const parts = text.split(/(\*\*.*?\*\*)/);
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} style={{ fontWeight: 600 }}>{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
     }
     return <span key={i}>{part}</span>;
   });
@@ -297,17 +298,17 @@ export default function KontenPage() {
 
   if (loading || wsLoading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "400px" }}>
-        <p style={{ color: "var(--text-muted)" }}>Memuat rekomendasi konten...</p>
+      <div className="flex items-center justify-center h-[400px]">
+        <p className="text-text-muted">Memuat rekomendasi konten...</p>
       </div>
     );
   }
 
   if (recs.length === 0) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "400px", gap: "12px" }}>
-        <p style={{ fontSize: "16px", fontWeight: 600 }}>Belum ada rekomendasi</p>
-        <p style={{ color: "var(--text-muted)" }}>Jalankan audit untuk mendapatkan rekomendasi konten.</p>
+      <div className="flex flex-col items-center justify-center h-[400px] gap-3">
+        <p className="text-[16px] leading-6 font-semibold">Belum ada rekomendasi</p>
+        <p className="text-text-muted">Jalankan audit untuk mendapatkan rekomendasi konten.</p>
       </div>
     );
   }
@@ -334,52 +335,45 @@ export default function KontenPage() {
         @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "24px", minWidth: 0, maxWidth: "100%" }}>
+      <div className="flex flex-col gap-6 min-w-0 max-w-full">
 
         {/* ── Header ── */}
         <div>
-          <h1 style={{ fontSize: "20px", margin: "0 0 4px 0" }}>
+          <h1 className="text-[20px] leading-7 mb-1 mt-0">
             Konten
           </h1>
-          <p style={{ color: "var(--text-muted)", margin: 0 }}>
+          <p className="text-text-muted m-0">
             Rekomendasi konten untuk meningkatkan visibilitas AI brand Anda.
           </p>
         </div>
 
         {/* ── Progress bar ── */}
-        <div style={{
-          padding: "20px", borderRadius: 'var(--radius-md)',
-          border: "1px solid var(--border-default)", background: "#ffffff",
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-            <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-heading)" }}>
+        <div className="p-5 rounded-md border border-border-default bg-white">
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-[13px] leading-4 font-semibold text-text-heading">
               Progress
             </span>
-            <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+            <span className="text-[13px] leading-4 text-text-muted">
               {appliedCount} dari {totalCount} diterapkan
-              {unlockedCount > 0 && ` · ${unlockedCount} dibuka`}
+              {unlockedCount > 0 && ` \u00b7 ${unlockedCount} dibuka`}
             </span>
           </div>
-          <div style={{
-            height: "6px", borderRadius: 'var(--radius-xs)', background: "var(--border-default)", overflow: "hidden",
-          }}>
-            <div style={{
-              height: "100%", borderRadius: 'var(--radius-xs)',
-              background: progressPct === 100 ? "#22C55E" : "var(--purple)",
-              width: `${progressPct}%`,
-              transition: "width 0.3s ease",
-            }} />
+          <div className="h-1.5 rounded-xs bg-border-default overflow-hidden">
+            <div
+              className={cn(
+                "h-full rounded-xs transition-[width] duration-300 ease-in-out",
+                progressPct === 100 ? "bg-success" : "bg-brand"
+              )}
+              style={{ width: `${progressPct}%` }}
+            />
           </div>
         </div>
 
         {/* ── Filters ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+        <div className="flex items-center gap-3 flex-wrap">
 
           {/* Type tabs */}
-          <div style={{
-            display: "flex", background: "var(--surface)",
-            border: "1px solid var(--border-default)", borderRadius: 'var(--radius-md)', overflow: "hidden",
-          }}>
+          <div className="flex bg-surface border border-border-default rounded-md overflow-hidden">
             {([
               { key: "all", label: "Semua" },
               { key: "web_copy", label: "Web Copy" },
@@ -389,15 +383,12 @@ export default function KontenPage() {
               <button
                 key={tab.key}
                 onClick={() => setTypeFilter(tab.key)}
-                style={{
-                  padding: "8px 14px", fontSize: "13px", fontWeight: 500,
-                  border: "none", cursor: "pointer",
-                  background: typeFilter === tab.key ? "#ffffff" : "transparent",
-                  color: typeFilter === tab.key ? "var(--text-heading)" : "var(--text-muted)",
-                  boxShadow: typeFilter === tab.key ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
-                  borderRadius: typeFilter === tab.key ? 'var(--radius-sm)' : "0",
-                  transition: "all 0.15s ease",
-                }}
+                className={cn(
+                  "px-3.5 py-2 text-[13px] leading-4 font-medium border-none cursor-pointer transition-all duration-100",
+                  typeFilter === tab.key
+                    ? "bg-white text-text-heading shadow-[0_1px_2px_rgba(0,0,0,0.06)] rounded-sm"
+                    : "bg-transparent text-text-muted rounded-none"
+                )}
               >
                 {tab.label}
               </button>
@@ -405,21 +396,12 @@ export default function KontenPage() {
           </div>
 
           {/* Status filter */}
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <IconFilter size={14} stroke={1.5} color="var(--text-muted)" />
+          <div className="flex items-center gap-1.5">
+            <IconFilter size={14} stroke={1.5} className="text-text-muted" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-              style={{
-                padding: "7px 28px 7px 10px", fontSize: "13px",
-                border: "1px solid var(--border-default)", borderRadius: 'var(--radius-sm)',
-                background: "#ffffff", color: "var(--text-body)",
-                cursor: "pointer", outline: "none", appearance: "none",
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")`,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right 8px center",
-                backgroundSize: "12px 9px",
-              }}
+              className="py-[7px] pl-2.5 pr-7 text-[13px] leading-4 border border-border-default rounded-sm bg-white text-text-body cursor-pointer outline-none appearance-none bg-[url('data:image/svg+xml,%3csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2016%2016%27%3e%3cpath%20fill%3D%27none%27%20stroke%3D%27%236B7280%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-width%3D%272%27%20d%3D%27m2%205%206%206%206-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:12px_9px]"
             >
               <option value="all">Semua status</option>
               <option value="unlocked">Sudah dibuka</option>
@@ -433,16 +415,7 @@ export default function KontenPage() {
             <select
               value={workspaceFilter}
               onChange={(e) => setWorkspaceFilter(e.target.value)}
-              style={{
-                padding: "7px 28px 7px 10px", fontSize: "13px",
-                border: "1px solid var(--border-default)", borderRadius: 'var(--radius-sm)',
-                background: "#ffffff", color: "var(--text-body)",
-                cursor: "pointer", outline: "none", appearance: "none",
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")`,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right 8px center",
-                backgroundSize: "12px 9px",
-              }}
+              className="py-[7px] pl-2.5 pr-7 text-[13px] leading-4 border border-border-default rounded-sm bg-white text-text-body cursor-pointer outline-none appearance-none bg-[url('data:image/svg+xml,%3csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2016%2016%27%3e%3cpath%20fill%3D%27none%27%20stroke%3D%27%236B7280%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-width%3D%272%27%20d%3D%27m2%205%206%206%206-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:12px_9px]"
             >
               <option value="all">Semua brand</option>
               {uniqueWorkspaces.map(([id, name]) => (
@@ -452,19 +425,19 @@ export default function KontenPage() {
           )}
 
           {/* Credits indicator */}
-          <div style={{ marginLeft: "auto", fontSize: "13px", color: "var(--text-muted)", fontWeight: 500 }}>
+          <div className="ml-auto text-[13px] leading-4 text-text-muted font-medium">
             {credits !== null ? `${credits} kredit tersisa` : ""}
           </div>
         </div>
 
         {/* ── Grouped recommendation cards ── */}
         {filtered.length === 0 ? (
-          <div style={{ padding: "48px 16px", textAlign: "center" }}>
-            <p style={{ color: "var(--text-muted)" }}>Tidak ada rekomendasi yang cocok dengan filter.</p>
+          <div className="py-12 px-4 text-center">
+            <p className="text-text-muted">Tidak ada rekomendasi yang cocok dengan filter.</p>
           </div>
         ) : typeFilter !== "all" ? (
           /* Flat list when type is selected */
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div className="flex flex-col gap-2.5">
             {filtered.map((rec) => (
               <RecCard key={rec.id} rec={rec} revealingId={revealingId} onReveal={handleReveal} onOpen={openPanel} onToggleApplied={handleToggleApplied} selectedId={selectedRec?.id ?? null} />
             ))}
@@ -477,18 +450,18 @@ export default function KontenPage() {
             const appliedInGroup = items.filter((r) => r.is_applied).length;
             return (
               <div key={type}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-                  <span style={{
-                    fontSize: "11px", fontWeight: 600, padding: "3px 10px", borderRadius: "var(--radius-xs)",
-                    background: typeInfo.bg, color: typeInfo.color, textTransform: "uppercase", letterSpacing: "0.05em",
-                  }}>
+                <div className="flex items-center gap-2.5 mb-3">
+                  <span
+                    className="text-[11px] leading-4 font-semibold px-2.5 py-[3px] rounded-xs uppercase tracking-wide"
+                    style={{ background: typeInfo.bg, color: typeInfo.color }}
+                  >
                     {typeInfo.label}
                   </span>
-                  <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                  <span className="text-[12px] leading-4 text-text-muted">
                     {appliedInGroup} dari {items.length} selesai
                   </span>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "28px" }}>
+                <div className="flex flex-col gap-2.5 mb-7">
                   {items.map((rec) => (
                     <RecCard key={rec.id} rec={rec} revealingId={revealingId} onReveal={handleReveal} onOpen={openPanel} onToggleApplied={handleToggleApplied} selectedId={selectedRec?.id ?? null} />
                   ))}
@@ -505,82 +478,74 @@ export default function KontenPage() {
           {/* Overlay */}
           <div
             onClick={closePanel}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
             style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.18)", zIndex: 49,
               animation: `${panelClosing ? "kontenOverlayOut" : "kontenOverlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
             }}
           />
 
           {/* Panel */}
           <div
+            className="flex flex-col fixed top-6 right-6 bottom-6 w-[480px] bg-white rounded-sm border border-border-default shadow-[0_8px_40px_rgba(0,0,0,0.12)] overflow-hidden z-50"
             style={{
-              display: "flex", flexDirection: "column",
-              position: "fixed", top: "24px", right: "24px", bottom: "24px",
-              width: "480px", background: "#ffffff", borderRadius: 'var(--radius-sm)',
-              border: "1px solid #E5E7EB", boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
-              overflow: "hidden", zIndex: 50,
               animation: `${panelClosing ? "kontenPanelOut" : "kontenPanelIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
             }}
           >
             {/* Panel header */}
-            <div style={{
-              flexShrink: 0, padding: "20px 24px 16px", borderBottom: "1px solid #E5E7EB",
-              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-            }}>
-              <div style={{ flex: 1, minWidth: 0, paddingRight: "16px" }}>
-                <div style={{ display: "flex", gap: "6px", marginBottom: "8px" }}>
-                  <span style={{
-                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "var(--radius-xs)",
-                    background: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).bg,
-                    color: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).color,
-                  }}>
+            <div className="shrink-0 px-6 pt-5 pb-4 border-b border-border-default flex justify-between items-start">
+              <div className="flex-1 min-w-0 pr-4">
+                <div className="flex gap-1.5 mb-2">
+                  <span
+                    className="text-[11px] leading-4 font-semibold px-2 py-0.5 rounded-xs"
+                    style={{
+                      background: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).bg,
+                      color: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).color,
+                    }}
+                  >
                     Prioritas {(PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).label}
                   </span>
-                  <span style={{
-                    fontSize: "11px", fontWeight: 600, padding: "2px 8px", borderRadius: "var(--radius-xs)",
-                    background: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).bg,
-                    color: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).color,
-                  }}>
+                  <span
+                    className="text-[11px] leading-4 font-semibold px-2 py-0.5 rounded-xs"
+                    style={{
+                      background: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).bg,
+                      color: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).color,
+                    }}
+                  >
                     {(TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).label}
                   </span>
                 </div>
-                <h2 style={{ fontSize: "16px", margin: 0 }}>
+                <h2 className="text-[16px] leading-6 m-0">
                   {selectedRec.title}
                 </h2>
               </div>
               <button
                 onClick={closePanel}
-                style={{
-                  background: "none", border: "none", cursor: "pointer", padding: "4px",
-                  color: "var(--text-muted)", flexShrink: 0,
-                }}
+                className="bg-none border-none cursor-pointer p-1 text-text-muted shrink-0"
               >
                 <IconX size={18} stroke={1.5} />
               </button>
             </div>
 
             {/* Panel body */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+            <div className="flex-1 overflow-y-auto px-6 py-5">
               {/* Description */}
-              <p style={{ fontSize: "14px", color: "#6B7280", lineHeight: 1.6, margin: "0 0 20px 0" }}>
+              <p className="text-[14px] leading-6 text-text-muted mb-5 mt-0">
                 {selectedRec.description}
               </p>
 
               {selectedRec.suggested_copy ? (
                 <>
                   {/* Suggested copy header */}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--purple)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-[12px] leading-4 font-semibold text-brand uppercase tracking-wide">
                       Saran Perbaikan
                     </span>
                     <button
                       onClick={() => handleCopy(selectedRec.suggested_copy!)}
-                      style={{
-                        display: "flex", alignItems: "center", gap: "4px",
-                        background: "none", border: "none", cursor: "pointer",
-                        fontSize: "12px", color: copied ? "#22C55E" : "#6B7280",
-                        transition: "color 0.15s ease",
-                      }}
+                      className={cn(
+                        "flex items-center gap-1 bg-none border-none cursor-pointer text-[12px] leading-4 transition-colors duration-100",
+                        copied ? "text-success" : "text-text-muted"
+                      )}
                     >
                       {copied ? <IconCheck size={14} stroke={2} /> : <IconCopy size={14} />}
                       {copied ? "Tersalin" : "Salin"}
@@ -588,28 +553,22 @@ export default function KontenPage() {
                   </div>
 
                   {/* Content */}
-                  <div style={{
-                    background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 'var(--radius-md)',
-                    padding: "16px",
-                  }}>
+                  <div className="bg-surface border border-border-default rounded-md p-4">
                     {renderMarkdown(selectedRec.suggested_copy)}
                   </div>
                 </>
               ) : (
-                <div style={{ textAlign: "center", padding: "40px 0" }}>
-                  <p style={{ color: "var(--text-muted)", marginBottom: "16px" }}>
+                <div className="text-center py-10">
+                  <p className="text-text-muted mb-4">
                     Konten belum dibuka. Buka konten ini untuk melihat saran perbaikan.
                   </p>
                   <button
                     onClick={() => handleReveal(selectedRec.id)}
                     disabled={revealingId === selectedRec.id}
-                    style={{
-                      display: "inline-flex", alignItems: "center", gap: "6px",
-                      background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: 'var(--radius-md)',
-                      padding: "10px 20px", fontSize: "13px", fontWeight: 600,
-                      cursor: revealingId === selectedRec.id ? "not-allowed" : "pointer",
-                      opacity: revealingId === selectedRec.id ? 0.7 : 1,
-                    }}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-5 py-2.5 text-[13px] leading-4 font-semibold",
+                      revealingId === selectedRec.id ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
+                    )}
                   >
                     {revealingId === selectedRec.id ? (
                       <>
@@ -618,7 +577,7 @@ export default function KontenPage() {
                       </>
                     ) : (
                       <>
-                        <IconSparkles size={14} /> Buat Konten · 1 kredit
+                        <IconSparkles size={14} /> Buat Konten &middot; 1 kredit
                       </>
                     )}
                   </button>
@@ -628,31 +587,25 @@ export default function KontenPage() {
 
             {/* Panel footer */}
             {selectedRec.suggested_copy && (
-              <div style={{
-                flexShrink: 0, padding: "16px 24px", borderTop: "1px solid #E5E7EB",
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-              }}>
+              <div className="shrink-0 px-6 py-4 border-t border-border-default flex items-center justify-between">
                 <button
                   onClick={() => handleToggleApplied(selectedRec.id, selectedRec.is_applied)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "8px",
-                    background: selectedRec.is_applied ? "#F0FDF4" : "var(--surface)",
-                    border: `1px solid ${selectedRec.is_applied ? "#BBF7D0" : "var(--border-default)"}`,
-                    borderRadius: 'var(--radius-md)', padding: "8px 16px",
-                    fontSize: "13px", fontWeight: 500, cursor: "pointer",
-                    color: selectedRec.is_applied ? "#16A34A" : "var(--text-body)",
-                    transition: "all 0.15s ease",
-                  }}
+                  className={cn(
+                    "flex items-center gap-2 rounded-md px-4 py-2 text-[13px] leading-4 font-medium cursor-pointer transition-all duration-100",
+                    selectedRec.is_applied
+                      ? "bg-[#F0FDF4] border border-[#BBF7D0] text-[#16A34A]"
+                      : "bg-surface border border-border-default text-text-body"
+                  )}
                 >
                   {selectedRec.is_applied ? (
-                    <><IconCircleCheckFilled size={16} style={{ color: "#22C55E" }} /> Sudah diterapkan</>
+                    <><IconCircleCheckFilled size={16} className="text-success" /> Sudah diterapkan</>
                   ) : (
                     "Tandai sudah diterapkan"
                   )}
                 </button>
 
                 {selectedRec._brandName && (
-                  <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                  <span className="text-[12px] leading-4 text-text-muted">
                     {selectedRec._brandName}
                   </span>
                 )}
@@ -690,86 +643,74 @@ function RecCard({
 
   return (
     <div
-      style={{
-        padding: "16px 20px", borderRadius: 'var(--radius-md)',
-        border: `1px solid ${isSelected ? "var(--purple)" : rec.is_applied ? "#BBF7D0" : "var(--border-default)"}`,
-        background: rec.is_applied ? "#FAFFF9" : "#ffffff",
-        display: "flex", alignItems: "center", gap: "16px",
-        cursor: isUnlocked ? "pointer" : "default",
-        transition: "border-color 0.15s ease, background 0.15s ease",
-      }}
+      className={cn(
+        "px-5 py-4 rounded-md flex items-center gap-4 transition-colors duration-100",
+        isSelected
+          ? "border border-brand"
+          : rec.is_applied
+            ? "border border-[#BBF7D0]"
+            : "border border-border-default",
+        rec.is_applied ? "bg-[#FAFFF9]" : "bg-white",
+        isUnlocked ? "cursor-pointer" : "cursor-default",
+        isUnlocked && !isSelected && "hover:border-[#C4B5FD]"
+      )}
       onClick={() => isUnlocked && onOpen(rec)}
-      onMouseEnter={(e) => {
-        if (isUnlocked && !isSelected) e.currentTarget.style.borderColor = "#C4B5FD";
-      }}
-      onMouseLeave={(e) => {
-        if (isUnlocked && !isSelected) {
-          e.currentTarget.style.borderColor = rec.is_applied ? "#BBF7D0" : "var(--border-default)";
-        }
-      }}
     >
       {/* Applied indicator */}
-      <div style={{ flexShrink: 0 }}>
+      <div className="shrink-0">
         {rec.is_applied ? (
-          <IconCircleCheckFilled size={20} style={{ color: "#22C55E" }} />
+          <IconCircleCheckFilled size={20} className="text-success" />
         ) : (
-          <div style={{
-            width: "20px", height: "20px", borderRadius: "50%",
-            border: `2px solid ${isUnlocked ? "var(--border-default)" : "#E5E7EB"}`,
-            background: "transparent",
-          }} />
+          <div className={cn(
+            "w-5 h-5 rounded-full border-2 bg-transparent",
+            isUnlocked ? "border-border-default" : "border-border-default"
+          )} />
         )}
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-          <span style={{
-            fontSize: "11px", fontWeight: 600, padding: "1px 6px", borderRadius: 'var(--radius-xs)',
-            background: priorityInfo.bg, color: priorityInfo.color,
-          }}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-1">
+          <span
+            className="text-[11px] leading-4 font-semibold px-1.5 py-px rounded-xs"
+            style={{ background: priorityInfo.bg, color: priorityInfo.color }}
+          >
             {priorityInfo.label}
           </span>
-          <span style={{
-            fontSize: "11px", fontWeight: 600, padding: "1px 6px", borderRadius: 'var(--radius-xs)',
-            background: typeInfo.bg, color: typeInfo.color,
-          }}>
+          <span
+            className="text-[11px] leading-4 font-semibold px-1.5 py-px rounded-xs"
+            style={{ background: typeInfo.bg, color: typeInfo.color }}
+          >
             {typeInfo.label}
           </span>
           {rec._brandName && (
-            <span style={{ fontSize: "11px", color: "var(--text-muted)", marginLeft: "4px" }}>
+            <span className="text-[11px] leading-4 text-text-muted ml-1">
               {rec._brandName}
             </span>
           )}
         </div>
-        <h3 style={{ fontSize: "14px", margin: "0 0 2px 0" }}>
+        <h3 className="text-[14px] leading-5 mb-0.5 mt-0">
           {rec.title}
         </h3>
-        <p style={{
-          fontSize: "13px", color: "var(--text-muted)", margin: 0, lineHeight: 1.5,
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-        }}>
+        <p className="text-[13px] leading-5 text-text-muted m-0 overflow-hidden text-ellipsis whitespace-nowrap">
           {rec.description}
         </p>
       </div>
 
       {/* Action */}
-      <div style={{ flexShrink: 0 }}>
+      <div className="shrink-0">
         {isUnlocked ? (
-          <span style={{ fontSize: "12px", color: "var(--purple)", fontWeight: 500 }}>
-            Lihat →
+          <span className="text-[12px] leading-4 text-brand font-medium">
+            Lihat &rarr;
           </span>
         ) : (
           <button
             onClick={(e) => { e.stopPropagation(); onReveal(rec.id); }}
             disabled={isRevealing}
-            style={{
-              display: "flex", alignItems: "center", gap: "5px",
-              background: "var(--purple)", color: "#ffffff", border: "none", borderRadius: 'var(--radius-sm)',
-              padding: "7px 12px", fontSize: "12px", fontWeight: 600,
-              cursor: isRevealing ? "not-allowed" : "pointer",
-              opacity: isRevealing ? 0.7 : 1, whiteSpace: "nowrap",
-            }}
+            className={cn(
+              "flex items-center gap-[5px] bg-brand text-white border-none rounded-sm px-3 py-[7px] text-[12px] leading-4 font-semibold whitespace-nowrap",
+              isRevealing ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
+            )}
           >
             {isRevealing ? (
               <>
@@ -778,7 +719,7 @@ function RecCard({
               </>
             ) : (
               <>
-                <IconSparkles size={12} /> Buat Konten · 1 kredit
+                <IconSparkles size={12} /> Buat Konten &middot; 1 kredit
               </>
             )}
           </button>

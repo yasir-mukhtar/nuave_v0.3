@@ -45,41 +45,18 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   }, []);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="flex min-h-screen flex-col">
       <LowCreditsBanner />
-      <div style={{ display: "flex", flex: 1 }}>
+      <div className="flex flex-1">
         <Sidebar
           credits={credits}
           userName={userName}
           userEmail={userEmail}
           workspaceName={workspaceName}
         />
-        <div
-          style={{
-            marginLeft: "256px",
-            flex: 1,
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            background: "var(--bg-page)",
-          }}
-        >
+        <div className="ml-64 flex min-w-0 flex-1 flex-col bg-page">
           <Topbar />
-          <main
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              overflowX: "hidden",
-              padding: "32px",
-              minWidth: 0,
-            }}
-          >
+          <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-8">
             {children}
           </main>
         </div>

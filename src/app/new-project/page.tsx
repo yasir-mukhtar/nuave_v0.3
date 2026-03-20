@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import WizardLayout from "@/components/new-project/WizardLayout";
 import SearchableSelect from "@/components/new-project/SearchableSelect";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
+import { cn } from "@/lib/utils";
 
 const REQUEST_TIMEOUT_MS = 60_000;
 
@@ -47,29 +48,6 @@ const LANGUAGES = [
   { code: "tl", name: "Filipino" },
   { code: "vi", name: "Vietnamese" },
 ];
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  height: 44,
-  padding: "0 14px",
-  fontFamily: "var(--font-body)",
-  fontSize: 14,
-  color: "#111827",
-  border: "1px solid var(--border-default)",
-  borderRadius: 8,
-  outline: "none",
-  transition: "border-color 0.15s ease, box-shadow 0.15s ease",
-  backgroundColor: "#fff",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontFamily: "var(--font-body)",
-  fontSize: 14,
-  fontWeight: 500,
-  color: "#111827",
-  marginBottom: 6,
-};
 
 
 function isValidUrlInput(value: string): boolean {
@@ -255,83 +233,39 @@ export default function NewProjectPage() {
     >
       <form onSubmit={handleSubmit}>
         {/* Heading */}
-        <h1 style={{
-          fontFamily: "var(--font-heading)",
-          fontSize: 24,
-          fontWeight: 600,
-          color: "#111827",
-          marginBottom: 8,
-          letterSpacing: "-0.02em",
-        }}>
+        <h1 className="font-heading text-[24px] leading-[32px] font-semibold text-text-heading mb-2 tracking-[-0.02em]">
           Mulai Audit Brand Anda
         </h1>
-        <p style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 15,
-          color: "var(--text-muted)",
-          marginBottom: 36,
-          lineHeight: 1.6,
-        }}>
+        <p className="font-body text-[15px] leading-[24px] text-text-muted mb-9">
           Kami akan menganalisis visibilitas brand Anda di AI.
         </p>
 
         {/* Website field */}
-        <div style={{ marginBottom: 24 }}>
-          <label style={labelStyle}>Website</label>
-          <div style={{ position: "relative", display: "flex" }}>
-            <span style={{
-              display: "flex",
-              alignItems: "center",
-              padding: "0 12px",
-              fontFamily: "var(--font-body)",
-              fontSize: 14,
-              color: "var(--text-muted)",
-              backgroundColor: "var(--bg-surface)",
-              border: "1px solid var(--border-default)",
-              borderRight: "none",
-              borderRadius: "8px 0 0 8px",
-              userSelect: "none",
-            }}>
+        <div className="mb-6">
+          <label className="block font-body text-[14px] leading-[20px] font-medium text-text-heading mb-1.5">
+            Website
+          </label>
+          <div className="relative flex">
+            <span className="flex items-center px-3 font-body text-[14px] leading-[20px] text-text-muted bg-surface border border-border-default border-r-0 rounded-l-md select-none">
               https://
             </span>
-            <div style={{ position: "relative", flex: 1 }}>
+            <div className="relative flex-1">
               <input
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="contoh.com"
-                style={{
-                  ...inputStyle,
-                  borderRadius: "0 8px 8px 0",
-                  paddingRight: prefetching ? 36 : 14,
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = "var(--purple)";
-                  e.target.style.boxShadow = "var(--shadow-focus)";
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = "var(--border-default)";
-                  e.target.style.boxShadow = "none";
-                }}
+                className={cn(
+                  "w-full h-[44px] px-3.5 font-body text-[14px] leading-[20px] text-text-heading border border-border-default rounded-r-md outline-none bg-white",
+                  "transition-[border-color,box-shadow] duration-100 ease-in-out",
+                  "focus:border-brand focus:shadow-app-focus"
+                )}
+                style={prefetching ? { paddingRight: 36 } : undefined}
               />
               {/* Loading spinner inside URL input */}
               {prefetching && (
-                <div style={{
-                  position: "absolute",
-                  right: 12,
-                  top: 0,
-                  bottom: 0,
-                  display: "flex",
-                  alignItems: "center",
-                }}>
-                  <div style={{
-                    width: 16,
-                    height: 16,
-                    border: "2px solid #E5E7EB",
-                    borderTop: "2px solid var(--purple)",
-                    borderRadius: "50%",
-                    animation: "spin 0.8s linear infinite",
-                  }} />
+                <div className="absolute right-3 top-0 bottom-0 flex items-center">
+                  <div className="w-4 h-4 border-2 border-border-default border-t-brand rounded-full animate-spin" />
                 </div>
               )}
             </div>
@@ -339,29 +273,20 @@ export default function NewProjectPage() {
         </div>
 
         {/* Brand name field */}
-        <div style={{ marginBottom: 24 }}>
-          <label style={labelStyle}>Nama Brand</label>
-          <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+        <div className="mb-6">
+          <label className="block font-body text-[14px] leading-[20px] font-medium text-text-heading mb-1.5">
+            Nama Brand
+          </label>
+          <div className="relative flex items-center">
             {/* Favicon inline */}
             {faviconUrl && faviconVisible && (
-              <div style={{
-                position: "absolute",
-                left: 12,
-                top: "50%",
-                transform: "translateY(-50%)",
-                zIndex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: 1,
-                transition: "opacity 0.15s ease",
-              }}>
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 z-[1] flex items-center justify-center transition-opacity duration-100 ease-in-out">
                 <img
                   src={faviconUrl}
                   alt=""
                   width={20}
                   height={20}
-                  style={{ borderRadius: 2, display: "block" }}
+                  className="rounded-xs block"
                   onError={() => setFaviconVisible(false)}
                 />
               </div>
@@ -374,19 +299,12 @@ export default function NewProjectPage() {
                 setBrandName(e.target.value);
               }}
               placeholder="Masukkan nama brand"
-              style={{
-                ...inputStyle,
-                paddingLeft: faviconUrl && faviconVisible ? 40 : 14,
-                transition: "border-color 0.15s ease, box-shadow 0.15s ease, padding-left 0.15s ease",
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = "var(--purple)";
-                e.target.style.boxShadow = "var(--shadow-focus)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "var(--border-default)";
-                e.target.style.boxShadow = "none";
-              }}
+              className={cn(
+                "w-full h-[44px] font-body text-[14px] leading-[20px] text-text-heading border border-border-default rounded-md outline-none bg-white",
+                "transition-[border-color,box-shadow,padding-left] duration-100 ease-in-out",
+                "focus:border-brand focus:shadow-app-focus"
+              )}
+              style={{ paddingLeft: faviconUrl && faviconVisible ? 40 : 14 }}
             />
           </div>
           {/* Hidden img to trigger favicon load */}
@@ -396,7 +314,7 @@ export default function NewProjectPage() {
               alt=""
               width={0}
               height={0}
-              style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
+              className="absolute opacity-0 pointer-events-none"
               onLoad={() => setFaviconVisible(true)}
               onError={() => setFaviconVisible(false)}
             />
@@ -404,9 +322,11 @@ export default function NewProjectPage() {
         </div>
 
         {/* Target Pasar + Bahasa Utama */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+        <div className="grid grid-cols-2 gap-4 mb-6">
           <div>
-            <label style={labelStyle}>Target Pasar</label>
+            <label className="block font-body text-[14px] leading-[20px] font-medium text-text-heading mb-1.5">
+              Target Pasar
+            </label>
             <SearchableSelect
               options={COUNTRIES.map((c) => ({ value: c.code, label: c.name, icon: c.flag }))}
               value={country}
@@ -419,7 +339,9 @@ export default function NewProjectPage() {
             />
           </div>
           <div>
-            <label style={labelStyle}>Bahasa Utama</label>
+            <label className="block font-body text-[14px] leading-[20px] font-medium text-text-heading mb-1.5">
+              Bahasa Utama
+            </label>
             <SearchableSelect
               options={LANGUAGES.map((l) => ({ value: l.code, label: l.name }))}
               value={language}
@@ -434,16 +356,11 @@ export default function NewProjectPage() {
         </div>
 
         {/* Spacing before button */}
-        <div style={{ marginTop: 12 }} />
+        <div className="mt-3" />
 
         {/* Error message */}
         {error && (
-          <p style={{
-            fontFamily: "var(--font-body)",
-            fontSize: 13,
-            color: "var(--red)",
-            marginBottom: 12,
-          }}>
+          <p className="font-body text-[13px] leading-[18px] text-error mb-3">
             {error}
           </p>
         )}
@@ -452,34 +369,21 @@ export default function NewProjectPage() {
         <button
           type="submit"
           disabled={!isValid || loading}
-          style={{
-            width: "100%",
-            height: 48,
-            borderRadius: 8,
-            border: "none",
-            backgroundColor: isValid && !loading ? "var(--purple)" : "#D1D5DB",
-            color: "#ffffff",
-            fontFamily: "var(--font-body)",
-            fontSize: 15,
-            fontWeight: 500,
-            cursor: isValid && !loading ? "pointer" : "not-allowed",
-            transition: "background-color 0.15s ease",
-          }}
-          onMouseEnter={(e) => {
-            if (isValid && !loading) e.currentTarget.style.backgroundColor = "var(--purple-dark)";
-          }}
-          onMouseLeave={(e) => {
-            if (isValid && !loading) e.currentTarget.style.backgroundColor = "var(--purple)";
-          }}
+          className={cn(
+            "w-full h-12 rounded-md border-none font-body text-[15px] leading-[22px] font-medium text-white transition-colors duration-100 ease-in-out",
+            isValid && !loading
+              ? "bg-brand cursor-pointer hover:bg-brand-dark"
+              : "bg-border-strong cursor-not-allowed"
+          )}
         >
-          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <span className="flex items-center justify-center gap-2">
             {loading && <ButtonSpinner size={16} />}
             {loading ? "Memproses..." : "Lanjutkan"}
           </span>
         </button>
       </form>
 
-      {/* Spinner animation */}
+      {/* NOTE: Embedded @keyframes spin — used by prefetch spinner. Consider moving to global CSS. */}
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </WizardLayout>
   );

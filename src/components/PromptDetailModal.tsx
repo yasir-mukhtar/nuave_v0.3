@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { X, CheckCircle2, XCircle } from 'lucide-react';
+import { IconX, IconCircleCheckFilled, IconCircleXFilled } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 import { renderMarkdown } from '@/lib/markdown';
 
@@ -71,7 +71,7 @@ export default function PromptDetailModal({
             onClick={handleClose}
             className="flex items-center border-none bg-transparent p-1 text-text-muted cursor-pointer hover:text-text-heading"
           >
-            <X className="h-[18px] w-[18px]" strokeWidth={1.5} />
+            <IconX size={18} stroke={1.5} />
           </button>
         </div>
 
@@ -90,9 +90,9 @@ export default function PromptDetailModal({
             <div className="mb-4 flex justify-end">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-surface-raised py-1.5 pl-1.5 pr-3">
                 {result.brand_mentioned ? (
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <IconCircleCheckFilled size={20} className="text-green-600" />
                 ) : (
-                  <XCircle className="h-5 w-5 text-red-600" />
+                  <IconCircleXFilled size={20} className="text-red-600" />
                 )}
                 <span className="text-[13px] leading-4 font-medium text-text-heading">
                   {brandName}{' '}
@@ -111,7 +111,7 @@ export default function PromptDetailModal({
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 border-t border-border-default px-6 py-3 text-center text-[11px] text-text-placeholder">
+        <div className="shrink-0 border-t border-border-default px-6 py-3 text-center text-[11px] leading-4 text-text-placeholder">
           Respons oleh GPT-4o dengan pencarian web ·{' '}
           {result.created_at
             ? new Date(result.created_at).toLocaleString('id-ID')

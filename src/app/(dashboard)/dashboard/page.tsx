@@ -14,6 +14,7 @@ import VisibilityChart from "@/components/dashboard/VisibilityChart";
 import CompetitorPanel from "@/components/dashboard/CompetitorPanel";
 import MentionPanel from "@/components/dashboard/MentionPanel";
 import ActionItemPanel from "@/components/dashboard/ActionItemPanel";
+import { cn } from "@/lib/utils";
 
 type DashboardData = {
   firstName: string;
@@ -156,70 +157,70 @@ export default function DashboardPage() {
 
   if (wsLoading || loading || !data) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "300px" }}>
-        <p className="text-label-14" style={{ color: "var(--text-muted)" }}>Memuat dashboard...</p>
+      <div className="flex items-center justify-center min-h-[300px]">
+        <p className="text-label-14 text-text-muted">Memuat dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+    <div className="flex flex-col gap-8">
       {/* Greeting */}
       <div>
-        <h1 style={{ margin: 0 }}>
+        <h1 className="m-0">
           Selamat datang, {data.firstName}
         </h1>
-        <p className="text-copy-14" style={{ color: "var(--text-muted)", margin: "4px 0 0" }}>
+        <p className="text-copy-14 text-text-muted mt-1 mb-0">
           Berikut performa AI visibility{" "}
-          <span style={{ fontWeight: 600, color: "var(--text-heading)" }}>{data.brandName}</span>
+          <span className="font-semibold text-text-heading">{data.brandName}</span>
         </p>
       </div>
 
       {/* Chart + Competitors row */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "20px", alignItems: "stretch" }}>
+      <div className="grid grid-cols-[1fr_320px] gap-5 items-stretch">
         <VisibilityChart data={data.chartData} latestScore={data.latestScore} />
         <CompetitorPanel competitors={data.competitors} />
       </div>
 
       {/* Mention + Action Item row */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", gridAutoRows: "480px" }}>
+      <div className="grid grid-cols-2 gap-5 auto-rows-[480px]">
         <MentionPanel mentions={data.mentions} auditId={data.latestAuditId} brandName={data.brandName} />
         <ActionItemPanel items={data.actionItems} auditId={data.latestAuditId} />
       </div>
 
       {/* Stats Row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
+      <div className="grid grid-cols-3 gap-5">
         <StatCard
           label="Total Audits"
           value={data.totalAudits}
-          icon={<IconClipboardCheck size={20} color="var(--purple)" />}
+          icon={<IconClipboardCheck size={20} className="text-brand" />}
         />
         <StatCard
           label="Average Score"
           value={`${data.avgScore}%`}
-          icon={<IconChartBar size={20} color="var(--purple)" />}
+          icon={<IconChartBar size={20} className="text-brand" />}
         />
         <StatCard
           label="Credits Remaining"
           value={data.creditsRemaining}
-          icon={<IconWallet size={20} color="var(--purple)" />}
+          icon={<IconWallet size={20} className="text-brand" />}
         />
       </div>
 
       {/* Recent Audits */}
       <div>
-        <h2 style={{ marginBottom: "16px" }}>
+        <h2 className="mb-4">
           Recent Audits
         </h2>
 
         {data.completeAudits.length === 0 ? (
-          <div className="card" style={{ padding: "40px", textAlign: "center" }}>
-            <p className="text-label-13" style={{ color: "var(--text-muted)" }}>
+          <div className="card p-10 text-center">
+            <p className="text-label-13 text-text-muted">
               No audits found. Start your first audit to see results here.
             </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div className="flex flex-col gap-3">
             {data.completeAudits.map((audit) => (
               <AuditRow key={audit.id} audit={audit} brandName={data.brandName} />
             ))}
@@ -232,24 +233,19 @@ export default function DashboardPage() {
 
 function StatCard({ label, value, icon }: { label: string; value: string | number; icon: React.ReactNode }) {
   return (
-    <div className="card" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
-      <div
-        className="text-label-13"
-        style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)", fontWeight: 500 }}
-      >
+    <div className="card p-6 flex flex-col gap-3">
+      <div className="text-label-13 flex items-center gap-2 text-text-muted font-medium">
         {icon}
         {label}
       </div>
-      <div style={{ fontSize: "28px", fontWeight: 700, color: "var(--text-heading)" }}>{value}</div>
+      <div className="text-[28px] leading-8 font-bold text-text-heading">{value}</div>
     </div>
   );
 }
 
 function AuditRow({ audit, brandName }: { audit: any; brandName: string }) {
   const score = audit.visibility_score || 0;
-  let scoreColor = "#EF4444";
-  if (score >= 70) scoreColor = "#22C55E";
-  else if (score >= 40) scoreColor = "#F59E0B";
+  const scoreColor = score >= 70 ? "text-success" : score >= 40 ? "text-warning" : "text-error";
 
   const date = audit.completed_at
     ? new Date(audit.completed_at).toLocaleDateString("en-US", {
@@ -260,67 +256,31 @@ function AuditRow({ audit, brandName }: { audit: any; brandName: string }) {
     : "—";
 
   return (
-    <div
-      className="card-row"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "16px 20px",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-        <div
-          style={{
-            width: "40px",
-            height: "40px",
-            borderRadius: "var(--radius-sm)",
-            background: "var(--purple-light)",
-            color: "var(--purple)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "18px",
-            fontWeight: 700,
-          }}
-        >
+    <div className="card-row flex items-center justify-between px-5 py-4">
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-sm bg-brand-light text-brand flex items-center justify-center text-[18px] leading-5 font-bold">
           {brandName.charAt(0).toUpperCase()}
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-          <span className="text-label-16" style={{ fontWeight: 600, color: "var(--text-heading)" }}>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-label-16 font-semibold text-text-heading">
             {brandName}
           </span>
-          <span className="text-label-13" style={{ color: "var(--text-muted)" }}>
+          <span className="text-label-13 text-text-muted">
             Audited on {date}
           </span>
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-          <span className="text-label-13" style={{ color: "var(--text-muted)", fontWeight: 500 }}>
+      <div className="flex items-center gap-8">
+        <div className="flex flex-col items-end gap-0.5">
+          <span className="text-label-13 text-text-muted font-medium">
             Visibility Score
           </span>
-          <span style={{ fontSize: "16px", fontWeight: 700, color: scoreColor }}>{score}%</span>
+          <span className={cn("text-[16px] leading-5 font-bold", scoreColor)}>{score}%</span>
         </div>
 
-        <Link href={`/audit/${audit.id}/results`} style={{ textDecoration: "none" }}>
-          <button
-            className="text-label-13"
-            style={{
-              background: "white",
-              border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-sm)",
-              padding: "8px 14px",
-              fontWeight: 600,
-              color: "var(--text-body)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              transition: "all 0.2s",
-            }}
-          >
+        <Link href={`/audit/${audit.id}/results`} className="no-underline">
+          <button className="text-label-13 bg-white border border-border-default rounded-sm px-3.5 py-2 font-semibold text-text-body cursor-pointer flex items-center gap-1.5 transition-all duration-200">
             View Results <IconArrowRight size={16} stroke={2} />
           </button>
         </Link>

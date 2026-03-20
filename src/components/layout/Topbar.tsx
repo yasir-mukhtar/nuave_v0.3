@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from "next/link";
 import {
-  Coins,
-  ArrowUpRight,
-  ChevronDown,
-  ChevronUp,
-  Check,
-  Plus,
-} from 'lucide-react';
+  IconCoins,
+  IconArrowUpRight,
+  IconChevronDown,
+  IconChevronUp,
+  IconCheck,
+  IconPlus,
+} from '@tabler/icons-react';
 import { cn } from "@/lib/utils";
 import { useCreditsBalance } from "@/hooks/useCreditsBalance";
 import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
@@ -54,9 +54,9 @@ export default function Topbar() {
         >
           {workspaceName}
           {open ? (
-            <ChevronUp size={14} strokeWidth={2} />
+            <IconChevronUp size={14} stroke={2} />
           ) : (
-            <ChevronDown size={14} strokeWidth={2} />
+            <IconChevronDown size={14} stroke={2} />
           )}
         </button>
 
@@ -84,7 +84,7 @@ export default function Topbar() {
                     )}
                   >
                     <span className="w-[18px] shrink-0">
-                      {isActive && <Check size={16} strokeWidth={2.5} />}
+                      {isActive && <IconCheck size={16} stroke={2.5} />}
                     </span>
                     {ws.brand_name}
                   </button>
@@ -102,7 +102,7 @@ export default function Topbar() {
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2 px-3.5 py-2.5 font-medium text-sm text-text-heading no-underline"
               >
-                <Plus size={16} strokeWidth={2} />
+                <IconPlus size={16} stroke={2} />
                 Tambah brand
               </Link>
             </div>
@@ -113,7 +113,7 @@ export default function Topbar() {
       {/* Right: credits + buy button */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-1.5 font-medium text-sm text-brand">
-          <Coins size={18} strokeWidth={2} />
+          <IconCoins size={18} stroke={2} />
           <span>{credits ?? "—"} credit</span>
         </div>
 
@@ -122,7 +122,7 @@ export default function Topbar() {
           className="flex items-center gap-1 px-3 py-1.5 font-medium text-sm text-text-heading bg-transparent border border-border-light rounded-sm no-underline shadow-app-subtle cursor-pointer"
         >
           Beli
-          <ArrowUpRight size={16} strokeWidth={2} />
+          <IconArrowUpRight size={16} stroke={2} />
         </Link>
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { X } from "lucide-react";
+import { IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
@@ -30,7 +30,7 @@ export default function WizardLayout({ currentStep, totalSteps, children, onClos
           aria-label="Tutup"
           className="flex h-10 w-10 items-center justify-center rounded-md border border-border-default bg-transparent text-text-body transition-colors duration-150 hover:border-border-strong hover:bg-surface active:bg-surface-raised cursor-pointer"
         >
-          <X className="h-5 w-5" strokeWidth={1.5} />
+          <IconX size={20} stroke={1.5} />
         </button>
       </header>
 

@@ -4,13 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Home,
-  MessageSquare,
-  FileText,
-  Sparkles,
-  ChevronsUpDown,
-  LogOut,
-} from 'lucide-react';
+  IconSmartHome,
+  IconMessageDots,
+  IconArticle,
+  IconRosetteAsterisk,
+  IconSelector,
+  IconLogout,
+} from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -22,10 +22,10 @@ type SidebarProps = {
 };
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: Home },
-  { label: "Prompt", href: "/prompt", icon: MessageSquare },
-  { label: "Konten", href: "/content", icon: FileText },
-  { label: "Brand", href: "/brand", icon: Sparkles },
+  { label: "Dashboard", href: "/dashboard", icon: IconSmartHome },
+  { label: "Prompt", href: "/prompt", icon: IconMessageDots },
+  { label: "Konten", href: "/content", icon: IconArticle },
+  { label: "Brand", href: "/brand", icon: IconRosetteAsterisk },
 ];
 
 const bottomLinks = [
@@ -80,7 +80,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
         className="flex items-center gap-2 no-underline mb-8"
       >
         <img src="/logo-nuave.svg" alt="Nuave" width="28" height="28" className="block" />
-        <span className="font-semibold text-[17px] text-text-heading">Nuave</span>
+        <span className="font-semibold text-[17px] leading-5 text-text-heading">Nuave</span>
       </Link>
 
       {/* Primary nav */}
@@ -100,13 +100,13 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
             >
               <div
                 className={cn(
-                  "flex items-center gap-2.5 h-9 px-2 rounded-sm cursor-pointer bg-transparent transition-[color] duration-150",
+                  "flex items-center gap-2.5 h-9 px-2 rounded-sm cursor-pointer bg-transparent transition-[color] duration-100",
                   isActive
                     ? "text-text-heading"
                     : "text-text-muted hover:text-text-body"
                 )}
               >
-                <Icon size={18} strokeWidth={2} />
+                <Icon size={18} stroke={2} />
                 <span
                   className={cn(
                     "text-sm",
@@ -132,7 +132,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "text-sm no-underline block py-1.5 px-2 rounded-sm transition-[color] duration-150",
+                  "text-sm no-underline block py-1.5 px-2 rounded-sm transition-[color] duration-100",
                   isActive
                     ? "font-semibold text-text-heading"
                     : "font-normal text-text-muted hover:text-text-body"
@@ -170,7 +170,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
                 onClick={handleLogout}
                 className="flex items-center gap-2 w-full py-2.5 px-3.5 text-[13px] leading-4 text-text-muted bg-transparent border-none cursor-pointer text-left hover:bg-surface hover:text-text-heading"
               >
-                <LogOut size={16} strokeWidth={1.5} />
+                <IconLogout size={16} stroke={1.5} />
                 Keluar
               </button>
             </div>
@@ -181,7 +181,7 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
             onClick={() => popoverOpen ? closePopover() : setPopoverOpen(true)}
             className="flex items-center gap-2.5 p-2.5 cursor-pointer rounded-md bg-white border border-border-default shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-shadow duration-150 hover:shadow-[0_2px_6px_rgba(0,0,0,0.08)]"
           >
-            <div className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-[11px] font-semibold shrink-0">
+            <div className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-[11px] leading-3 font-semibold shrink-0">
               {initial}
             </div>
             <div className="flex flex-col gap-px flex-1 min-w-0">
@@ -189,9 +189,9 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
                 {userName}
               </span>
             </div>
-            <ChevronsUpDown
+            <IconSelector
               size={16}
-              strokeWidth={2}
+              stroke={2}
               className="text-text-muted shrink-0"
             />
           </div>

@@ -9,8 +9,8 @@ const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1Q
 export default function RunningPage() {
   return (
     <Suspense fallback={
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>Memuat...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="font-body text-text-muted">Memuat...</p>
       </div>
     }>
       <RunningPageContent />
@@ -67,61 +67,26 @@ function RunningPageContent() {
   const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#ffffff",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: 24,
-    }}>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
       {/* Logo */}
-      <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", marginBottom: 48 }}>
-        <img src={LOGO_SVG} alt="Nuave" width={28} height={28} style={{ objectFit: "contain" }} />
-        <span style={{
-          fontFamily: "var(--font-heading)",
-          fontWeight: 600,
-          fontSize: 20,
-          color: "#111827",
-        }}>
+      <Link href="/" className="flex items-center gap-2 no-underline mb-12">
+        <img src={LOGO_SVG} alt="Nuave" width={28} height={28} className="object-contain" />
+        <span className="font-heading font-semibold text-[20px] leading-[28px] text-text-heading">
           Nuave
         </span>
       </Link>
 
       {status === "failed" ? (
         <>
-          <h2 style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: 20,
-            fontWeight: 600,
-            color: "#111827",
-            marginBottom: 8,
-          }}>
+          <h2 className="font-heading text-[20px] leading-[28px] font-semibold text-text-heading mb-2">
             Audit gagal
           </h2>
-          <p style={{
-            fontFamily: "var(--font-body)",
-            fontSize: 14,
-            color: "var(--text-muted)",
-            marginBottom: 24,
-          }}>
+          <p className="font-body text-[14px] leading-[20px] text-text-muted mb-6">
             Terjadi kesalahan saat menjalankan audit. Silakan coba lagi.
           </p>
           <button
             onClick={() => router.push("/new-project")}
-            style={{
-              height: 44,
-              padding: "0 24px",
-              borderRadius: 8,
-              border: "none",
-              background: "var(--purple)",
-              color: "#fff",
-              fontFamily: "var(--font-body)",
-              fontSize: 14,
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            className="h-[44px] px-6 rounded-md border-none bg-brand text-white font-body text-[14px] leading-[20px] font-medium cursor-pointer"
           >
             Coba lagi
           </button>
@@ -129,55 +94,28 @@ function RunningPageContent() {
       ) : (
         <>
           {/* Spinner */}
-          <div style={{
-            width: 48,
-            height: 48,
-            border: "4px solid #E5E7EB",
-            borderTop: "4px solid var(--purple)",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-            marginBottom: 24,
-          }} />
+          <div className="w-12 h-12 border-4 border-border-default border-t-brand rounded-full animate-spin mb-6" />
 
-          <h2 style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: 20,
-            fontWeight: 600,
-            color: "#111827",
-            marginBottom: 8,
-          }}>
+          <h2 className="font-heading text-[20px] leading-[28px] font-semibold text-text-heading mb-2">
             {status === "complete" ? "Audit selesai!" : "Menjalankan audit..."}
           </h2>
-          <p style={{
-            fontFamily: "var(--font-body)",
-            fontSize: 14,
-            color: "var(--text-muted)",
-            marginBottom: 32,
-          }}>
+          <p className="font-body text-[14px] leading-[20px] text-text-muted mb-8">
             {status === "complete"
               ? "Mengalihkan ke hasil laporan..."
               : `Menganalisis ${completed} dari ${total} pertanyaan`}
           </p>
 
           {/* Progress bar */}
-          <div style={{
-            width: 280,
-            height: 6,
-            borderRadius: 3,
-            background: "#E5E7EB",
-            overflow: "hidden",
-          }}>
-            <div style={{
-              width: `${progress}%`,
-              height: "100%",
-              borderRadius: 3,
-              background: "var(--purple)",
-              transition: "width 0.5s ease",
-            }} />
+          <div className="w-[280px] h-1.5 rounded-full bg-border-default overflow-hidden">
+            <div
+              className="h-full rounded-full bg-brand transition-[width] duration-500 ease-in-out"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </>
       )}
 
+      {/* NOTE: Embedded @keyframes spin — consider moving to global CSS */}
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
