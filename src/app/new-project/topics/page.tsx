@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IconPlus } from "@tabler/icons-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import WizardLayout from "@/components/new-project/WizardLayout";
 
 interface Topic {
@@ -38,6 +39,7 @@ export default function TopicsPage() {
             company_overview: project.profile?.company_overview || "",
             industry: project.profile?.industry || "",
             language: project.language || "id",
+            workspace_id: project.workspaceId,
           }),
         });
         const data = await res.json();
@@ -172,25 +174,10 @@ export default function TopicsPage() {
               transition: "border-color 0.15s ease",
             }}
           >
-            {/* Checkbox */}
-            <div style={{
-              width: 18,
-              height: 18,
-              borderRadius: 4,
-              border: topic.checked ? "none" : "1.5px solid var(--border-strong)",
-              backgroundColor: topic.checked ? "var(--purple)" : "#ffffff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              transition: "background-color 0.15s ease, border-color 0.15s ease",
-            }}>
-              {topic.checked && (
-                <svg width="10" height="8" viewBox="0 0 12 9" fill="none">
-                  <path d="M1 4L4.5 7.5L11 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </div>
+            <Checkbox
+              checked={topic.checked}
+              className="h-[18px] w-[18px] rounded"
+            />
 
             <span style={{
               fontFamily: "var(--font-body)",
