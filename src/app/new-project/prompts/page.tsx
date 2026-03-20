@@ -152,7 +152,7 @@ export default function PromptsPage() {
     }
     const topics: { id: string; name: string }[] = JSON.parse(topicsData);
     const project = JSON.parse(projectData);
-    const cacheKey = `nuave_cached_prompts_${project.workspaceId || "default"}`;
+    const cacheKey = `nuave_cached_prompts_${project.projectId || "default"}`;
 
     // Check sessionStorage cache first
     const cached = sessionStorage.getItem(cacheKey);
@@ -176,7 +176,7 @@ export default function PromptsPage() {
             brand_name: project.brandName,
             topics: topics.map((t) => t.name),
             language: project.language || "id",
-            workspace_id: project.workspaceId,
+            project_id: project.projectId,
           }),
         });
         const data = await res.json();
@@ -233,7 +233,7 @@ export default function PromptsPage() {
     const projectData = sessionStorage.getItem("nuave_new_project");
     if (!projectData) return;
     const project = JSON.parse(projectData);
-    const cacheKey = `nuave_cached_prompts_${project.workspaceId || "default"}`;
+    const cacheKey = `nuave_cached_prompts_${project.projectId || "default"}`;
     sessionStorage.setItem(cacheKey, JSON.stringify(topicGroups));
   }, [topicGroups]);
 
@@ -331,7 +331,7 @@ export default function PromptsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          workspace_id: project.workspaceId,
+          project_id: project.projectId,
           prompts,
           brand_name: project.brandName,
           website_url: project.url,

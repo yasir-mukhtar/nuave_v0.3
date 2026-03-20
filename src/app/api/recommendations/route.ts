@@ -47,21 +47,21 @@ export async function POST(request: Request) {
     }
     console.log('audit:', audit)
 
-    // Query 2: get workspace
-    const { data: workspace, error: workspaceError } = await supabase
-      .from('workspaces')
+    // Query 2: get project
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
       .select('*')
-      .eq('id', audit.workspace_id)
+      .eq('id', audit.project_id)
       .single()
 
-    if (workspaceError || !workspace) {
-      console.error('Workspace fetch error:', workspaceError)
+    if (projectError || !project) {
+      console.error('Project fetch error:', projectError)
       return NextResponse.json(
-        { error: 'Workspace not found' },
+        { error: 'Project not found' },
         { status: 404 }
       )
     }
-    console.log('workspace:', workspace)
+    console.log('project:', project)
 
     // Fetch audit results
     const { data: results, error: resultsError } = await supabase
@@ -74,11 +74,11 @@ export async function POST(request: Request) {
     }
     console.log('results count:', results?.length)
 
-    const brandName = workspace.brand_name
-    const websiteUrl = workspace.website_url
-    const companyOverview = workspace.company_overview
-    const industry = workspace.industry || 'General'
-    const differentiators = workspace.differentiators
+    const brandName = project.name
+    const websiteUrl = project.website_url
+    const companyOverview = project.company_overview
+    const industry = project.industry || 'General'
+    const differentiators = project.differentiators
     const visibilityScore = audit.visibility_score
 
     const mentionedCount = results?.filter(r => r.brand_mentioned).length || 0
@@ -167,7 +167,7 @@ Return ONLY a JSON array, no other text:
     // Store in Supabase
     const toInsertWithTarget = recommendations.map((rec: any) => ({
       audit_id,
-      workspace_id: audit.workspace_id,
+      project_id: audit.project_id,
       type: rec.type === 'meta_structure' ? 'structure' : rec.type,
       priority: rec.priority,
       title: rec.title,

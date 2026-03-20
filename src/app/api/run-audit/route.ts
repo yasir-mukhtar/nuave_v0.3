@@ -18,58 +18,71 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { workspace_id, prompts, brand_name: requestBrandName, website_url, profile } = body as {
-      workspace_id: string;
+    const { project_id, prompts, brand_name: requestBrandName, website_url, profile } = body as {
+      project_id: string;
       prompts: PromptRequest[];
       brand_name?: string;
       website_url?: string;
       profile?: any;
     };
 
-    if (!workspace_id || !prompts || !Array.isArray(prompts)) {
+    if (!project_id || !prompts || !Array.isArray(prompts)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid request body. Missing workspace_id or prompts.' },
+        { success: false, error: 'Invalid request body. Missing project_id or prompts.' },
         { status: 400 }
       );
     }
 
-    // STEP 0 — Resolve brand name and ensure workspace exists
+    // STEP 0 — Resolve brand name and ensure project exists
     let brandName = requestBrandName || '';
 
     if (!brandName) {
-      const { data: workspace } = await supabase
-        .from('workspaces')
-        .select('brand_name')
-        .eq('id', workspace_id)
+      const { data: project } = await supabase
+        .from('projects')
+        .select('name')
+        .eq('id', project_id)
         .maybeSingle();
-      
-      brandName = workspace?.brand_name || 'the brand';
+
+      brandName = project?.name || 'the brand';
     }
 
-    // Ensure workspace record exists
-    const { data: existingWorkspace } = await supabase
-      .from('workspaces')
+    // Ensure project record exists
+    const { data: existingProject } = await supabase
+      .from('projects')
       .select('id')
-      .eq('id', workspace_id)
+      .eq('id', project_id)
       .maybeSingle();
 
-    if (!existingWorkspace) {
-      console.log(`Workspace ${workspace_id} not found. Creating temporary workspace record.`);
-      await supabase
-        .from('workspaces')
-        .insert({
-          id: workspace_id,
-          brand_name: brandName,
-          website_url: website_url || '',
-          company_overview: profile?.company_overview || '',
-          user_id: user?.id ?? null
-        });
+    if (!existingProject) {
+      console.log(`Project ${project_id} not found. Creating temporary project record.`);
+      // Find user's first workspace to assign the project to
+      let wsId: string | null = null;
+      if (user) {
+        const { data: ws } = await supabase
+          .from('workspaces')
+          .select('id')
+          .eq('user_id', user.id)
+          .limit(1)
+          .maybeSingle();
+        wsId = ws?.id ?? null;
+      }
+      if (wsId) {
+        await supabase
+          .from('projects')
+          .insert({
+            id: project_id,
+            workspace_id: wsId,
+            name: brandName,
+            website_url: website_url || '',
+            company_overview: profile?.company_overview || '',
+          });
+      }
     }
 
-    // Always update workspace with the latest profile data if available
+    // Always update project with the latest profile data if available
     if (profile) {
       await supabase
-        .from('workspaces')
+        .from('projects')
         .update({
           company_overview: profile.company_overview,
           industry: profile.industry,
@@ -78,7 +91,7 @@ export async function POST(req: NextRequest) {
           competitors: profile.competitors,
           website_url: website_url || profile.website_url || '',
         })
-        .eq('id', workspace_id);
+        .eq('id', project_id);
     }
 
     // STEP 0.5 — Atomic credit check + deduction (prevents race conditions)
@@ -108,7 +121,7 @@ export async function POST(req: NextRequest) {
     const { data: audit, error: auditError } = await supabase
       .from('audits')
       .insert({
-        workspace_id: workspace_id,
+        project_id: project_id,
         status: 'running',
         total_prompts: prompts.length,
         brand_mention_count: 0,
@@ -133,7 +146,7 @@ export async function POST(req: NextRequest) {
     // STEP 2 — Start background processing
     const backgroundProcess = processAuditInBackground(
       auditId,
-      workspace_id,
+      project_id,
       prompts,
       brandName,
       user?.id || null,
@@ -172,7 +185,7 @@ export async function POST(req: NextRequest) {
 
 async function processAuditInBackground(
   auditId: string,
-  workspaceId: string,
+  projectId: string,
   prompts: PromptRequest[],
   brandName: string,
   userId: string | null,

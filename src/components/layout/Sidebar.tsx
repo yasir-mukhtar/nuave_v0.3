@@ -18,12 +18,14 @@ import {
 } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { clearNuaveProjectSession } from "@/lib/session";
 
 type SidebarProps = {
   credits: number;
   userName: string;
   userEmail: string;
   workspaceName: string;
+  projectName: string;
   websiteUrl?: string;
 };
 
@@ -49,7 +51,7 @@ function getFaviconUrl(websiteUrl?: string): string | null {
   }
 }
 
-export function Sidebar({ credits, userName, userEmail, workspaceName, websiteUrl }: SidebarProps) {
+export function Sidebar({ credits, userName, userEmail, workspaceName, projectName, websiteUrl }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const initial = getInitial(userName);
@@ -188,14 +190,17 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, websiteUr
                 </div>
 
                 {/* New project */}
-                <Link
-                  href="/new-project"
-                  onClick={() => closePopover()}
-                  className="flex items-center gap-2 no-underline"
+                <button
+                  onClick={() => {
+                    clearNuaveProjectSession();
+                    closePopover();
+                    router.push("/new-project");
+                  }}
+                  className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-0"
                 >
                   <IconPlus size={20} stroke={1.5} className="text-[#374151]" />
                   <span className="text-[14px] font-medium text-[#374151]">Buat proyek baru</span>
-                </Link>
+                </button>
               </div>
 
               <div className="border-t border-[#ececec]" />
@@ -220,7 +225,7 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, websiteUr
               <div className="w-7 h-7 rounded-full bg-white border border-[#ececec] flex items-center justify-center shrink-0 overflow-hidden">
                 <img
                   src={faviconSrc}
-                  alt={workspaceName}
+                  alt={projectName}
                   width={18}
                   height={18}
                   className="block"
@@ -230,10 +235,10 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, websiteUr
               </div>
             ) : (
               <div className="w-7 h-7 rounded-full bg-white border border-[#ececec] flex items-center justify-center text-[11px] font-semibold text-[#0d0d0d] shrink-0">
-                {getInitial(workspaceName)}
+                {getInitial(projectName)}
               </div>
             )}
-            <span className="text-[14px] font-medium text-[#0d0d0d] truncate flex-1">{workspaceName}</span>
+            <span className="text-[14px] font-medium text-[#0d0d0d] truncate flex-1">{projectName}</span>
             <IconSelector
               size={16}
               stroke={2}

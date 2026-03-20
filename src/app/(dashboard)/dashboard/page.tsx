@@ -10,7 +10,7 @@ import {
   IconWallet,
 } from "@tabler/icons-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
+import { useActiveProject } from "@/hooks/useActiveProject";
 import VisibilityChart from "@/components/dashboard/VisibilityChart";
 import CompetitorPanel from "@/components/dashboard/CompetitorPanel";
 import MentionPanel from "@/components/dashboard/MentionPanel";
@@ -34,12 +34,12 @@ type DashboardData = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { activeWorkspaceId, activeWorkspace, loading: wsLoading } = useActiveWorkspace();
+  const { activeProjectId, activeProject, loading: wsLoading } = useActiveProject();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (wsLoading || !activeWorkspaceId) return;
+    if (wsLoading || !activeProjectId) return;
 
     const supabase = createSupabaseBrowserClient();
 
@@ -56,12 +56,12 @@ export default function DashboardPage() {
         .maybeSingle();
 
       const firstName = userData?.full_name?.split(" ")[0] ?? "User";
-      const brandName = activeWorkspace?.brand_name ?? "—";
+      const brandName = activeProject?.name ?? "—";
 
       const { data: audits } = await supabase
         .from("audits")
         .select("id, visibility_score, completed_at, status")
-        .eq("workspace_id", activeWorkspaceId)
+        .eq("project_id", activeProjectId)
         .order("completed_at", { ascending: false });
 
       const completeAudits = audits?.filter((a) => a.status === "complete") || [];
@@ -155,7 +155,7 @@ export default function DashboardPage() {
     }
 
     fetchDashboardData();
-  }, [activeWorkspaceId, wsLoading, activeWorkspace]);
+  }, [activeProjectId, wsLoading, activeProject]);
 
   if (wsLoading || loading || !data) {
     return (

@@ -276,6 +276,14 @@ function ReportPageContent() {
     // If we have cached result, use it
     if (auditRaw) {
       setReport(buildReport());
+      // Set new workspace as active so dashboard picks it up on navigation
+      const projectRaw = sessionStorage.getItem("nuave_new_project");
+      if (projectRaw) {
+        const project = JSON.parse(projectRaw);
+        if (project.workspaceId) {
+          localStorage.setItem("nuave_active_workspace", project.workspaceId);
+        }
+      }
       return;
     }
 
@@ -287,6 +295,14 @@ function ReportPageContent() {
         if (data.status === "complete") {
           sessionStorage.setItem("nuave_audit_result", JSON.stringify(data));
           setReport(buildReport());
+          // Set new workspace as active
+          const projectRaw = sessionStorage.getItem("nuave_new_project");
+          if (projectRaw) {
+            const project = JSON.parse(projectRaw);
+            if (project.workspaceId) {
+              localStorage.setItem("nuave_active_workspace", project.workspaceId);
+            }
+          }
         }
       })();
     }

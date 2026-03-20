@@ -17,18 +17,18 @@ export async function PATCH(
 
     // Verify ownership
     const admin = createSupabaseAdminClient();
-    const { data: ws } = await admin
-      .from("workspaces")
+    const { data: proj } = await admin
+      .from("projects")
       .select("user_id")
       .eq("id", id)
       .single();
 
-    if (!ws || ws.user_id !== user.id) {
+    if (!proj || proj.user_id !== user.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     // Only allow updating specific fields
-    const allowed = ["brand_name", "website_url", "company_overview", "differentiators", "competitors"];
+    const allowed = ["name", "website_url", "company_overview", "differentiators", "competitors"];
     const updates: Record<string, unknown> = {};
     for (const key of allowed) {
       if (body[key] !== undefined) updates[key] = body[key];
@@ -41,18 +41,18 @@ export async function PATCH(
     updates.updated_at = new Date().toISOString();
 
     const { error } = await admin
-      .from("workspaces")
+      .from("projects")
       .update(updates)
       .eq("id", id);
 
     if (error) {
-      console.error("Workspace update error:", error);
+      console.error("Project update error:", error);
       return NextResponse.json({ error: "Failed to update" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("PATCH workspace error:", err);
+    console.error("PATCH project error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -73,35 +73,35 @@ export async function DELETE(
     const admin = createSupabaseAdminClient();
 
     // Verify ownership
-    const { data: ws } = await admin
-      .from("workspaces")
+    const { data: proj } = await admin
+      .from("projects")
       .select("user_id")
       .eq("id", id)
       .single();
 
-    if (!ws || ws.user_id !== user.id) {
+    if (!proj || proj.user_id !== user.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Delete cascade: recommendations → audit_results → audits → prompts → workspace
+    // Delete cascade: recommendations → audit_results → audits → prompts → project
     const { data: audits } = await admin
       .from("audits")
       .select("id")
-      .eq("workspace_id", id);
+      .eq("project_id", id);
 
     if (audits && audits.length > 0) {
       const auditIds = audits.map((a) => a.id);
       await admin.from("recommendations").delete().in("audit_id", auditIds);
       await admin.from("audit_results").delete().in("audit_id", auditIds);
-      await admin.from("audits").delete().eq("workspace_id", id);
+      await admin.from("audits").delete().eq("project_id", id);
     }
 
-    await admin.from("prompts").delete().eq("workspace_id", id);
-    await admin.from("workspaces").delete().eq("id", id);
+    await admin.from("prompts").delete().eq("project_id", id);
+    await admin.from("projects").delete().eq("id", id);
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("DELETE workspace error:", err);
+    console.error("DELETE project error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

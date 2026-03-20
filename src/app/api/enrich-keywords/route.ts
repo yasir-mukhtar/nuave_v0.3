@@ -89,10 +89,10 @@ async function fetchKeywordMetrics(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { workspace_id } = body;
+    const { project_id } = body;
 
-    if (!workspace_id) {
-      return NextResponse.json({ success: false, error: "workspace_id is required" }, { status: 400 });
+    if (!project_id) {
+      return NextResponse.json({ success: false, error: "project_id is required" }, { status: 400 });
     }
 
     // Check required env vars
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     const { data: prompts, error: fetchError } = await supabase
       .from("prompts")
       .select("id, core_keyword, language, keyword_data_fetched_at")
-      .eq("workspace_id", workspace_id)
+      .eq("project_id", project_id)
       .not("core_keyword", "is", null);
 
     if (fetchError || !prompts || prompts.length === 0) {
@@ -127,14 +127,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, enriched_count: 0, no_data_count: 0, message: "All prompts already enriched" });
     }
 
-    // Get workspace language for geo targeting
-    const { data: workspace } = await supabase
-      .from("workspaces")
+    // Get project language for geo targeting
+    const { data: project } = await supabase
+      .from("projects")
       .select("language")
-      .eq("id", workspace_id)
+      .eq("id", project_id)
       .maybeSingle();
 
-    const wsLang = workspace?.language || "id";
+    const wsLang = project?.language || "id";
     const geoTarget = GEO_TARGETS[wsLang] || GEO_TARGETS.id;
 
     // Split keywords by detected language

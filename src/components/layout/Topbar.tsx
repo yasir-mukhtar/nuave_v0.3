@@ -3,25 +3,24 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from "next/link";
 import {
-  IconCoins,
-  IconArrowUpRight,
   IconChevronDown,
   IconChevronUp,
   IconCheck,
   IconPlus,
 } from '@tabler/icons-react';
 import { cn } from "@/lib/utils";
-import { useCreditsBalance } from "@/hooks/useCreditsBalance";
-import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
+import { useActiveProject } from "@/hooks/useActiveProject";
+import { clearNuaveProjectSession } from "@/lib/session";
+import { useRouter } from "next/navigation";
 
 export default function Topbar() {
-  const { credits } = useCreditsBalance();
-  const { workspaces, activeWorkspaceId, setActiveWorkspaceId, activeWorkspace } = useActiveWorkspace();
+  const router = useRouter();
+  const { projects, activeProjectId, setActiveProjectId, activeProject } = useActiveProject();
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const workspaceName = activeWorkspace?.brand_name ?? "Select Workspace";
+  const projectName = activeProject?.name ?? "Pilih proyek";
 
   function closeDropdown() {
     setClosing(true);
@@ -45,14 +44,14 @@ export default function Topbar() {
   }, [open]);
 
   return (
-    <div className="flex items-center justify-between h-[52px] px-8 border-b border-border-light">
-      {/* Left: workspace/brand selector */}
+    <div className="flex items-center justify-end h-[52px] px-8 border-b border-border-light">
+      {/* Right: project switcher */}
       <div ref={dropdownRef} className="relative">
         <button
           onClick={() => open ? closeDropdown() : setOpen(true)}
           className="flex items-center gap-1.5 bg-transparent border border-border-light rounded-sm px-3 py-1.5 cursor-pointer font-medium text-sm text-text-heading shadow-app-subtle"
         >
-          {workspaceName}
+          {projectName}
           {open ? (
             <IconChevronUp size={14} stroke={2} />
           ) : (
@@ -64,18 +63,18 @@ export default function Topbar() {
           <div
             className={cn(
               closing ? "popover-down-out" : "popover-down",
-              "absolute top-[calc(100%+4px)] left-0 min-w-[220px] bg-white border border-border-light rounded-sm shadow-app-modal z-30 overflow-hidden"
+              "absolute top-[calc(100%+4px)] right-0 min-w-[220px] bg-white border border-border-light rounded-sm shadow-app-modal z-30 overflow-hidden"
             )}
           >
-            {/* Workspace list */}
+            {/* Project list */}
             <div className="py-1 max-h-[400px] overflow-y-auto">
-              {workspaces.map((ws) => {
-                const isActive = ws.id === activeWorkspaceId;
+              {projects.map((proj) => {
+                const isActive = proj.id === activeProjectId;
                 return (
                   <button
-                    key={ws.id}
+                    key={proj.id}
                     onClick={() => {
-                      setActiveWorkspaceId(ws.id);
+                      setActiveProjectId(proj.id);
                       closeDropdown();
                     }}
                     className={cn(
@@ -86,7 +85,7 @@ export default function Topbar() {
                     <span className="w-[18px] shrink-0">
                       {isActive && <IconCheck size={16} stroke={2.5} />}
                     </span>
-                    {ws.brand_name}
+                    {proj.name}
                   </button>
                 );
               })}
@@ -95,35 +94,22 @@ export default function Topbar() {
             {/* Divider */}
             <div className="h-px bg-border-light" />
 
-            {/* Add brand */}
+            {/* Add project */}
             <div className="py-1">
-              <Link
-                href="/"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2 px-3.5 py-2.5 font-medium text-sm text-text-heading no-underline"
+              <button
+                onClick={() => {
+                  clearNuaveProjectSession();
+                  closeDropdown();
+                  router.push("/new-project");
+                }}
+                className="flex items-center gap-2 w-full px-3.5 py-2.5 font-medium text-sm text-text-heading bg-transparent border-none cursor-pointer text-left"
               >
                 <IconPlus size={16} stroke={2} />
-                Tambah brand
-              </Link>
+                Tambah proyek
+              </button>
             </div>
           </div>
         )}
-      </div>
-
-      {/* Right: credits + buy button */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5 font-medium text-sm text-brand">
-          <IconCoins size={18} stroke={2} />
-          <span>{credits ?? "—"} credit</span>
-        </div>
-
-        <Link
-          href="/dashboard/credits"
-          className="flex items-center gap-1 px-3 py-1.5 font-medium text-sm text-text-heading bg-transparent border border-border-light rounded-sm no-underline shadow-app-subtle cursor-pointer"
-        >
-          Beli
-          <IconArrowUpRight size={16} stroke={2} />
-        </Link>
       </div>
     </div>
   );

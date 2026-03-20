@@ -6,6 +6,7 @@ import WizardLayout from "@/components/new-project/WizardLayout";
 import SearchableSelect from "@/components/new-project/SearchableSelect";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
 import { cn } from "@/lib/utils";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const REQUEST_TIMEOUT_MS = 60_000;
 
@@ -56,31 +57,68 @@ function isValidUrlInput(value: string): boolean {
 
 export default function NewProjectPage() {
   const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
 
-  // Restore form state from sessionStorage (read once via useRef)
-  const restoredRef = useRef(
-    typeof window !== "undefined"
-      ? (() => { const raw = sessionStorage.getItem("nuave_new_project"); return raw ? JSON.parse(raw) : null; })()
-      : null
-  );
-  const restored = restoredRef.current as Record<string, any> | null;
+  // Auth guard — redirect to /auth if not logged in
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        router.replace("/auth?next=/new-project");
+      } else {
+        setAuthChecked(true);
+      }
+    });
+  }, [router]);
 
-  const [url, setUrl] = useState(restored?.url?.replace(/^https?:\/\//, "") || "");
-  const [brandName, setBrandName] = useState(restored?.brandName || "");
-  const [country, setCountry] = useState(restored?.country || "");
-  const [language, setLanguage] = useState(restored?.language || "");
+  const [url, setUrl] = useState("");
+  const [brandName, setBrandName] = useState("");
+  const [country, setCountry] = useState("");
+  const [language, setLanguage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   // Auto-fill state
   const [prefetching, setPrefetching] = useState(false);
-  const [faviconUrl, setFaviconUrl] = useState<string | null>(restored?.url ? `https://www.google.com/s2/favicons?domain=${restored.url.replace(/^https?:\/\//, "")}&sz=128` : null);
-  const [faviconVisible, setFaviconVisible] = useState(!!restored);
-  const touchedFields = useRef(restored ? new Set<string>(["brandName", "country", "language"]) : new Set<string>());
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
+  const [faviconVisible, setFaviconVisible] = useState(false);
+  const touchedFields = useRef(new Set<string>());
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  // Track the last URL that triggered a prefetch to avoid re-fetching on mount
-  const lastPrefetchedUrl = useRef<string>(restored?.url?.replace(/^https?:\/\//, "") || "");
+  const lastPrefetchedUrl = useRef<string>("");
+  const restoredRef = useRef(false);
+
+  // Restore form state from sessionStorage on mount (client-only, avoids hydration mismatch)
+  useEffect(() => {
+    const raw = sessionStorage.getItem("nuave_new_project");
+    if (raw) {
+      const restored = JSON.parse(raw);
+      restoredRef.current = true;
+      const restoredUrl = restored.url?.replace(/^https?:\/\//, "") || "";
+      setUrl(restoredUrl);
+      setBrandName(restored.brandName || "");
+      setCountry(restored.country || "");
+      setLanguage(restored.language || "");
+      lastPrefetchedUrl.current = restoredUrl;
+      touchedFields.current = new Set(["brandName", "country", "language"]);
+      if (restored.url) {
+        const domain = restored.url.replace(/^https?:\/\//, "");
+        setFaviconUrl(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`);
+        setFaviconVisible(true);
+      }
+    } else {
+      // Fresh entry — clear stale cached data from previous incomplete flows
+      sessionStorage.removeItem("nuave_new_project_topics");
+      sessionStorage.removeItem("nuave_new_project_prompts");
+      sessionStorage.removeItem("nuave_audit_result");
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const key = sessionStorage.key(i);
+        if (key?.startsWith("nuave_cached_topics_") || key?.startsWith("nuave_cached_prompts_")) {
+          sessionStorage.removeItem(key);
+        }
+      }
+    }
+  }, []);
 
   const isValid = url.trim().length > 0 && brandName.trim().length > 0 && country !== "" && language !== "";
 
@@ -167,14 +205,15 @@ export default function NewProjectPage() {
     const fullUrl = url.startsWith("http") ? url : `https://${url}`;
 
     // If workspace already exists and URL hasn't changed, skip scrape and go to step 2
-    if (restored?.workspaceId && restored.url === fullUrl) {
-      // Update sessionStorage with any field changes (brand name, country, language)
+    const existingRaw = sessionStorage.getItem("nuave_new_project");
+    const existing = existingRaw ? JSON.parse(existingRaw) : null;
+    if (existing?.projectId && existing.url === fullUrl) {
       const projectData = {
-        ...restored,
+        ...existing,
         brandName: brandName.trim(),
         country,
         language,
-        faviconUrl: faviconUrl || restored.faviconUrl || null,
+        faviconUrl: faviconUrl || existing.faviconUrl || null,
       };
       sessionStorage.setItem("nuave_new_project", JSON.stringify(projectData));
       router.push("/new-project/topics");
@@ -188,10 +227,13 @@ export default function NewProjectPage() {
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
+      // Get active workspace_id from localStorage
+      const activeWsId = localStorage.getItem("nuave_active_workspace") || undefined;
+
       const res = await fetch("/api/scrape", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ website_url: fullUrl, brand_name: brandName.trim() }),
+        body: JSON.stringify({ website_url: fullUrl, brand_name: brandName.trim(), workspace_id: activeWsId }),
         signal: controller.signal,
       });
       clearTimeout(timeout);
@@ -208,7 +250,8 @@ export default function NewProjectPage() {
         brandName: data.profile?.brand_name || brandName.trim(),
         country,
         language,
-        workspaceId: data.workspace_id,
+        projectId: data.project_id,
+        workspaceId: activeWsId,
         profile: data.profile,
         faviconUrl: faviconUrl || null,
       };
@@ -224,6 +267,14 @@ export default function NewProjectPage() {
       setLoading(false);
     }
   };
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="font-body text-text-muted">Memuat...</p>
+      </div>
+    );
+  }
 
   return (
     <WizardLayout

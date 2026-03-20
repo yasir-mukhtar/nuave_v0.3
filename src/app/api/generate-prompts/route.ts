@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let body: { workspace_id: string; profile: Profile };
+  let body: { project_id: string; profile: Profile };
 
   try {
     body = await request.json();
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { workspace_id, profile } = body;
+  const { project_id, profile } = body;
 
   if (!profile) {
     return NextResponse.json(
@@ -46,11 +46,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Persist workspace profile to Supabase
+  // Persist project profile to Supabase
   try {
     const adminClient = createSupabaseAdminClient();
     await adminClient
-      .from('workspaces')
+      .from('projects')
       .update({
         website_url: profile.website_url || null,
         company_overview: profile.company_overview || null,
@@ -60,9 +60,9 @@ export async function POST(request: NextRequest) {
         target_audience: profile.target_audience || null,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', workspace_id);
+      .eq('id', project_id);
   } catch (err) {
-    console.error("Failed to persist workspace profile:", err);
+    console.error("Failed to persist project profile:", err);
     // Non-fatal, continue with prompt generation
   }
 
@@ -147,7 +147,7 @@ Return JSON array of 10 objects:
 
   // Step 2: Save to Supabase
   const rows = generatedPrompts.map((prompt, index) => ({
-    workspace_id,
+    project_id,
     prompt_text: prompt.prompt_text,
     stage: prompt.stage,
     language: prompt.language,
@@ -166,7 +166,7 @@ Return JSON array of 10 objects:
       .select();
 
     if (error) {
-      // 23503 = foreign key violation (workspace_id not in workspaces table — temp UUID)
+      // 23503 = foreign key violation (project_id not in projects table — temp UUID)
       if (error.code !== "23503") {
         console.error("Supabase insert error:", error);
       }

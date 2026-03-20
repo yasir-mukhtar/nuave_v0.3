@@ -7,19 +7,19 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { brand_name, topics, language, workspace_id } = body;
+    const { brand_name, topics, language, project_id } = body;
 
     if (!brand_name || !topics || !Array.isArray(topics) || topics.length === 0) {
       return NextResponse.json({ success: false, error: "brand_name and topics are required" }, { status: 400 });
     }
 
-    // If workspace_id provided, check for existing prompts first
-    if (workspace_id) {
+    // If project_id provided, check for existing prompts first
+    if (project_id) {
       const supabase = createSupabaseAdminClient();
       const { data: existing } = await supabase
         .from("prompts")
         .select("prompt_text, core_keyword, demand_tier, topic, display_order")
-        .eq("workspace_id", workspace_id)
+        .eq("project_id", project_id)
         .order("display_order", { ascending: true });
 
       if (existing && existing.length > 0) {
@@ -84,11 +84,11 @@ Return ONLY a JSON object where keys are topic names and values are arrays of 5 
       }
     }
 
-    // Save to DB if workspace_id provided
-    if (workspace_id) {
+    // Save to DB if project_id provided
+    if (project_id) {
       const supabase = createSupabaseAdminClient();
       const rows: {
-        workspace_id: string;
+        project_id: string;
         prompt_text: string;
         core_keyword: string | null;
         demand_tier: string;
@@ -106,7 +106,7 @@ Return ONLY a JSON object where keys are topic names and values are arrays of 5 
           const coreKeyword = typeof item === "string" ? null : item.core_keyword;
           const demandTier = typeof item === "string" ? "medium" : (item.demand_tier || "medium");
           rows.push({
-            workspace_id,
+            project_id,
             prompt_text: text,
             core_keyword: coreKeyword,
             demand_tier: demandTier,
@@ -130,7 +130,7 @@ Return ONLY a JSON object where keys are topic names and values are arrays of 5 
           fetch(`${baseUrl}/api/enrich-keywords`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ workspace_id }),
+            body: JSON.stringify({ project_id }),
           }).catch((err) => console.error("Keyword enrichment trigger failed:", err));
         }
       }

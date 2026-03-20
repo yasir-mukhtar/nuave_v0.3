@@ -7,6 +7,7 @@ import Topbar from "@/components/layout/Topbar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import LowCreditsBanner from "@/components/LowCreditsBanner";
 import { ActiveWorkspaceProvider, useActiveWorkspace } from "@/hooks/useActiveWorkspace";
+import { ActiveProjectProvider, useActiveProject } from "@/hooks/useActiveProject";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -17,8 +18,10 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   const [userName, setUserName] = useState("User");
   const [userEmail, setUserEmail] = useState("");
   const { activeWorkspace } = useActiveWorkspace();
-  const workspaceName = activeWorkspace?.brand_name ?? "Select Workspace";
-  const websiteUrl = activeWorkspace?.website_url;
+  const { activeProject } = useActiveProject();
+  const workspaceName = activeWorkspace?.name ?? "Select Workspace";
+  const projectName = activeProject?.name ?? "Select Project";
+  const websiteUrl = activeProject?.website_url;
 
   useEffect(() => {
     localStorage.removeItem('nuave_credits');
@@ -54,6 +57,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
           userName={userName}
           userEmail={userEmail}
           workspaceName={workspaceName}
+          projectName={projectName}
           websiteUrl={websiteUrl}
         />
         <div className="ml-64 flex min-w-0 flex-1 flex-col bg-page">
@@ -70,7 +74,9 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <ActiveWorkspaceProvider>
-      <DashboardLayoutInner>{children}</DashboardLayoutInner>
+      <ActiveProjectProvider>
+        <DashboardLayoutInner>{children}</DashboardLayoutInner>
+      </ActiveProjectProvider>
     </ActiveWorkspaceProvider>
   );
 }

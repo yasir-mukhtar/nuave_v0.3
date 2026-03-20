@@ -7,23 +7,23 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { brand_name, company_overview, industry, language, workspace_id } = body;
+    const { brand_name, company_overview, industry, language, project_id } = body;
 
     if (!brand_name) {
       return NextResponse.json({ success: false, error: "brand_name is required" }, { status: 400 });
     }
 
-    // If workspace_id provided, check for existing topics first
-    if (workspace_id) {
+    // If project_id provided, check for existing topics first
+    if (project_id) {
       const supabase = createSupabaseAdminClient();
-      const { data: workspace } = await supabase
-        .from("workspaces")
+      const { data: project } = await supabase
+        .from("projects")
         .select("topics")
-        .eq("id", workspace_id)
+        .eq("id", project_id)
         .maybeSingle();
 
-      if (workspace?.topics && Array.isArray(workspace.topics) && workspace.topics.length > 0) {
-        return NextResponse.json({ success: true, topics: workspace.topics, cached: true });
+      if (project?.topics && Array.isArray(project.topics) && project.topics.length > 0) {
+        return NextResponse.json({ success: true, topics: project.topics, cached: true });
       }
     }
 
@@ -55,16 +55,16 @@ export async function POST(request: NextRequest) {
 
     topics = topics.slice(0, 3);
 
-    // Save to workspace if workspace_id provided
-    if (workspace_id && topics.length > 0) {
+    // Save to project if project_id provided
+    if (project_id && topics.length > 0) {
       const supabase = createSupabaseAdminClient();
       const { error: updateError } = await supabase
-        .from("workspaces")
+        .from("projects")
         .update({ topics })
-        .eq("id", workspace_id);
+        .eq("id", project_id);
 
       if (updateError) {
-        console.error("Failed to save topics to workspace:", updateError);
+        console.error("Failed to save topics to project:", updateError);
       }
     }
 

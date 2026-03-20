@@ -8,6 +8,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 interface ScrapeRequestBody {
   website_url: string;
   brand_name?: string;
+  workspace_id?: string;
 }
 
 interface CompanyProfile {
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { website_url, brand_name } = body;
+  const { website_url, brand_name, workspace_id } = body;
 
   if (!website_url) {
     return NextResponse.json(
@@ -147,16 +148,28 @@ Respond with JSON only, same format as before.`;
 
     // Use admin client for the INSERT to bypass RLS
     const adminClient = createSupabaseAdminClient();
-    
-    // Generate workspace ID before insert
-    const workspaceId = randomUUID();
 
-    const { error: wsError } = await adminClient
-      .from('workspaces')
+    // Generate project ID before insert
+    const projectId = randomUUID();
+
+    // If no workspace_id provided, find user's default workspace
+    let resolvedWsId = workspace_id;
+    if (!resolvedWsId && user) {
+      const { data: ws } = await adminClient
+        .from('workspaces')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle();
+      resolvedWsId = ws?.id;
+    }
+
+    const { error: projError } = await adminClient
+      .from('projects')
       .insert({
-        id: workspaceId,
-        user_id: user?.id || null,
-        brand_name: profile.brand_name,
+        id: projectId,
+        workspace_id: resolvedWsId,
+        name: profile.brand_name,
         website_url: website_url,
         company_overview: profile.company_overview || null,
         industry: profile.industry || null,
@@ -166,16 +179,15 @@ Respond with JSON only, same format as before.`;
         language: profile.language || 'en',
       });
 
-    if (wsError) {
-      console.error('Workspace insert failed:', JSON.stringify(wsError));
-      console.error('Insert payload user_id was:', user?.id ?? null);
+    if (projError) {
+      console.error('Project insert failed:', JSON.stringify(projError));
     }
 
     return NextResponse.json({
       success: true,
       source: websiteContent ? "scraped" : "knowledge",
       website_url,
-      workspace_id: workspaceId,
+      project_id: projectId,
       profile,
     });
   } catch (error) {
