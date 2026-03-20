@@ -79,15 +79,13 @@ function isValidUrlInput(value: string): boolean {
 export default function NewProjectPage() {
   const router = useRouter();
 
-  // Restore form state from sessionStorage (read once on mount)
-  const restoredRef = useRef<Record<string, any> | null>(null);
-  const [initialized, setInitialized] = useState(false);
-
-  if (!initialized && typeof window !== "undefined") {
-    const raw = sessionStorage.getItem("nuave_new_project");
-    restoredRef.current = raw ? JSON.parse(raw) : null;
-  }
-  const restored = restoredRef.current;
+  // Restore form state from sessionStorage (read once via useRef)
+  const restoredRef = useRef(
+    typeof window !== "undefined"
+      ? (() => { const raw = sessionStorage.getItem("nuave_new_project"); return raw ? JSON.parse(raw) : null; })()
+      : null
+  );
+  const restored = restoredRef.current as Record<string, any> | null;
 
   const [url, setUrl] = useState(restored?.url?.replace(/^https?:\/\//, "") || "");
   const [brandName, setBrandName] = useState(restored?.brandName || "");
@@ -105,9 +103,6 @@ export default function NewProjectPage() {
   const abortRef = useRef<AbortController | null>(null);
   // Track the last URL that triggered a prefetch to avoid re-fetching on mount
   const lastPrefetchedUrl = useRef<string>(restored?.url?.replace(/^https?:\/\//, "") || "");
-
-  // Mark as initialized after first render
-  useEffect(() => { setInitialized(true); }, []);
 
   const isValid = url.trim().length > 0 && brandName.trim().length > 0 && country !== "" && language !== "";
 

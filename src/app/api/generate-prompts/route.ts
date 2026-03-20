@@ -1,3 +1,5 @@
+// Used by the old onboarding flow (/onboarding/profile).
+// The new project flow (/new-project) uses /api/generate-topic-prompts instead.
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
