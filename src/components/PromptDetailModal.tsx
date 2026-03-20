@@ -1,11 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import {
-  IconX,
-  IconCircleCheckFilled,
-  IconCircleXFilled,
-} from '@tabler/icons-react';
+import { X, CheckCircle2, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { renderMarkdown } from '@/lib/markdown';
 
 export interface PromptDetail {
@@ -49,190 +46,55 @@ export default function PromptDetailModal({
 
   return (
     <>
-      <style>{`
-        @keyframes promptModalPanelIn {
-          from {
-            opacity: 0;
-            filter: blur(8px);
-            transform: translateX(100%);
-          }
-          to {
-            opacity: 1;
-            filter: blur(0px);
-            transform: translateX(0);
-          }
-        }
-        @keyframes promptModalPanelOut {
-          from {
-            opacity: 1;
-            filter: blur(0px);
-            transform: translateX(0);
-          }
-          to {
-            opacity: 0;
-            filter: blur(8px);
-            transform: translateX(100%);
-          }
-        }
-        @keyframes promptModalOverlayIn {
-          from { opacity: 0; backdrop-filter: blur(0px); }
-          to   { opacity: 1; backdrop-filter: blur(2px); }
-        }
-        @keyframes promptModalOverlayOut {
-          from { opacity: 1; backdrop-filter: blur(2px); }
-          to   { opacity: 0; backdrop-filter: blur(0px); }
-        }
-        .prompt-modal-overlay-enter {
-          animation: promptModalOverlayIn ${ANIM_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .prompt-modal-overlay-exit {
-          animation: promptModalOverlayOut ${ANIM_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .prompt-modal-enter {
-          animation: promptModalPanelIn ${ANIM_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .prompt-modal-exit {
-          animation: promptModalPanelOut ${ANIM_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @media (max-width: 768px) {
-          .prompt-modal-panel {
-            width: 100vw !important;
-            height: 85vh !important;
-            bottom: 0 !important;
-            top: auto !important;
-            right: 0 !important;
-            left: 0 !important;
-            border-radius: var(--radius-sm) var(--radius-sm) 0 0 !important;
-          }
-        }
-      `}</style>
-
       {/* Overlay */}
       <div
-        className={closing ? 'prompt-modal-overlay-exit' : 'prompt-modal-overlay-enter'}
+        className={cn(
+          'fixed inset-0 z-[49] bg-black/[0.18]',
+          closing ? 'prompt-modal-overlay-exit' : 'prompt-modal-overlay-enter'
+        )}
         onClick={handleClose}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.18)',
-          zIndex: 49,
-        }}
       />
 
       {/* Panel */}
       <div
-        className={`prompt-modal-panel ${closing ? 'prompt-modal-exit' : 'prompt-modal-enter'}`}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'fixed',
-          top: '24px',
-          right: '24px',
-          bottom: '24px',
-          width: '480px',
-          background: '#FFFFFF',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid #E5E7EB',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
-          overflow: 'hidden',
-          zIndex: 50,
-        }}
+        className={cn(
+          'prompt-modal-panel fixed top-6 right-6 bottom-6 z-50 flex w-[480px] flex-col overflow-hidden rounded-sm border border-border-default bg-white shadow-[0_8px_40px_rgba(0,0,0,0.12)]',
+          closing ? 'prompt-modal-exit' : 'prompt-modal-enter'
+        )}
       >
         {/* Header */}
-        <div
-          style={{
-            flexShrink: 0,
-            padding: '20px 24px 16px 24px',
-            borderBottom: '1px solid #E5E7EB',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '16px',
-              fontWeight: 600,
-              color: '#111827',
-              margin: 0,
-            }}
-          >
+        <div className="flex shrink-0 items-center justify-between border-b border-border-default px-6 pb-4 pt-5">
+          <h2 className="m-0 text-base font-semibold text-text-heading">
             Hasil Prompt
           </h2>
           <button
             onClick={handleClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#6B7280',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-            }}
+            className="flex items-center border-none bg-transparent p-1 text-text-muted cursor-pointer hover:text-text-heading"
           >
-            <IconX size={18} stroke={1.5} />
+            <X className="h-[18px] w-[18px]" strokeWidth={1.5} />
           </button>
         </div>
 
         {/* Scrollable content */}
         <div
+          className="flex-1 overflow-y-auto px-6 py-5"
           onWheel={(e) => e.stopPropagation()}
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '20px 24px',
-          }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="flex flex-col">
             {/* User prompt bubble */}
-            <div
-              className="text-label-14"
-              style={{
-                marginLeft: 'auto',
-                background: 'var(--purple)',
-                color: 'white',
-                borderRadius: 'var(--radius-2xl) var(--radius-2xl) var(--radius-xs) var(--radius-2xl)',
-                padding: '10px 14px',
-                maxWidth: '85%',
-                display: 'inline-block',
-                marginBottom: '12px',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-              }}
-            >
+            <div className="ml-auto mb-3 inline-block max-w-[85%] rounded-2xl rounded-br-xs bg-brand px-3.5 py-2.5 text-sm text-white shadow-sm">
               {result.prompt_text}
             </div>
 
             {/* Mention status badge */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                marginBottom: '16px',
-              }}
-            >
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: '#F4F4F4',
-                  borderRadius: 'var(--radius-full)',
-                  padding: '6px 12px 6px 6px',
-                }}
-              >
+            <div className="mb-4 flex justify-end">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-surface-raised py-1.5 pl-1.5 pr-3">
                 {result.brand_mentioned ? (
-                  <IconCircleCheckFilled size={20} color="#16A34A" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
                 ) : (
-                  <IconCircleXFilled size={20} color="#DC2626" />
+                  <XCircle className="h-5 w-5 text-red-600" />
                 )}
-                <span
-                  className="text-label-13"
-                  style={{
-                    fontWeight: 500,
-                    color: '#111827',
-                  }}
-                >
+                <span className="text-[13px] leading-4 font-medium text-text-heading">
                   {brandName}{' '}
                   {result.brand_mentioned
                     ? 'disebutkan'
@@ -242,23 +104,14 @@ export default function PromptDetailModal({
             </div>
 
             {/* AI response */}
-            <div style={{ whiteSpace: 'pre-wrap' }}>
+            <div className="whitespace-pre-wrap">
               {renderMarkdown(result.ai_response, brandName)}
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            flexShrink: 0,
-            padding: '12px 24px',
-            borderTop: '1px solid #E5E7EB',
-            fontSize: '11px',
-            color: '#9CA3AF',
-            textAlign: 'center',
-          }}
-        >
+        <div className="shrink-0 border-t border-border-default px-6 py-3 text-center text-[11px] text-text-placeholder">
           Respons oleh GPT-4o dengan pencarian web ·{' '}
           {result.created_at
             ? new Date(result.created_at).toLocaleString('id-ID')

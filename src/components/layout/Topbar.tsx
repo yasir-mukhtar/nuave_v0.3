@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from "next/link";
 import {
-  IconCoins,
-  IconArrowUpRight,
-  IconChevronDown,
-  IconChevronUp,
-  IconCheck,
-  IconPlus,
-} from '@tabler/icons-react';
+  Coins,
+  ArrowUpRight,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Plus,
+} from 'lucide-react';
+import { cn } from "@/lib/utils";
 import { useCreditsBalance } from "@/hooks/useCreditsBalance";
 import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
 
@@ -44,64 +45,30 @@ export default function Topbar() {
   }, [open]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        height: "52px",
-        padding: "0 32px",
-        borderBottom: "1px solid var(--border-light)",
-      }}
-    >
+    <div className="flex items-center justify-between h-[52px] px-8 border-b border-border-light">
       {/* Left: workspace/brand selector */}
-      <div ref={dropdownRef} style={{ position: "relative" }}>
+      <div ref={dropdownRef} className="relative">
         <button
           onClick={() => open ? closeDropdown() : setOpen(true)}
-          className="text-label-14"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            background: "none",
-            border: "1px solid var(--border-light)",
-            borderRadius: "var(--radius-sm)",
-            padding: "6px 12px",
-            cursor: "pointer",
-            fontWeight: 500,
-            color: "var(--text-heading)",
-            boxShadow: "var(--shadow-subtle)",
-          }}
+          className="flex items-center gap-1.5 bg-transparent border border-border-light rounded-sm px-3 py-1.5 cursor-pointer font-medium text-sm text-text-heading shadow-app-subtle"
         >
           {workspaceName}
           {open ? (
-            <IconChevronUp size={14} stroke={2} />
+            <ChevronUp size={14} strokeWidth={2} />
           ) : (
-            <IconChevronDown size={14} stroke={2} />
+            <ChevronDown size={14} strokeWidth={2} />
           )}
         </button>
 
         {open && (
           <div
-            className={closing ? "popover-down-out" : "popover-down"}
-            style={{
-              position: "absolute",
-              top: "calc(100% + 4px)",
-              left: 0,
-              minWidth: "220px",
-              background: "#ffffff",
-              border: "1px solid var(--border-light)",
-              borderRadius: "var(--radius-sm)",
-              boxShadow: "var(--shadow-modal)",
-              zIndex: 30,
-              overflow: "hidden",
-            }}
+            className={cn(
+              closing ? "popover-down-out" : "popover-down",
+              "absolute top-[calc(100%+4px)] left-0 min-w-[220px] bg-white border border-border-light rounded-sm shadow-app-modal z-30 overflow-hidden"
+            )}
           >
             {/* Workspace list */}
-            <div
-              className="scroll-subtle"
-              style={{ padding: "4px 0", maxHeight: "400px", overflowY: "auto" }}
-            >
+            <div className="py-1 max-h-[400px] overflow-y-auto">
               {workspaces.map((ws) => {
                 const isActive = ws.id === activeWorkspaceId;
                 return (
@@ -111,23 +78,13 @@ export default function Topbar() {
                       setActiveWorkspaceId(ws.id);
                       closeDropdown();
                     }}
-                    className="text-label-14"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      width: "100%",
-                      padding: "10px 14px",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontWeight: isActive ? 600 : 400,
-                      color: "var(--text-heading)",
-                      textAlign: "left",
-                    }}
+                    className={cn(
+                      "flex items-center gap-2 w-full px-3.5 py-2.5 bg-transparent border-none cursor-pointer text-sm text-text-heading text-left",
+                      isActive ? "font-semibold" : "font-normal"
+                    )}
                   >
-                    <span style={{ width: "18px", flexShrink: 0 }}>
-                      {isActive && <IconCheck size={16} stroke={2.5} />}
+                    <span className="w-[18px] shrink-0">
+                      {isActive && <Check size={16} strokeWidth={2.5} />}
                     </span>
                     {ws.brand_name}
                   </button>
@@ -136,25 +93,16 @@ export default function Topbar() {
             </div>
 
             {/* Divider */}
-            <div style={{ height: "1px", background: "var(--border-light)" }} />
+            <div className="h-px bg-border-light" />
 
             {/* Add brand */}
-            <div style={{ padding: "4px 0" }}>
+            <div className="py-1">
               <Link
                 href="/"
                 onClick={() => setOpen(false)}
-                className="text-label-14"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "10px 14px",
-                  fontWeight: 500,
-                  color: "var(--text-heading)",
-                  textDecoration: "none",
-                }}
+                className="flex items-center gap-2 px-3.5 py-2.5 font-medium text-sm text-text-heading no-underline"
               >
-                <IconPlus size={16} stroke={2} />
+                <Plus size={16} strokeWidth={2} />
                 Tambah brand
               </Link>
             </div>
@@ -163,41 +111,18 @@ export default function Topbar() {
       </div>
 
       {/* Right: credits + buy button */}
-      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-        <div
-          className="text-label-14"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            fontWeight: 500,
-            color: "var(--purple)",
-          }}
-        >
-          <IconCoins size={18} stroke={2} />
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5 font-medium text-sm text-brand">
+          <Coins size={18} strokeWidth={2} />
           <span>{credits ?? "—"} credit</span>
         </div>
 
         <Link
           href="/dashboard/credits"
-          className="text-label-14"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            padding: "6px 12px",
-            fontWeight: 500,
-            color: "var(--text-heading)",
-            background: "none",
-            border: "1px solid var(--border-light)",
-            borderRadius: "var(--radius-sm)",
-            textDecoration: "none",
-            boxShadow: "var(--shadow-subtle)",
-            cursor: "pointer",
-          }}
+          className="flex items-center gap-1 px-3 py-1.5 font-medium text-sm text-text-heading bg-transparent border border-border-light rounded-sm no-underline shadow-app-subtle cursor-pointer"
         >
           Beli
-          <IconArrowUpRight size={16} stroke={2} />
+          <ArrowUpRight size={16} strokeWidth={2} />
         </Link>
       </div>
     </div>

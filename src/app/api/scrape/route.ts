@@ -175,7 +175,7 @@ Respond with JSON only, same format as before.`;
       success: true,
       source: websiteContent ? "scraped" : "knowledge",
       website_url,
-      workspace_id: wsError ? null : workspaceId,
+      workspace_id: workspaceId,
       profile,
     });
   } catch (error) {

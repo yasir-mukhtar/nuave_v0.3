@@ -19,7 +19,7 @@ export default function TopicsPage() {
   const [customName, setCustomName] = useState("");
   const [loadingTopics, setLoadingTopics] = useState(true);
 
-  // Load project data and fetch AI-generated topics
+  // Load project data and fetch AI-generated topics (sessionStorage cache → DB cache → AI)
   useEffect(() => {
     const raw = sessionStorage.getItem("nuave_new_project");
     if (!raw) {
@@ -28,6 +28,20 @@ export default function TopicsPage() {
     }
 
     const project = JSON.parse(raw);
+    const cacheKey = `nuave_cached_topics_${project.workspaceId || "default"}`;
+
+    // Check sessionStorage cache first
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const cachedTopics: Topic[] = JSON.parse(cached);
+        if (cachedTopics.length > 0) {
+          setTopics(cachedTopics);
+          setLoadingTopics(false);
+          return;
+        }
+      } catch { /* fall through to API */ }
+    }
 
     (async () => {
       try {
@@ -44,11 +58,14 @@ export default function TopicsPage() {
         });
         const data = await res.json();
         if (data.success && Array.isArray(data.topics)) {
-          setTopics(data.topics.map((name: string, i: number) => ({
+          const topicsList: Topic[] = data.topics.map((name: string, i: number) => ({
             id: `topic-${i}`,
             name,
             checked: true,
-          })));
+          }));
+          setTopics(topicsList);
+          // Save to sessionStorage cache
+          sessionStorage.setItem(cacheKey, JSON.stringify(topicsList));
         }
       } catch {
         // Fallback: empty list, user can add custom topics
@@ -75,6 +92,16 @@ export default function TopicsPage() {
     setCustomName("");
     setAddingCustom(false);
   };
+
+  // Persist topic state to sessionStorage cache whenever it changes
+  useEffect(() => {
+    if (topics.length === 0) return;
+    const raw = sessionStorage.getItem("nuave_new_project");
+    if (!raw) return;
+    const project = JSON.parse(raw);
+    const cacheKey = `nuave_cached_topics_${project.workspaceId || "default"}`;
+    sessionStorage.setItem(cacheKey, JSON.stringify(topics));
+  }, [topics]);
 
   const handleSubmit = () => {
     const selected = topics.filter((t) => t.checked);

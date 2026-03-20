@@ -141,7 +141,7 @@ export default function PromptsPage() {
     })();
   }, []);
 
-  // Load topics from session and fetch AI-generated prompts
+  // Load topics from session and fetch AI-generated prompts (sessionStorage cache → DB cache → AI)
   useEffect(() => {
     const topicsData = sessionStorage.getItem("nuave_new_project_topics");
     const projectData = sessionStorage.getItem("nuave_new_project");
@@ -151,6 +151,20 @@ export default function PromptsPage() {
     }
     const topics: { id: string; name: string }[] = JSON.parse(topicsData);
     const project = JSON.parse(projectData);
+    const cacheKey = `nuave_cached_prompts_${project.workspaceId || "default"}`;
+
+    // Check sessionStorage cache first
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const cachedGroups: TopicGroup[] = JSON.parse(cached);
+        if (cachedGroups.length > 0 && cachedGroups.some((g) => g.prompts.length > 0)) {
+          setTopicGroups(cachedGroups);
+          setLoadingPrompts(false);
+          return;
+        }
+      } catch { /* fall through to API */ }
+    }
 
     (async () => {
       try {
@@ -190,6 +204,8 @@ export default function PromptsPage() {
           // Auto-select top 10 by volume tier
           groups = autoSelectPrompts(groups, DEFAULT_SELECTION);
           setTopicGroups(groups);
+          // Save to sessionStorage cache
+          sessionStorage.setItem(cacheKey, JSON.stringify(groups));
         } else {
           setTopicGroups(topics.map((t, i) => ({
             id: t.id,
@@ -209,6 +225,16 @@ export default function PromptsPage() {
       setLoadingPrompts(false);
     })();
   }, [router]);
+
+  // Persist prompt state to sessionStorage cache whenever it changes
+  useEffect(() => {
+    if (topicGroups.length === 0 || topicGroups.every((g) => g.prompts.length === 0)) return;
+    const projectData = sessionStorage.getItem("nuave_new_project");
+    if (!projectData) return;
+    const project = JSON.parse(projectData);
+    const cacheKey = `nuave_cached_prompts_${project.workspaceId || "default"}`;
+    sessionStorage.setItem(cacheKey, JSON.stringify(topicGroups));
+  }, [topicGroups]);
 
   const totalPrompts = topicGroups.reduce((sum, g) => sum + g.prompts.length, 0);
   const totalSelected = topicGroups.reduce(

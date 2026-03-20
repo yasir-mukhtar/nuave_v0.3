@@ -78,9 +78,16 @@ function isValidUrlInput(value: string): boolean {
 
 export default function NewProjectPage() {
   const router = useRouter();
-  // Restore form state from sessionStorage if returning from step 2
-  const savedProject = typeof window !== "undefined" ? sessionStorage.getItem("nuave_new_project") : null;
-  const restored = savedProject ? JSON.parse(savedProject) : null;
+
+  // Restore form state from sessionStorage (read once on mount)
+  const restoredRef = useRef<Record<string, any> | null>(null);
+  const [initialized, setInitialized] = useState(false);
+
+  if (!initialized && typeof window !== "undefined") {
+    const raw = sessionStorage.getItem("nuave_new_project");
+    restoredRef.current = raw ? JSON.parse(raw) : null;
+  }
+  const restored = restoredRef.current;
 
   const [url, setUrl] = useState(restored?.url?.replace(/^https?:\/\//, "") || "");
   const [brandName, setBrandName] = useState(restored?.brandName || "");
@@ -91,12 +98,16 @@ export default function NewProjectPage() {
 
   // Auto-fill state
   const [prefetching, setPrefetching] = useState(false);
-  const [faviconUrl, setFaviconUrl] = useState<string | null>(restored ? `https://www.google.com/s2/favicons?domain=${restored.url?.replace(/^https?:\/\//, "")}&sz=128` : null);
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(restored?.url ? `https://www.google.com/s2/favicons?domain=${restored.url.replace(/^https?:\/\//, "")}&sz=128` : null);
   const [faviconVisible, setFaviconVisible] = useState(!!restored);
   const touchedFields = useRef(restored ? new Set<string>(["brandName", "country", "language"]) : new Set<string>());
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const isInitialMount = useRef(!!restored);
+  // Track the last URL that triggered a prefetch to avoid re-fetching on mount
+  const lastPrefetchedUrl = useRef<string>(restored?.url?.replace(/^https?:\/\//, "") || "");
+
+  // Mark as initialized after first render
+  useEffect(() => { setInitialized(true); }, []);
 
   const isValid = url.trim().length > 0 && brandName.trim().length > 0 && country !== "" && language !== "";
 
@@ -148,25 +159,27 @@ export default function NewProjectPage() {
     }
   }, []);
 
-  // Debounced URL change handler
+  // Debounced URL change handler — skip if URL hasn't changed from restored/last-fetched value
   useEffect(() => {
-    // Skip prefetch on initial mount when form is restored from sessionStorage
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-    if (!url.trim()) {
+    const trimmed = url.trim();
+
+    if (!trimmed) {
       setPrefetching(false);
       setFaviconUrl(null);
       setFaviconVisible(false);
       return;
     }
 
+    // Skip if URL is the same as what we already have data for
+    if (trimmed === lastPrefetchedUrl.current) {
+      return;
+    }
+
     debounceTimer.current = setTimeout(() => {
-      handlePrefetch(url.trim());
+      lastPrefetchedUrl.current = trimmed;
+      handlePrefetch(trimmed);
     }, 800);
 
     return () => {
@@ -181,7 +194,7 @@ export default function NewProjectPage() {
     const fullUrl = url.startsWith("http") ? url : `https://${url}`;
 
     // If workspace already exists and URL hasn't changed, skip scrape and go to step 2
-    if (restored?.workspaceId && restored?.url === fullUrl) {
+    if (restored?.workspaceId && restored.url === fullUrl) {
       // Update sessionStorage with any field changes (brand name, country, language)
       const projectData = {
         ...restored,

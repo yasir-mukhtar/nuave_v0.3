@@ -4,14 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  IconSmartHome,
-  IconMessageDots,
-  IconArticle,
-  IconRosetteAsterisk,
-  IconSelector,
-  IconLogout,
-} from '@tabler/icons-react';
+  Home,
+  MessageSquare,
+  FileText,
+  Sparkles,
+  ChevronsUpDown,
+  LogOut,
+} from 'lucide-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 type SidebarProps = {
   credits: number;
@@ -21,10 +22,10 @@ type SidebarProps = {
 };
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: IconSmartHome },
-  { label: "Prompt", href: "/prompt", icon: IconMessageDots },
-  { label: "Konten", href: "/content", icon: IconArticle },
-  { label: "Brand", href: "/brand", icon: IconRosetteAsterisk },
+  { label: "Dashboard", href: "/dashboard", icon: Home },
+  { label: "Prompt", href: "/prompt", icon: MessageSquare },
+  { label: "Konten", href: "/content", icon: FileText },
+  { label: "Brand", href: "/brand", icon: Sparkles },
 ];
 
 const bottomLinks = [
@@ -72,44 +73,18 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
   }
 
   return (
-    <aside
-      style={{
-        width: "256px",
-        height: "100vh",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        zIndex: 10,
-        padding: "24px 16px 16px",
-        display: "flex",
-        flexDirection: "column",
-        background: "#F5F5F5",
-        borderRight: "1px solid var(--border-default)",
-      }}
-    >
+    <aside className="w-64 h-screen fixed top-0 left-0 z-10 pt-6 px-4 pb-4 flex flex-col bg-[#F5F5F5] border-r border-border-default">
       {/* Logo area */}
       <Link
         href="/"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          textDecoration: "none",
-          marginBottom: "32px",
-        }}
+        className="flex items-center gap-2 no-underline mb-8"
       >
-        <img src="/logo-nuave.svg" alt="Nuave" width="28" height="28" style={{ display: 'block' }} />
-        <span style={{ fontWeight: 600, fontSize: '17px', color: 'var(--text-heading)' }}>Nuave</span>
+        <img src="/logo-nuave.svg" alt="Nuave" width="28" height="28" className="block" />
+        <span className="font-semibold text-[17px] text-text-heading">Nuave</span>
       </Link>
 
       {/* Primary nav */}
-      <nav
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "2px",
-        }}
-      >
+      <nav className="flex flex-col gap-0.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
@@ -121,32 +96,22 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              style={{ textDecoration: "none" }}
+              className="no-underline"
             >
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  height: "36px",
-                  padding: "0 8px",
-                  borderRadius: "var(--radius-sm)",
-                  cursor: "pointer",
-                  color: isActive ? "var(--text-heading)" : "var(--text-muted)",
-                  background: "transparent",
-                  transition: "var(--transition-fast)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.color = "var(--text-body)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.color = "var(--text-muted)";
-                }}
+                className={cn(
+                  "flex items-center gap-2.5 h-9 px-2 rounded-sm cursor-pointer bg-transparent transition-[color] duration-150",
+                  isActive
+                    ? "text-text-heading"
+                    : "text-text-muted hover:text-text-body"
+                )}
               >
-                <Icon size={18} stroke={2} />
+                <Icon size={18} strokeWidth={2} />
                 <span
-                  className="text-label-14"
-                  style={{ fontWeight: isActive ? 600 : 400 }}
+                  className={cn(
+                    "text-sm",
+                    isActive ? "font-semibold" : "font-normal"
+                  )}
                 >
                   {item.label}
                 </span>
@@ -157,38 +122,21 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
       </nav>
 
       {/* Bottom section */}
-      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "0px" }}>
+      <div className="mt-auto flex flex-col">
         {/* Secondary links */}
-        <nav
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
-            marginBottom: "20px",
-          }}
-        >
+        <nav className="flex flex-col gap-0.5 mb-5">
           {bottomLinks.map((item) => {
             const isActive = pathname?.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-label-14"
-                style={{
-                  textDecoration: "none",
-                  display: "block",
-                  padding: "6px 8px",
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? "var(--text-heading)" : "var(--text-muted)",
-                  borderRadius: "var(--radius-sm)",
-                  transition: "var(--transition-fast)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.color = "var(--text-body)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.color = "var(--text-muted)";
-                }}
+                className={cn(
+                  "text-sm no-underline block py-1.5 px-2 rounded-sm transition-[color] duration-150",
+                  isActive
+                    ? "font-semibold text-text-heading"
+                    : "font-normal text-text-muted hover:text-text-body"
+                )}
               >
                 {item.label}
               </Link>
@@ -197,41 +145,22 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
         </nav>
 
         {/* User profile with popover */}
-        <div ref={popoverRef} style={{ position: "relative" }}>
+        <div ref={popoverRef} className="relative">
 
           {/* Popover */}
           {popoverOpen && (
             <div
-              className={popoverClosing ? "popover-up-out" : "popover-up"}
-              style={{
-                position: "absolute",
-                bottom: "calc(100% + 4px)",
-                left: 0,
-                width: "max-content",
-                minWidth: "100%",
-                background: "#ffffff",
-                border: "1px solid var(--border-default)",
-                borderRadius: "var(--radius-md)",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-                overflow: "hidden",
-                zIndex: 20,
-              }}
+              className={cn(
+                "absolute bottom-[calc(100%+4px)] left-0 w-max min-w-full bg-white border border-border-default rounded-md shadow-[0_4px_16px_rgba(0,0,0,0.1)] overflow-hidden z-20",
+                popoverClosing ? "popover-up-out" : "popover-up"
+              )}
             >
               {/* User info */}
-              <div style={{ padding: "12px 14px", borderBottom: "1px solid var(--border-default)" }}>
-                <p
-                  className="text-label-13"
-                  style={{
-                    fontWeight: 600, color: "var(--text-heading)",
-                    margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                  }}
-                >
+              <div className="py-3 px-3.5 border-b border-border-default">
+                <p className="text-[13px] leading-4 font-semibold text-text-heading m-0 whitespace-nowrap overflow-hidden text-ellipsis">
                   {userName}
                 </p>
-                <p
-                  className="text-label-12"
-                  style={{ color: "var(--text-muted)", margin: "2px 0 0 0" }}
-                >
+                <p className="text-xs text-text-muted mt-0.5 mb-0 ml-0 mr-0">
                   {userEmail}
                 </p>
               </div>
@@ -239,24 +168,9 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
               {/* Logout button */}
               <button
                 onClick={handleLogout}
-                className="text-label-13"
-                style={{
-                  display: "flex", alignItems: "center", gap: "8px",
-                  width: "100%", padding: "10px 14px",
-                  color: "var(--text-muted)",
-                  background: "none", border: "none", cursor: "pointer",
-                  textAlign: "left",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "var(--surface)";
-                  e.currentTarget.style.color = "var(--text-heading)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "none";
-                  e.currentTarget.style.color = "var(--text-muted)";
-                }}
+                className="flex items-center gap-2 w-full py-2.5 px-3.5 text-[13px] leading-4 text-text-muted bg-transparent border-none cursor-pointer text-left hover:bg-surface hover:text-text-heading"
               >
-                <IconLogout size={16} stroke={1.5} />
+                <LogOut size={16} strokeWidth={1.5} />
                 Keluar
               </button>
             </div>
@@ -265,68 +179,20 @@ export function Sidebar({ userName, userEmail, workspaceName }: SidebarProps) {
           {/* User card trigger */}
           <div
             onClick={() => popoverOpen ? closePopover() : setPopoverOpen(true)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "10px",
-              cursor: "pointer",
-              borderRadius: "var(--radius-md)",
-              background: "#ffffff",
-              border: "1px solid var(--border-default)",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-              transition: "var(--transition-fast)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.05)";
-            }}
+            className="flex items-center gap-2.5 p-2.5 cursor-pointer rounded-md bg-white border border-border-default shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-shadow duration-150 hover:shadow-[0_2px_6px_rgba(0,0,0,0.08)]"
           >
-            <div
-              style={{
-                width: "24px",
-                height: "24px",
-                borderRadius: "50%",
-                background: "var(--purple)",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "11px",
-                fontWeight: 600,
-                flexShrink: 0,
-              }}
-            >
+            <div className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-[11px] font-semibold shrink-0">
               {initial}
             </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1px",
-                flex: 1,
-                minWidth: 0,
-              }}
-            >
-              <span
-                className="text-label-13"
-                style={{
-                  fontWeight: 500,
-                  color: "var(--text-heading)",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
+            <div className="flex flex-col gap-px flex-1 min-w-0">
+              <span className="text-[13px] leading-4 font-medium text-text-heading whitespace-nowrap overflow-hidden text-ellipsis">
                 {userName}
               </span>
             </div>
-            <IconSelector
+            <ChevronsUpDown
               size={16}
-              stroke={2}
-              style={{ color: "var(--text-muted)", flexShrink: 0 }}
+              strokeWidth={2}
+              className="text-text-muted shrink-0"
             />
           </div>
         </div>

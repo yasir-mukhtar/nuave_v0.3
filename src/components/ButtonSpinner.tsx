@@ -1,30 +1,29 @@
 "use client";
 
 import React from "react";
+import { cn } from "@/lib/utils";
 
 /**
- * Inline spinner for buttons — matches existing project spinner style.
- * Renders a small spinning circle next to button text.
+ * Inline spinner for buttons — renders a small spinning circle.
  */
 export function ButtonSpinner({
   size = 16,
   color = "#ffffff",
+  className,
 }: {
   size?: number;
-  /** Spinner accent color — defaults to white (for purple buttons). Use "var(--purple)" for light buttons. */
+  /** Spinner accent color — defaults to white (for brand buttons). */
   color?: string;
+  className?: string;
 }) {
   return (
     <span
+      className={cn("inline-block shrink-0 animate-spin rounded-full", className)}
       style={{
-        display: "inline-block",
         width: size,
         height: size,
         border: `2px solid ${color === "#ffffff" ? "rgba(255,255,255,0.3)" : "#E5E7EB"}`,
         borderTopColor: color,
-        borderRadius: "50%",
-        animation: "spin 0.7s linear infinite",
-        flexShrink: 0,
       }}
     />
   );
