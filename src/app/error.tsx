@@ -50,7 +50,7 @@ export default function Error({
               letterSpacing: '-1.6px',
               color: '#111827',
             }}>
-              Oops
+              Waduh
             </span>
           </h1>
 
@@ -101,7 +101,7 @@ export default function Error({
                 letterSpacing: '-1.92px',
                 color: '#111827',
               }}>
-                Oops
+                Waduh
               </span>
             </h1>
 
