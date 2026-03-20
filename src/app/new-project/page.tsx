@@ -78,20 +78,25 @@ function isValidUrlInput(value: string): boolean {
 
 export default function NewProjectPage() {
   const router = useRouter();
-  const [url, setUrl] = useState("");
-  const [brandName, setBrandName] = useState("");
-  const [country, setCountry] = useState("");
-  const [language, setLanguage] = useState("");
+  // Restore form state from sessionStorage if returning from step 2
+  const savedProject = typeof window !== "undefined" ? sessionStorage.getItem("nuave_new_project") : null;
+  const restored = savedProject ? JSON.parse(savedProject) : null;
+
+  const [url, setUrl] = useState(restored?.url?.replace(/^https?:\/\//, "") || "");
+  const [brandName, setBrandName] = useState(restored?.brandName || "");
+  const [country, setCountry] = useState(restored?.country || "");
+  const [language, setLanguage] = useState(restored?.language || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   // Auto-fill state
   const [prefetching, setPrefetching] = useState(false);
-  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
-  const [faviconVisible, setFaviconVisible] = useState(false);
-  const touchedFields = useRef(new Set<string>());
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(restored ? `https://www.google.com/s2/favicons?domain=${restored.url?.replace(/^https?:\/\//, "")}&sz=128` : null);
+  const [faviconVisible, setFaviconVisible] = useState(!!restored);
+  const touchedFields = useRef(restored ? new Set<string>(["brandName", "country", "language"]) : new Set<string>());
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const isInitialMount = useRef(!!restored);
 
   const isValid = url.trim().length > 0 && brandName.trim().length > 0 && country !== "" && language !== "";
 
@@ -145,6 +150,12 @@ export default function NewProjectPage() {
 
   // Debounced URL change handler
   useEffect(() => {
+    // Skip prefetch on initial mount when form is restored from sessionStorage
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
     if (!url.trim()) {
@@ -167,10 +178,25 @@ export default function NewProjectPage() {
     e.preventDefault();
     if (!isValid || loading) return;
 
+    const fullUrl = url.startsWith("http") ? url : `https://${url}`;
+
+    // If workspace already exists and URL hasn't changed, skip scrape and go to step 2
+    if (restored?.workspaceId && restored?.url === fullUrl) {
+      // Update sessionStorage with any field changes (brand name, country, language)
+      const projectData = {
+        ...restored,
+        brandName: brandName.trim(),
+        country,
+        language,
+        faviconUrl: faviconUrl || restored.faviconUrl || null,
+      };
+      sessionStorage.setItem("nuave_new_project", JSON.stringify(projectData));
+      router.push("/new-project/topics");
+      return;
+    }
+
     setLoading(true);
     setError("");
-
-    const fullUrl = url.startsWith("http") ? url : `https://${url}`;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
