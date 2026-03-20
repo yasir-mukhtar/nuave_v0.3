@@ -18,6 +18,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   const [userEmail, setUserEmail] = useState("");
   const { activeWorkspace } = useActiveWorkspace();
   const workspaceName = activeWorkspace?.brand_name ?? "Select Workspace";
+  const websiteUrl = activeWorkspace?.website_url;
 
   useEffect(() => {
     localStorage.removeItem('nuave_credits');
@@ -53,6 +54,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
           userName={userName}
           userEmail={userEmail}
           workspaceName={workspaceName}
+          websiteUrl={websiteUrl}
         />
         <div className="ml-64 flex min-w-0 flex-1 flex-col bg-page">
           <Topbar />

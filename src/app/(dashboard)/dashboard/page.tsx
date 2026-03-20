@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   IconArrowRight,
@@ -32,6 +33,7 @@ type DashboardData = {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { activeWorkspaceId, activeWorkspace, loading: wsLoading } = useActiveWorkspace();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,15 +167,41 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Greeting */}
-      <div>
-        <h1 className="m-0">
-          Selamat datang, {data.firstName}
-        </h1>
-        <p className="text-copy-14 text-text-muted mt-1 mb-0">
-          Berikut performa AI visibility{" "}
-          <span className="font-semibold text-text-heading">{data.brandName}</span>
-        </p>
+      {/* Greeting + action */}
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 style={{
+            fontSize: '28px',
+            fontWeight: 600,
+            lineHeight: '40px',
+            letterSpacing: '-0.56px',
+            color: '#0d0d0d',
+            margin: 0,
+            whiteSpace: 'nowrap',
+          }}>
+            Selamat datang, {data.firstName}
+          </h1>
+          <p style={{ fontSize: '14px', color: '#8b8b8b', lineHeight: '28px', margin: 0 }}>
+            Berikut performa AI visibility{" "}
+            <span style={{ color: '#0d0d0d', fontWeight: 500 }}>{data.brandName}</span>
+          </p>
+        </div>
+        <button
+          onClick={() => router.push("/new-project")}
+          style={{
+            background: '#ffffff',
+            border: '1px solid #e5e5e5',
+            borderRadius: '6px',
+            padding: '12px 16px',
+            fontSize: '14px',
+            fontWeight: 500,
+            color: '#374151',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          Buat laporan
+        </button>
       </div>
 
       {/* Chart + Competitors row */}

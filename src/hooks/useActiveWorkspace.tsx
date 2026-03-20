@@ -6,6 +6,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 type Workspace = {
   id: string;
   brand_name: string;
+  website_url?: string;
 };
 
 type ActiveWorkspaceContextValue = {
@@ -41,7 +42,7 @@ export function ActiveWorkspaceProvider({ children }: { children: ReactNode }) {
 
       const { data } = await supabase
         .from('workspaces')
-        .select('id, brand_name')
+        .select('id, brand_name, website_url')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
