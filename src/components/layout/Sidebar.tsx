@@ -181,19 +181,26 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
       </nav>
 
       {/* Bottom section */}
-      <div className="mt-auto flex flex-col px-6 pb-6">
+      <div className="mt-auto flex flex-col px-6 pb-[24px]">
+        {/* Muted Nuave logo */}
+        <div className="mb-6">
+          <svg width={24} height={24} viewBox="0 0 262 262" fill="none" className="block text-[#8b8b8b]">
+            <path d="M172.197 202.668L130.999 131.02L89.1807 206H8L89.8027 59.332L130.999 130.98L172.818 56H254L172.197 202.668Z" fill="currentColor"/>
+          </svg>
+        </div>
+
         {/* Secondary links */}
         <div className="flex flex-col gap-6 mb-6">
-          <Link href="/support" className="text-[14px] font-medium text-[#6b7280] no-underline transition-colors hover:text-foreground">
+          <Link href="/support" className="text-[14px] font-medium text-[#8b8b8b] no-underline transition-colors hover:text-foreground">
             Bantuan
           </Link>
-          <Link href="/settings" className="text-[14px] font-medium text-[#6b7280] no-underline transition-colors hover:text-foreground">
+          <Link href="/settings" className="text-[14px] font-medium text-[#8b8b8b] no-underline transition-colors hover:text-foreground">
             Pengaturan
           </Link>
         </div>
 
         {/* Credits row */}
-        <Link href="/dashboard/credits" className="group mb-6 h-5 flex items-center justify-between no-underline">
+        <Link href="/dashboard/credits" className="group h-5 flex items-center justify-between no-underline">
           <div className="flex items-center gap-1.5">
             <IconCoins size={16} stroke={1.5} className="text-[#533afd]" />
             <span className="text-[14px]">
@@ -206,14 +213,6 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
             <IconArrowUpRight size={16} stroke={1.5} />
           </div>
         </Link>
-
-        {/* Muted Nuave logo */}
-        <div className="flex items-center gap-1.5">
-          <svg width={24} height={24} viewBox="0 0 262 262" fill="none" className="block text-[#6B7280]">
-            <path d="M172.197 202.668L130.999 131.02L89.1807 206H8L89.8027 59.332L130.999 130.98L172.818 56H254L172.197 202.668Z" fill="currentColor"/>
-          </svg>
-          <span className="text-[16px] font-semibold text-[#6B7280]">Nuave</span>
-        </div>
       </div>
 
       <style>{`
