@@ -105,6 +105,7 @@ export type Prompt = {
   competition_level: string | null;
   cpc_micros: number | null;
   keyword_data_fetched_at: string | null;
+  archived_at: string | null;
   created_at: string;
 };
 

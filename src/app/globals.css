@@ -89,9 +89,9 @@ label.field-label.disabled {
 .form-field select {
   box-sizing: border-box;
   margin: 0px;
-  padding: 0.375rem 0.75rem;
-  height: 36px;
-  max-height: 36px;
+  padding: 0.625rem 0.75rem;
+  height: 44px !important;
+  max-height: 44px !important;
   width: 100%;
   background-color: #FFFFFF;
   color: rgba(33, 33, 38, 0.65);
@@ -620,6 +620,15 @@ label.field-label.disabled {
 }
 
 @layer base {
+  /* Fix cmdk list scroll — ensure list is scrollable and inner sizer doesn't block */
+  [cmdk-list] {
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+  [cmdk-list-sizer] {
+    overflow: visible !important;
+  }
+
   * {
     box-sizing: border-box;
     margin: 0;

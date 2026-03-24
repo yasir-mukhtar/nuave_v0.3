@@ -1,470 +1,1052 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
-  IconChevronDown,
-  IconChevronRight,
+  IconPlus,
+  IconSearch,
+  IconTrash,
+  IconArchive,
+  IconArrowBackUp,
   IconCircleCheckFilled,
   IconCircleXFilled,
-  IconSearch,
-  IconSparkles,
-  IconPlus,
-  IconFileText,
-  IconArchive,
-  IconTrash,
-  IconClock,
+  IconPencil,
+  IconX,
+  IconCheck,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import SearchableSelect from "@/components/new-project/SearchableSelect";
+import PromptDetailModal, { type PromptDetail } from "@/components/PromptDetailModal";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useActiveProject } from "@/hooks/useActiveProject";
+import { usePromptPageData, type PromptWithAudit } from "@/hooks/usePromptPageData";
+import { COUNTRIES, LANGUAGES } from "@/lib/constants";
+import type { Topic } from "@/types";
 
-/* ── Mock data ── */
-
-const MOCK_TOPICS = [
-  { id: "t1", name: "Best CRM tools", language: "en" },
-  { id: "t2", name: "Rekomendasi alat pemasaran", language: "id" },
-  { id: "t3", name: "Small business solutions", language: "en" },
-];
-
-const MOCK_PROMPTS = [
-  { id: "p1", topicId: "t1", text: "What are the best CRM tools for startups in 2026?", mentioned: true, archived: false },
-  { id: "p2", topicId: "t1", text: "Top CRM software for small teams with limited budget", mentioned: false, archived: false },
-  { id: "p3", topicId: "t1", text: "Compare the best CRM platforms for B2B companies", mentioned: true, archived: true },
-  { id: "p4", topicId: "t2", text: "Apa saja alat pemasaran digital terbaik untuk UKM?", mentioned: true, archived: false },
-  { id: "p5", topicId: "t2", text: "Rekomendasi platform email marketing untuk bisnis kecil", mentioned: false, archived: false },
-  { id: "p6", topicId: "t3", text: "Best accounting software for freelancers", mentioned: false, archived: false },
-  { id: "p7", topicId: "t3", text: "What project management tools do small businesses use?", mentioned: true, archived: false },
-  { id: "p8", topicId: null, text: "How to improve brand visibility in AI search results?", mentioned: false, archived: false },
-];
-
-const MOCK_RESPONSE = `## Top CRM Tools for Startups in 2026
-
-Here are the most recommended CRM platforms for startups:
-
-- **HubSpot CRM** — Free tier with robust features, great for small teams starting out
-- **Salesforce Essentials** — Enterprise-grade features scaled down for startups
-- **Pipedrive** — Focused on sales pipeline management with intuitive interface
-- **Zoho CRM** — Affordable with extensive customization options
-
-### Key Factors to Consider
-
-When choosing a CRM for your startup, consider:
-
-- **Pricing** — Look for free tiers or startup-friendly pricing
-- **Scalability** — Can it grow with your team?
-- **Integrations** — Does it connect with your existing tools?
-- **Ease of use** — Your team should adopt it quickly
-
----
-
-Most startups find success with HubSpot CRM or Pipedrive as their first CRM solution.`;
+const PANEL_ANIM_MS = 280;
 
 /* ── Page ── */
 
-type FilterTab = "all" | "active" | "archived";
-
 export default function PromptsPage() {
-  const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
+  const { activeProjectId, activeProject, loading: projectLoading } = useActiveProject();
+  const brandName = activeProject?.name ?? "";
+  const {
+    topics,
+    prompts,
+    loading: dataLoading,
+    createTopic,
+    renameTopic,
+    deleteTopic: deleteTopicMutation,
+    createPrompt,
+    updatePrompt,
+    togglePromptActive,
+    archivePrompt: archivePromptMutation,
+    archiveAllInTopic,
+    restorePrompt,
+    deletePromptPermanently,
+  } = usePromptPageData(activeProjectId);
+
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
-  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set(MOCK_TOPICS.map((t) => t.id)));
-  const [filterTab, setFilterTab] = useState<FilterTab>("all");
+  const [showArchive, setShowArchive] = useState(false);
   const [search, setSearch] = useState("");
+  const [archiveAllOpen, setArchiveAllOpen] = useState(false);
+  const [archiveAllClosing, setArchiveAllClosing] = useState(false);
+  const [createTopicOpen, setCreateTopicOpen] = useState(false);
+  const [createTopicClosing, setCreateTopicClosing] = useState(false);
+  const [createPromptOpen, setCreatePromptOpen] = useState(false);
+  const [createPromptClosing, setCreatePromptClosing] = useState(false);
+  const [archivePromptId, setArchivePromptId] = useState<string | null>(null);
+  const [archivePromptClosing, setArchivePromptClosing] = useState(false);
+  const [permanentDeleteId, setPermanentDeleteId] = useState<string | null>(null);
+  const [permanentDeleteClosing, setPermanentDeleteClosing] = useState(false);
+  const [deleteTopicId, setDeleteTopicId] = useState<string | null>(null);
+  const [deleteTopicClosing, setDeleteTopicClosing] = useState(false);
+  const [selectedPromptDetail, setSelectedPromptDetail] = useState<PromptDetail | null>(null);
+  const [editPromptData, setEditPromptData] = useState<PromptWithAudit | null>(null);
+  const [editPromptClosing, setEditPromptClosing] = useState(false);
 
-  const selectedType = selectedPromptId ? "prompt" : selectedTopicId ? "topic" : null;
+  const loading = projectLoading || dataLoading;
 
-  const toggleExpand = (id: string) => {
-    setExpandedTopics((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  // Filter prompts
+  const activePrompts = prompts.filter((p) => !p.archived_at);
+  const archivedPrompts = prompts.filter((p) => !!p.archived_at);
 
-  const filteredPrompts = MOCK_PROMPTS.filter((p) => {
-    if (filterTab === "active" && p.archived) return false;
-    if (filterTab === "archived" && !p.archived) return false;
-    if (search && !p.text.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
+  const topicPrompts = showArchive
+    ? archivedPrompts
+    : activePrompts.filter((p) => {
+        if (selectedTopicId === null) return p.topic_id === null;
+        return p.topic_id === selectedTopicId;
+      });
+
+  const filteredPrompts = topicPrompts.filter((p) => {
+    if (!search) return true;
+    return p.prompt_text.toLowerCase().includes(search.toLowerCase());
   });
 
-  const promptsForTopic = (topicId: string | null) =>
-    filteredPrompts.filter((p) => p.topicId === topicId);
+  function getTopicCounts(topicId: string | null) {
+    const tp = activePrompts.filter((p) => (topicId === null ? p.topic_id === null : p.topic_id === topicId));
+    const active = tp.filter((p) => p.is_active).length;
+    const total = tp.length;
+    return { active, total };
+  }
 
-  const counts = {
-    all: MOCK_PROMPTS.filter((p) => !search || p.text.toLowerCase().includes(search.toLowerCase())).length,
-    active: MOCK_PROMPTS.filter((p) => !p.archived && (!search || p.text.toLowerCase().includes(search.toLowerCase()))).length,
-    archived: MOCK_PROMPTS.filter((p) => p.archived && (!search || p.text.toLowerCase().includes(search.toLowerCase()))).length,
-  };
+  const selectedTopicName = selectedTopicId === null
+    ? "Tanpa Topik"
+    : topics.find((t) => t.id === selectedTopicId)?.name ?? "";
 
-  const selectedPrompt = MOCK_PROMPTS.find((p) => p.id === selectedPromptId);
-  const selectedTopic = MOCK_TOPICS.find((t) => t.id === selectedTopicId);
+  function closeArchiveAll() {
+    setArchiveAllClosing(true);
+    setTimeout(() => { setArchiveAllOpen(false); setArchiveAllClosing(false); }, PANEL_ANIM_MS);
+  }
 
-  const TABS: { key: FilterTab; label: string }[] = [
-    { key: "all", label: "Semua" },
-    { key: "active", label: "Aktif" },
-    { key: "archived", label: "Diarsipkan" },
-  ];
+  function closeCreateTopic() {
+    setCreateTopicClosing(true);
+    setTimeout(() => { setCreateTopicOpen(false); setCreateTopicClosing(false); }, PANEL_ANIM_MS);
+  }
 
-  const LANG: Record<string, string> = { en: "EN", id: "ID", ms: "MS" };
+  function closeCreatePrompt() {
+    setCreatePromptClosing(true);
+    setTimeout(() => { setCreatePromptOpen(false); setCreatePromptClosing(false); }, PANEL_ANIM_MS);
+  }
+
+  function closeArchivePrompt() {
+    setArchivePromptClosing(true);
+    setTimeout(() => { setArchivePromptId(null); setArchivePromptClosing(false); }, PANEL_ANIM_MS);
+  }
+
+  function closePermanentDelete() {
+    setPermanentDeleteClosing(true);
+    setTimeout(() => { setPermanentDeleteId(null); setPermanentDeleteClosing(false); }, PANEL_ANIM_MS);
+  }
+
+  function closeDeleteTopic() {
+    setDeleteTopicClosing(true);
+    setTimeout(() => { setDeleteTopicId(null); setDeleteTopicClosing(false); }, PANEL_ANIM_MS);
+  }
+
+  function closeEditPrompt() {
+    setEditPromptClosing(true);
+    setTimeout(() => { setEditPromptData(null); setEditPromptClosing(false); }, PANEL_ANIM_MS);
+  }
+
+  const archivePromptData = prompts.find((p) => p.id === archivePromptId);
+  const permanentDeletePrompt = prompts.find((p) => p.id === permanentDeleteId);
+  const deleteTopicData = topics.find((t) => t.id === deleteTopicId);
+  const deleteTopicPromptCount = deleteTopicId ? prompts.filter((p) => p.topic_id === deleteTopicId).length : 0;
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[400px]">
+        <p className="text-text-muted text-[13px]">Memuat data prompt...</p>
+      </div>
+    );
+  }
+
+  // No brand selected
+  if (!activeProjectId) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[400px] gap-3">
+        <p className="text-[16px] leading-6 font-semibold">Belum ada brand</p>
+        <p className="text-text-muted">Buat brand terlebih dahulu untuk mulai mengelola prompt.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] -m-8 bg-white rounded-md border border-border-default overflow-hidden">
+    <TooltipProvider delayDuration={200}>
+      <style>{`
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes modalOut { from { opacity: 1; transform: scale(1) translateY(0); } to { opacity: 0; transform: scale(0.95) translateY(8px); } }
+        @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
+      `}</style>
 
-      {/* ═══════ LEFT PANEL ═══════ */}
-      <div className="w-[400px] shrink-0 flex flex-col border-r border-border-default h-full">
-        {/* Header */}
-        <div className="px-5 pt-5">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-[18px] leading-6 font-bold m-0">Prompt</h1>
-            <div className="flex gap-2">
-              <button className="inline-flex items-center gap-[5px] px-3 py-1.5 text-[12px] leading-4 font-semibold text-white bg-brand border-none rounded-sm cursor-pointer">
-                <IconSparkles size={14} stroke={2} />
-                Generate Topik
-              </button>
-              <button className="inline-flex items-center gap-1 px-3 py-1.5 text-[12px] leading-4 font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer">
-                <IconPlus size={14} stroke={2} />
-                Tambah Topik
-              </button>
-            </div>
+      <div className="flex h-[calc(100vh-52px)] -m-8 bg-white overflow-hidden">
+
+        {/* ═══════ LEFT PANEL: Topics ═══════ */}
+        <div className="w-[380px] shrink-0 flex flex-col border-r border-border-default h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between px-8 h-[52px] border-b border-border-default shrink-0">
+            <h2 className="text-[16px] leading-6 font-semibold m-0 font-body text-text-heading tracking-normal">Topik</h2>
+            <button
+              onClick={() => setCreateTopicOpen(true)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-[12px] leading-4 font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer"
+            >
+              <IconPlus size={14} stroke={2} />
+              Buat topik
+            </button>
           </div>
 
-          {/* Tabs */}
-          <div className="flex bg-surface border border-border-default rounded-md overflow-hidden mb-3">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setFilterTab(tab.key)}
-                className={cn(
-                  "flex-1 px-2.5 py-[7px] text-[12px] leading-4 font-medium border-none cursor-pointer",
-                  filterTab === tab.key
-                    ? "bg-white text-text-heading shadow-[0_1px_2px_rgba(0,0,0,0.06)] rounded-sm"
-                    : "bg-transparent text-text-muted rounded-none"
-                )}
-              >
-                {tab.label}
-                <span className={cn(
-                  "ml-[5px] text-[10px] leading-3 font-semibold px-[5px] py-px rounded-xs",
-                  filterTab === tab.key
-                    ? "bg-brand-light text-brand"
-                    : "bg-surface text-text-muted"
-                )}>
-                  {counts[tab.key]}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Search */}
-          <div className="relative mb-3">
-            <IconSearch size={14} stroke={1.5} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari prompt..."
-              className="w-full py-[7px] pl-[30px] pr-3 text-[13px] leading-5 border border-border-default rounded-sm bg-white text-text-body outline-none box-border"
+          {/* Topic list */}
+          <div className="scroll-subtle flex-1 overflow-y-auto px-3 pt-3">
+            <TopicRow
+              name="Tanpa Topik"
+              counts={getTopicCounts(null)}
+              selected={!showArchive && selectedTopicId === null}
+              onClick={() => { setShowArchive(false); setSelectedTopicId(null); setSearch(""); }}
+              muted
             />
+            {topics.map((t) => (
+              <TopicRow
+                key={t.id}
+                name={t.name}
+                counts={getTopicCounts(t.id)}
+                selected={!showArchive && selectedTopicId === t.id}
+                onClick={() => { setShowArchive(false); setSelectedTopicId(t.id); setSearch(""); }}
+                onRename={(newName) => renameTopic(t.id, newName)}
+                onDelete={() => setDeleteTopicId(t.id)}
+              />
+            ))}
+
+            {/* Archive section */}
+            {archivedPrompts.length > 0 && (
+              <>
+                <div className="h-px bg-border-default mx-2 my-2" />
+                <div
+                  onClick={() => { setShowArchive(true); setSearch(""); }}
+                  className={cn(
+                    "flex items-center justify-between w-full px-5 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100",
+                    showArchive
+                      ? "bg-surface-raised"
+                      : "bg-transparent hover:bg-surface"
+                  )}
+                >
+                  <span className={cn(
+                    "text-[13px] leading-5 flex items-center gap-1.5",
+                    showArchive ? "font-semibold text-text-heading" : "text-text-muted"
+                  )}>
+                    <IconArchive size={14} stroke={1.5} />
+                    Arsip
+                  </span>
+                  <span className={cn(
+                    "text-[12px] leading-5 shrink-0 ml-2 tabular-nums",
+                    showArchive ? "text-text-heading font-semibold" : "text-text-muted"
+                  )}>
+                    {archivedPrompts.length}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Topic list */}
-        <div className="scroll-subtle flex-1 overflow-y-auto px-2 pb-3">
-          {MOCK_TOPICS.map((topic) => {
-            const tp = promptsForTopic(topic.id);
-            const isExpanded = expandedTopics.has(topic.id);
-            const isSelected = selectedType === "topic" && selectedTopicId === topic.id;
-            return (
-              <div key={topic.id} className="mb-1">
+        {/* ═══════ RIGHT PANEL: Prompts ═══════ */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-white">
+
+          {/* Header: search left-aligned, button right-aligned */}
+          <div className="flex items-center gap-3 px-8 h-[52px] border-b border-border-default shrink-0">
+            <div className="relative w-[240px]">
+              <IconSearch size={14} stroke={1.5} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Cari prompt..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full h-[30px] pl-[30px] pr-3 text-[13px] leading-5 border border-border-default rounded-sm bg-white text-text-body outline-none box-border"
+              />
+            </div>
+
+            <Button variant="brand" size="sm" className="ml-auto h-[30px]" onClick={() => setCreatePromptOpen(true)}>
+              <IconPlus size={14} stroke={2} />
+              Buat prompt
+            </Button>
+          </div>
+
+          {/* Prompt rows */}
+          <div className="flex-1 overflow-y-auto scroll-subtle">
+            {filteredPrompts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-[200px] text-text-muted text-[13px]">
+                {search
+                  ? "Tidak ada prompt yang cocok."
+                  : showArchive
+                    ? "Tidak ada prompt yang diarsipkan."
+                    : "Belum ada prompt di topik ini."}
+              </div>
+            ) : (
+              filteredPrompts.map((p) => (
                 <div
+                  key={p.id}
                   onClick={() => {
-                    setSelectedTopicId(topic.id);
-                    setSelectedPromptId(null);
-                    toggleExpand(topic.id);
+                    if (p.ai_response) {
+                      setSelectedPromptDetail({
+                        prompt_text: p.prompt_text,
+                        ai_response: p.ai_response,
+                        brand_mentioned: p.mentioned ?? false,
+                      });
+                    }
                   }}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-2 cursor-pointer rounded-sm",
-                    isSelected ? "bg-brand-light" : "bg-transparent"
+                    "flex items-center px-8 py-3.5 border-b border-border-default hover:bg-surface transition-colors duration-100 group",
+                    p.ai_response ? "cursor-pointer" : "cursor-default"
                   )}
                 >
-                  <span className="text-text-muted">
-                    {isExpanded ? <IconChevronDown size={14} stroke={2} /> : <IconChevronRight size={14} stroke={2} />}
-                  </span>
-                  <span className="flex-1 text-[13px] leading-4 font-semibold text-text-heading overflow-hidden text-ellipsis whitespace-nowrap">
-                    {topic.name}
-                  </span>
-                  <span className="text-[10px] leading-3 font-semibold px-[5px] py-px rounded-xs bg-brand-light text-brand">
-                    {LANG[topic.language] ?? topic.language.toUpperCase()}
-                  </span>
-                  <span className="text-[11px] leading-4 font-medium text-text-muted">{tp.length}</span>
-                </div>
-                {isExpanded && (
-                  <div className="pl-1">
-                    {tp.length === 0 ? (
-                      <p className="py-2 px-3 pl-8 text-[12px] leading-4 text-text-muted italic">
-                        Tidak ada prompt yang cocok
-                      </p>
-                    ) : tp.map((p) => (
-                      <div
-                        key={p.id}
-                        onClick={() => { setSelectedPromptId(p.id); setSelectedTopicId(null); }}
-                        className={cn(
-                          "flex items-center gap-2 py-2 px-3 pl-8 cursor-pointer rounded-sm",
-                          selectedPromptId === p.id ? "bg-brand-light" : "bg-transparent"
-                        )}
-                      >
-                        {p.mentioned
-                          ? <IconCircleCheckFilled size={16} className="text-success shrink-0" />
-                          : <IconCircleXFilled size={16} className="text-error shrink-0" />
-                        }
-                        <span className="flex-1 text-[13px] leading-4 text-text-body overflow-hidden text-ellipsis whitespace-nowrap">
-                          {p.text}
-                        </span>
-                        {p.archived && (
-                          <span className="text-[10px] leading-3 font-medium px-1.5 py-px rounded-xs bg-surface-raised text-text-placeholder">
-                            Arsip
-                          </span>
-                        )}
-                      </div>
-                    ))}
+                  {/* Prompt text + edit icon */}
+                  <div className="flex items-start gap-2 flex-1 min-w-0 pr-3">
+                    <p className={cn(
+                      "text-[13px] leading-5 m-0 flex-1",
+                      p.is_active ? "text-text-body" : "text-text-muted"
+                    )}>
+                      {p.prompt_text}
+                    </p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setEditPromptData(p); }}
+                      className="bg-transparent border-none cursor-pointer text-text-placeholder p-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-100 shrink-0"
+                    >
+                      <IconPencil size={13} stroke={1.5} />
+                    </button>
                   </div>
-                )}
-              </div>
-            );
-          })}
 
-          {/* Uncategorized */}
-          {promptsForTopic(null).length > 0 && (
-            <div className="mb-1">
-              <div
-                onClick={() => {
-                  setSelectedTopicId(null);
-                  setSelectedPromptId(null);
-                }}
-                className="flex items-center gap-2 px-3 py-2 cursor-pointer rounded-sm bg-transparent"
-              >
-                <span className="text-text-muted">
-                  <IconChevronDown size={14} stroke={2} />
-                </span>
-                <span className="flex-1 text-[13px] leading-4 font-semibold text-text-muted">
-                  Tanpa Topik
-                </span>
-                <span className="text-[11px] leading-4 font-medium text-text-muted">
-                  {promptsForTopic(null).length}
-                </span>
-              </div>
-              <div className="pl-1">
-                {promptsForTopic(null).map((p) => (
-                  <div
-                    key={p.id}
-                    onClick={() => { setSelectedPromptId(p.id); setSelectedTopicId(null); }}
-                    className={cn(
-                      "flex items-center gap-2 py-2 px-3 pl-8 cursor-pointer rounded-sm",
-                      selectedPromptId === p.id ? "bg-brand-light" : "bg-transparent"
+                  {/* Mentioned icon with tooltip */}
+                  <div className="w-[48px] flex justify-center shrink-0">
+                    {p.mentioned === null ? (
+                      <span className="text-[13px] text-text-placeholder">&mdash;</span>
+                    ) : (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-default">
+                            {p.mentioned
+                              ? <IconCircleCheckFilled size={18} className="text-success" />
+                              : <IconCircleXFilled size={18} className="text-error" />
+                            }
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-[12px]">
+                          {p.mentioned
+                            ? "Brand disebut di audit terakhir"
+                            : "Brand tidak disebut di audit terakhir"}
+                        </TooltipContent>
+                      </Tooltip>
                     )}
-                  >
-                    {p.mentioned
-                      ? <IconCircleCheckFilled size={16} className="text-success shrink-0" />
-                      : <IconCircleXFilled size={16} className="text-error shrink-0" />
-                    }
-                    <span className="flex-1 text-[13px] leading-4 text-text-body overflow-hidden text-ellipsis whitespace-nowrap">
-                      {p.text}
-                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+
+                  {/* Toggle */}
+                  <div className="w-[48px] flex justify-center shrink-0">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); togglePromptActive(p.id, !p.is_active); }}
+                          className={cn(
+                            "relative w-[36px] h-[20px] rounded-full border-none cursor-pointer transition-colors duration-200",
+                            p.is_active ? "bg-[#111827]" : "bg-border-default"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "absolute top-[2px] w-[16px] h-[16px] rounded-full bg-white transition-[left] duration-200 shadow-[0_1px_2px_rgba(0,0,0,0.12)]",
+                              p.is_active ? "left-[18px]" : "left-[2px]"
+                            )}
+                          />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-[12px]">
+                        {p.is_active
+                          ? "Nonaktifkan pengecekan harian"
+                          : "Aktifkan pengecekan harian"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+
+                  {/* Actions — hover only */}
+                  <div className="flex items-center shrink-0 ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-100">
+                    {showArchive ? (
+                      <>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); restorePrompt(p.id); }}
+                              className="bg-transparent border-none cursor-pointer text-text-muted p-0.5 hover:text-success"
+                            >
+                              <IconArrowBackUp size={15} stroke={1.5} />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-[12px]">Pulihkan</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setPermanentDeleteId(p.id); }}
+                              className="bg-transparent border-none cursor-pointer text-text-muted p-0.5 hover:text-error"
+                            >
+                              <IconTrash size={15} stroke={1.5} />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-[12px]">Hapus permanen</TooltipContent>
+                        </Tooltip>
+                      </>
+                    ) : (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setArchivePromptId(p.id); }}
+                        className="bg-transparent border-none cursor-pointer text-text-placeholder p-0 hover:text-text-muted"
+                      >
+                        <IconArchive size={15} stroke={1.5} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between px-8 h-[44px] border-t border-border-default bg-white shrink-0">
+            <span className="text-[12px] leading-4 text-text-muted">
+              {filteredPrompts.length} ditampilkan
+            </span>
+            {!showArchive && topicPrompts.length > 0 && (
+              <button
+                onClick={() => setArchiveAllOpen(true)}
+                className="inline-flex items-center gap-1 text-[12px] leading-4 font-medium text-text-muted bg-transparent border-none cursor-pointer px-0 hover:text-text-body transition-colors duration-100"
+              >
+                <IconArchive size={13} stroke={1.5} />
+                Arsipkan semua
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ═══════ RIGHT PANEL ═══════ */}
-      <div className="flex-1 flex flex-col bg-[#FAFAFA]">
-
-        {/* Empty state */}
-        {!selectedPrompt && !selectedTopic && (
-          <div className="flex-1 flex flex-col items-center justify-center gap-3">
-            <IconFileText size={40} stroke={1} className="text-border-strong" />
-            <p className="text-[14px] leading-5 text-text-muted m-0">
-              Pilih prompt atau topik untuk melihat detail
-            </p>
-          </div>
-        )}
-
-        {/* Prompt detail */}
-        {selectedPrompt && (
-          <div className="scroll-subtle flex-1 overflow-y-auto p-6 flex flex-col gap-5">
-            {/* Chat bubble */}
-            <div className="flex justify-end">
-              <div className="bg-brand text-white rounded-[var(--radius-2xl)] rounded-br-xs px-3.5 py-2.5 max-w-[85%] text-[14px] leading-6 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
-                {selectedPrompt.text}
-              </div>
-            </div>
-
-            {/* Mention badge */}
-            <div className="flex gap-2 justify-end">
-              <div className="inline-flex items-center gap-1.5 bg-[#F4F4F4] rounded-full py-1.5 pl-1.5 pr-3">
-                {selectedPrompt.mentioned
-                  ? <IconCircleCheckFilled size={18} color="#16A34A" />
-                  : <IconCircleXFilled size={18} color="#DC2626" />
-                }
-                <span className="text-[13px] leading-4 font-medium text-text-heading">
-                  Brand {selectedPrompt.mentioned ? "disebutkan" : "tidak disebutkan"}
-                </span>
-              </div>
-              {selectedPrompt.mentioned && (
-                <div className="inline-flex items-center bg-[#DCFCE7] text-[#16A34A] rounded-full px-3 py-1.5 text-[12px] leading-4 font-semibold">
-                  Positif
-                </div>
-              )}
-            </div>
-
-            {/* AI response */}
-            <div className="border border-border-default rounded-md p-5 bg-white">
-              <p className="text-[11px] leading-4 font-semibold text-text-muted uppercase tracking-wide mb-3 mt-0">
-                Respons AI
+      {/* ── Archive All Confirmation ── */}
+      {archiveAllOpen && (
+        <>
+          <div
+            onClick={closeArchiveAll}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
+            style={{ animation: `${archiveAllClosing ? "overlayOut" : "overlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[calc(100vw-48px)] bg-white rounded-lg border border-border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)] p-6 z-50"
+            style={{ animation: `${archiveAllClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          >
+            <div className="mb-4">
+              <h3 className="text-[15px] leading-5 font-semibold m-0 mb-1">
+                Arsipkan semua prompt di topik ini?
+              </h3>
+              <p className="text-[13px] leading-5 text-text-muted m-0">
+                <strong className="text-text-body">{topicPrompts.length} prompt</strong> di topik <strong className="text-text-body">&ldquo;{selectedTopicName}&rdquo;</strong> akan diarsipkan. Pengecekan harian akan dihentikan. Anda bisa memulihkan prompt dari arsip kapan saja.
               </p>
-              <div className="text-[14px] leading-6 text-text-body whitespace-pre-wrap">
-                {MOCK_RESPONSE.split("\n").map((line, i) => {
-                  if (line.startsWith("## ")) return <p key={i} className="text-[16px] leading-6 font-bold text-text-heading mt-4 mb-2">{line.slice(3)}</p>;
-                  if (line.startsWith("### ")) return <p key={i} className="text-[14px] leading-5 font-semibold text-text-heading mt-3 mb-1">{line.slice(4)}</p>;
-                  if (line.startsWith("- ")) return <div key={i} className="flex gap-2 mb-1"><span className="text-brand">&#8226;</span><span>{line.slice(2)}</span></div>;
-                  if (line.startsWith("---")) return <hr key={i} className="border-none border-t border-border-default my-3" />;
-                  if (line.trim() === "") return <div key={i} className="h-2" />;
-                  return <p key={i} className="mb-1 mt-0">{line}</p>;
-                })}
-              </div>
-              <div className="mt-3 pt-3 border-t border-border-default text-[11px] leading-4 text-text-placeholder">
-                Respons oleh GPT-4o dengan pencarian web &middot; 17 Mar 2026
-              </div>
             </div>
-
-            {/* Competitor mentions */}
-            <div>
-              <p className="text-[11px] leading-4 font-semibold text-text-muted uppercase tracking-wide mb-2 mt-0">
-                Kompetitor yang Disebutkan
-              </p>
-              <div className="flex gap-1.5 flex-wrap">
-                {["HubSpot", "Salesforce", "Pipedrive", "Zoho"].map((c) => (
-                  <span key={c} className="text-[12px] leading-4 font-medium px-2.5 py-1 rounded-full bg-[#FEE2E2] text-red-600">
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Response history placeholder */}
-            <div className="border border-border-default rounded-md p-5 bg-[#FAFAFA]">
-              <div className="flex items-center gap-1.5 mb-4">
-                <IconClock size={16} stroke={1.5} className="text-text-muted" />
-                <span className="text-[13px] leading-4 font-semibold text-text-heading">Riwayat Respons</span>
-                <span className="text-[10px] leading-3 font-semibold px-2 py-0.5 rounded-full bg-[#FEF3C7] text-amber-600">
-                  Segera hadir
-                </span>
-              </div>
-              <div className="opacity-40">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className={cn("flex gap-3 pb-3 mb-3", i < 3 ? "border-b border-border-default" : "border-none")}>
-                    <div className="w-2 h-2 rounded-full bg-border-strong mt-1" />
-                    <div>
-                      <div className="h-2.5 w-20 bg-border-default rounded-[4px] mb-1.5" />
-                      <div className="h-2.5 w-40 bg-border-default rounded-[4px]" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-2 pt-2 border-t border-border-default">
-              <button className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] leading-4 font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer">
-                <IconArchive size={14} stroke={1.5} />
-                Arsipkan
+            <div className="flex justify-end gap-2.5 mt-5">
+              <button
+                onClick={closeArchiveAll}
+                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
+              >
+                Batal
               </button>
-              <button className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] leading-4 font-semibold text-red-600 bg-transparent border border-[#FCA5A5] rounded-sm cursor-pointer">
-                <IconTrash size={14} stroke={1.5} />
+              <Button
+                variant="brand"
+                onClick={() => {
+                  archiveAllInTopic(selectedTopicId);
+                  closeArchiveAll();
+                }}
+              >
+                Arsipkan {topicPrompts.length} prompt
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Create Topic Modal ── */}
+      {createTopicOpen && (
+        <>
+          <div
+            onClick={closeCreateTopic}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
+            style={{ animation: `${createTopicClosing ? "overlayOut" : "overlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] max-w-[calc(100vw-48px)] bg-white rounded-lg border border-border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)] z-50 overflow-hidden"
+            style={{ animation: `${createTopicClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          >
+            <div className="flex items-start justify-between px-6 pt-6 pb-0">
+              <div>
+                <h3 className="text-[16px] leading-6 font-semibold m-0">Buat topik baru</h3>
+                <p className="text-[13px] leading-5 text-text-muted mt-1 mb-0">
+                  Buat topik tanpa menyebut nama brand Anda. Setiap topik akan berisi prompt.
+                </p>
+              </div>
+              <button onClick={closeCreateTopic} className="bg-transparent border-none cursor-pointer text-text-muted p-1 shrink-0 ml-4">
+                <IconX size={18} stroke={1.5} />
+              </button>
+            </div>
+            <CreateTopicForm
+              onSubmit={async (name) => {
+                await createTopic(name);
+                closeCreateTopic();
+              }}
+            />
+          </div>
+        </>
+      )}
+
+      {/* ── Create Prompt Modal ── */}
+      {createPromptOpen && (
+        <>
+          <div
+            onClick={closeCreatePrompt}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
+            style={{ animation: `${createPromptClosing ? "overlayOut" : "overlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] max-w-[calc(100vw-48px)] bg-white rounded-lg border border-border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)] z-50 overflow-hidden"
+            style={{ animation: `${createPromptClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          >
+            <div className="flex items-start justify-between px-6 pt-6 pb-0">
+              <div>
+                <h3 className="text-[16px] leading-6 font-semibold m-0">Buat prompt baru</h3>
+                <p className="text-[13px] leading-5 text-text-muted mt-1 mb-0">
+                  Buat prompt tanpa menyebut nama brand Anda. Setiap baris akan menjadi prompt terpisah.
+                </p>
+              </div>
+              <button onClick={closeCreatePrompt} className="bg-transparent border-none cursor-pointer text-text-muted p-1 shrink-0 ml-4">
+                <IconX size={18} stroke={1.5} />
+              </button>
+            </div>
+            <CreatePromptForm
+              topics={topics}
+              selectedTopicId={selectedTopicId}
+              onSubmit={async (data) => {
+                await createPrompt(data);
+                closeCreatePrompt();
+              }}
+            />
+          </div>
+        </>
+      )}
+
+      {/* ── Archive Single Prompt Confirmation ── */}
+      {archivePromptId && archivePromptData && (
+        <>
+          <div
+            onClick={closeArchivePrompt}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
+            style={{ animation: `${archivePromptClosing ? "overlayOut" : "overlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[calc(100vw-48px)] bg-white rounded-lg border border-border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)] p-6 z-50"
+            style={{ animation: `${archivePromptClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          >
+            <div className="mb-4">
+              <h3 className="text-[15px] leading-5 font-semibold m-0 mb-1">
+                Arsipkan prompt ini?
+              </h3>
+              <p className="text-[13px] leading-5 text-text-muted m-0">
+                Prompt <strong className="text-text-body">&ldquo;{archivePromptData.prompt_text.length > 80 ? archivePromptData.prompt_text.slice(0, 80) + "..." : archivePromptData.prompt_text}&rdquo;</strong> akan diarsipkan dan pengecekan harian dihentikan. Anda bisa memulihkan dari arsip kapan saja.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2.5 mt-5">
+              <button
+                onClick={closeArchivePrompt}
+                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
+              >
+                Batal
+              </button>
+              <Button
+                variant="brand"
+                onClick={() => {
+                  archivePromptMutation(archivePromptId);
+                  closeArchivePrompt();
+                }}
+              >
+                Arsipkan
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Permanent Delete Confirmation (from archive) ── */}
+      {permanentDeleteId && permanentDeletePrompt && (
+        <>
+          <div
+            onClick={closePermanentDelete}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
+            style={{ animation: `${permanentDeleteClosing ? "overlayOut" : "overlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[calc(100vw-48px)] bg-white rounded-lg border border-border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)] p-6 z-50"
+            style={{ animation: `${permanentDeleteClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          >
+            <div className="mb-4">
+              <h3 className="text-[15px] leading-5 font-semibold m-0 mb-1">
+                ✋ Yakin mau menghapus permanen?
+              </h3>
+              <p className="text-[13px] leading-5 text-text-muted m-0">
+                Anda akan menghapus permanen prompt <strong className="text-text-body">&ldquo;{permanentDeletePrompt.prompt_text.length > 80 ? permanentDeletePrompt.prompt_text.slice(0, 80) + "..." : permanentDeletePrompt.prompt_text}&rdquo;</strong> beserta data audit terkait. Prompt yang sudah dihapus tidak dapat dikembalikan.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2.5 mt-5">
+              <button
+                onClick={closePermanentDelete}
+                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  deletePromptPermanently(permanentDeleteId);
+                  closePermanentDelete();
+                }}
+                className="flex items-center gap-1.5 px-5 py-2 text-[13px] leading-4 font-semibold bg-[#DC2626] text-white border-none rounded-sm cursor-pointer"
+              >
+                Hapus permanen
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Delete Topic Confirmation ── */}
+      {deleteTopicId && deleteTopicData && (
+        <>
+          <div
+            onClick={closeDeleteTopic}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
+            style={{ animation: `${deleteTopicClosing ? "overlayOut" : "overlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[calc(100vw-48px)] bg-white rounded-lg border border-border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)] p-6 z-50"
+            style={{ animation: `${deleteTopicClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          >
+            <div className="mb-4">
+              <h3 className="text-[15px] leading-5 font-semibold m-0 mb-1">
+                ✋ Yakin mau menghapus topik ini?
+              </h3>
+              <p className="text-[13px] leading-5 text-text-muted m-0">
+                Anda akan menghapus permanen topik <strong className="text-text-body">&ldquo;{deleteTopicData.name}&rdquo;</strong>{deleteTopicPromptCount > 0 ? <> beserta <strong className="text-text-body">{deleteTopicPromptCount} prompt</strong> di dalamnya</> : null}. Topik dan prompt yang sudah dihapus tidak dapat dikembalikan.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2.5 mt-5">
+              <button
+                onClick={closeDeleteTopic}
+                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  deleteTopicMutation(deleteTopicId);
+                  if (selectedTopicId === deleteTopicId) setSelectedTopicId(null);
+                  closeDeleteTopic();
+                }}
+                className="flex items-center gap-1.5 px-5 py-2 text-[13px] leading-4 font-semibold bg-[#DC2626] text-white border-none rounded-sm cursor-pointer"
+              >
                 Hapus
               </button>
             </div>
           </div>
-        )}
+        </>
+      )}
 
-        {/* Topic detail */}
-        {selectedTopic && !selectedPrompt && (
-          <div className="scroll-subtle flex-1 overflow-y-auto p-6 flex flex-col gap-5">
-            <div>
-              <h2 className="text-[20px] leading-7 font-bold mb-1.5 mt-0">{selectedTopic.name}</h2>
-              <span className="text-[12px] leading-4 font-medium px-2 py-0.5 rounded-xs bg-brand-light text-brand">
-                {LANG[selectedTopic.language] ?? selectedTopic.language}
-              </span>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: "Total Prompt", value: String(promptsForTopic(selectedTopic.id).length), color: "text-text-heading" },
-                { label: "Aktif", value: String(MOCK_PROMPTS.filter((p) => p.topicId === selectedTopic.id && !p.archived).length), color: "text-success" },
-                { label: "Tingkat Sebutan", value: "67%", color: "text-warning" },
-              ].map((s) => (
-                <div key={s.label} className="p-4 rounded-md border border-border-default bg-white">
-                  <p className="text-[11px] leading-4 font-medium text-text-muted uppercase tracking-wide mb-1 mt-0">{s.label}</p>
-                  <p className={cn("text-[24px] leading-7 font-bold m-0", s.color)}>{s.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-2">
-              <button className="inline-flex items-center gap-[5px] px-3.5 py-2 text-[12px] leading-4 font-semibold text-white bg-brand border-none rounded-sm cursor-pointer">
-                <IconSparkles size={14} stroke={2} />
-                Generate Prompt
-              </button>
-              <button className="inline-flex items-center gap-1 px-3.5 py-2 text-[12px] leading-4 font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer">
-                <IconPlus size={14} stroke={2} />
-                Tambah Prompt
-              </button>
-            </div>
-
-            {/* Prompts list */}
-            <div>
-              <p className="text-[11px] leading-4 font-semibold text-text-muted uppercase tracking-wide mb-2 mt-0">
-                Prompt dalam Topik
-              </p>
-              <div className="border border-border-default rounded-md bg-white overflow-hidden">
-                {MOCK_PROMPTS.filter((p) => p.topicId === selectedTopic.id).map((p, i, arr) => (
-                  <div
-                    key={p.id}
-                    onClick={() => { setSelectedPromptId(p.id); setSelectedTopicId(null); }}
-                    className={cn(
-                      "flex items-center gap-2 px-3.5 py-2.5 cursor-pointer",
-                      i < arr.length - 1 ? "border-b border-border-default" : ""
-                    )}
-                  >
-                    {p.mentioned
-                      ? <IconCircleCheckFilled size={16} className="text-success shrink-0" />
-                      : <IconCircleXFilled size={16} className="text-error shrink-0" />
-                    }
-                    <span className="flex-1 text-[13px] leading-4 text-text-body overflow-hidden text-ellipsis whitespace-nowrap">
-                      {p.text}
-                    </span>
-                    {p.archived && (
-                      <span className="text-[10px] leading-3 font-medium px-1.5 py-px rounded-xs bg-surface-raised text-text-placeholder">
-                        Arsip
-                      </span>
-                    )}
-                  </div>
-                ))}
+      {/* ── Edit Prompt Modal ── */}
+      {editPromptData && (
+        <>
+          <div
+            onClick={closeEditPrompt}
+            className="fixed inset-0 bg-black/[0.18] z-[49]"
+            style={{ animation: `${editPromptClosing ? "overlayOut" : "overlayIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] max-w-[calc(100vw-48px)] bg-white rounded-lg border border-border-default shadow-[0_16px_48px_rgba(0,0,0,0.12)] z-50 overflow-hidden"
+            style={{ animation: `${editPromptClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
+          >
+            <div className="flex items-start justify-between px-6 pt-6 pb-0">
+              <div>
+                <h3 className="text-[16px] leading-6 font-semibold m-0">Edit prompt</h3>
+                {editPromptData.mentioned !== null && (
+                  <p className="text-[13px] leading-5 text-text-muted mt-1 mb-0">
+                    Perubahan akan berlaku di pengecekan berikutnya.
+                  </p>
+                )}
               </div>
-            </div>
-
-            {/* Delete topic */}
-            <div className="pt-2 border-t border-border-default">
-              <button className="inline-flex items-center gap-1.5 px-3.5 py-2 text-[12px] leading-4 font-semibold text-red-600 bg-transparent border border-[#FCA5A5] rounded-sm cursor-pointer">
-                <IconTrash size={14} stroke={1.5} />
-                Hapus Topik
+              <button onClick={closeEditPrompt} className="bg-transparent border-none cursor-pointer text-text-muted p-1 shrink-0 ml-4">
+                <IconX size={18} stroke={1.5} />
               </button>
             </div>
+            <EditPromptForm
+              prompt={editPromptData}
+              topics={topics}
+              onSubmit={async (data) => {
+                await updatePrompt(editPromptData.id, data);
+                closeEditPrompt();
+              }}
+            />
           </div>
-        )}
+        </>
+      )}
+
+      {/* ── Prompt Detail Side Panel ── */}
+      {selectedPromptDetail && (
+        <PromptDetailModal
+          result={selectedPromptDetail}
+          brandName={brandName}
+          onClose={() => setSelectedPromptDetail(null)}
+        />
+      )}
+    </TooltipProvider>
+  );
+}
+
+/* ── Create Prompt Form ── */
+
+function EditPromptForm({
+  prompt,
+  topics,
+  onSubmit,
+}: {
+  prompt: PromptWithAudit;
+  topics: Topic[];
+  onSubmit: (data: { prompt_text?: string; topic_id?: string | null; language?: string }) => Promise<void>;
+}) {
+  const [promptText, setPromptText] = useState(prompt.prompt_text);
+  const [topicId, setTopicId] = useState(prompt.topic_id ?? "");
+  const [country, setCountry] = useState("ID");
+  const [submitting, setSubmitting] = useState(false);
+  const maxLength = 200;
+
+  const topicOptions = [
+    { value: "", label: "Tanpa Topik" },
+    ...topics.map((t) => ({ value: t.id, label: t.name })),
+  ];
+
+  async function handleSubmit() {
+    if (!promptText.trim() || submitting) return;
+    setSubmitting(true);
+
+    const changes: Record<string, unknown> = {};
+    if (promptText.trim() !== prompt.prompt_text) changes.prompt_text = promptText.trim();
+    const newTopicId = topicId || null;
+    if (newTopicId !== prompt.topic_id) changes.topic_id = newTopicId;
+
+    if (Object.keys(changes).length > 0) {
+      await onSubmit(changes as { prompt_text?: string; topic_id?: string | null; language?: string });
+    } else {
+      await onSubmit({});
+    }
+    setSubmitting(false);
+  }
+
+  return (
+    <>
+      <div className="px-6 py-5 flex flex-col gap-4">
+        <div className="form-field">
+          <div className="flex items-center justify-between">
+            <label>Prompt</label>
+            <span className="text-[12px] leading-4 text-text-muted">
+              {promptText.length}/{maxLength}
+            </span>
+          </div>
+          <textarea
+            value={promptText}
+            onChange={(e) => setPromptText(e.target.value.slice(0, maxLength))}
+            rows={3}
+          />
+        </div>
+
+        <div className="form-field">
+          <label>Topik</label>
+          <SearchableSelect
+            options={topicOptions}
+            value={topicId}
+            onChange={setTopicId}
+            placeholder="Pilih topik"
+            searchPlaceholder="Cari topik..."
+          />
+        </div>
+
+        <div className="form-field">
+          <label>Target Pasar</label>
+          <SearchableSelect
+            options={COUNTRIES.map((c) => ({ value: c.code, label: c.name, icon: c.flag }))}
+            value={country}
+            onChange={setCountry}
+            placeholder="Pilih negara"
+            searchPlaceholder="Cari negara..."
+          />
+        </div>
       </div>
+
+      <div className="px-6 pb-5 flex justify-end">
+        <Button variant="brand" onClick={handleSubmit} disabled={!promptText.trim() || submitting}>
+          {submitting ? "Menyimpan..." : "Simpan"}
+        </Button>
+      </div>
+    </>
+  );
+}
+
+function CreatePromptForm({
+  topics,
+  selectedTopicId,
+  onSubmit,
+}: {
+  topics: Topic[];
+  selectedTopicId: string | null;
+  onSubmit: (data: { prompt_text: string; topic_id: string | null; language: string }) => Promise<void>;
+}) {
+  const [promptText, setPromptText] = useState("");
+  const [topicId, setTopicId] = useState(selectedTopicId ?? "");
+  const [country, setCountry] = useState("ID");
+  const [submitting, setSubmitting] = useState(false);
+  const maxLength = 200;
+
+  const topicOptions = [
+    { value: "", label: "Tanpa Topik" },
+    ...topics.map((t) => ({ value: t.id, label: t.name })),
+  ];
+
+  async function handleSubmit() {
+    if (!promptText.trim() || submitting) return;
+    setSubmitting(true);
+
+    const lines = promptText
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+
+    for (const line of lines) {
+      await onSubmit({
+        prompt_text: line,
+        topic_id: topicId || null,
+        language: "id",
+      });
+    }
+
+    setSubmitting(false);
+  }
+
+  return (
+    <>
+      <div className="px-6 py-5 flex flex-col gap-4">
+        <div className="form-field">
+          <div className="flex items-center justify-between">
+            <label>Prompt</label>
+            <span className="text-[12px] leading-4 text-text-muted">
+              {promptText.length}/{maxLength}
+            </span>
+          </div>
+          <textarea
+            value={promptText}
+            onChange={(e) => setPromptText(e.target.value.slice(0, maxLength))}
+            placeholder="What is the best insurance?"
+            rows={3}
+          />
+        </div>
+
+        <div className="form-field">
+          <label>Topik</label>
+          <SearchableSelect
+            options={topicOptions}
+            value={topicId}
+            onChange={setTopicId}
+            placeholder="Pilih topik"
+            searchPlaceholder="Cari topik..."
+          />
+        </div>
+
+        <div className="form-field">
+          <label>Target Pasar</label>
+          <SearchableSelect
+            options={COUNTRIES.map((c) => ({ value: c.code, label: c.name, icon: c.flag }))}
+            value={country}
+            onChange={setCountry}
+            placeholder="Pilih negara"
+            searchPlaceholder="Cari negara..."
+          />
+        </div>
+      </div>
+
+      <div className="px-6 pb-5 flex justify-end">
+        <Button variant="brand" onClick={handleSubmit} disabled={!promptText.trim() || submitting}>
+          {submitting ? "Menyimpan..." : "Tambah"}
+        </Button>
+      </div>
+    </>
+  );
+}
+
+/* ── Create Topic Form ── */
+
+function CreateTopicForm({ onSubmit }: { onSubmit: (name: string) => Promise<void> }) {
+  const [topicName, setTopicName] = useState("");
+  const [country, setCountry] = useState("ID");
+  const [language, setLanguage] = useState("id");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit() {
+    if (!topicName.trim() || submitting) return;
+    setSubmitting(true);
+    await onSubmit(topicName.trim());
+    setSubmitting(false);
+  }
+
+  return (
+    <>
+      <div className="px-6 py-5 flex flex-col gap-4">
+        <div className="form-field">
+          <label>Topik</label>
+          <input
+            type="text"
+            placeholder="Contoh: SEO Optimization"
+            value={topicName}
+            onChange={(e) => setTopicName(e.target.value)}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="form-field">
+            <label>Target Pasar</label>
+            <SearchableSelect
+              options={COUNTRIES.map((c) => ({ value: c.code, label: c.name, icon: c.flag }))}
+              value={country}
+              onChange={setCountry}
+              placeholder="Pilih negara"
+              searchPlaceholder="Cari negara..."
+            />
+          </div>
+          <div className="form-field">
+            <label>Bahasa</label>
+            <SearchableSelect
+              options={LANGUAGES.map((l) => ({ value: l.code, label: l.name }))}
+              value={language}
+              onChange={setLanguage}
+              placeholder="Pilih bahasa"
+              searchPlaceholder="Cari bahasa..."
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="px-6 pb-5 flex justify-end">
+        <Button variant="brand" onClick={handleSubmit} disabled={!topicName.trim() || submitting}>
+          {submitting ? "Menyimpan..." : "Tambah"}
+        </Button>
+      </div>
+    </>
+  );
+}
+
+/* ── Topic Row ── */
+
+function TopicRow({
+  name,
+  counts,
+  selected,
+  onClick,
+  muted,
+  onRename,
+  onDelete,
+}: {
+  name: string;
+  counts: { active: number; total: number };
+  selected: boolean;
+  onClick: () => void;
+  muted?: boolean;
+  onRename?: (newName: string) => void;
+  onDelete?: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState(name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [editing]);
+
+  function commitEdit() {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== name) {
+      onRename?.(trimmed);
+    } else {
+      setEditValue(name);
+    }
+    setEditing(false);
+  }
+
+  if (editing) {
+    return (
+      <div className="px-3 py-1.5">
+        <input
+          ref={inputRef}
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") commitEdit();
+            if (e.key === "Escape") { setEditValue(name); setEditing(false); }
+          }}
+          className="w-full px-2.5 py-1.5 text-[13px] leading-5 border border-brand rounded-xs bg-white text-text-heading outline-none"
+        />
+        <div className="flex items-center gap-1 mt-1.5 justify-end">
+          <button
+            onClick={() => { setEditValue(name); setEditing(false); }}
+            className="inline-flex items-center gap-1 px-2 py-1 text-[11px] leading-3 font-medium text-text-muted bg-transparent border border-border-default rounded-xs cursor-pointer"
+          >
+            <IconX size={12} stroke={2} />
+            Batal
+          </button>
+          <button
+            onClick={commitEdit}
+            className="inline-flex items-center gap-1 px-2 py-1 text-[11px] leading-3 font-medium text-white bg-brand border-none rounded-xs cursor-pointer"
+          >
+            <IconCheck size={12} stroke={2} />
+            Simpan
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const editable = !!onRename;
+
+  return (
+    <div
+      onClick={onClick}
+      className={cn(
+        "flex items-start w-full px-5 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100 group",
+        selected
+          ? "bg-surface-raised"
+          : "bg-transparent hover:bg-surface"
+      )}
+    >
+      <span className={cn(
+        "text-[13px] leading-5 flex-1 min-w-0 line-clamp-2",
+        selected ? "font-semibold text-text-heading" : muted ? "text-text-muted" : "text-text-body"
+      )}>
+        {name}
+      </span>
+
+      {editable && (
+        <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-100 ml-2 mt-px">
+          <button
+            onClick={(e) => { e.stopPropagation(); setEditing(true); }}
+            className="bg-transparent border-none cursor-pointer text-text-muted p-0.5 hover:text-text-heading"
+          >
+            <IconPencil size={14} stroke={1.5} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete?.(); }}
+            className="bg-transparent border-none cursor-pointer text-text-muted p-0.5 hover:text-error"
+          >
+            <IconTrash size={14} stroke={1.5} />
+          </button>
+        </div>
+      )}
+
+      <span className={cn(
+        "text-[12px] leading-5 shrink-0 ml-2 tabular-nums",
+        selected ? "text-text-heading font-semibold" : "text-text-muted"
+      )}>
+        {counts.active}/{counts.total}
+      </span>
     </div>
   );
 }

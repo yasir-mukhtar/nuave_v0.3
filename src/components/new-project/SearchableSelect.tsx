@@ -68,13 +68,14 @@ export default function SearchableSelect({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          side="top"
+          side="bottom"
           align="start"
           className="w-[--radix-popover-trigger-width] p-0"
+          onWheel={(e) => e.stopPropagation()}
         >
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
-            <CommandList>
+            <CommandList className="max-h-[200px]">
               <CommandEmpty>Tidak ditemukan</CommandEmpty>
               <CommandGroup>
                 {options.map((option) => (

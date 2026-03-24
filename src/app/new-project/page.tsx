@@ -7,48 +7,9 @@ import SearchableSelect from "@/components/new-project/SearchableSelect";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
 import { cn } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { COUNTRIES, LANGUAGES } from "@/lib/constants";
 
 const REQUEST_TIMEOUT_MS = 60_000;
-
-const COUNTRIES = [
-  { code: "GLOBAL", name: "Global", flag: "🌐" },
-  { code: "ID", name: "Indonesia", flag: "🇮🇩" },
-  { code: "US", name: "United States", flag: "🇺🇸" },
-  { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
-  { code: "SG", name: "Singapore", flag: "🇸🇬" },
-  { code: "MY", name: "Malaysia", flag: "🇲🇾" },
-  { code: "AU", name: "Australia", flag: "🇦🇺" },
-  { code: "JP", name: "Japan", flag: "🇯🇵" },
-  { code: "KR", name: "South Korea", flag: "🇰🇷" },
-  { code: "IN", name: "India", flag: "🇮🇳" },
-  { code: "DE", name: "Germany", flag: "🇩🇪" },
-  { code: "FR", name: "France", flag: "🇫🇷" },
-  { code: "NL", name: "Netherlands", flag: "🇳🇱" },
-  { code: "BR", name: "Brazil", flag: "🇧🇷" },
-  { code: "AE", name: "UAE", flag: "🇦🇪" },
-  { code: "SA", name: "Saudi Arabia", flag: "🇸🇦" },
-  { code: "TH", name: "Thailand", flag: "🇹🇭" },
-  { code: "PH", name: "Philippines", flag: "🇵🇭" },
-  { code: "VN", name: "Vietnam", flag: "🇻🇳" },
-];
-
-const LANGUAGES = [
-  { code: "id", name: "Indonesian" },
-  { code: "en", name: "English" },
-  { code: "ms", name: "Malay" },
-  { code: "ja", name: "Japanese" },
-  { code: "ko", name: "Korean" },
-  { code: "zh", name: "Chinese" },
-  { code: "hi", name: "Hindi" },
-  { code: "de", name: "German" },
-  { code: "fr", name: "French" },
-  { code: "nl", name: "Dutch" },
-  { code: "pt", name: "Portuguese" },
-  { code: "ar", name: "Arabic" },
-  { code: "th", name: "Thai" },
-  { code: "tl", name: "Filipino" },
-  { code: "vi", name: "Vietnamese" },
-];
 
 
 function isValidUrlInput(value: string): boolean {

@@ -170,6 +170,7 @@ CREATE TABLE public.prompts (
   competition_level       TEXT,
   cpc_micros              BIGINT,
   keyword_data_fetched_at TIMESTAMPTZ,
+  archived_at             TIMESTAMPTZ,
   created_at              TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
