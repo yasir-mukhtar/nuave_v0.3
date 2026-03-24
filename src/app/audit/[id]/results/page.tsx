@@ -91,6 +91,19 @@ export default function ResultsPage() {
     }
 
     fetchAuditData();
+
+    // Clear new-project session so /new-project starts fresh
+    sessionStorage.removeItem("nuave_new_project");
+    sessionStorage.removeItem("nuave_new_project_topics");
+    sessionStorage.removeItem("nuave_new_project_prompts");
+    sessionStorage.removeItem("nuave_audit_result");
+    sessionStorage.removeItem("nuave_pending_audit_id");
+    // Clear any cached topic/prompt data (keys like nuave_topics_<id>, nuave_prompts_<id>)
+    for (const key of Object.keys(sessionStorage)) {
+      if (key.startsWith("nuave_topics_") || key.startsWith("nuave_prompts_")) {
+        sessionStorage.removeItem(key);
+      }
+    }
   }, [router, auditId]);
 
   if (loading) {

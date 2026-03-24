@@ -41,7 +41,7 @@ export default function AuditRunningPage() {
           // Let the loader finish its animation before redirecting
           redirectTimer.current = setTimeout(() => {
             router.push(`/audit/${id}/results`);
-          }, 4500); // step 2 (2s) + step 3 (2s) + brief pause
+          }, 1500);
 
           return true; // Stop polling
         }
@@ -63,7 +63,7 @@ export default function AuditRunningPage() {
       intervalId = setInterval(async () => {
         const shouldStop = await pollStatus(id);
         if (shouldStop) clearInterval(intervalId);
-      }, 3000);
+      }, 2000);
     };
 
     // Resolve auditId

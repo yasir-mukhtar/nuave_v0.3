@@ -29,7 +29,11 @@ export default function Topbar() {
   const [closing, setClosing] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const projectName = activeProject?.name ?? "Pilih proyek";
+  const MAX_LABEL_LEN = 28;
+  const rawName = activeProject?.name ?? "Pilih proyek";
+  const projectName = rawName.length > MAX_LABEL_LEN
+    ? rawName.slice(0, Math.ceil(MAX_LABEL_LEN / 2)) + "\u2026" + rawName.slice(-(Math.floor(MAX_LABEL_LEN / 2) - 1))
+    : rawName;
 
   function closeDropdown() {
     setClosing(true);
@@ -61,9 +65,10 @@ export default function Topbar() {
       <div ref={dropdownRef} className="relative">
         <button
           onClick={() => open ? closeDropdown() : setOpen(true)}
-          className="flex items-center gap-1.5 bg-transparent border border-border-light rounded-sm px-3 py-1.5 cursor-pointer font-medium text-sm text-text-heading shadow-app-subtle"
+          className="flex items-center gap-1.5 max-w-[280px] bg-transparent border border-border-light rounded-sm px-3 py-1.5 cursor-pointer font-medium text-sm text-text-heading shadow-app-subtle"
+          title={rawName}
         >
-          {projectName}
+          <span className="truncate">{projectName}</span>
           <IconSelector size={16} stroke={2} className="text-[#8b8b8b]" />
         </button>
 

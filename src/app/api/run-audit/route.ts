@@ -145,6 +145,102 @@ export async function POST(req: NextRequest) {
   }
 }
 
+const CONCURRENCY = 10; // max parallel OpenAI calls per batch
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+interface AuditResultRow {
+  audit_id: string;
+  prompt_id: string | null;
+  prompt_text: string;
+  ai_response: string;
+  brand_mentioned: boolean;
+  mention_context: string | null;
+  mention_sentiment: string;
+  competitor_mentions: string[];
+  position_rank: null;
+}
+
+async function runSinglePrompt(
+  prompt: PromptRequest,
+  auditId: string,
+  brandLower: string,
+  brandNoSpaces: string,
+): Promise<{ row: AuditResultRow; mentioned: boolean }> {
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      temperature: 0,
+      input: prompt.prompt_text,
+      tools: [{
+        type: "web_search_preview",
+        user_location: {
+          type: "approximate",
+          country: prompt.language === 'ms' ? 'MY' : 'ID',
+          city: prompt.language === 'ms' ? 'Kuala Lumpur' : 'Jakarta',
+        },
+        search_context_size: "medium",
+      }],
+    }),
+  });
+
+  const data = await response.json();
+
+  let responseText = '';
+  if (data.output && Array.isArray(data.output)) {
+    for (const item of data.output) {
+      if (item.type === 'message' && item.content) {
+        for (const content of item.content) {
+          if (content.type === 'output_text' && content.text) {
+            responseText = content.text;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  const responseLower = responseText.toLowerCase();
+  let brandMentioned = responseLower.includes(brandLower);
+  if (!brandMentioned && brandLower.includes(' ')) {
+    brandMentioned = responseLower.includes(brandNoSpaces);
+  }
+
+  let mentionContext: string | null = null;
+  if (brandMentioned) {
+    let index = responseLower.indexOf(brandLower);
+    let matchLength = brandLower.length;
+    if (index === -1 && brandLower.includes(' ')) {
+      index = responseLower.indexOf(brandNoSpaces);
+      matchLength = brandNoSpaces.length;
+    }
+    if (index !== -1) {
+      const start = Math.max(0, index - 100);
+      const end = Math.min(responseText.length, index + matchLength + 100);
+      mentionContext = responseText.substring(start, end);
+    }
+  }
+
+  return {
+    mentioned: brandMentioned,
+    row: {
+      audit_id: auditId,
+      prompt_id: UUID_RE.test(prompt.id) ? prompt.id : null,
+      prompt_text: prompt.prompt_text,
+      ai_response: responseText,
+      brand_mentioned: brandMentioned,
+      mention_context: mentionContext,
+      mention_sentiment: 'positive',
+      competitor_mentions: [],
+      position_rank: null,
+    },
+  };
+}
+
 async function processAuditInBackground(
   auditId: string,
   brandId: string,
@@ -155,103 +251,42 @@ async function processAuditInBackground(
   creditsUsed: number
 ) {
   const supabase = createSupabaseAdminClient();
-  let totalBrandMentionCount = 0;
 
   try {
     const brandLower = brandName.trim().toLowerCase();
     const brandNoSpaces = brandLower.replace(/\s+/g, '');
 
-    for (let i = 0; i < prompts.length; i++) {
-      const prompt = prompts[i];
+    const allRows: AuditResultRow[] = [];
+    let totalBrandMentionCount = 0;
 
-      // 500ms delay between calls to avoid rate limits
-      if (i > 0) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+    // Process prompts in parallel batches of CONCURRENCY
+    for (let i = 0; i < prompts.length; i += CONCURRENCY) {
+      const batch = prompts.slice(i, i + CONCURRENCY);
+
+      const results = await Promise.allSettled(
+        batch.map(p => runSinglePrompt(p, auditId, brandLower, brandNoSpaces))
+      );
+
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          allRows.push(result.value.row);
+          if (result.value.mentioned) totalBrandMentionCount++;
+        } else {
+          console.error('Prompt processing failed:', result.reason);
+        }
       }
 
-      try {
-        const response = await fetch('https://api.openai.com/v1/responses', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: OPENAI_MODEL,
-            temperature: 0,
-            input: prompt.prompt_text,
-            tools: [{
-              type: "web_search_preview",
-              user_location: {
-                type: "approximate",
-                country: prompt.language === 'ms' ? 'MY' : 'ID',
-                city: prompt.language === 'ms' ? 'Kuala Lumpur' : 'Jakarta',
-              },
-              search_context_size: "medium",
-            }],
-          }),
-        });
+      // Insert batch results immediately so polling progress updates
+      const batchRows = results
+        .filter((r): r is PromiseFulfilledResult<{ row: AuditResultRow; mentioned: boolean }> => r.status === 'fulfilled')
+        .map(r => r.value.row);
 
-        const data = await response.json();
-
-        // Extract text from output array
-        let responseText = '';
-        if (data.output && Array.isArray(data.output)) {
-          for (const item of data.output) {
-            if (item.type === 'message' && item.content) {
-              for (const content of item.content) {
-                if (content.type === 'output_text' && content.text) {
-                  responseText = content.text;
-                  break;
-                }
-              }
-            }
-          }
-        }
-
-        const responseLower = responseText.toLowerCase();
-
-        let brandMentioned = responseLower.includes(brandLower);
-        if (!brandMentioned && brandLower.includes(' ')) {
-          brandMentioned = responseLower.includes(brandNoSpaces);
-        }
-
-        let mentionContext = null;
-        if (brandMentioned) {
-          totalBrandMentionCount++;
-          let index = responseLower.indexOf(brandLower);
-          let matchLength = brandLower.length;
-          if (index === -1 && brandLower.includes(' ')) {
-            index = responseLower.indexOf(brandNoSpaces);
-            matchLength = brandNoSpaces.length;
-          }
-          if (index !== -1) {
-            const start = Math.max(0, index - 100);
-            const end = Math.min(responseText.length, index + matchLength + 100);
-            mentionContext = responseText.substring(start, end);
-          }
-        }
-
-        const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(prompt.id);
-
-        await supabase.from('audit_results').insert({
-          audit_id: auditId,
-          prompt_id: isValidUUID ? prompt.id : null,
-          prompt_text: prompt.prompt_text,
-          ai_response: responseText,
-          brand_mentioned: brandMentioned,
-          mention_context: mentionContext,
-          mention_sentiment: 'positive',
-          competitor_mentions: [],
-          position_rank: null,
-        });
-
-      } catch (promptError) {
-        console.error(`Error processing prompt ${prompt.id}:`, promptError);
+      if (batchRows.length > 0) {
+        const { error: insertErr } = await supabase.from('audit_results').insert(batchRows);
+        if (insertErr) console.error('Batch insert failed:', insertErr);
       }
     }
 
-    // Update audit record when complete
     const visibilityScore = prompts.length > 0
       ? Math.round((totalBrandMentionCount / prompts.length) * 100)
       : 0;
@@ -282,7 +317,6 @@ async function processAuditInBackground(
     console.error('Background audit process failed:', error);
     await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
 
-    // v3: refund credits to org (not user)
     if (userId && orgId && creditsUsed > 0) {
       const { error: refundError } = await supabase.rpc('refund_credits', {
         p_org_id: orgId,

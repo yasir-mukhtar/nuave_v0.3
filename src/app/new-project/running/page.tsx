@@ -6,6 +6,20 @@ import Link from "next/link";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 
+const THINKING_MESSAGES = [
+  "Mengirim pertanyaan ke ChatGPT...",
+  "Mencari informasi di web...",
+  "Menganalisis hasil pencarian...",
+  "Memeriksa apakah AI menyebut brand Anda...",
+  "Membandingkan dengan kompetitor...",
+  "Memindai respons dari AI...",
+  "Menghitung visibility score...",
+  "Menyusun laporan audit...",
+  "Hampir selesai...",
+];
+
+const MESSAGE_INTERVAL = 2500;
+
 export default function RunningPage() {
   return (
     <Suspense fallback={
@@ -22,10 +36,26 @@ function RunningPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const auditId = searchParams.get("audit_id");
-  const [completed, setCompleted] = useState(0);
-  const [total, setTotal] = useState(10);
   const [status, setStatus] = useState<"running" | "complete" | "failed">("running");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Thinking message rotation
+  const [msgIndex, setMsgIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (status !== "running") return;
+
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setMsgIndex((prev) => (prev + 1) % THINKING_MESSAGES.length);
+        setVisible(true);
+      }, 300);
+    }, MESSAGE_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [status]);
 
   useEffect(() => {
     if (!auditId) {
@@ -40,19 +70,13 @@ function RunningPageContent() {
 
         if (data.status === "complete") {
           setStatus("complete");
-          setCompleted(data.total_prompts);
-          setTotal(data.total_prompts);
           if (pollRef.current) clearInterval(pollRef.current);
 
-          // Store results for report page
           sessionStorage.setItem("nuave_audit_result", JSON.stringify(data));
-          setTimeout(() => router.push(`/new-project/report?audit_id=${auditId}`), 1000);
+          setTimeout(() => router.push(`/new-project/report?audit_id=${auditId}`), 1500);
         } else if (data.status === "failed") {
           setStatus("failed");
           if (pollRef.current) clearInterval(pollRef.current);
-        } else {
-          setCompleted(data.completed_prompts || 0);
-          setTotal(data.total_prompts || 10);
         }
       } catch {
         // Retry on next interval
@@ -60,14 +84,20 @@ function RunningPageContent() {
     };
 
     poll();
-    pollRef.current = setInterval(poll, 3000);
+    pollRef.current = setInterval(poll, 2000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [auditId, router]);
 
-  const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6">
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+      `}</style>
+
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 no-underline mb-12">
         <img src={LOGO_SVG} alt="Nuave" width={28} height={28} className="object-contain" />
@@ -78,7 +108,7 @@ function RunningPageContent() {
 
       {status === "failed" ? (
         <>
-          <h2 className="font-heading text-[20px] leading-[28px] font-semibold text-text-heading mb-2">
+          <h2 className="font-heading text-[20px] leading-[28px] font-semibold text-error mb-2">
             Audit gagal
           </h2>
           <p className="font-body text-[14px] leading-[20px] text-text-muted mb-6">
@@ -94,33 +124,39 @@ function RunningPageContent() {
       ) : (
         <>
           {/* Spinner */}
-          <div className="w-12 h-12 border-4 border-border-default border-t-brand rounded-full animate-spin mb-6" />
+          <div className="w-12 h-12 border-4 border-border-default border-t-brand rounded-full mb-6" style={{ animation: "spin 0.8s linear infinite" }} />
 
           <h2 className="font-heading text-[20px] leading-[28px] font-semibold text-text-heading mb-2">
-            {status === "complete" ? "Audit selesai!" : "Menjalankan audit..."}
+            {status === "complete" ? "Audit selesai!" : "Menjalankan audit\u2026"}
           </h2>
-          <p className="font-body text-[14px] leading-[20px] text-text-muted mb-8">
+
+          {/* Thinking message with fade */}
+          <p
+            className="font-body text-[14px] leading-[20px] text-text-muted mb-8 h-[20px] text-center"
+            style={{
+              opacity: status === "complete" ? 1 : visible ? 1 : 0,
+              transition: "opacity 0.3s ease",
+            }}
+          >
             {status === "complete"
-              ? "Mengalihkan ke hasil laporan..."
-              : `Menganalisis ${completed} dari ${total} pertanyaan`}
+              ? "Mengalihkan ke hasil laporan\u2026"
+              : THINKING_MESSAGES[msgIndex]}
           </p>
 
-          {/* Progress bar */}
-          <div className="w-[280px] h-1.5 rounded-full bg-border-default overflow-hidden">
-            <div
-              className="h-full rounded-full bg-brand transition-[width] duration-500 ease-in-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          {/* Indeterminate shimmer progress bar */}
+          {status !== "complete" && (
+            <div className="w-[280px] h-[3px] rounded-full bg-border-default overflow-hidden relative">
+              <div
+                className="absolute top-0 left-0 w-1/2 h-full rounded-full"
+                style={{
+                  background: "linear-gradient(90deg, transparent, var(--purple), transparent)",
+                  animation: "shimmer 1.8s ease-in-out infinite",
+                }}
+              />
+            </div>
+          )}
         </>
       )}
-
-      {/* NOTE: Embedded @keyframes spin — consider moving to global CSS */}
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }
