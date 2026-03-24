@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconPencil, IconCheck, IconX } from "@tabler/icons-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import WizardLayout from "@/components/new-project/WizardLayout";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,29 @@ export default function TopicsPage() {
   const [addingCustom, setAddingCustom] = useState(false);
   const [customName, setCustomName] = useState("");
   const [loadingTopics, setLoadingTopics] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const editRowRef = useRef<HTMLDivElement>(null);
+
+  // Click outside editing row → save
+  useEffect(() => {
+    if (!editingId) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (editRowRef.current && !editRowRef.current.contains(e.target as Node)) {
+        // Save if there's valid text, otherwise revert
+        const trimmed = editingName.trim();
+        if (trimmed) {
+          setTopics((prev) =>
+            prev.map((t) => (t.id === editingId ? { ...t, name: trimmed } : t))
+          );
+        }
+        setEditingId(null);
+        setEditingName("");
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [editingId, editingName]);
 
   // Load project data and fetch AI-generated topics (sessionStorage cache → DB cache → AI)
   useEffect(() => {
@@ -87,6 +110,26 @@ export default function TopicsPage() {
     setTopics((prev) =>
       prev.map((t) => (t.id === id ? { ...t, checked: !t.checked } : t))
     );
+  };
+
+  const startEdit = (topic: Topic) => {
+    setEditingId(topic.id);
+    setEditingName(topic.name);
+  };
+
+  const saveEdit = () => {
+    const name = editingName.trim();
+    if (!name || !editingId) return;
+    setTopics((prev) =>
+      prev.map((t) => (t.id === editingId ? { ...t, name } : t))
+    );
+    setEditingId(null);
+    setEditingName("");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingName("");
   };
 
   const addCustomTopic = () => {
@@ -162,20 +205,68 @@ export default function TopicsPage() {
         {topics.map((topic) => (
           <div
             key={topic.id}
-            role="button"
-            tabIndex={0}
-            onClick={() => toggleTopic(topic.id)}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleTopic(topic.id); } }}
-            className="flex items-center gap-3 w-full py-3.5 px-4 rounded-md border border-border-default bg-white cursor-pointer text-left transition-colors duration-100 ease-in-out hover:border-border-strong"
+            ref={editingId === topic.id ? editRowRef : undefined}
+            className="group/topic flex items-center gap-3 w-full py-3.5 px-4 rounded-md border border-border-default bg-white text-left transition-colors duration-100 ease-in-out hover:border-border-strong"
           >
-            <Checkbox
-              checked={topic.checked}
-              className="h-[18px] w-[18px] rounded"
-            />
-
-            <span className="font-body text-[14px] leading-[20px] text-text-heading">
-              {topic.name}
-            </span>
+            {editingId === topic.id ? (
+              <>
+                <Checkbox
+                  checked={topic.checked}
+                  className="h-[18px] w-[18px] rounded shrink-0"
+                />
+                <input
+                  type="text"
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") { e.preventDefault(); saveEdit(); }
+                    if (e.key === "Escape") cancelEdit();
+                  }}
+                  autoFocus
+                  className="flex-1 font-body text-[14px] leading-[20px] text-text-heading bg-transparent border-none outline-none p-0"
+                />
+                <button
+                  type="button"
+                  onClick={saveEdit}
+                  disabled={!editingName.trim()}
+                  className="bg-transparent border-none cursor-pointer p-0.5 text-success shrink-0"
+                >
+                  <IconCheck size={16} stroke={2} />
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="bg-transparent border-none cursor-pointer p-0.5 text-text-muted shrink-0"
+                >
+                  <IconX size={16} stroke={2} />
+                </button>
+              </>
+            ) : (
+              <>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => toggleTopic(topic.id)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleTopic(topic.id); } }}
+                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                >
+                  <Checkbox
+                    checked={topic.checked}
+                    className="h-[18px] w-[18px] rounded shrink-0"
+                  />
+                  <span className="font-body text-[14px] leading-[20px] text-text-heading">
+                    {topic.name}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); startEdit(topic); }}
+                  className="bg-transparent border-none cursor-pointer p-0.5 text-text-muted opacity-0 group-hover/topic:opacity-100 hover:text-foreground transition-all shrink-0"
+                >
+                  <IconPencil size={15} stroke={1.5} />
+                </button>
+              </>
+            )}
           </div>
         ))}
       </div>
