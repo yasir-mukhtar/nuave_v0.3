@@ -12,12 +12,11 @@ import {
   IconArrowUpRight,
   IconSelector,
   IconMail,
-  IconPlus,
   IconLogout,
 } from '@tabler/icons-react';
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { clearNuaveProjectSession } from "@/lib/session";
+
 
 type SidebarProps = {
   credits: number;
@@ -90,7 +89,7 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
       <div ref={popoverRef} className="relative px-4 pt-4">
         <div
           onClick={() => popoverOpen ? closePopover() : setPopoverOpen(true)}
-          className="flex items-center gap-2.5 p-2.5 cursor-pointer rounded-md bg-white border border-[#ececec]"
+          className="flex items-center gap-2.5 px-2.5 py-2 cursor-pointer rounded-md bg-white border border-[#ececec]"
         >
           {faviconSrc && !faviconError ? (
             <div className="w-7 h-7 rounded-full bg-white border border-[#ececec] flex items-center justify-center shrink-0 overflow-hidden">
@@ -117,7 +116,7 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
         {popoverOpen && (
           <div
             className={cn(
-              "absolute top-full left-4 right-4 mt-1 bg-white border border-[#ececec] rounded-[6px] shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)] z-20 overflow-hidden",
+              "absolute top-full left-4 mt-1 w-max max-w-[280px] bg-white border border-[#ececec] rounded-[6px] shadow-[0px_2px_4px_0px_rgba(0,0,0,0.1)] z-20 overflow-hidden",
               popoverClosing ? "animate-popover-out" : "animate-popover-in"
             )}
           >
@@ -129,8 +128,8 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
 
             <div className="border-t border-[#ececec]" />
 
-            {/* Workspace section */}
-            <div className="px-3 py-5 flex flex-col gap-5">
+            {/* Brand section */}
+            <div className="px-3 py-5">
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 rounded-full bg-white border border-[#ececec] flex items-center justify-center shrink-0 overflow-hidden">
                   {faviconSrc && !faviconError ? (
@@ -141,18 +140,6 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
                 </div>
                 <span className="text-[14px] font-medium text-[#374151] truncate">{workspaceName}</span>
               </div>
-
-              <button
-                onClick={() => {
-                  clearNuaveProjectSession();
-                  closePopover();
-                  router.push("/new-project");
-                }}
-                className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-0"
-              >
-                <IconPlus size={20} stroke={1.5} className="text-[#374151]" />
-                <span className="text-[14px] font-medium text-[#374151]">Buat proyek baru</span>
-              </button>
             </div>
 
             <div className="border-t border-[#ececec]" />

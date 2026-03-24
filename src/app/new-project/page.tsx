@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import WizardLayout from "@/components/new-project/WizardLayout";
 import SearchableSelect from "@/components/new-project/SearchableSelect";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
@@ -57,6 +57,7 @@ function isValidUrlInput(value: string): boolean {
 
 export default function NewProjectPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [authChecked, setAuthChecked] = useState(false);
 
   // Auth guard — redirect to /auth if not logged in
@@ -89,9 +90,30 @@ export default function NewProjectPage() {
   const restoredRef = useRef(false);
 
   // Restore form state from sessionStorage on mount (client-only, avoids hydration mismatch)
+  // If ?new=1 is present, clear all previous session data and start fresh
   useEffect(() => {
+    const isNewFlow = searchParams.get("new") === "1";
+
+    if (isNewFlow) {
+      // Clear all wizard session data for a fresh start
+      sessionStorage.removeItem("nuave_new_project");
+      sessionStorage.removeItem("nuave_new_project_topics");
+      sessionStorage.removeItem("nuave_new_project_prompts");
+      sessionStorage.removeItem("nuave_audit_result");
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const key = sessionStorage.key(i);
+        if (key?.startsWith("nuave_cached_topics_") || key?.startsWith("nuave_cached_prompts_")) {
+          sessionStorage.removeItem(key);
+        }
+      }
+      // Remove ?new=1 from URL without triggering navigation
+      router.replace("/new-project", { scroll: false });
+      return;
+    }
+
     const raw = sessionStorage.getItem("nuave_new_project");
     if (raw) {
+      // Restore in-progress wizard state
       const restored = JSON.parse(raw);
       restoredRef.current = true;
       const restoredUrl = restored.url?.replace(/^https?:\/\//, "") || "";
@@ -106,19 +128,8 @@ export default function NewProjectPage() {
         setFaviconUrl(`https://www.google.com/s2/favicons?domain=${domain}&sz=128`);
         setFaviconVisible(true);
       }
-    } else {
-      // Fresh entry — clear stale cached data from previous incomplete flows
-      sessionStorage.removeItem("nuave_new_project_topics");
-      sessionStorage.removeItem("nuave_new_project_prompts");
-      sessionStorage.removeItem("nuave_audit_result");
-      for (let i = sessionStorage.length - 1; i >= 0; i--) {
-        const key = sessionStorage.key(i);
-        if (key?.startsWith("nuave_cached_topics_") || key?.startsWith("nuave_cached_prompts_")) {
-          sessionStorage.removeItem(key);
-        }
-      }
     }
-  }, []);
+  }, [searchParams, router]);
 
   const isValid = url.trim().length > 0 && brandName.trim().length > 0 && country !== "" && language !== "";
 

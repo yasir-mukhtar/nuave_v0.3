@@ -9,7 +9,7 @@ import {
 } from '@tabler/icons-react';
 import { cn } from "@/lib/utils";
 import { useActiveProject } from "@/hooks/useActiveProject";
-import { clearNuaveProjectSession } from "@/lib/session";
+
 import { useRouter, usePathname } from "next/navigation";
 
 export default function Topbar() {
@@ -106,9 +106,8 @@ export default function Topbar() {
             <div className="py-1">
               <button
                 onClick={() => {
-                  clearNuaveProjectSession();
                   closeDropdown();
-                  router.push("/new-project");
+                  router.push("/new-project?new=1");
                 }}
                 className="flex items-center gap-2 w-full px-3.5 py-2.5 font-medium text-sm text-text-heading bg-transparent border-none cursor-pointer text-left"
               >

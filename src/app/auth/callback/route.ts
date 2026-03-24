@@ -48,7 +48,7 @@ export async function GET(request: Request) {
 
   if (wsIds.length === 0) {
     // Trigger race condition (extremely rare) or trigger failed — send to brand wizard
-    return NextResponse.redirect(`${origin}/new-project`);
+    return NextResponse.redirect(`${origin}/new-project?new=1`);
   }
 
   const { count } = await adminClient
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
 
   if (!count || count === 0) {
     // New user — no brands yet → start brand creation wizard
-    return NextResponse.redirect(`${origin}/new-project`);
+    return NextResponse.redirect(`${origin}/new-project?new=1`);
   }
 
   // Returning user with existing brands → go to dashboard

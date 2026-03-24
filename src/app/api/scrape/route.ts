@@ -13,6 +13,7 @@ interface ScrapeRequestBody {
 
 interface CompanyProfile {
   brand_name: string;
+  parent_brand: string;
   company_overview: string;
   industry: string;
   differentiators: string[];
@@ -84,7 +85,8 @@ export async function POST(request: NextRequest) {
 
   const userPrompt = websiteContent
     ? `Analyze this website content and extract:
-- brand_name: the company name${brand_name ? ` (hint: it may be "${brand_name}")` : ""}
+- brand_name: the specific product, service, or model name shown on this page${brand_name ? ` (hint: it may be "${brand_name}")` : ""}
+- parent_brand: the umbrella company or brand that owns this product/service (e.g. if brand_name is "Philips FC9330/09", parent_brand is "Philips". If brand_name is the same as the company, use the same value for both)
 - company_overview: 2-3 sentence description of what they do
 - industry: one word industry category
 - differentiators: array of 3-5 unique value propositions (short phrases, max 4 words each)
@@ -93,9 +95,11 @@ export async function POST(request: NextRequest) {
 Website content:
 ${websiteContent}
 
-Respond with a single valid JSON object containing exactly these keys: brand_name, company_overview, industry, differentiators, competitors. No markdown, no explanation, no extra text.`
+Respond with a single valid JSON object containing exactly these keys: brand_name, parent_brand, company_overview, industry, differentiators, competitors. No markdown, no explanation, no extra text.`
     : `Based on your knowledge of this company, extract:
-brand_name, company_overview, industry, differentiators, competitors, target_audience, language.
+brand_name (specific product/service/model), parent_brand (umbrella company), company_overview, industry, differentiators, competitors, target_audience, language.
+
+If brand_name and parent_brand are the same company, use the same value for both.
 
 Company website: ${website_url}
 ${brand_name ? `Brand name: ${brand_name}` : ""}
@@ -190,6 +194,25 @@ Respond with JSON only, same format as before.`;
         { error: `Failed to save brand: ${brandError.message}` },
         { status: 500 }
       );
+    }
+
+    // Update workspace name to parent brand if still default
+    const parentBrand = profile.parent_brand || profile.brand_name;
+    if (parentBrand) {
+      const { data: ws } = await adminClient
+        .from('workspaces')
+        .select('name')
+        .eq('id', resolvedWsId)
+        .single();
+
+      // Only update if workspace has a default/generic name
+      const isDefault = !ws?.name || ws.name === 'My Workspace' || ws.name === 'default';
+      if (isDefault) {
+        await adminClient
+          .from('workspaces')
+          .update({ name: parentBrand, updated_at: new Date().toISOString() })
+          .eq('id', resolvedWsId);
+      }
     }
 
     const competitorNames = profile.competitors;

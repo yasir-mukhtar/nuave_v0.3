@@ -195,7 +195,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <button
-          onClick={() => router.push("/new-project")}
+          onClick={() => router.push("/new-project?new=1")}
           style={{
             background: '#ffffff',
             border: '1px solid #e5e5e5',

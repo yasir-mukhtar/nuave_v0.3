@@ -18,10 +18,12 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   const [userName, setUserName] = useState("User");
   const [userEmail, setUserEmail] = useState("");
   const { activeWorkspace } = useActiveWorkspace();
-  const { activeProject } = useActiveProject();
+  const { activeProject, projects } = useActiveProject();
   const workspaceName = activeWorkspace?.name ?? "Select Workspace";
   const projectName = activeProject?.name ?? "Select Project";
-  const websiteUrl = activeProject?.website_url ?? undefined;
+  // Workspace favicon: use the first brand's website (stable), not the active project's
+  const workspaceWebsiteUrl = projects[projects.length - 1]?.website_url ?? undefined;
+  const projectWebsiteUrl = activeProject?.website_url ?? undefined;
 
   useEffect(() => {
     localStorage.removeItem('nuave_credits');
@@ -70,7 +72,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
           userEmail={userEmail}
           workspaceName={workspaceName}
           projectName={projectName}
-          websiteUrl={websiteUrl}
+          websiteUrl={workspaceWebsiteUrl}
         />
         <div className="ml-64 flex min-w-0 flex-1 flex-col bg-page">
           <Topbar />
