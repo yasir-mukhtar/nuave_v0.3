@@ -22,6 +22,12 @@ interface CompanyProfile {
   website_url?: string;
 }
 
+function ensureStringArray(val: unknown): string[] {
+  if (Array.isArray(val)) return val.map(String);
+  if (typeof val === "string" && val.trim()) return [val];
+  return [];
+}
+
 async function fetchWebsiteContent(url: string): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20_000);
@@ -100,6 +106,7 @@ Respond with JSON only, same format as before.`;
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       max_tokens: 1500,
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
@@ -110,22 +117,22 @@ Respond with JSON only, same format as before.`;
     });
 
     const responseText = completion.choices[0].message.content ?? "";
-    const cleaned = responseText
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/\s*```$/i, "")
-      .trim();
 
     let profile: CompanyProfile;
     try {
-      profile = JSON.parse(cleaned) as CompanyProfile;
+      profile = JSON.parse(responseText) as CompanyProfile;
       profile.website_url = website_url;
     } catch {
+      console.error("GPT-4o JSON parse failed. Raw response:", responseText);
       return NextResponse.json(
         { error: "GPT-4o returned invalid JSON", raw: responseText },
         { status: 500 }
       );
     }
+
+    // Normalize — GPT sometimes returns strings instead of arrays
+    profile.differentiators = ensureStringArray(profile.differentiators);
+    profile.competitors = ensureStringArray(profile.competitors);
 
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -133,9 +140,9 @@ Respond with JSON only, same format as before.`;
     const adminClient = createSupabaseAdminClient();
     const brandId = randomUUID();
 
-    // v3: resolve workspace via workspace_members (not workspaces.user_id)
-    let resolvedWsId = workspace_id;
-    if (!resolvedWsId && user) {
+    // Resolve workspace from DB — client-provided workspace_id may be stale
+    let resolvedWsId: string | undefined;
+    if (user) {
       const { data: wm } = await adminClient
         .from('workspace_members')
         .select('workspace_id')
@@ -144,6 +151,8 @@ Respond with JSON only, same format as before.`;
         .maybeSingle();
       resolvedWsId = wm?.workspace_id;
     }
+    // Fall back to client-provided value only if DB lookup returned nothing
+    if (!resolvedWsId) resolvedWsId = workspace_id;
 
     if (!resolvedWsId) {
       console.error('No workspace found for user', user?.id);
@@ -155,11 +164,10 @@ Respond with JSON only, same format as before.`;
 
     // Determine if profile is complete enough to set onboarding_completed_at
     const hasOverview = Boolean(profile.company_overview);
-    const hasDifferentiators = (profile.differentiators || []).length > 0;
-    const hasCompetitors = (profile.competitors || []).length > 0;
+    const hasDifferentiators = profile.differentiators.length > 0;
+    const hasCompetitors = profile.competitors.length > 0;
     const isOnboardingComplete = hasOverview && hasDifferentiators && hasCompetitors;
 
-    // v3: insert into brands (not projects), no competitors column
     const { error: brandError } = await adminClient
       .from('brands')
       .insert({
@@ -170,7 +178,7 @@ Respond with JSON only, same format as before.`;
         website_url,
         company_overview: profile.company_overview || null,
         industry: profile.industry || null,
-        differentiators: profile.differentiators || [],
+        differentiators: profile.differentiators,
         target_audience: profile.target_audience || null,
         language: profile.language || 'id',
         onboarding_completed_at: isOnboardingComplete ? new Date().toISOString() : null,
@@ -178,16 +186,13 @@ Respond with JSON only, same format as before.`;
 
     if (brandError) {
       console.error('Brand insert failed:', JSON.stringify(brandError));
-      // Surface the error to the client — a missing brand_id will cause all downstream
-      // inserts (topics, prompts, audits) to fail with FK constraint violations.
       return NextResponse.json(
         { error: `Failed to save brand: ${brandError.message}` },
         { status: 500 }
       );
     }
 
-    // v3: insert competitors into brand_competitors table (not brands.competitors[])
-    const competitorNames: string[] = profile.competitors || [];
+    const competitorNames = profile.competitors;
     if (competitorNames.length > 0) {
       const competitorRows = competitorNames.map(name => ({
         brand_id: brandId,
