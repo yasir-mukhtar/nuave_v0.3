@@ -222,7 +222,7 @@ CREATE TABLE public.prompts (
   id               UUID        PK   DEFAULT gen_random_uuid(),
   brand_id         UUID        NN   FK → brands(id)  ON DELETE CASCADE,   -- was: project_id
   topic_id         UUID             FK → topics(id)  ON DELETE SET NULL,  -- was: topic TEXT
-  text             TEXT        NN,                                         -- was: prompt_text
+  prompt_text      TEXT        NN,
   stage            TEXT,                   -- awareness | consideration | decision
   language         TEXT        DEF  'id',
   is_active        BOOLEAN     DEF  true,
@@ -239,7 +239,7 @@ CREATE TABLE public.prompts (
 );
 ```
 
-**Renamed:** `project_id` → `brand_id` · `prompt_text` → `text` · `topic TEXT` → `topic_id UUID`
+**Renamed:** `project_id` → `brand_id` · `topic TEXT` → `topic_id UUID`
 
 ---
 
@@ -318,7 +318,7 @@ Renamed from `competitor_analysis`. Per-audit competitor performance data. Now u
 CREATE TABLE public.competitor_snapshots (
   id              UUID        PK   DEFAULT gen_random_uuid(),
   audit_id        UUID        NN   FK → audits(id)           ON DELETE CASCADE,
-  competitor_id   UUID        NN   FK → brand_competitors(id) ON DELETE CASCADE,  -- was: competitor_name TEXT
+  competitor_id   UUID             FK → brand_competitors(id) ON DELETE SET NULL,  -- was: competitor_name TEXT
   mention_count   INTEGER     DEF  0,
   mention_frequency  NUMERIC(5,4),
   avg_position    NUMERIC(5,2),
