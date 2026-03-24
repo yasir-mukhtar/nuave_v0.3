@@ -144,22 +144,24 @@ Respond with JSON only, same format as before.`;
     const adminClient = createSupabaseAdminClient();
     const brandId = randomUUID();
 
-    // Resolve workspace from DB — client-provided workspace_id may be stale
-    let resolvedWsId: string | undefined;
-    if (user) {
-      const { data: wm } = await adminClient
-        .from('workspace_members')
-        .select('workspace_id')
-        .eq('user_id', user.id)
-        .limit(1)
-        .maybeSingle();
-      resolvedWsId = wm?.workspace_id;
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Not authenticated. Please sign in and try again.' },
+        { status: 401 }
+      );
     }
-    // Fall back to client-provided value only if DB lookup returned nothing
-    if (!resolvedWsId) resolvedWsId = workspace_id;
+
+    // Resolve workspace from DB — never trust client-provided workspace_id
+    const { data: wm } = await adminClient
+      .from('workspace_members')
+      .select('workspace_id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle();
+    const resolvedWsId = wm?.workspace_id;
 
     if (!resolvedWsId) {
-      console.error('No workspace found for user', user?.id);
+      console.error('No workspace found for user', user.id);
       return NextResponse.json(
         { error: 'No workspace found. Please sign in and try again.' },
         { status: 400 }
