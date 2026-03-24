@@ -152,7 +152,7 @@ interface Profile {
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [workspaceId, setWorkspaceId] = useState("");
+  const [brandId, setBrandId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -182,25 +182,23 @@ export default function ProfilePage() {
       ...profileData,
       website_url
     });
-    setWorkspaceId(data.workspace_id);
+    setBrandId(data.brand_id ?? "");
   }, []);
 
   async function handleGeneratePrompts() {
-    console.log('workspace_id:', workspaceId);
-    console.log('profile:', profile);
     setError(null);
     setLoading(true);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60_000);
 
     try {
-      if (!workspaceId) {
-        throw new Error("ID workspace tidak ditemukan. Silakan coba ulangi audit.");
+      if (!brandId) {
+        throw new Error("ID brand tidak ditemukan. Silakan coba ulangi analisis.");
       }
       const res = await fetch("/api/generate-prompts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspace_id: workspaceId, profile }),
+        body: JSON.stringify({ brand_id: brandId, profile }),
         signal: controller.signal,
       });
       clearTimeout(timeout);

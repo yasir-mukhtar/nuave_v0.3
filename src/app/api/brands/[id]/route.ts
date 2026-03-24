@@ -1,6 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
 
+// HEAD /api/brands/[id] — lightweight existence check used by the new-project cache guard
+export async function HEAD(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const admin = createSupabaseAdminClient();
+  const { data } = await admin.from("brands").select("id").eq("id", id).maybeSingle();
+  return new NextResponse(null, { status: data ? 200 : 404 });
+}
+
+// v3: ownership is verified via workspace_members (not brands.user_id)
+async function verifyBrandOwnership(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  brandId: string,
+  userId: string
+): Promise<boolean> {
+  const { data: brand } = await admin
+    .from("brands")
+    .select("workspace_id")
+    .eq("id", brandId)
+    .maybeSingle();
+
+  if (!brand) return false;
+
+  const { data: membership } = await admin
+    .from("workspace_members")
+    .select("user_id")
+    .eq("workspace_id", brand.workspace_id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return Boolean(membership);
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,20 +50,14 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Verify ownership
     const admin = createSupabaseAdminClient();
-    const { data: proj } = await admin
-      .from("projects")
-      .select("user_id")
-      .eq("id", id)
-      .single();
 
-    if (!proj || proj.user_id !== user.id) {
+    if (!(await verifyBrandOwnership(admin, id, user.id))) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Only allow updating specific fields
-    const allowed = ["name", "website_url", "company_overview", "differentiators", "competitors"];
+    // Only allow updating specific brand fields
+    const allowed = ["name", "website_url", "company_overview", "differentiators", "industry", "target_audience", "language"];
     const updates: Record<string, unknown> = {};
     for (const key of allowed) {
       if (body[key] !== undefined) updates[key] = body[key];
@@ -41,18 +70,18 @@ export async function PATCH(
     updates.updated_at = new Date().toISOString();
 
     const { error } = await admin
-      .from("projects")
+      .from("brands")
       .update(updates)
       .eq("id", id);
 
     if (error) {
-      console.error("Project update error:", error);
+      console.error("Brand update error:", error);
       return NextResponse.json({ error: "Failed to update" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("PATCH project error:", err);
+    console.error("PATCH brand error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -72,36 +101,35 @@ export async function DELETE(
 
     const admin = createSupabaseAdminClient();
 
-    // Verify ownership
-    const { data: proj } = await admin
-      .from("projects")
-      .select("user_id")
-      .eq("id", id)
-      .single();
-
-    if (!proj || proj.user_id !== user.id) {
+    if (!(await verifyBrandOwnership(admin, id, user.id))) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Delete cascade: recommendations → audit_results → audits → prompts → project
+    // v3: cascade is handled by DB (ON DELETE CASCADE on all brand_id FKs),
+    // but we delete manually here to be explicit and avoid partial failures.
+
+    // 1. Collect audit IDs for this brand
     const { data: audits } = await admin
       .from("audits")
       .select("id")
-      .eq("project_id", id);
+      .eq("brand_id", id);
 
     if (audits && audits.length > 0) {
-      const auditIds = audits.map((a) => a.id);
-      await admin.from("recommendations").delete().in("audit_id", auditIds);
+      const auditIds = audits.map(a => a.id);
       await admin.from("audit_results").delete().in("audit_id", auditIds);
-      await admin.from("audits").delete().eq("project_id", id);
     }
 
-    await admin.from("prompts").delete().eq("project_id", id);
-    await admin.from("projects").delete().eq("id", id);
+    // 2. Delete in FK dependency order
+    await admin.from("recommendations").delete().eq("brand_id", id);
+    await admin.from("audits").delete().eq("brand_id", id);
+    await admin.from("prompts").delete().eq("brand_id", id);
+    await admin.from("topics").delete().eq("brand_id", id);
+    await admin.from("brand_competitors").delete().eq("brand_id", id);
+    await admin.from("brands").delete().eq("id", id);
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("DELETE project error:", err);
+    console.error("DELETE brand error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

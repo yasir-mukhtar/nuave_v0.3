@@ -204,20 +204,26 @@ export default function NewProjectPage() {
 
     const fullUrl = url.startsWith("http") ? url : `https://${url}`;
 
-    // If workspace already exists and URL hasn't changed, skip scrape and go to step 2
+    // If a cached brand exists for this URL, verify it still exists in the DB before skipping scrape.
+    // Stale sessionStorage (e.g. from a previous Supabase project) would cause FK errors downstream.
     const existingRaw = sessionStorage.getItem("nuave_new_project");
     const existing = existingRaw ? JSON.parse(existingRaw) : null;
     if (existing?.projectId && existing.url === fullUrl) {
-      const projectData = {
-        ...existing,
-        brandName: brandName.trim(),
-        country,
-        language,
-        faviconUrl: faviconUrl || existing.faviconUrl || null,
-      };
-      sessionStorage.setItem("nuave_new_project", JSON.stringify(projectData));
-      router.push("/new-project/topics");
-      return;
+      const checkRes = await fetch(`/api/brands/${existing.projectId}`, { method: "HEAD" }).catch(() => null);
+      if (checkRes?.ok) {
+        const projectData = {
+          ...existing,
+          brandName: brandName.trim(),
+          country,
+          language,
+          faviconUrl: faviconUrl || existing.faviconUrl || null,
+        };
+        sessionStorage.setItem("nuave_new_project", JSON.stringify(projectData));
+        router.push("/new-project/topics");
+        return;
+      }
+      // Brand not found in DB — clear stale cache and fall through to re-scrape
+      sessionStorage.removeItem("nuave_new_project");
     }
 
     setLoading(true);
@@ -250,7 +256,7 @@ export default function NewProjectPage() {
         brandName: data.profile?.brand_name || brandName.trim(),
         country,
         language,
-        projectId: data.project_id,
+        projectId: data.brand_id,
         workspaceId: activeWsId,
         profile: data.profile,
         faviconUrl: faviconUrl || null,

@@ -32,6 +32,7 @@ type BrandWorkspace = {
   _mentionRate: number | null;
   _appliedCount: number;
   _totalRecs: number;
+  _workspaceId: string;
 };
 
 /* ── Helpers ── */
@@ -80,45 +81,70 @@ export default function BrandPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data: workspaces } = await supabase
-      .from("workspaces")
-      .select("id, brand_name, website_url, company_overview, differentiators, competitors, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+    // v3: get workspace IDs via workspace_members, then fetch brands
+    const { data: memberships } = await supabase
+      .from("workspace_members")
+      .select("workspace_id")
+      .eq("user_id", user.id);
 
-    if (!workspaces || workspaces.length === 0) {
+    if (!memberships || memberships.length === 0) {
       setBrands([]);
       setLoading(false);
       return;
     }
 
-    const wsIds = workspaces.map((w) => w.id);
+    const wsIds = memberships.map((m) => m.workspace_id);
 
-    // Fetch audits for all workspaces
+    // v3: fetch brands (not workspaces)
+    const { data: brandRows } = await supabase
+      .from("brands")
+      .select("id, workspace_id, name, website_url, company_overview, differentiators, created_at")
+      .in("workspace_id", wsIds)
+      .order("created_at", { ascending: false });
+
+    if (!brandRows || brandRows.length === 0) {
+      setBrands([]);
+      setLoading(false);
+      return;
+    }
+
+    const brandIds = brandRows.map((b) => b.id);
+
+    // v3: fetch competitors from brand_competitors table
+    const { data: competitorRows } = await supabase
+      .from("brand_competitors")
+      .select("brand_id, name")
+      .in("brand_id", brandIds);
+
+    const competitorsByBrand: Record<string, string[]> = {};
+    for (const c of competitorRows ?? []) {
+      if (!competitorsByBrand[c.brand_id]) competitorsByBrand[c.brand_id] = [];
+      competitorsByBrand[c.brand_id].push(c.name);
+    }
+
+    // v3: audits use brand_id
     const { data: audits } = await supabase
       .from("audits")
-      .select("id, workspace_id, visibility_score, status, brand_mention_count, total_prompts")
-      .in("workspace_id", wsIds)
+      .select("id, brand_id, visibility_score, status, brand_mention_count, total_prompts")
+      .in("brand_id", brandIds)
       .eq("status", "complete")
       .order("completed_at", { ascending: false });
 
-    // Fetch recommendations for all audits
-    const auditIds = audits?.map((a) => a.id) ?? [];
-    let recs: { audit_id: string; is_applied: boolean }[] = [];
-    if (auditIds.length > 0) {
+    // v3: recommendations are brand-level with status field
+    let recs: { brand_id: string; status: string }[] = [];
+    if (brandIds.length > 0) {
       const { data } = await supabase
         .from("recommendations")
-        .select("audit_id, is_applied")
-        .in("audit_id", auditIds);
+        .select("brand_id, status")
+        .in("brand_id", brandIds);
       recs = data ?? [];
     }
 
-    // Build per-workspace stats
-    const enriched: BrandWorkspace[] = workspaces.map((ws) => {
-      const wsAudits = audits?.filter((a) => a.workspace_id === ws.id) ?? [];
-      const latestAudit = wsAudits[0] ?? null;
-      const wsAuditIds = wsAudits.map((a) => a.id);
-      const wsRecs = recs.filter((r) => wsAuditIds.includes(r.audit_id));
+    // Build per-brand stats
+    const enriched: BrandWorkspace[] = brandRows.map((b) => {
+      const brandAudits = audits?.filter((a) => a.brand_id === b.id) ?? [];
+      const latestAudit = brandAudits[0] ?? null;
+      const brandRecs = recs.filter((r) => r.brand_id === b.id);
 
       let mentionRate: number | null = null;
       if (latestAudit && latestAudit.total_prompts > 0) {
@@ -126,14 +152,19 @@ export default function BrandPage() {
       }
 
       return {
-        ...ws,
-        differentiators: ws.differentiators ?? [],
-        competitors: ws.competitors ?? [],
-        _totalAudits: wsAudits.length,
+        id: b.id,
+        brand_name: b.name,
+        website_url: b.website_url ?? "",
+        company_overview: b.company_overview,
+        differentiators: b.differentiators ?? [],
+        competitors: competitorsByBrand[b.id] ?? [],
+        created_at: b.created_at,
+        _totalAudits: brandAudits.length,
         _latestScore: latestAudit?.visibility_score ?? null,
         _mentionRate: mentionRate,
-        _appliedCount: wsRecs.filter((r) => r.is_applied).length,
-        _totalRecs: wsRecs.length,
+        _appliedCount: brandRecs.filter((r) => r.status === "applied" || r.status === "resolved").length,
+        _totalRecs: brandRecs.length,
+        _workspaceId: b.workspace_id,
       };
     });
 
@@ -173,10 +204,15 @@ export default function BrandPage() {
     if (!editingBrand) return;
     setSaving(true);
 
-    const res = await fetch(`/api/workspaces/${editingBrand.id}`, {
+    const res = await fetch(`/api/brands/${editingBrand.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editForm),
+      body: JSON.stringify({
+        name: editForm.brand_name,
+        website_url: editForm.website_url,
+        company_overview: editForm.company_overview,
+        differentiators: editForm.differentiators,
+      }),
     });
 
     if (res.ok) {
@@ -209,7 +245,7 @@ export default function BrandPage() {
     if (!deletingId) return;
     setDeleting(true);
 
-    const res = await fetch(`/api/workspaces/${deletingId}`, { method: "DELETE" });
+    const res = await fetch(`/api/brands/${deletingId}`, { method: "DELETE" });
     if (res.ok) {
       setBrands((prev) => prev.filter((b) => b.id !== deletingId));
       closeDelete();
@@ -220,7 +256,7 @@ export default function BrandPage() {
   async function handleRescrape(id: string) {
     setRescrapingId(id);
     try {
-      const res = await fetch(`/api/workspaces/${id}/rescrape`, { method: "POST" });
+      const res = await fetch(`/api/brands/${id}/rescrape`, { method: "POST" });
       const data = await res.json();
       if (data.success && data.profile) {
         setBrands((prev) =>

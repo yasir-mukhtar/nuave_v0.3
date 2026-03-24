@@ -21,7 +21,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   const { activeProject } = useActiveProject();
   const workspaceName = activeWorkspace?.name ?? "Select Workspace";
   const projectName = activeProject?.name ?? "Select Project";
-  const websiteUrl = activeProject?.website_url;
+  const websiteUrl = activeProject?.website_url ?? undefined;
 
   useEffect(() => {
     localStorage.removeItem('nuave_credits');
@@ -32,16 +32,28 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserEmail(user.email ?? "");
+
+        // v3: user name from users table; credits from organizations via membership
         const { data: userData } = await supabase
           .from('users')
-          .select('full_name, credits_balance')
+          .select('full_name')
           .eq('id', user.id)
           .single();
 
         if (userData) {
-          setCredits(userData.credits_balance ?? 0);
           setUserName(userData.full_name ?? "User");
         }
+
+        // v3: credits live on organizations, not users
+        const { data: omData } = await supabase
+          .from('organization_members')
+          .select('organizations(credits_balance)')
+          .eq('user_id', user.id)
+          .limit(1)
+          .maybeSingle();
+
+        const org = omData?.organizations as unknown as { credits_balance: number } | null;
+        if (org) setCredits(org.credits_balance ?? 0);
       }
     }
 

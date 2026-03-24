@@ -878,4 +878,4 @@ PRD: [attach nuave-prd-v1.2]
 | Logs URL | https://vercel.com/mailyasirmukhtar-gmailcoms-projects/nuave/logs |
 | Production domain | nuave.id |
 | Deploy trigger | Push to `main` branch on GitHub |
-| GitHub repo | https://github.com/yasir-mukhtar/nuave_v0.3 |
+| GitHub repo | https://github.com/yasir-mukhtar/nuave |

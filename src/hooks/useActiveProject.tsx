@@ -3,13 +3,15 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useActiveWorkspace } from './useActiveWorkspace';
-import type { Project } from '@/types';
+import type { Brand } from '@/types';
 
+// Context still exported as "Project" names for backward compat with existing UI consumers
+// Internally operates on the `brands` table (v3)
 type ActiveProjectContextValue = {
-  projects: Project[];
+  projects: Brand[];
   activeProjectId: string | null;
   setActiveProjectId: (id: string) => void;
-  activeProject: Project | undefined;
+  activeProject: Brand | undefined;
   loading: boolean;
   refreshProjects: () => Promise<void>;
 };
@@ -25,7 +27,7 @@ const ActiveProjectContext = createContext<ActiveProjectContextValue>({
 
 export function ActiveProjectProvider({ children }: { children: ReactNode }) {
   const { activeWorkspaceId } = useActiveWorkspace();
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Brand[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,15 +42,15 @@ export function ActiveProjectProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     const supabase = createSupabaseBrowserClient();
 
+    // v3: query brands table (was projects)
     const { data } = await supabase
-      .from('projects')
-      .select('id, workspace_id, name, website_url, language, company_overview, differentiators, competitors, industry, target_audience, topics')
+      .from('brands')
+      .select('id, workspace_id, created_by, name, website_url, language, company_overview, differentiators, industry, target_audience, onboarding_completed_at, created_at, updated_at')
       .eq('workspace_id', activeWorkspaceId)
       .order('created_at', { ascending: false });
 
     if (data && data.length > 0) {
-      setProjects(data as Project[]);
-      // Restore previously selected project, or default to latest
+      setProjects(data as Brand[]);
       const saved = localStorage.getItem('nuave_active_project');
       const valid = saved && data.some(p => p.id === saved);
       setActiveProjectId(valid ? saved : data[0].id);
@@ -59,9 +61,7 @@ export function ActiveProjectProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, [activeWorkspaceId]);
 
-  // Re-fetch when activeWorkspaceId changes
   useEffect(() => {
-    // Clear active project when workspace changes
     setActiveProjectId(null);
     localStorage.removeItem('nuave_active_project');
     fetchProjects();

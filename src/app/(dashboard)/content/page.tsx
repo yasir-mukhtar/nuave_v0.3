@@ -19,16 +19,16 @@ import { cn } from "@/lib/utils";
 
 type Recommendation = {
   id: string;
-  audit_id: string;
+  brand_id: string;
   type: string;
   priority: string;
   title: string;
   description: string;
   suggested_copy: string | null;
-  is_applied: boolean;
+  status: string;
   created_at: string;
   _brandName: string;
-  _wsId: string;
+  _brandId: string;
 };
 
 type TypeGroup = "web_copy" | "content_gap" | "meta_structure" | "all";
@@ -106,7 +106,7 @@ export default function KontenPage() {
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState<TypeGroup>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "unlocked" | "locked" | "applied">("all");
-  const [workspaceFilter, setWorkspaceFilter] = useState<string>("all");
+  const [brandFilter, setWorkspaceFilter] = useState<string>("all");
   const [revealingId, setRevealingId] = useState<string | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
 
@@ -132,43 +132,40 @@ export default function KontenPage() {
         if (d.credits !== null) setCredits(d.credits);
       });
 
-      // Get workspaces
-      const { data: userWorkspaces } = await supabase
-        .from("workspaces")
-        .select("id, brand_name")
+      // v3: get workspace IDs via workspace_members, then brands
+      const { data: memberships } = await supabase
+        .from("workspace_members")
+        .select("workspace_id")
         .eq("user_id", user.id);
 
-      if (!userWorkspaces || userWorkspaces.length === 0) {
+      if (!memberships || memberships.length === 0) {
         setRecs([]);
         setLoading(false);
         return;
       }
 
-      const wsIds = userWorkspaces.map((w) => w.id);
-      const wsMap = Object.fromEntries(userWorkspaces.map((w) => [w.id, w.brand_name]));
+      const wsIds = memberships.map((m) => m.workspace_id);
 
-      // Get complete audits
-      const { data: audits } = await supabase
-        .from("audits")
-        .select("id, workspace_id")
-        .in("workspace_id", wsIds)
-        .eq("status", "complete")
-        .order("completed_at", { ascending: false });
+      // v3: fetch brands for these workspaces
+      const { data: brands } = await supabase
+        .from("brands")
+        .select("id, name")
+        .in("workspace_id", wsIds);
 
-      if (!audits || audits.length === 0) {
+      if (!brands || brands.length === 0) {
         setRecs([]);
         setLoading(false);
         return;
       }
 
-      const auditIds = audits.map((a) => a.id);
-      const auditWsMap = Object.fromEntries(audits.map((a) => [a.id, a.workspace_id]));
+      const brandIds = brands.map((b) => b.id);
+      const brandNameMap = Object.fromEntries(brands.map((b) => [b.id, b.name]));
 
-      // Get recommendations
+      // v3: recommendations are brand-level
       const { data: recommendations } = await supabase
         .from("recommendations")
         .select("*")
-        .in("audit_id", auditIds)
+        .in("brand_id", brandIds)
         .order("created_at", { ascending: true });
 
       if (!recommendations) {
@@ -177,15 +174,12 @@ export default function KontenPage() {
         return;
       }
 
-      const enriched: Recommendation[] = recommendations.map((r) => {
-        const wsId = auditWsMap[r.audit_id] ?? "";
-        return {
-          ...r,
-          is_applied: r.is_applied ?? false,
-          _brandName: wsMap[wsId] ?? "",
-          _wsId: wsId,
-        };
-      });
+      const enriched: Recommendation[] = recommendations.map((r) => ({
+        ...r,
+        status: r.status ?? "open",
+        _brandName: brandNameMap[r.brand_id] ?? "",
+        _brandId: r.brand_id,
+      }));
 
       setRecs(enriched);
       setLoading(false);
@@ -218,16 +212,16 @@ export default function KontenPage() {
     }
   }
 
-  async function handleToggleApplied(recId: string, current: boolean) {
-    const newVal = !current;
+  async function handleToggleApplied(recId: string, currentApplied: boolean) {
+    const newStatus = currentApplied ? "open" : "applied";
     // Optimistic update
-    setRecs((prev) => prev.map((r) => r.id === recId ? { ...r, is_applied: newVal } : r));
-    if (selectedRec?.id === recId) setSelectedRec((prev) => prev ? { ...prev, is_applied: newVal } : prev);
+    setRecs((prev) => prev.map((r) => r.id === recId ? { ...r, status: newStatus } : r));
+    if (selectedRec?.id === recId) setSelectedRec((prev) => prev ? { ...prev, status: newStatus } : prev);
 
     await fetch("/api/recommendations/toggle-applied", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ recommendation_id: recId, is_applied: newVal }),
+      body: JSON.stringify({ recommendation_id: recId, is_applied: newStatus === "applied" }),
     });
   }
 
@@ -267,21 +261,21 @@ export default function KontenPage() {
   /* ── Derived data ── */
 
   const filtered = recs.filter((r) => {
-    if (workspaceFilter !== "all" && r._wsId !== workspaceFilter) return false;
+    if (brandFilter !== "all" && r._brandId !== brandFilter) return false;
     if (typeFilter !== "all" && normalizeType(r.type) !== typeFilter) return false;
     if (statusFilter === "unlocked" && !r.suggested_copy) return false;
     if (statusFilter === "locked" && r.suggested_copy) return false;
-    if (statusFilter === "applied" && !r.is_applied) return false;
+    if (statusFilter === "applied" && r.status !== "applied") return false;
     return true;
   });
 
-  const totalCount = recs.filter((r) => workspaceFilter === "all" || r._wsId === workspaceFilter).length;
-  const appliedCount = recs.filter((r) => (workspaceFilter === "all" || r._wsId === workspaceFilter) && r.is_applied).length;
-  const unlockedCount = recs.filter((r) => (workspaceFilter === "all" || r._wsId === workspaceFilter) && r.suggested_copy).length;
+  const totalCount = recs.filter((r) => brandFilter === "all" || r._brandId === brandFilter).length;
+  const appliedCount = recs.filter((r) => (brandFilter === "all" || r._brandId === brandFilter) && r.status === "applied").length;
+  const unlockedCount = recs.filter((r) => (brandFilter === "all" || r._brandId === brandFilter) && r.suggested_copy).length;
   const progressPct = totalCount > 0 ? Math.round((appliedCount / totalCount) * 100) : 0;
 
-  const uniqueWorkspaces = Array.from(
-    new Map(recs.map((r) => [r._wsId, r._brandName])).entries()
+  const uniqueBrands = Array.from(
+    new Map(recs.map((r) => [r._brandId, r._brandName])).entries()
   ).filter(([id]) => id);
 
   // Group by type
@@ -411,14 +405,14 @@ export default function KontenPage() {
           </div>
 
           {/* Workspace filter */}
-          {uniqueWorkspaces.length > 1 && (
+          {uniqueBrands.length > 1 && (
             <select
-              value={workspaceFilter}
+              value={brandFilter}
               onChange={(e) => setWorkspaceFilter(e.target.value)}
               className="py-[7px] pl-2.5 pr-7 text-[13px] leading-4 border border-border-default rounded-sm bg-white text-text-body cursor-pointer outline-none appearance-none bg-[url('data:image/svg+xml,%3csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2016%2016%27%3e%3cpath%20fill%3D%27none%27%20stroke%3D%27%236B7280%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-width%3D%272%27%20d%3D%27m2%205%206%206%206-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:12px_9px]"
             >
               <option value="all">Semua brand</option>
-              {uniqueWorkspaces.map(([id, name]) => (
+              {uniqueBrands.map(([id, name]) => (
                 <option key={id} value={id}>{name}</option>
               ))}
             </select>
@@ -447,7 +441,7 @@ export default function KontenPage() {
           groupOrder.filter((t) => grouped[t]?.length).map((type) => {
             const items = grouped[type]!;
             const typeInfo = TYPE_CONFIG[type] ?? { label: type, bg: "#F3F4F6", color: "#374151" };
-            const appliedInGroup = items.filter((r) => r.is_applied).length;
+            const appliedInGroup = items.filter((r) => r.status === "applied").length;
             return (
               <div key={type}>
                 <div className="flex items-center gap-2.5 mb-3">
@@ -589,15 +583,15 @@ export default function KontenPage() {
             {selectedRec.suggested_copy && (
               <div className="shrink-0 px-6 py-4 border-t border-border-default flex items-center justify-between">
                 <button
-                  onClick={() => handleToggleApplied(selectedRec.id, selectedRec.is_applied)}
+                  onClick={() => handleToggleApplied(selectedRec.id, selectedRec.status === "applied")}
                   className={cn(
                     "flex items-center gap-2 rounded-md px-4 py-2 text-[13px] leading-4 font-medium cursor-pointer transition-all duration-100",
-                    selectedRec.is_applied
+                    selectedRec.status === "applied"
                       ? "bg-[#F0FDF4] border border-[#BBF7D0] text-[#16A34A]"
                       : "bg-surface border border-border-default text-text-body"
                   )}
                 >
-                  {selectedRec.is_applied ? (
+                  {selectedRec.status === "applied" ? (
                     <><IconCircleCheckFilled size={16} className="text-success" /> Sudah diterapkan</>
                   ) : (
                     "Tandai sudah diterapkan"
@@ -647,10 +641,10 @@ function RecCard({
         "px-5 py-4 rounded-md flex items-center gap-4 transition-colors duration-100",
         isSelected
           ? "border border-brand"
-          : rec.is_applied
+          : rec.status === "applied"
             ? "border border-[#BBF7D0]"
             : "border border-border-default",
-        rec.is_applied ? "bg-[#FAFFF9]" : "bg-white",
+        rec.status === "applied" ? "bg-[#FAFFF9]" : "bg-white",
         isUnlocked ? "cursor-pointer" : "cursor-default",
         isUnlocked && !isSelected && "hover:border-[#C4B5FD]"
       )}
@@ -658,7 +652,7 @@ function RecCard({
     >
       {/* Applied indicator */}
       <div className="shrink-0">
-        {rec.is_applied ? (
+        {rec.status === "applied" ? (
           <IconCircleCheckFilled size={20} className="text-success" />
         ) : (
           <div className={cn(

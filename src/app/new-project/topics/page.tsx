@@ -31,16 +31,19 @@ export default function TopicsPage() {
     const project = JSON.parse(raw);
     const cacheKey = `nuave_cached_topics_${project.projectId || "default"}`;
 
-    // Check sessionStorage cache first
+    // Check sessionStorage cache first — validate that names are strings (guard against stale object-shaped cache)
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
       try {
         const cachedTopics: Topic[] = JSON.parse(cached);
-        if (cachedTopics.length > 0) {
+        const valid = cachedTopics.length > 0 && cachedTopics.every((t) => typeof t.name === "string");
+        if (valid) {
           setTopics(cachedTopics);
           setLoadingTopics(false);
           return;
         }
+        // Stale/malformed cache — delete it and fall through to API
+        sessionStorage.removeItem(cacheKey);
       } catch { /* fall through to API */ }
     }
 
@@ -54,16 +57,19 @@ export default function TopicsPage() {
             company_overview: project.profile?.company_overview || "",
             industry: project.profile?.industry || "",
             language: project.language || "id",
-            project_id: project.projectId,
+            brand_id: project.projectId,
           }),
         });
         const data = await res.json();
         if (data.success && Array.isArray(data.topics)) {
-          const topicsList: Topic[] = data.topics.map((name: string, i: number) => ({
-            id: `topic-${i}`,
-            name,
-            checked: true,
-          }));
+          // v3: topics are {id, name, display_order} objects (not plain strings)
+          const topicsList: Topic[] = data.topics.map(
+            (t: { id: string | null; name: string; display_order: number }, i: number) => ({
+              id: t.id ?? `topic-${i}`,
+              name: t.name,
+              checked: true,
+            })
+          );
           setTopics(topicsList);
           // Save to sessionStorage cache
           sessionStorage.setItem(cacheKey, JSON.stringify(topicsList));

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/server';
 
-const OPENAI_MODEL = "gpt-4o-2024-11-20"
+const OPENAI_MODEL = "gpt-4o-2024-11-20";
 
 interface PromptRequest {
   id: string;
@@ -18,111 +18,52 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { project_id, prompts, brand_name: requestBrandName, website_url, profile } = body as {
-      project_id: string;
+    const brand_id: string = body.brand_id;
+    const { prompts, brand_name: requestBrandName } = body as {
+      brand_id: string;
       prompts: PromptRequest[];
       brand_name?: string;
-      website_url?: string;
-      profile?: any;
     };
 
-    if (!project_id || !prompts || !Array.isArray(prompts)) {
+    if (!brand_id || !prompts || !Array.isArray(prompts)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid request body. Missing project_id or prompts.' },
+        { success: false, error: 'Invalid request body. Missing brand_id or prompts.' },
         { status: 400 }
       );
     }
 
-    // STEP 0 — Resolve brand name and ensure project exists
+    // STEP 0 — Resolve brand name from brands table (v3)
     let brandName = requestBrandName || '';
-
     if (!brandName) {
-      const { data: project } = await supabase
-        .from('projects')
+      const { data: brand } = await supabase
+        .from('brands')
         .select('name')
-        .eq('id', project_id)
+        .eq('id', brand_id)
         .maybeSingle();
-
-      brandName = project?.name || 'the brand';
+      brandName = brand?.name || 'the brand';
     }
 
-    // Ensure project record exists
-    const { data: existingProject } = await supabase
-      .from('projects')
-      .select('id')
-      .eq('id', project_id)
-      .maybeSingle();
-
-    if (!existingProject) {
-      console.log(`Project ${project_id} not found. Creating temporary project record.`);
-      // Find user's first workspace to assign the project to
-      let wsId: string | null = null;
-      if (user) {
-        const { data: ws } = await supabase
-          .from('workspaces')
-          .select('id')
-          .eq('user_id', user.id)
-          .limit(1)
-          .maybeSingle();
-        wsId = ws?.id ?? null;
-      }
-      if (wsId) {
-        await supabase
-          .from('projects')
-          .insert({
-            id: project_id,
-            workspace_id: wsId,
-            name: brandName,
-            website_url: website_url || '',
-            company_overview: profile?.company_overview || '',
-          });
-      }
+    // STEP 0.5 — Resolve org_id for credit operations (v3: credits on org, not user)
+    let orgId: string | null = null;
+    if (user) {
+      const { data: om } = await supabase
+        .from('organization_members')
+        .select('org_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle();
+      orgId = om?.org_id ?? null;
     }
 
-    // Always update project with the latest profile data if available
-    if (profile) {
-      await supabase
-        .from('projects')
-        .update({
-          company_overview: profile.company_overview,
-          industry: profile.industry,
-          differentiators: profile.differentiators,
-          target_audience: profile.target_audience,
-          competitors: profile.competitors,
-          website_url: website_url || profile.website_url || '',
-        })
-        .eq('id', project_id);
-    }
-
-    // STEP 0.5 — Atomic credit check + deduction (prevents race conditions)
     const creditsNeeded = prompts.length;
 
-    if (user) {
-      const { data: newBalance, error: rpcError } = await supabase
-        .rpc('deduct_credits', { p_user_id: user.id, p_amount: creditsNeeded });
-
-      if (rpcError) {
-        console.error('Credit deduction RPC failed:', rpcError);
-        return NextResponse.json(
-          { success: false, error: 'Gagal memproses kredit. Silakan coba lagi.' },
-          { status: 500 }
-        );
-      }
-
-      if (newBalance === -1) {
-        return NextResponse.json(
-          { success: false, error: `Kredit tidak cukup. Anda butuh ${creditsNeeded} kredit.` },
-          { status: 402 }
-        );
-      }
-    }
-
-    // STEP 1 — Create audit record in Supabase
+    // STEP 1 — Create audit record (status: pending until credits confirmed)
     const { data: audit, error: auditError } = await supabase
       .from('audits')
       .insert({
-        project_id: project_id,
-        status: 'running',
+        brand_id,
+        created_by: user?.id ?? null,
+        status: 'pending',
         total_prompts: prompts.length,
         brand_mention_count: 0,
         credits_used: creditsNeeded,
@@ -136,20 +77,45 @@ export async function POST(req: NextRequest) {
 
     auditId = audit.id;
 
-    if (!auditId) {
-      return NextResponse.json(
-        { success: false, error: 'Failed to create audit' },
-        { status: 500 }
-      );
+    // STEP 2 — Atomic credit deduction (v3: org-scoped, audit_id linked)
+    if (user && orgId) {
+      const { data: newBalance, error: rpcError } = await supabase
+        .rpc('deduct_credits', {
+          p_org_id: orgId,
+          p_amount: creditsNeeded,
+          p_actioned_by: user.id,
+          p_audit_id: auditId,
+          p_description: `Audit: ${creditsNeeded} prompts`,
+        });
+
+      if (rpcError) {
+        console.error('Credit deduction RPC failed:', rpcError);
+        await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
+        return NextResponse.json(
+          { success: false, error: 'Gagal memproses kredit. Silakan coba lagi.' },
+          { status: 500 }
+        );
+      }
+
+      if (newBalance === -1) {
+        await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
+        return NextResponse.json(
+          { success: false, error: `Kredit tidak cukup. Anda butuh ${creditsNeeded} kredit.` },
+          { status: 402 }
+        );
+      }
     }
 
-    // STEP 2 — Start background processing
+    // STEP 3 — Mark audit as running and kick off background processing
+    await supabase.from('audits').update({ status: 'running' }).eq('id', auditId);
+
     const backgroundProcess = processAuditInBackground(
-      auditId,
-      project_id,
+      auditId!,
+      brand_id,
       prompts,
       brandName,
-      user?.id || null,
+      user?.id ?? null,
+      orgId,
       creditsNeeded
     );
 
@@ -159,21 +125,17 @@ export async function POST(req: NextRequest) {
       globalThis.waitUntil?.(backgroundProcess);
     }
 
-    // STEP 3 — Return response immediately
     return NextResponse.json({
       success: true,
       audit_id: auditId,
-      status: 'running'
+      status: 'running',
     });
 
   } catch (error: any) {
     console.error('Audit Runner API Error:', error);
-    
+
     if (auditId) {
-      await supabase
-        .from('audits')
-        .update({ status: 'failed' })
-        .eq('id', auditId);
+      await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
     }
 
     return NextResponse.json(
@@ -185,10 +147,11 @@ export async function POST(req: NextRequest) {
 
 async function processAuditInBackground(
   auditId: string,
-  projectId: string,
+  brandId: string,
   prompts: PromptRequest[],
   brandName: string,
   userId: string | null,
+  orgId: string | null,
   creditsUsed: number
 ) {
   const supabase = createSupabaseAdminClient();
@@ -200,10 +163,10 @@ async function processAuditInBackground(
 
     for (let i = 0; i < prompts.length; i++) {
       const prompt = prompts[i];
-      
-      // 500ms delay between calls
+
+      // 500ms delay between calls to avoid rate limits
       if (i > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       try {
@@ -211,7 +174,7 @@ async function processAuditInBackground(
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           },
           body: JSON.stringify({
             model: OPENAI_MODEL,
@@ -222,11 +185,11 @@ async function processAuditInBackground(
               user_location: {
                 type: "approximate",
                 country: prompt.language === 'ms' ? 'MY' : 'ID',
-                city: prompt.language === 'ms' ? 'Kuala Lumpur' : 'Jakarta'
+                city: prompt.language === 'ms' ? 'Kuala Lumpur' : 'Jakarta',
               },
-              search_context_size: "medium"
-            }]
-          })
+              search_context_size: "medium",
+            }],
+          }),
         });
 
         const data = await response.json();
@@ -248,7 +211,6 @@ async function processAuditInBackground(
 
         const responseLower = responseText.toLowerCase();
 
-        // Brand mention detection logic
         let brandMentioned = responseLower.includes(brandLower);
         if (!brandMentioned && brandLower.includes(' ')) {
           brandMentioned = responseLower.includes(brandNoSpaces);
@@ -257,15 +219,12 @@ async function processAuditInBackground(
         let mentionContext = null;
         if (brandMentioned) {
           totalBrandMentionCount++;
-          
           let index = responseLower.indexOf(brandLower);
           let matchLength = brandLower.length;
-
           if (index === -1 && brandLower.includes(' ')) {
             index = responseLower.indexOf(brandNoSpaces);
             matchLength = brandNoSpaces.length;
           }
-
           if (index !== -1) {
             const start = Math.max(0, index - 100);
             const end = Math.min(responseText.length, index + matchLength + 100);
@@ -275,19 +234,17 @@ async function processAuditInBackground(
 
         const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(prompt.id);
 
-        await supabase
-          .from('audit_results')
-          .insert({
-            audit_id: auditId,
-            prompt_id: isValidUUID ? prompt.id : null,
-            prompt_text: prompt.prompt_text,
-            ai_response: responseText,
-            brand_mentioned: brandMentioned,
-            mention_context: mentionContext,
-            mention_sentiment: 'positive', 
-            competitor_mentions: [],
-            position_rank: null
-          });
+        await supabase.from('audit_results').insert({
+          audit_id: auditId,
+          prompt_id: isValidUUID ? prompt.id : null,
+          prompt_text: prompt.prompt_text,
+          ai_response: responseText,
+          brand_mentioned: brandMentioned,
+          mention_context: mentionContext,
+          mention_sentiment: 'positive',
+          competitor_mentions: [],
+          position_rank: null,
+        });
 
       } catch (promptError) {
         console.error(`Error processing prompt ${prompt.id}:`, promptError);
@@ -295,8 +252,8 @@ async function processAuditInBackground(
     }
 
     // Update audit record when complete
-    const visibilityScore = prompts.length > 0 
-      ? Math.round((totalBrandMentionCount / prompts.length) * 100) 
+    const visibilityScore = prompts.length > 0
+      ? Math.round((totalBrandMentionCount / prompts.length) * 100)
       : 0;
 
     await supabase
@@ -305,7 +262,7 @@ async function processAuditInBackground(
         status: 'complete',
         brand_mention_count: totalBrandMentionCount,
         visibility_score: visibilityScore,
-        completed_at: new Date().toISOString()
+        completed_at: new Date().toISOString(),
       })
       .eq('id', auditId);
 
@@ -319,24 +276,25 @@ async function processAuditInBackground(
       });
     } catch (err) {
       console.error('Auto-generate recommendations failed:', err);
-      // Non-fatal — user can still manually generate
     }
 
   } catch (error) {
     console.error('Background audit process failed:', error);
-    await supabase
-      .from('audits')
-      .update({ status: 'failed' })
-      .eq('id', auditId);
+    await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
 
-    // Refund credits on complete failure
-    if (userId && creditsUsed > 0) {
-      const { error: refundError } = await supabase
-        .rpc('refund_credits', { p_user_id: userId, p_amount: creditsUsed });
+    // v3: refund credits to org (not user)
+    if (userId && orgId && creditsUsed > 0) {
+      const { error: refundError } = await supabase.rpc('refund_credits', {
+        p_org_id: orgId,
+        p_amount: creditsUsed,
+        p_actioned_by: userId,
+        p_audit_id: auditId,
+        p_description: 'Refund: audit failed',
+      });
       if (refundError) {
         console.error('Credit refund failed:', refundError);
       } else {
-        console.log(`Refunded ${creditsUsed} credits to user ${userId} after audit failure`);
+        console.log(`Refunded ${creditsUsed} credits to org ${orgId} after audit failure`);
       }
     }
   }

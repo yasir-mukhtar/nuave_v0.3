@@ -37,13 +37,11 @@ async function fetchWebsiteContent(url: string): Promise<string> {
     }
 
     const html = await response.text();
-    const text = html
+    return html
       .replace(/<[^>]*>/g, " ")
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 8000);
-
-    return text;
   } finally {
     clearTimeout(timeout);
   }
@@ -61,27 +59,19 @@ export async function POST(request: NextRequest) {
   const { website_url, brand_name, workspace_id } = body;
 
   if (!website_url) {
-    return NextResponse.json(
-      { error: "website_url is required" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "website_url is required" }, { status: 400 });
   }
 
   try {
     new URL(website_url);
   } catch {
-    return NextResponse.json(
-      { error: "website_url must be a valid URL" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "website_url must be a valid URL" }, { status: 400 });
   }
 
   let websiteContent: string | null = null;
   try {
     const content = await fetchWebsiteContent(website_url);
-    if (content && content.length >= 50) {
-      websiteContent = content;
-    }
+    if (content && content.length >= 50) websiteContent = content;
   } catch {
     // fallback to knowledge prompt
   }
@@ -115,10 +105,7 @@ Respond with JSON only, same format as before.`;
           role: "system",
           content: "You are a business analyst. Extract structured information from website content. Always respond with valid JSON only, no markdown, no explanation.",
         },
-        {
-          role: "user",
-          content: userPrompt,
-        },
+        { role: "user", content: userPrompt },
       ],
     });
 
@@ -140,54 +127,85 @@ Respond with JSON only, same format as before.`;
       );
     }
 
-    // Get the authenticated user
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
-    
-    console.log('user from session:', user?.id ?? 'NULL - no session');
 
-    // Use admin client for the INSERT to bypass RLS
     const adminClient = createSupabaseAdminClient();
+    const brandId = randomUUID();
 
-    // Generate project ID before insert
-    const projectId = randomUUID();
-
-    // If no workspace_id provided, find user's default workspace
+    // v3: resolve workspace via workspace_members (not workspaces.user_id)
     let resolvedWsId = workspace_id;
     if (!resolvedWsId && user) {
-      const { data: ws } = await adminClient
-        .from('workspaces')
-        .select('id')
+      const { data: wm } = await adminClient
+        .from('workspace_members')
+        .select('workspace_id')
         .eq('user_id', user.id)
         .limit(1)
         .maybeSingle();
-      resolvedWsId = ws?.id;
+      resolvedWsId = wm?.workspace_id;
     }
 
-    const { error: projError } = await adminClient
-      .from('projects')
+    if (!resolvedWsId) {
+      console.error('No workspace found for user', user?.id);
+      return NextResponse.json(
+        { error: 'No workspace found. Please sign in and try again.' },
+        { status: 400 }
+      );
+    }
+
+    // Determine if profile is complete enough to set onboarding_completed_at
+    const hasOverview = Boolean(profile.company_overview);
+    const hasDifferentiators = (profile.differentiators || []).length > 0;
+    const hasCompetitors = (profile.competitors || []).length > 0;
+    const isOnboardingComplete = hasOverview && hasDifferentiators && hasCompetitors;
+
+    // v3: insert into brands (not projects), no competitors column
+    const { error: brandError } = await adminClient
+      .from('brands')
       .insert({
-        id: projectId,
+        id: brandId,
         workspace_id: resolvedWsId,
+        created_by: user?.id ?? null,
         name: profile.brand_name,
-        website_url: website_url,
+        website_url,
         company_overview: profile.company_overview || null,
         industry: profile.industry || null,
         differentiators: profile.differentiators || [],
-        competitors: profile.competitors || [],
         target_audience: profile.target_audience || null,
-        language: profile.language || 'en',
+        language: profile.language || 'id',
+        onboarding_completed_at: isOnboardingComplete ? new Date().toISOString() : null,
       });
 
-    if (projError) {
-      console.error('Project insert failed:', JSON.stringify(projError));
+    if (brandError) {
+      console.error('Brand insert failed:', JSON.stringify(brandError));
+      // Surface the error to the client — a missing brand_id will cause all downstream
+      // inserts (topics, prompts, audits) to fail with FK constraint violations.
+      return NextResponse.json(
+        { error: `Failed to save brand: ${brandError.message}` },
+        { status: 500 }
+      );
+    }
+
+    // v3: insert competitors into brand_competitors table (not brands.competitors[])
+    const competitorNames: string[] = profile.competitors || [];
+    if (competitorNames.length > 0) {
+      const competitorRows = competitorNames.map(name => ({
+        brand_id: brandId,
+        name,
+      }));
+      const { error: compError } = await adminClient
+        .from('brand_competitors')
+        .insert(competitorRows);
+      if (compError) {
+        console.error('Competitors insert failed:', JSON.stringify(compError));
+      }
     }
 
     return NextResponse.json({
       success: true,
       source: websiteContent ? "scraped" : "knowledge",
       website_url,
-      project_id: projectId,
+      brand_id: brandId,
       profile,
     });
   } catch (error) {

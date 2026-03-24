@@ -51,7 +51,7 @@ export default function DashboardPage() {
 
       const { data: userData } = await supabase
         .from("users")
-        .select("credits_balance, full_name")
+        .select("full_name")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -61,7 +61,7 @@ export default function DashboardPage() {
       const { data: audits } = await supabase
         .from("audits")
         .select("id, visibility_score, completed_at, status")
-        .eq("project_id", activeProjectId)
+        .eq("brand_id", activeProjectId)
         .order("completed_at", { ascending: false });
 
       const completeAudits = audits?.filter((a) => a.status === "complete") || [];
@@ -120,22 +120,30 @@ export default function DashboardPage() {
 
       let actionItems: DashboardData["actionItems"] = [];
 
-      if (latestAuditId) {
-        const { data: recs } = await supabase
-          .from("recommendations")
-          .select("title, description, priority, type")
-          .eq("audit_id", latestAuditId)
-          .order("created_at", { ascending: true });
+      // v3: recommendations are brand-level, not audit-level
+      const { data: recs } = await supabase
+        .from("recommendations")
+        .select("title, description, priority, type")
+        .eq("brand_id", activeProjectId)
+        .eq("status", "open")
+        .order("created_at", { ascending: true });
 
-        if (recs) {
-          actionItems = recs.map((r) => ({
-            title: r.title ?? "",
-            description: r.description ?? "",
-            priority: (r.priority as "high" | "medium" | "low") ?? "low",
-            type: r.type ?? "web_copy",
-          }));
-        }
+      if (recs) {
+        actionItems = recs.map((r) => ({
+          title: r.title ?? "",
+          description: r.description ?? "",
+          priority: (r.priority as "high" | "medium" | "low") ?? "low",
+          type: r.type ?? "web_copy",
+        }));
       }
+
+      // v3: credits live on organizations, fetch via API
+      let creditsRemaining = 0;
+      try {
+        const creditsRes = await fetch("/api/user/credits");
+        const creditsData = await creditsRes.json();
+        creditsRemaining = creditsData.credits ?? 0;
+      } catch {}
 
       setData({
         firstName,
@@ -148,7 +156,7 @@ export default function DashboardPage() {
         latestAuditId,
         totalAudits,
         avgScore,
-        creditsRemaining: userData?.credits_balance ?? 0,
+        creditsRemaining,
         completeAudits,
       });
       setLoading(false);

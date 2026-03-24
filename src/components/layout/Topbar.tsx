@@ -3,19 +3,28 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from "next/link";
 import {
-  IconChevronDown,
-  IconChevronUp,
+  IconSelector,
   IconCheck,
   IconPlus,
 } from '@tabler/icons-react';
 import { cn } from "@/lib/utils";
 import { useActiveProject } from "@/hooks/useActiveProject";
 import { clearNuaveProjectSession } from "@/lib/session";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Topbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { projects, activeProjectId, setActiveProjectId, activeProject } = useActiveProject();
+
+  // Derive page title from pathname
+  const pageTitle = (() => {
+    if (pathname === "/dashboard") return "Dashboard";
+    if (pathname?.startsWith("/prompt")) return "Prompt";
+    if (pathname?.startsWith("/content")) return "Konten";
+    if (pathname?.startsWith("/brand")) return "Brand";
+    return "Dashboard";
+  })();
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -44,7 +53,10 @@ export default function Topbar() {
   }, [open]);
 
   return (
-    <div className="flex items-center justify-end h-[52px] px-8 border-b border-border-light">
+    <div className="flex items-center justify-between h-[52px] px-8 border-b border-border-light">
+      {/* Left: page title */}
+      <span className="text-[14px] font-medium text-[#0d0d0d]">{pageTitle}</span>
+
       {/* Right: project switcher */}
       <div ref={dropdownRef} className="relative">
         <button
@@ -52,11 +64,7 @@ export default function Topbar() {
           className="flex items-center gap-1.5 bg-transparent border border-border-light rounded-sm px-3 py-1.5 cursor-pointer font-medium text-sm text-text-heading shadow-app-subtle"
         >
           {projectName}
-          {open ? (
-            <IconChevronUp size={14} stroke={2} />
-          ) : (
-            <IconChevronDown size={14} stroke={2} />
-          )}
+          <IconSelector size={16} stroke={2} className="text-[#8b8b8b]" />
         </button>
 
         {open && (

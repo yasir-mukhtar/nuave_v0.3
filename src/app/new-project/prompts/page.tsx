@@ -176,7 +176,7 @@ export default function PromptsPage() {
             brand_name: project.brandName,
             topics: topics.map((t) => t.name),
             language: project.language || "id",
-            project_id: project.projectId,
+            brand_id: project.projectId,
           }),
         });
         const data = await res.json();
@@ -331,7 +331,7 @@ export default function PromptsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          project_id: project.projectId,
+          brand_id: project.projectId,
           prompts,
           brand_name: project.brandName,
           website_url: project.url,

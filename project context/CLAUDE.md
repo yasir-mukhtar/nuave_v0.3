@@ -1,12 +1,12 @@
 # CLAUDE.md — Nuave Project Context
 
-> Last updated: March 20, 2026
+> Last updated: March 24, 2026
 
 ## What is Nuave?
 
 **Nuave** (nuave.ai) — AEO (Answer Engine Optimization) SaaS for Indonesian/Malaysian SMBs.
 Measures how often AI tools mention a brand, delivers a 0–100 Visibility Score, generates content fixes.
-Credits-based (not subscription). 10 free credits on signup. IDR pricing via Midtrans.
+Credits-based (not subscription). Free credits earned by completing brand profile (not auto-granted). IDR pricing via Midtrans.
 
 ---
 
@@ -19,13 +19,13 @@ Credits-based (not subscription). 10 free credits on signup. IDR pricing via Mid
 | Components | shadcn/ui (18 components in `components/ui/`) — Radix UI primitives |
 | Fonts | Geist Sans (`font-heading`) + Inter (`font-body`) |
 | Icons | `@tabler/icons-react` only — `lucide-react` has been removed |
-| Database | Supabase PostgreSQL — Singapore (sin1) |
+| Database | Supabase PostgreSQL — Singapore (sin1) · **Schema v3** (see `supabase/schema_v3.sql`) |
 | Auth | Supabase Auth — Google OAuth only |
 | AI — Scraping & Recs | Anthropic **`claude-sonnet-4-5-20250929`** (exact string required) |
 | AI — Audit | OpenAI GPT-4o with `web_search` tool |
 | Payments | Midtrans (Indonesian payment methods) |
 | Hosting | Vercel — auto-deploy from `main` |
-| Repo | github.com/yasir-mukhtar/nuave_v0.3 |
+| Repo | github.com/yasir-mukhtar/nuave |
 
 ---
 
@@ -35,9 +35,9 @@ Credits-based (not subscription). 10 free credits on signup. IDR pricing via Mid
 src/
 ├── app/
 │   ├── (dashboard)/        # Route group with sidebar layout — dashboard, prompt, content, brand pages
-│   ├── api/                # scrape, generate-prompts, run-audit, audit/[id]/status, recommendations, user/credits, support
+│   ├── api/                # scrape, generate-prompts, run-audit, audit/[id]/status, recommendations, credits/claim-welcome
 │   ├── audit/[id]/         # running, results, recommendations screens
-│   ├── auth/               # Login page + OAuth callback (creates user + 10 credits)
+│   ├── auth/               # Login page + OAuth callback
 │   ├── onboarding/         # analyze, profile, prompts screens
 │   ├── harga/              # Public pricing page
 │   ├── privacy/            # Privacy policy
@@ -52,6 +52,10 @@ src/
 │   └── client.ts           # createSupabaseBrowserClient()
 ├── middleware.ts           # Auth middleware (MUST be in src/, not project root)
 └── styles/tokens.css       # CSS design tokens
+docs/
+└── data-architecture-v3.md # Full architecture decisions and rationale
+supabase/
+└── schema_v3.sql           # Current schema — source of truth
 ```
 
 ---
@@ -73,6 +77,9 @@ src/
 13. **UI work:** Always read `DESIGN_SYSTEM.md` before building or modifying any UI (pages, components, layouts)
 14. **No lucide-react:** Package has been removed. Use `@tabler/icons-react` exclusively
 15. **CSS layers:** Never add unlayered `*`, `body`, or element selectors to globals.css — they override Tailwind utilities. Always use `@layer base`
+16. **Schema v3:** Table names have changed. Use `brands` (not `projects`), `brand_competitors` (not `competitors[]`), `topics` table (not `topics JSONB`), `competitor_snapshots` (not `competitor_analysis`), `content_assets` (not `blog_posts`). See data model below.
+17. **Credits on org:** `credits_balance` lives on `organizations`, not `users`. Use `deduct_credits(org_id, ...)` and `refund_credits(org_id, ...)` DB functions. Never update credits directly.
+18. **Free credits:** NOT auto-granted on signup. User must complete brand profile → call `POST /api/credits/claim-welcome` → calls `claim_welcome_credits()` DB function. Idempotent.
 
 ---
 
@@ -81,10 +88,94 @@ src/
 **Protected routes:** `/dashboard`, `/onboarding`, `/prompt`, `/content`, `/brand`
 Unauthenticated → redirect to `/auth?next=<path>`
 
-**Onboarding flow:**
-1. Landing form → save brand/url to `sessionStorage` → redirect to `/auth`
-2. OAuth callback → create `users` row (10 credits) + `credit_transactions` bonus
-3. Redirect to `/onboarding/analyze` → reads sessionStorage → auto-scrape
+**Signup flow (v3):**
+1. Google OAuth → `handle_new_user()` trigger fires automatically
+2. Creates: `users` row → `organizations` (0 credits) → `workspaces` (default) → `organization_members` (owner) → `workspace_members` (admin)
+3. Redirect to `/onboarding/analyze`
+
+**Free credit claim flow:**
+1. User completes brand profile → `brands.onboarding_completed_at` is set
+2. "Claim free audit" button appears in the prompt review screen
+3. Button calls `POST /api/credits/claim-welcome`
+4. API checks: authenticated + `onboarding_completed_at IS NOT NULL` + not yet claimed
+5. Calls `claim_welcome_credits(org_id, user_id)` DB function (idempotent)
+6. 10 credits added to `organizations.credits_balance`
+
+---
+
+## Data Architecture (v3)
+
+**Full reference:** `docs/data-architecture-v3.md` and `supabase/schema_v3.sql`
+
+### Hierarchy
+
+```
+organizations                    ← billing root, credit pool (credits_balance here)
+  ├── organization_members       ← roles: owner | admin | member | viewer
+  └── workspaces                 ← team boundaries (1 auto-created "My Workspace" for SME)
+        ├── workspace_members    ← assigns org members to workspace with scoped role
+        └── brands               ← one brand being tracked (was: projects)
+              ├── topics         ← content strategy pillars (was: projects.topics JSONB)
+              │     └── prompts  ← topic_id nullable = uncategorized prompt
+              ├── brand_competitors  ← (was: projects.competitors TEXT[])
+              ├── audits         ← time-series measurement events
+              │     ├── audit_results
+              │     └── competitor_snapshots  ← (was: competitor_analysis)
+              ├── recommendations    ← brand-level persistent backlog (NOT audit-level)
+              └── content_assets    ← (was: blog_posts, broader type system)
+
+credit_transactions              ← org-scoped ledger, records actioned_by + audit_id
+```
+
+### Key tables
+
+| Table | Purpose | Key columns |
+|---|---|---|
+| `organizations` | Billing root | `credits_balance`, `plan` (free/pro/enterprise) |
+| `organization_members` | Org RBAC | `role` (owner/admin/member/viewer), `invited_by` |
+| `workspaces` | Team boundaries | `org_id`, `name`, `slug` |
+| `workspace_members` | Workspace RBAC | `role` (admin/member/viewer) |
+| `brands` | Brand being tracked | `workspace_id`, `onboarding_completed_at`, `differentiators[]` |
+| `topics` | Content pillars | `brand_id`, `name`, `display_order` |
+| `prompts` | AI questions | `brand_id`, `topic_id` (nullable), `prompt_text`, `stage` |
+| `brand_competitors` | Known competitors | `brand_id`, `name`, `website_url` |
+| `audits` | Measurement events | `brand_id`, `created_by`, `status`, `visibility_score` |
+| `audit_results` | Per-prompt results | `audit_id`, `prompt_id` (SET NULL), `prompt_text` (denormalized) |
+| `competitor_snapshots` | Per-audit competitor data | `audit_id`, `competitor_id` (SET NULL), `competitor_name` (denormalized) |
+| `recommendations` | Persistent brand backlog | `brand_id`, `source_audit_id`, `last_seen_audit_id`, `status` |
+| `content_assets` | Content deliverables | `brand_id`, `type`, `status`, `origin_recommendation_id` |
+| `credit_transactions` | Credit ledger | `org_id`, `actioned_by`, `audit_id`, `type`, `amount` |
+
+### Recommendations status lifecycle
+```
+open → applied    (user implemented)
+open → dismissed  (user ignored)
+applied → resolved (next audit: gap closed)
+resolved → open   (regression: gap reappeared)
+dismissed → open  (user changed mind)
+```
+
+### Recommendation upsert key
+When a new audit runs, recommendations are upserted (not duplicated) matching on:
+`(brand_id, type, page_target)` using `IS NOT DISTINCT FROM` for nullable `page_target`.
+- If existing + `open/dismissed`: update `last_seen_audit_id`
+- If existing + `resolved`: reopen it (regression), update `last_seen_audit_id`
+- If not found: insert new
+
+### RLS helper functions
+```sql
+user_orgs()       -- returns org_ids for current user
+user_workspaces() -- returns workspace_ids for current user (direct + org admin)
+user_brands()     -- returns brand_ids for current user
+effective_role(workspace_id) -- returns 'owner'|'admin'|'member'|'viewer'|'none'
+```
+
+### DB functions (SECURITY DEFINER — call via API, never direct from client)
+```sql
+deduct_credits(org_id, amount, actioned_by, audit_id?, description?)
+refund_credits(org_id, amount, actioned_by, audit_id?, description?)
+claim_welcome_credits(org_id, actioned_by)  -- returns: balance | -1 (not found) | -2 (already claimed)
+```
 
 ---
 
@@ -99,7 +190,8 @@ Unauthenticated → redirect to `/auth?next=<path>`
 ## Recommendations
 
 Two-step freemium: free titles on page load (cached in Supabase), paid reveal (1 credit) for `suggested_copy`.
-Types: `web_copy`, `content_gap`, `meta_structure`.
+Types: `technical` (subtype: meta/schema/structure) · `web_copy` · `content` (subtype: blog/page).
+Recommendations are **brand-level** — persist across audits. New audit upserts existing, doesn't duplicate.
 
 ---
 
@@ -107,7 +199,7 @@ Types: `web_copy`, `content_gap`, `meta_structure`.
 
 **Full reference:** `DESIGN_SYSTEM.md` (root) — typography scale, spacing scale, component patterns, layout rules, and constraints.
 
-Light mode only. Accent: `#6C3FF5`. Reference: Acctual.com.
+Light mode only. Accent: `#533AFD`. Reference: Acctual.com.
 
 | Token | Hex | Tailwind class | | Token | Hex | Tailwind class |
 |-------|-----|---------------|-|-------|-----|---------------|
@@ -147,25 +239,6 @@ Light mode only. Accent: `#6C3FF5`. Reference: Acctual.com.
 tokens.css (source of truth) → @theme inline in globals.css → Tailwind utility classes
 ```
 
-- `tokens.css` defines raw values as CSS custom properties
-- `@theme inline` maps them into Tailwind's theme system
-- Components use Tailwind classes like `bg-brand`, `text-text-heading`, `shadow-app-subtle`
-- Shadows use `shadow-app-*` prefix (e.g. `shadow-app-subtle`, `shadow-app-modal`) to avoid circular reference with same-named `:root` variables
-
----
-
-## Data Model (key tables)
-
-- **users** — profiles, `credits_balance`
-- **workspaces** — brand data (website, industry, competitors)
-- **prompts** — 10 AI questions per audit (awareness/consideration/decision)
-- **audits** — `status` (pending→running→complete/failed), `visibility_score`
-- **audit_results** — per-prompt AI response, `brand_mentioned`, `mention_context`
-- **recommendations** — AI suggestions per audit
-- **credit_transactions** — audit trail (purchase, debit, bonus)
-
-Supabase project: `bromdpwhiyqpffqxlzcu` | RLS enabled, server inserts use admin client.
-
 ---
 
 ## Environment Variables
@@ -178,16 +251,17 @@ Supabase project: `bromdpwhiyqpffqxlzcu` | RLS enabled, server inserts use admin
 
 ---
 
-## Open Issues
-
-1. "See recommendations" button not navigating from results page
-2. Markdown in `suggested_copy` renders as raw text
-
 ## Not Yet Built
 
+- Run `supabase/schema_v3.sql` on new Supabase project + update env vars
+- Update all API routes for v3 schema (brands, topics, competitors, recommendations, credits)
+- Update TypeScript types (`src/types/index.ts`) for v3 tables
+- `POST /api/credits/claim-welcome` endpoint
+- Org/workspace management UI (enterprise)
 - Midtrans credit purchase integration
-- Blog plan + post generation
+- Content asset generation (blog posts, page copy)
 - PDF report export
+- Multi-org switcher UI
 
 ---
 
@@ -203,4 +277,7 @@ AI: Claude claude-sonnet-4-5-20250929 + GPT-4o (web_search)
 Middleware: src/middleware.ts (NOT root) | Auth: getUser() not getSession()
 Supabase client: createSupabaseBrowserClient() | Admin: createSupabaseAdminClient()
 CSS layers: all base resets must be in @layer base — unlayered styles override Tailwind
+Schema v3: brands(not projects), topics table, brand_competitors table, competitor_snapshots,
+  content_assets(not blog_posts), recommendations are brand-level(not audit-level),
+  credits on organizations(not users). See docs/data-architecture-v3.md
 ```

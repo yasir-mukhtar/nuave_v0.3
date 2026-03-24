@@ -12,14 +12,19 @@ export function useCreditsBalance() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
+      // v3: credits live on organizations, not users
+      // Join: workspace_members → workspaces → organizations
       const { data, error } = await supabase
-        .from("users")
-        .select("credits_balance")
-        .eq("id", user.id)
-        .single();
+        .from('organization_members')
+        .select('organizations(credits_balance)')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle();
 
       if (error) console.error("useCreditsBalance error:", error);
-      if (data) setCredits(data.credits_balance);
+
+      const org = data?.organizations as unknown as { credits_balance: number } | null;
+      if (org) setCredits(org.credits_balance);
       setLoading(false);
     }
 

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
-import type { Workspace } from '@/types';
+import type { Workspace, WorkspaceWithOrg } from '@/types';
 
 type ActiveWorkspaceContextValue = {
   workspaces: Workspace[];
@@ -35,18 +35,22 @@ export function ActiveWorkspaceProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // v3: workspaces resolved via workspace_members join (not user_id on workspaces)
     const { data } = await supabase
-      .from('workspaces')
-      .select('id, name, slug, plan, user_id')
+      .from('workspace_members')
+      .select('workspaces(id, org_id, name, slug, created_at, updated_at)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (data && data.length > 0) {
-      setWorkspaces(data as Workspace[]);
-      // Restore previously selected workspace, or default to latest
+    const ws: Workspace[] = (data || [])
+      .map(row => (row as unknown as { workspaces: Workspace | null }).workspaces)
+      .filter((w): w is Workspace => w !== null);
+
+    if (ws.length > 0) {
+      setWorkspaces(ws);
       const saved = localStorage.getItem('nuave_active_workspace');
-      const valid = saved && data.some(w => w.id === saved);
-      setActiveWorkspaceId(valid ? saved : data[0].id);
+      const valid = saved && ws.some(w => w.id === saved);
+      setActiveWorkspaceId(valid ? saved : ws[0].id);
     }
     setLoading(false);
   }, []);

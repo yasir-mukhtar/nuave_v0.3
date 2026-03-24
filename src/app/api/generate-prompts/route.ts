@@ -1,5 +1,5 @@
-// Used by the old onboarding flow (/onboarding/profile).
-// The new project flow (/new-project) uses /api/generate-topic-prompts instead.
+// Used by the onboarding flow (/onboarding/profile).
+// v3: writes to brands table and prompts table (brand_id, no project_id / topic_id).
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  let body: { project_id: string; profile: Profile };
+  let body: { brand_id?: string; profile: Profile };
 
   try {
     body = await request.json();
@@ -37,33 +37,50 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { project_id, profile } = body;
+  const brand_id = body.brand_id;
+  const { profile } = body;
 
   if (!profile) {
-    return NextResponse.json(
-      { error: "profile is required" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "profile is required" }, { status: 400 });
   }
 
-  // Persist project profile to Supabase
-  try {
-    const adminClient = createSupabaseAdminClient();
-    await adminClient
-      .from('projects')
-      .update({
-        website_url: profile.website_url || null,
-        company_overview: profile.company_overview || null,
-        industry: profile.industry || null,
-        differentiators: profile.differentiators || [],
-        competitors: profile.competitors || [],
-        target_audience: profile.target_audience || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', project_id);
-  } catch (err) {
-    console.error("Failed to persist project profile:", err);
-    // Non-fatal, continue with prompt generation
+  // v3: persist updated profile fields to brands table (not projects)
+  if (brand_id) {
+    try {
+      const adminClient = createSupabaseAdminClient();
+
+      const hasOverview = Boolean(profile.company_overview);
+      const hasDifferentiators = (profile.differentiators || []).length > 0;
+      const hasCompetitors = (profile.competitors || []).length > 0;
+      const isComplete = hasOverview && hasDifferentiators && hasCompetitors;
+
+      await adminClient
+        .from('brands')
+        .update({
+          website_url: profile.website_url || null,
+          company_overview: profile.company_overview || null,
+          industry: profile.industry || null,
+          differentiators: profile.differentiators || [],
+          target_audience: profile.target_audience || null,
+          language: profile.language || 'id',
+          // Set onboarding_completed_at if not already set and profile is now complete
+          ...(isComplete ? { onboarding_completed_at: new Date().toISOString() } : {}),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', brand_id);
+
+      // v3: upsert competitors to brand_competitors (not brands.competitors[])
+      if (hasCompetitors) {
+        // Delete old competitors and re-insert (idempotent on profile edit)
+        await adminClient.from('brand_competitors').delete().eq('brand_id', brand_id);
+        await adminClient.from('brand_competitors').insert(
+          profile.competitors.map(name => ({ brand_id, name }))
+        );
+      }
+    } catch (err) {
+      console.error("Failed to persist brand profile:", err);
+      // Non-fatal, continue with prompt generation
+    }
   }
 
   const localLanguage =
@@ -102,7 +119,6 @@ Return JSON array of 10 objects:
   }
 ]`;
 
-  // Step 1: Generate prompts with GPT-4o
   let generatedPrompts: GeneratedPrompt[];
 
   try {
@@ -116,10 +132,7 @@ Return JSON array of 10 objects:
           content:
             "You are an AEO (Answer Engine Optimization) specialist. Generate search prompts that real users ask AI tools like ChatGPT. Always respond with valid JSON only, no markdown.",
         },
-        {
-          role: "user",
-          content: userPrompt,
-        },
+        { role: "user", content: userPrompt },
       ],
     });
 
@@ -145,9 +158,10 @@ Return JSON array of 10 objects:
     );
   }
 
-  // Step 2: Save to Supabase
+  // v3: save to prompts table with brand_id (no project_id, no topic_id for onboarding prompts)
   const rows = generatedPrompts.map((prompt, index) => ({
-    project_id,
+    brand_id: brand_id ?? null,
+    topic_id: null,  // onboarding prompts are uncategorized
     prompt_text: prompt.prompt_text,
     stage: prompt.stage,
     language: prompt.language,
@@ -159,24 +173,22 @@ Return JSON array of 10 objects:
 
   let savedPrompts = rows;
 
-  try {
-    const { data, error } = await supabase
-      .from("prompts")
-      .insert(rows)
-      .select();
+  if (brand_id) {
+    try {
+      const { data, error } = await supabase
+        .from("prompts")
+        .insert(rows)
+        .select();
 
-    if (error) {
-      // 23503 = foreign key violation (project_id not in projects table — temp UUID)
-      if (error.code !== "23503") {
+      if (error) {
         console.error("Supabase insert error:", error);
+      } else if (data) {
+        savedPrompts = data;
       }
-    } else if (data) {
-      savedPrompts = data;
+    } catch (err) {
+      console.error("Supabase client error:", err);
     }
-  } catch (err) {
-    console.error("Supabase client error:", err);
   }
 
-  // Step 3: Return response
   return NextResponse.json({ success: true, prompts: savedPrompts });
 }

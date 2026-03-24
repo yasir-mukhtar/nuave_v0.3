@@ -7,26 +7,28 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { brand_name, topics, language, project_id } = body;
+    const brand_id: string | undefined = body.brand_id;
+    const { brand_name, topics, language } = body;
 
     if (!brand_name || !topics || !Array.isArray(topics) || topics.length === 0) {
       return NextResponse.json({ success: false, error: "brand_name and topics are required" }, { status: 400 });
     }
 
-    // If project_id provided, check for existing prompts first
-    if (project_id) {
-      const supabase = createSupabaseAdminClient();
+    const supabase = createSupabaseAdminClient();
+
+    // v3: check for existing prompts by brand_id (not project_id)
+    if (brand_id) {
       const { data: existing } = await supabase
         .from("prompts")
-        .select("prompt_text, core_keyword, demand_tier, topic, display_order")
-        .eq("project_id", project_id)
+        .select("id, prompt_text, core_keyword, demand_tier, topic_id, display_order, topics(name)")
+        .eq("brand_id", brand_id)
         .order("display_order", { ascending: true });
 
       if (existing && existing.length > 0) {
-        // Reconstruct the topic-grouped response from stored prompts
+        // Reconstruct topic-grouped response; resolve topic name via join
         const result: Record<string, Array<{ text: string; core_keyword: string; demand_tier: string }>> = {};
         for (const row of existing) {
-          const topicName = row.topic || "General";
+          const topicName = (row.topics as unknown as { name: string } | null)?.name ?? "General";
           if (!result[topicName]) result[topicName] = [];
           result[topicName].push({
             text: row.prompt_text,
@@ -38,9 +40,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Normalise topics input: accept string[] or {id, name}[]
+    type TopicInput = string | { id?: string | null; name: string };
+    const topicNames: string[] = (topics as TopicInput[]).map(t =>
+      typeof t === "string" ? t : t.name
+    );
+
     // Generate new prompts via AI
     const langLabel = language === "id" ? "Bahasa Indonesia" : language === "ms" ? "Malay" : "English";
-    const topicList = topics.map((t: string, i: number) => `${i + 1}. ${t}`).join("\n");
+    const topicList = topicNames.map((t, i) => `${i + 1}. ${t}`).join("\n");
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -72,27 +80,34 @@ Return ONLY a JSON object where keys are topic names and values are arrays of 5 
       result = JSON.parse(raw.replace(/```json?\n?/g, "").replace(/```/g, ""));
     } catch {
       result = {};
-      for (const t of topics) {
-        result[t] = [];
-      }
+      for (const t of topicNames) result[t] = [];
     }
 
     // Enforce max 5 prompts per topic
     for (const key of Object.keys(result)) {
-      if (result[key].length > 5) {
-        result[key] = result[key].slice(0, 5);
-      }
+      if (result[key].length > 5) result[key] = result[key].slice(0, 5);
     }
 
-    // Save to DB if project_id provided
-    if (project_id) {
-      const supabase = createSupabaseAdminClient();
+    // v3: save to DB with brand_id + topic_id FK
+    if (brand_id) {
+      // Resolve topic name → topic_id map from the topics table
+      const { data: topicRows } = await supabase
+        .from("topics")
+        .select("id, name")
+        .eq("brand_id", brand_id)
+        .in("name", topicNames);
+
+      const topicIdByName: Record<string, string> = {};
+      for (const row of topicRows ?? []) {
+        topicIdByName[row.name] = row.id;
+      }
+
       const rows: {
-        project_id: string;
+        brand_id: string;
+        topic_id: string | null;
         prompt_text: string;
         core_keyword: string | null;
         demand_tier: string;
-        topic: string;
         display_order: number;
         stage: string;
         language: string;
@@ -101,16 +116,17 @@ Return ONLY a JSON object where keys are topic names and values are arrays of 5 
 
       let order = 0;
       for (const [topicName, prompts] of Object.entries(result)) {
+        const topic_id = topicIdByName[topicName] ?? null;
         for (const item of prompts) {
           const text = typeof item === "string" ? item : item.text;
           const coreKeyword = typeof item === "string" ? null : item.core_keyword;
           const demandTier = typeof item === "string" ? "medium" : (item.demand_tier || "medium");
           rows.push({
-            project_id,
+            brand_id,
+            topic_id,
             prompt_text: text,
             core_keyword: coreKeyword,
             demand_tier: demandTier,
-            topic: topicName,
             display_order: order++,
             stage: "awareness",
             language: language || "id",
@@ -122,16 +138,16 @@ Return ONLY a JSON object where keys are topic names and values are arrays of 5 
       if (rows.length > 0) {
         const { error: insertError } = await supabase.from("prompts").insert(rows);
         if (insertError) {
-          console.error("Failed to save draft prompts:", insertError);
+          console.error("Failed to save prompts:", insertError);
           // Non-fatal — prompts still returned to client
         } else {
-          // Fire-and-forget: enrich keywords with Google Ads volume data
+          // Fire-and-forget: enrich keywords with search volume data
           const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
           fetch(`${baseUrl}/api/enrich-keywords`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ project_id }),
-          }).catch((err) => console.error("Keyword enrichment trigger failed:", err));
+            body: JSON.stringify({ brand_id }),
+          }).catch(err => console.error("Keyword enrichment trigger failed:", err));
         }
       }
     }

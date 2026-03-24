@@ -89,10 +89,10 @@ async function fetchKeywordMetrics(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { project_id } = body;
+    const brand_id = body.brand_id;
 
-    if (!project_id) {
-      return NextResponse.json({ success: false, error: "project_id is required" }, { status: 400 });
+    if (!brand_id) {
+      return NextResponse.json({ success: false, error: "brand_id is required" }, { status: 400 });
     }
 
     // Check required env vars
@@ -106,10 +106,11 @@ export async function POST(request: NextRequest) {
     const supabase = createSupabaseAdminClient();
 
     // Fetch prompts that need enrichment
+    // v3: prompts use brand_id (not brand_id)
     const { data: prompts, error: fetchError } = await supabase
       .from("prompts")
       .select("id, core_keyword, language, keyword_data_fetched_at")
-      .eq("project_id", project_id)
+      .eq("brand_id", brand_id)
       .not("core_keyword", "is", null);
 
     if (fetchError || !prompts || prompts.length === 0) {
@@ -127,11 +128,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, enriched_count: 0, no_data_count: 0, message: "All prompts already enriched" });
     }
 
-    // Get project language for geo targeting
+    // v3: get brand language from brands table
     const { data: project } = await supabase
-      .from("projects")
+      .from("brands")
       .select("language")
-      .eq("id", project_id)
+      .eq("id", brand_id)
       .maybeSingle();
 
     const wsLang = project?.language || "id";

@@ -63,11 +63,11 @@ export default function RecommendationsPage() {
         } else {
           supabase
             .from('audits')
-            .select('workspaces(brand_name)')
+            .select('brands(name)')
             .eq('id', auditId)
             .single()
             .then(({ data }) => {
-              const brand = (data?.workspaces as any)?.brand_name;
+              const brand = (data?.brands as any)?.name;
               if (brand) setBrandName(brand);
             });
         }
@@ -109,10 +109,19 @@ export default function RecommendationsPage() {
       );
 
       const interval = setInterval(async () => {
+        // v3: resolve audit → brand_id, then fetch brand-level recommendations
+        const { data: audit } = await supabase
+          .from('audits')
+          .select('brand_id')
+          .eq('id', auditId)
+          .single();
+
+        if (!audit) return;
+
         const { data: fresh } = await supabase
           .from('recommendations')
           .select('*')
-          .eq('audit_id', auditId)
+          .eq('brand_id', audit.brand_id)
           .order('created_at', { ascending: true });
 
         if (fresh && fresh.length > 0) {
