@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -69,43 +69,41 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'brand_id required' }, { status: 400 });
     }
 
-    // Auth
-    const serverSupabase = await createSupabaseServerClient();
-    const { data: { user } } = await serverSupabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const supabase = createSupabaseAdminClient();
 
-    // Get org + credits
-    const { data: omData } = await supabase
-      .from('organization_members')
-      .select('organization_id, organizations(credits_balance)')
-      .eq('user_id', user.id)
-      .limit(1)
-      .maybeSingle();
-
-    if (!omData) {
-      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
-    }
-
-    const org = omData.organizations as unknown as { credits_balance: number } | null;
-    const credits = org?.credits_balance ?? 0;
-
-    if (credits < CREDIT_COST) {
-      return NextResponse.json({ error: 'Insufficient credits', credits }, { status: 402 });
-    }
-
-    // Get brand details
+    // Get brand + workspace in one query
     const { data: brand, error: brandError } = await supabase
       .from('brands')
-      .select('name, website_url, industry, company_overview')
+      .select('name, website_url, industry, company_overview, workspace_id')
       .eq('id', brand_id)
       .single();
 
     if (brandError || !brand) {
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 });
+    }
+
+    // Get org via workspace.org_id
+    const { data: workspace } = await supabase
+      .from('workspaces')
+      .select('org_id')
+      .eq('id', brand.workspace_id)
+      .single();
+
+    if (!workspace?.org_id) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+    }
+
+    // Get org credits
+    const { data: org } = await supabase
+      .from('organizations')
+      .select('credits_balance')
+      .eq('id', workspace.org_id)
+      .single();
+
+    const credits = org?.credits_balance ?? 0;
+
+    if (credits < CREDIT_COST) {
+      return NextResponse.json({ error: 'Insufficient credits', credits }, { status: 402 });
     }
 
     // Generate 3 recs in parallel (1 per category)
@@ -150,7 +148,7 @@ export async function POST(request: Request) {
     await supabase
       .from('organizations')
       .update({ credits_balance: credits - CREDIT_COST })
-      .eq('id', omData.organization_id);
+      .eq('id', workspace.org_id);
 
     return NextResponse.json({ success: true, recommendations: insertedRecs });
 
