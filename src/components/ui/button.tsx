@@ -14,11 +14,11 @@ const buttonVariants = cva(
         outline:
           "bg-[var(--btn-default-bg)] border border-[var(--btn-default-border)] text-[var(--btn-default-text)] hover:bg-[var(--btn-default-bg-hover)] hover:border-[var(--btn-default-border-hover)] hover:text-[var(--btn-default-text-hover)]",
         destructive:
-          "bg-[var(--btn-destructive-bg)] text-[var(--btn-destructive-text)] hover:bg-[var(--btn-destructive-bg-hover)]",
+          "border border-transparent bg-[var(--btn-destructive-bg)] text-[var(--btn-destructive-text)] hover:bg-[var(--btn-destructive-bg-hover)]",
         secondary:
-          "bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] hover:bg-[var(--btn-secondary-bg-hover)] hover:text-[var(--btn-secondary-text-hover)]",
+          "border border-transparent bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] hover:bg-[var(--btn-secondary-bg-hover)] hover:text-[var(--btn-secondary-text-hover)]",
         ghost:
-          "text-[var(--btn-ghost-text)] hover:bg-[var(--btn-ghost-bg-hover)] hover:text-[var(--btn-ghost-text-hover)]",
+          "border border-transparent text-[var(--btn-ghost-text)] hover:bg-[var(--btn-ghost-bg-hover)] hover:text-[var(--btn-ghost-text-hover)]",
         link:
           "text-[var(--btn-default-text)] underline-offset-4 hover:underline",
         brand:
