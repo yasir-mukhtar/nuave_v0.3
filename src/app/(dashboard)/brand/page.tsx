@@ -339,16 +339,16 @@ export default function BrandPage() {
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-[20px] leading-7 mb-1 mt-0">
+            <h1 className="type-heading-sm mb-1 mt-0">
               Brand
             </h1>
-            <p className="text-text-muted m-0">
+            <p className="type-body text-text-muted m-0">
               Kelola profil brand yang Anda audit di Nuave.
             </p>
           </div>
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-4 py-[9px] text-[13px] leading-4 font-semibold cursor-pointer"
+            className="flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-4 py-[9px] type-body font-semibold cursor-pointer"
           >
             <IconPlus size={15} stroke={2} />
             Tambah Brand
@@ -358,15 +358,15 @@ export default function BrandPage() {
         {/* Empty state */}
         {brands.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[320px] gap-3 border border-dashed border-border-default rounded-md bg-white">
-            <p className="text-[16px] leading-6 font-semibold">
+            <p className="type-title">
               Belum ada brand
             </p>
-            <p className="text-text-muted text-center">
+            <p className="type-body text-text-muted text-center">
               Tambahkan brand pertama Anda untuk mulai audit visibilitas AI.
             </p>
             <button
               onClick={() => router.push("/")}
-              className="flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-5 py-2.5 text-[13px] leading-4 font-semibold cursor-pointer mt-2"
+              className="flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-5 py-2.5 type-body font-semibold cursor-pointer mt-2"
             >
               <IconPlus size={15} stroke={2} />
               Tambah Brand
@@ -411,7 +411,7 @@ export default function BrandPage() {
           >
             {/* Modal header */}
             <div className="shrink-0 px-6 py-5 border-b border-border-default flex justify-between items-center">
-              <h2 className="text-[16px] leading-6 m-0">
+              <h2 className="type-title m-0">
                 Edit Brand
               </h2>
               <button onClick={closeEdit} className="bg-none border-none cursor-pointer text-text-muted p-1">
@@ -456,7 +456,7 @@ export default function BrandPage() {
                   <label>Keunggulan</label>
                   <div className={cn("flex flex-wrap gap-1.5", editForm.differentiators.length > 0 ? "mb-2" : "mb-0")}>
                     {editForm.differentiators.map((d, i) => (
-                      <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-brand-light text-brand text-[12px] leading-4 font-medium">
+                      <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-brand-light text-brand type-caption font-medium">
                         {d}
                         <button
                           onClick={() => removeChip("differentiators", i)}
@@ -483,7 +483,7 @@ export default function BrandPage() {
                   <label>Kompetitor</label>
                   <div className={cn("flex flex-wrap gap-1.5", editForm.competitors.length > 0 ? "mb-2" : "mb-0")}>
                     {editForm.competitors.map((c, i) => (
-                      <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-surface-raised text-text-body text-[12px] leading-4 font-medium">
+                      <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-surface-raised text-text-body type-caption font-medium">
                         {c}
                         <button
                           onClick={() => removeChip("competitors", i)}
@@ -512,7 +512,7 @@ export default function BrandPage() {
             <div className="shrink-0 px-6 py-4 border-t border-border-default flex justify-end gap-2.5">
               <button
                 onClick={closeEdit}
-                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-md cursor-pointer text-text-body"
+                className="px-4 py-2 type-body font-medium bg-surface border border-border-default rounded-md cursor-pointer text-text-body"
               >
                 Batal
               </button>
@@ -520,7 +520,7 @@ export default function BrandPage() {
                 onClick={handleSave}
                 disabled={saving || !editForm.brand_name.trim()}
                 className={cn(
-                  "flex items-center gap-1.5 px-5 py-2 text-[13px] leading-4 font-semibold bg-brand text-white border-none rounded-md",
+                  "flex items-center gap-1.5 px-5 py-2 type-body font-semibold bg-brand text-white border-none rounded-md",
                   saving || !editForm.brand_name.trim() ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
                 )}
               >
@@ -562,10 +562,10 @@ export default function BrandPage() {
                 <IconAlertTriangle size={20} stroke={1.5} className="text-red-600" />
               </div>
               <div>
-                <h3 className="text-[15px] leading-5 m-0">
+                <h3 className="type-title m-0">
                   Hapus Brand
                 </h3>
-                <p className="text-[13px] leading-5 text-text-muted mt-1 mb-0">
+                <p className="type-body text-text-muted mt-1 mb-0">
                   Semua data audit, prompt, dan rekomendasi untuk brand <strong>{brands.find((b) => b.id === deletingId)?.brand_name}</strong> akan dihapus permanen.
                 </p>
               </div>
@@ -573,7 +573,7 @@ export default function BrandPage() {
             <div className="flex justify-end gap-2.5 mt-5">
               <button
                 onClick={closeDelete}
-                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-md cursor-pointer text-text-body"
+                className="px-4 py-2 type-body font-medium bg-surface border border-border-default rounded-md cursor-pointer text-text-body"
               >
                 Batal
               </button>
@@ -581,7 +581,7 @@ export default function BrandPage() {
                 onClick={handleDelete}
                 disabled={deleting}
                 className={cn(
-                  "flex items-center gap-1.5 px-5 py-2 text-[13px] leading-4 font-semibold bg-red-600 text-white border-none rounded-md",
+                  "flex items-center gap-1.5 px-5 py-2 type-body font-semibold bg-red-600 text-white border-none rounded-md",
                   deleting ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
                 )}
               >
@@ -620,7 +620,7 @@ function BrandCard({
       {/* Top row: avatar + name + URL + actions */}
       <div className="flex items-center gap-3.5 mb-4">
         {/* Avatar */}
-        <div className="w-10 h-10 rounded-md bg-brand text-white flex items-center justify-center text-[16px] leading-5 font-bold shrink-0">
+        <div className="w-10 h-10 rounded-md bg-brand text-white flex items-center justify-center type-body-lg font-bold shrink-0">
           {getInitial(brand.brand_name)}
         </div>
 
@@ -628,7 +628,7 @@ function BrandCard({
         <div className="flex-1 min-w-0">
           <h3
             onClick={onSelect}
-            className="text-[15px] leading-5 m-0 cursor-pointer hover:text-brand"
+            className="type-title m-0 cursor-pointer hover:text-brand"
           >
             {brand.brand_name}
           </h3>
@@ -636,7 +636,7 @@ function BrandCard({
             href={brand.website_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[12px] leading-4 text-text-muted no-underline inline-flex items-center gap-[3px] hover:text-brand"
+            className="type-caption text-text-muted no-underline inline-flex items-center gap-[3px] hover:text-brand"
           >
             {brand.website_url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
             <IconExternalLink size={11} stroke={1.5} />
@@ -667,7 +667,7 @@ function BrandCard({
 
       {/* Overview */}
       {brand.company_overview && (
-        <p className="text-[13px] leading-5 text-text-body mb-4 mt-0 line-clamp-2">
+        <p className="type-body text-text-body mb-4 mt-0 line-clamp-2">
           {brand.company_overview}
         </p>
       )}
@@ -676,12 +676,12 @@ function BrandCard({
       {(brand.differentiators.length > 0 || brand.competitors.length > 0) && (
         <div className="flex flex-wrap gap-[5px] mb-4">
           {brand.differentiators.map((d, i) => (
-            <span key={`d-${i}`} className="px-2 py-[3px] rounded-xs text-[11px] leading-4 font-medium bg-brand-light text-brand">
+            <span key={`d-${i}`} className="px-2 py-[3px] rounded-xs type-caption font-medium bg-brand-light text-brand">
               {d}
             </span>
           ))}
           {brand.competitors.map((c, i) => (
-            <span key={`c-${i}`} className="px-2 py-[3px] rounded-xs text-[11px] leading-4 font-medium bg-surface-raised text-text-muted">
+            <span key={`c-${i}`} className="px-2 py-[3px] rounded-xs type-caption font-medium bg-surface-raised text-text-muted">
               vs {c}
             </span>
           ))}
@@ -717,8 +717,8 @@ function BrandCard({
 function StatItem({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div>
-      <div className="text-[11px] leading-4 text-text-muted mb-0.5">{label}</div>
-      <div className={cn("text-[14px] leading-5 font-semibold", color ?? "text-text-heading")}>{value}</div>
+      <div className="type-caption text-text-muted mb-0.5">{label}</div>
+      <div className={cn("type-body font-semibold", color ?? "text-text-heading")}>{value}</div>
     </div>
   );
 }
