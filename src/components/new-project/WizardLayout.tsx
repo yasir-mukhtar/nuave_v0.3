@@ -20,7 +20,7 @@ export default function WizardLayout({ currentStep, totalSteps, children, onClos
       <header className="flex items-center justify-between px-8 py-5">
         <Link href="/" className="flex items-center gap-2 no-underline">
           <img src={LOGO_SVG} alt="Nuave" width={28} height={28} className="object-contain" />
-          <span className="font-heading text-xl font-semibold text-text-heading">
+          <span className="type-title text-text-heading">
             Nuave
           </span>
         </Link>
@@ -38,7 +38,7 @@ export default function WizardLayout({ currentStep, totalSteps, children, onClos
       <main className="mx-auto max-w-[520px] px-6 pb-20 pt-10">
         {/* Step indicator */}
         <div className="mb-10">
-          <p className="mb-2 font-body text-[13px] leading-4 text-text-muted">
+          <p className="mb-2 type-caption text-text-muted">
             Langkah {currentStep}/{totalSteps}
           </p>
           <div className="flex gap-1.5">

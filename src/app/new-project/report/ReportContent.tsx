@@ -121,7 +121,7 @@ function ScoreRing({ score }: { score: number }) {
           />
         </g>
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center font-heading text-[28px] leading-[36px] font-bold text-text-heading">
+      <span className="absolute inset-0 flex items-center justify-center type-heading-md text-text-heading">
         {score}
       </span>
     </div>
@@ -310,7 +310,7 @@ export default function ReportContent() {
       <header className="flex items-center justify-between py-4 px-8 bg-white border-b border-border-default">
         <Link href="/" className="flex items-center gap-2 no-underline">
           <img src={LOGO_SVG} alt="Nuave" width={24} height={24} className="object-contain" />
-          <span className="font-heading font-semibold text-[18px] leading-[26px] text-text-heading">
+          <span className="type-title text-text-heading">
             Nuave
           </span>
         </Link>
@@ -319,14 +319,14 @@ export default function ReportContent() {
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-md border border-border-default bg-white text-text-body font-body text-[13px] leading-[18px] font-medium cursor-pointer"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-md border border-border-default bg-white text-text-body type-body font-medium cursor-pointer"
           >
             {downloading ? <ButtonSpinner size={14} color="var(--purple)" /> : <IconDownload size={16} stroke={1.5} />}
             {downloading ? "Mengunduh..." : "Unduh laporan"}
           </button>
           <button
             onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-md border-none bg-brand text-white font-body text-[13px] leading-[18px] font-medium cursor-pointer transition-colors duration-100 ease-in-out hover:bg-brand-dark"
+            className="flex items-center gap-1.5 h-9 px-4 rounded-md border-none bg-brand text-white type-body font-medium cursor-pointer transition-colors duration-100 ease-in-out hover:bg-brand-dark"
           >
             Dashboard
             <IconArrowRight size={16} stroke={1.5} />
@@ -367,24 +367,24 @@ export default function ReportContent() {
                   }}
                 />
               ) : (
-                <div className="w-10 h-10 rounded-md bg-surface-raised flex items-center justify-center text-[18px] leading-[26px] font-semibold text-brand font-heading">
+                <div className="w-10 h-10 rounded-md bg-surface-raised flex items-center justify-center type-body-lg font-semibold text-brand">
                   {REPORT.brandName.charAt(0)}
                 </div>
               )}
               <div>
-                <p className="font-body text-[15px] leading-[22px] font-semibold text-text-heading m-0">
+                <p className="type-body font-semibold text-text-heading m-0">
                   {REPORT.brandName}
                 </p>
-                <p className="font-body text-[13px] leading-[18px] text-text-muted m-0">
+                <p className="type-body text-text-muted m-0">
                   {REPORT.brandUrl}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="font-body text-[14px] leading-[20px] font-semibold text-text-heading m-0">
+              <p className="type-body font-semibold text-text-heading m-0">
                 {REPORT.title}
               </p>
-              <p className="font-body text-[13px] leading-[18px] text-text-muted m-0">
+              <p className="type-body text-text-muted m-0">
                 {REPORT.date}
               </p>
             </div>
@@ -393,13 +393,13 @@ export default function ReportContent() {
           {/* Score section */}
           <div data-pdf-pad className="flex flex-col items-center pt-4 px-8 pb-8">
             <ScoreRing score={REPORT.score} />
-            <p className="font-body text-[12px] leading-[16px] text-text-muted mt-3 mb-1">
+            <p className="type-caption text-text-muted mt-3 mb-1">
               Skor Visibilitas AI
             </p>
-            <p className="font-heading text-[18px] leading-[26px] font-semibold text-text-heading mb-1">
+            <p className="type-body-lg font-semibold text-text-heading mb-1">
               {REPORT.level}
             </p>
-            <p className="font-body text-[13px] leading-[18px] text-text-muted m-0">
+            <p className="type-body text-text-muted m-0">
               Brand Anda muncul di {REPORT.mentionedCount} dari {REPORT.totalPrompts} pertanyaan
             </p>
           </div>
@@ -409,17 +409,17 @@ export default function ReportContent() {
 
           {/* Competitors section */}
           <div data-pdf-pad className="py-6 px-8">
-            <p className="font-body text-[13px] leading-[18px] font-semibold text-text-heading mb-1">
+            <p className="type-body font-semibold text-text-heading mb-1">
               Kompetitor
             </p>
-            <p className="font-body text-[13px] leading-[18px] text-text-muted mb-3">
+            <p className="type-body text-text-muted mb-3">
               AI juga merekomendasikan brand berikut:
             </p>
             <div className="flex flex-wrap gap-2">
               {REPORT.competitors.map((name) => (
                 <span
                   key={name}
-                  className="inline-block py-1.5 px-3.5 rounded-sm bg-surface-raised font-body text-[13px] leading-[18px] text-text-body"
+                  className="inline-block py-1.5 px-3.5 rounded-sm bg-surface-raised type-body text-text-body"
                 >
                   {name}
                 </span>
@@ -432,10 +432,10 @@ export default function ReportContent() {
 
           {/* Results section */}
           <div data-pdf-pad className="pt-6 px-8 pb-8">
-            <p className="font-body text-[13px] leading-[18px] font-semibold text-text-heading mb-1">
+            <p className="type-body font-semibold text-text-heading mb-1">
               Hasil Uji
             </p>
-            <p className="font-body text-[13px] leading-[18px] text-text-muted mb-4">
+            <p className="type-body text-text-muted mb-4">
               Berikut hasil setiap pertanyaan:
             </p>
 
@@ -450,13 +450,13 @@ export default function ReportContent() {
                   })}
                   className="flex items-start justify-between gap-4 py-3 cursor-pointer rounded-sm transition-colors duration-100 ease-in-out hover:bg-surface"
                 >
-                  <span className="font-body text-[14px] leading-[20px] text-text-heading flex-1">
+                  <span className="type-body text-text-heading flex-1">
                     {r.prompt}
                   </span>
                   <div className="flex items-center gap-2 shrink-0">
                     {r.demand_tier && TIER_STYLES[r.demand_tier] && (
                       <span
-                        className="inline-block py-0.5 px-2 rounded-sm font-body text-[11px] leading-[16px] font-semibold whitespace-nowrap"
+                        className="inline-block py-0.5 px-2 rounded-sm type-caption font-semibold whitespace-nowrap"
                         style={{
                           backgroundColor: TIER_STYLES[r.demand_tier].bg,
                           color: TIER_STYLES[r.demand_tier].color,
@@ -465,7 +465,7 @@ export default function ReportContent() {
                         {TIER_STYLES[r.demand_tier].label}
                       </span>
                     )}
-                    <span className={`font-body text-[13px] leading-[18px] font-medium whitespace-nowrap ${r.mentioned ? "text-success" : "text-error"}`}>
+                    <span className={`type-body font-medium whitespace-nowrap ${r.mentioned ? "text-success" : "text-error"}`}>
                       {r.mentioned ? "Muncul" : "Tidak muncul"}
                     </span>
                   </div>
@@ -478,11 +478,11 @@ export default function ReportContent() {
           <div data-pdf-pad data-pdf-footer className="flex items-center justify-between py-5 px-8 border-t border-border-default bg-surface">
             <div className="flex items-center gap-1.5">
               <img src={LOGO_SVG} alt="Nuave" width={18} height={18} className="object-contain" />
-              <span className="font-heading font-semibold text-[14px] leading-[20px] text-text-heading">
+              <span className="type-title text-text-heading">
                 Nuave
               </span>
             </div>
-            <span className="font-body text-[13px] leading-[18px] text-text-muted">
+            <span className="type-body text-text-muted">
               Dibuat dengan <strong className="text-text-heading">nuave.ai</strong>
             </span>
           </div>

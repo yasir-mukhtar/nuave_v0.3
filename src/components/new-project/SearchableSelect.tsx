@@ -54,13 +54,13 @@ export default function SearchableSelect({
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "h-11 w-full justify-between rounded-md border px-3.5 text-sm font-normal",
+              "h-11 w-full justify-between rounded-md border px-3.5 type-body font-normal",
               !selected && "text-text-placeholder"
             )}
           >
             <span className="flex items-center gap-2 truncate">
               {selected?.icon && (
-                <span className="text-base leading-none">{selected.icon}</span>
+                <span className="type-body leading-none">{selected.icon}</span>
               )}
               <span>{selected ? selected.label : placeholder}</span>
             </span>

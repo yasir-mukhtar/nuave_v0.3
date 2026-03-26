@@ -262,20 +262,20 @@ export default function NewProjectContent() {
     >
       <form onSubmit={handleSubmit}>
         {/* Heading */}
-        <h1 className="font-heading text-[24px] leading-[32px] font-semibold text-text-heading mb-2 tracking-[-0.02em]">
+        <h1 className="type-heading-sm text-text-heading mb-2 tracking-[-0.02em]">
           Mulai Audit Brand Anda
         </h1>
-        <p className="font-body text-[15px] leading-[24px] text-text-muted mb-9">
+        <p className="type-body text-text-muted mb-9">
           Kami akan menganalisis visibilitas brand Anda di AI.
         </p>
 
         {/* Website field */}
         <div className="mb-6">
-          <label className="block font-body text-[14px] leading-[20px] font-medium text-text-heading mb-1.5">
+          <label className="block type-body font-medium text-text-heading mb-1.5">
             Website
           </label>
           <div className="relative flex">
-            <span className="flex items-center px-3 font-body text-[14px] leading-[20px] text-text-muted bg-surface border border-border-default border-r-0 rounded-l-md select-none">
+            <span className="flex items-center px-3 type-body text-text-muted bg-surface border border-border-default border-r-0 rounded-l-md select-none">
               https://
             </span>
             <div className="relative flex-1">
@@ -285,7 +285,7 @@ export default function NewProjectContent() {
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="contoh.com"
                 className={cn(
-                  "w-full h-[44px] px-3.5 font-body text-[14px] leading-[20px] text-text-heading border border-border-default rounded-r-md outline-none bg-white",
+                  "w-full h-[44px] px-3.5 type-body text-text-heading border border-border-default rounded-r-md outline-none bg-white",
                   "transition-[border-color,box-shadow] duration-100 ease-in-out",
                   "focus:border-brand focus:shadow-app-focus"
                 )}
@@ -303,7 +303,7 @@ export default function NewProjectContent() {
 
         {/* Brand name field */}
         <div className="mb-6">
-          <label className="block font-body text-[14px] leading-[20px] font-medium text-text-heading mb-1.5">
+          <label className="block type-body font-medium text-text-heading mb-1.5">
             Nama Brand
           </label>
           <div className="relative flex items-center">
@@ -329,7 +329,7 @@ export default function NewProjectContent() {
               }}
               placeholder="Masukkan nama brand"
               className={cn(
-                "w-full h-[44px] font-body text-[14px] leading-[20px] text-text-heading border border-border-default rounded-md outline-none bg-white",
+                "w-full h-[44px] type-body text-text-heading border border-border-default rounded-md outline-none bg-white",
                 "transition-[border-color,box-shadow,padding-left] duration-100 ease-in-out",
                 "focus:border-brand focus:shadow-app-focus"
               )}
@@ -353,7 +353,7 @@ export default function NewProjectContent() {
         {/* Target Pasar + Bahasa Utama */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div>
-            <label className="block font-body text-[14px] leading-[20px] font-medium text-text-heading mb-1.5">
+            <label className="block type-body font-medium text-text-heading mb-1.5">
               Target Pasar
             </label>
             <SearchableSelect
@@ -368,7 +368,7 @@ export default function NewProjectContent() {
             />
           </div>
           <div>
-            <label className="block font-body text-[14px] leading-[20px] font-medium text-text-heading mb-1.5">
+            <label className="block type-body font-medium text-text-heading mb-1.5">
               Bahasa Utama
             </label>
             <SearchableSelect
@@ -389,7 +389,7 @@ export default function NewProjectContent() {
 
         {/* Error message */}
         {error && (
-          <p className="font-body text-[13px] leading-[18px] text-error mb-3">
+          <p className="type-body text-error mb-3">
             {error}
           </p>
         )}
@@ -399,7 +399,7 @@ export default function NewProjectContent() {
           type="submit"
           disabled={!isValid || loading}
           className={cn(
-            "w-full h-12 rounded-md border-none font-body text-[15px] leading-[22px] font-medium text-white transition-colors duration-100 ease-in-out",
+            "w-full h-12 rounded-md border-none type-body font-medium text-white transition-colors duration-100 ease-in-out",
             isValid && !loading
               ? "bg-brand cursor-pointer hover:bg-brand-dark"
               : "bg-border-strong cursor-not-allowed"

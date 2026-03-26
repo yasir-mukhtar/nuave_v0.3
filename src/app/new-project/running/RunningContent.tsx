@@ -89,22 +89,22 @@ export default function RunningContent() {
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 no-underline mb-12">
         <img src={LOGO_SVG} alt="Nuave" width={28} height={28} className="object-contain" />
-        <span className="font-heading font-semibold text-[20px] leading-[28px] text-text-heading">
+        <span className="type-title text-text-heading">
           Nuave
         </span>
       </Link>
 
       {status === "failed" ? (
         <>
-          <h2 className="font-heading text-[20px] leading-[28px] font-semibold text-error mb-2">
+          <h2 className="type-heading-sm text-error mb-2">
             Audit gagal
           </h2>
-          <p className="font-body text-[14px] leading-[20px] text-text-muted mb-6">
+          <p className="type-body text-text-muted mb-6">
             Terjadi kesalahan saat menjalankan audit. Silakan coba lagi.
           </p>
           <button
             onClick={() => router.push("/new-project")}
-            className="h-[44px] px-6 rounded-md border-none bg-brand text-white font-body text-[14px] leading-[20px] font-medium cursor-pointer"
+            className="h-[44px] px-6 rounded-md border-none bg-brand text-white type-body font-medium cursor-pointer"
           >
             Coba lagi
           </button>
@@ -114,13 +114,13 @@ export default function RunningContent() {
           {/* Spinner */}
           <div className="w-12 h-12 border-4 border-border-default border-t-brand rounded-full mb-6" style={{ animation: "spin 0.8s linear infinite" }} />
 
-          <h2 className="font-heading text-[20px] leading-[28px] font-semibold text-text-heading mb-2">
+          <h2 className="type-heading-sm text-text-heading mb-2">
             {status === "complete" ? "Audit selesai!" : "Menjalankan audit\u2026"}
           </h2>
 
           {/* Thinking message with fade */}
           <p
-            className="font-body text-[14px] leading-[20px] text-text-muted mb-8 h-[20px] text-center"
+            className="type-body text-text-muted mb-8 h-[20px] text-center"
             style={{
               opacity: status === "complete" ? 1 : visible ? 1 : 0,
               transition: "opacity 0.3s ease",
