@@ -67,7 +67,7 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
         </span>
         {auditId && (
           <Link
-            href={`/audit/${auditId}/recommendations`}
+            href="/content"
             className="type-body flex items-center gap-1 px-3 py-1.5 font-[var(--btn-font-weight)] text-text-heading no-underline border border-border-light rounded-[var(--radius-sm)] shadow-app-subtle hover:border-border-default transition-colors"
           >
             Lihat semua
