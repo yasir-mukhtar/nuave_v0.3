@@ -60,6 +60,9 @@
   --radius-3xl: 24px;
   --radius-full: 9999px;
 
+  /* Icons */
+  --icon-stroke: 1.5;
+
   /* Transitions */
   --transition-fast: 100ms ease;
   --transition-base: 180ms ease;

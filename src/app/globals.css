@@ -658,6 +658,9 @@ label.field-label.disabled {
 }
 
 @layer base {
+  /* Tabler icon stroke — controlled by --icon-stroke token */
+  .tabler-icon { stroke-width: var(--icon-stroke); }
+
   /* Fix cmdk list scroll — ensure list is scrollable and inner sizer doesn't block */
   [cmdk-list] {
     overflow-y: auto !important;
