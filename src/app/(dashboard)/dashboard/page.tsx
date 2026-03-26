@@ -168,7 +168,7 @@ export default function DashboardPage() {
   if (wsLoading || loading || !data) {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
-        <p className="text-label-14 text-text-muted">Memuat dashboard...</p>
+        <p className="type-body text-text-muted">Memuat dashboard...</p>
       </div>
     );
   }
@@ -177,20 +177,12 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-8">
       {/* Greeting + action */}
       <div>
-        <h1 style={{
-          fontSize: '28px',
-          fontWeight: 600,
-          lineHeight: '40px',
-          letterSpacing: '-0.56px',
-          color: '#0d0d0d',
-          margin: 0,
-          whiteSpace: 'nowrap',
-        }}>
+        <h1 className="type-heading-sm" style={{ margin: 0, whiteSpace: 'nowrap' }}>
           Selamat datang, {data.firstName}
         </h1>
-        <p style={{ fontSize: '14px', color: '#8b8b8b', lineHeight: '28px', margin: 0 }}>
+        <p className="type-body text-text-muted" style={{ margin: 0 }}>
           Berikut performa AI visibility{" "}
-          <span style={{ color: '#0d0d0d', fontWeight: 500 }}>{data.brandName}</span>
+          <span className="text-text-heading font-medium">{data.brandName}</span>
         </p>
       </div>
 
@@ -233,7 +225,7 @@ export default function DashboardPage() {
 
         {data.completeAudits.length === 0 ? (
           <div className="card p-10 text-center">
-            <p className="text-label-13 text-text-muted">
+            <p className="type-bodytext-text-muted">
               No audits found. Start your first audit to see results here.
             </p>
           </div>
@@ -252,11 +244,11 @@ export default function DashboardPage() {
 function StatCard({ label, value, icon }: { label: string; value: string | number; icon: React.ReactNode }) {
   return (
     <div className="card p-6 flex flex-col gap-3">
-      <div className="text-label-13 flex items-center gap-2 text-text-muted font-medium">
+      <div className="type-caption flex items-center gap-2 text-text-muted font-medium">
         {icon}
         {label}
       </div>
-      <div className="text-[28px] leading-8 font-bold text-text-heading">{value}</div>
+      <div className="type-heading-sm font-bold text-text-heading">{value}</div>
     </div>
   );
 }
@@ -276,14 +268,14 @@ function AuditRow({ audit, brandName }: { audit: any; brandName: string }) {
   return (
     <div className="card-row flex items-center justify-between px-5 py-4">
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-sm bg-brand-light text-brand flex items-center justify-center text-[18px] leading-5 font-bold">
+        <div className="w-10 h-10 rounded-sm bg-brand-light text-brand flex items-center justify-center type-body-lg font-bold">
           {brandName.charAt(0).toUpperCase()}
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-label-16 font-semibold text-text-heading">
+          <span className="type-title text-text-heading">
             {brandName}
           </span>
-          <span className="text-label-13 text-text-muted">
+          <span className="type-caption text-text-muted">
             Audited on {date}
           </span>
         </div>
@@ -291,14 +283,14 @@ function AuditRow({ audit, brandName }: { audit: any; brandName: string }) {
 
       <div className="flex items-center gap-8">
         <div className="flex flex-col items-end gap-0.5">
-          <span className="text-label-13 text-text-muted font-medium">
+          <span className="type-caption text-text-muted font-medium">
             Visibility Score
           </span>
-          <span className={cn("text-[16px] leading-5 font-bold", scoreColor)}>{score}%</span>
+          <span className={cn("type-body-lg font-bold", scoreColor)}>{score}%</span>
         </div>
 
         <Link href={`/audit/${audit.id}/results`} className="no-underline">
-          <button className="text-label-13 bg-white border border-border-default rounded-sm px-3.5 py-2 font-semibold text-text-body cursor-pointer flex items-center gap-1.5 transition-all duration-200">
+          <button className="type-bodybg-white border border-border-default rounded-sm px-3.5 py-2 font-semibold text-text-body cursor-pointer flex items-center gap-1.5 transition-all duration-200">
             View Results <IconArrowRight size={16} stroke={2} />
           </button>
         </Link>

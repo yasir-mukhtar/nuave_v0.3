@@ -49,7 +49,7 @@ export function renderMarkdown(text: string, brand: string) {
       return (
         <p
           key={i}
-          className="text-label-14"
+          className="type-body"
           style={{
             fontWeight: 600,
             color: '#111827',
@@ -66,7 +66,7 @@ export function renderMarkdown(text: string, brand: string) {
       return (
         <div
           key={i}
-          className="text-copy-14"
+          className="type-body"
           style={{
             display: 'flex',
             gap: '8px',
@@ -97,7 +97,7 @@ export function renderMarkdown(text: string, brand: string) {
     return (
       <p
         key={i}
-        className="text-copy-14"
+        className="type-body"
         style={{
           color: '#374151',
           marginBottom: '4px',
