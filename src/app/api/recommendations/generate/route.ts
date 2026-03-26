@@ -63,11 +63,16 @@ Rules:
 
 export async function POST(request: Request) {
   try {
-    const { brand_id } = await request.json();
+    const { brand_id, categories: requestedCats } = await request.json();
 
     if (!brand_id) {
       return NextResponse.json({ error: 'brand_id required' }, { status: 400 });
     }
+
+    const allCats: UiCategory[] = ['teknikal', 'web_copy', 'konten'];
+    const categories: UiCategory[] = Array.isArray(requestedCats) && requestedCats.length > 0
+      ? requestedCats.filter((c: string) => allCats.includes(c as UiCategory)) as UiCategory[]
+      : allCats;
 
     const supabase = createSupabaseAdminClient();
 
@@ -101,13 +106,13 @@ export async function POST(request: Request) {
       .single();
 
     const credits = org?.credits_balance ?? 0;
+    const creditCost = categories.length === 3 ? CREDIT_COST : Math.ceil(categories.length * CREDIT_COST / 3);
 
-    if (credits < CREDIT_COST) {
+    if (credits < creditCost) {
       return NextResponse.json({ error: 'Insufficient credits', credits }, { status: 402 });
     }
 
-    // Generate 3 recs in parallel (1 per category)
-    const categories: UiCategory[] = ['teknikal', 'web_copy', 'konten'];
+    // Generate recs in parallel (1 per selected category)
     const results = await Promise.allSettled(
       categories.map((cat) => generateForCategory(cat, brand))
     );
@@ -147,7 +152,7 @@ export async function POST(request: Request) {
     // Deduct credits
     await supabase
       .from('organizations')
-      .update({ credits_balance: credits - CREDIT_COST })
+      .update({ credits_balance: credits - creditCost })
       .eq('id', workspace.org_id);
 
     return NextResponse.json({ success: true, recommendations: insertedRecs });
