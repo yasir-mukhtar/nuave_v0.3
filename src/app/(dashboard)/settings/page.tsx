@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useActiveWorkspace } from '@/hooks/useActiveWorkspace';
 import { Button } from '@/components/ui/button';
@@ -122,8 +123,11 @@ function openReceiptWindow(txn: CreditTransaction, orgName: string) {
   w.document.close();
 }
 
+const validTabs: SectionId[] = ['profil', 'workspace', 'kredit', 'pembelian'];
+
 export default function SettingsPage() {
   const supabase = createSupabaseBrowserClient();
+  const searchParams = useSearchParams();
   const { activeWorkspaceId, refreshWorkspaces } = useActiveWorkspace();
 
   const [user, setUser] = useState<{ email: string; full_name: string } | null>(null);
@@ -134,7 +138,10 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<SectionId>('profil');
+  const tabParam = searchParams.get('tab') as SectionId | null;
+  const [activeTab, setActiveTab] = useState<SectionId>(
+    tabParam && validTabs.includes(tabParam) ? tabParam : 'profil'
+  );
 
   useEffect(() => {
     async function load() {

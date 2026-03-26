@@ -120,10 +120,14 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
             )}
           >
             {/* Email */}
-            <div className="px-3 py-2 flex items-center gap-2">
+            <Link
+              href="/settings?tab=profil"
+              onClick={() => closePopover()}
+              className="px-3 py-2 flex items-center gap-2 no-underline hover:bg-surface transition-colors"
+            >
               <IconMail size={20} stroke={1.5} className="text-[#374151] shrink-0" />
               <span className="type-caption text-text-body truncate">{userEmail}</span>
-            </div>
+            </Link>
 
             <div className="border-t border-[#ececec]" />
 
