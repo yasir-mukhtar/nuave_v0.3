@@ -9,6 +9,7 @@ import {
   IconClipboardCheck,
   IconWallet,
 } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useActiveProject } from "@/hooks/useActiveProject";
 import VisibilityChart from "@/components/dashboard/VisibilityChart";
@@ -290,9 +291,9 @@ function AuditRow({ audit, brandName }: { audit: any; brandName: string }) {
         </div>
 
         <Link href={`/audit/${audit.id}/results`} className="no-underline">
-          <button className="type-bodybg-white border border-border-default rounded-sm px-3.5 py-2 font-semibold text-text-body cursor-pointer flex items-center gap-1.5 transition-all duration-200">
+          <Button variant="default">
             View Results <IconArrowRight size={16} stroke={2} />
-          </button>
+          </Button>
         </Link>
       </div>
     </div>

@@ -67,8 +67,7 @@ export default function Error({
 
           <button
             onClick={reset}
-            className="flex items-center justify-center w-full bg-[#111827] text-white rounded-[10px] px-4 py-3 mt-10 hover:opacity-90 transition-opacity cursor-pointer border-none"
-            style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500 }}
+            className="flex items-center justify-center w-full bg-[#111827] text-white rounded-[10px] px-4 py-3 mt-10 hover:opacity-90 transition-opacity cursor-pointer border-none type-body font-medium"
           >
             Coba lagi
           </button>
@@ -117,8 +116,7 @@ export default function Error({
 
             <button
               onClick={reset}
-              className="inline-flex items-center justify-center bg-[#111827] text-white rounded-[8px] px-5 py-3 w-fit mt-10 hover:opacity-90 transition-opacity cursor-pointer border-none"
-              style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500 }}
+              className="inline-flex items-center justify-center bg-[#111827] text-white rounded-[8px] px-5 py-3 w-fit mt-10 hover:opacity-90 transition-opacity cursor-pointer border-none type-body font-medium"
             >
               Coba lagi
             </button>

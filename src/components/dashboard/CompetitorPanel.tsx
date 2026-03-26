@@ -65,22 +65,7 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
         <span className="type-title text-text-heading">
           Kompetitor
         </span>
-        <button
-          className="type-body"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '6px 12px',
-            fontWeight: 500,
-            color: 'var(--text-heading)',
-            background: 'none',
-            border: '1px solid var(--border-light)',
-            borderRadius: 'var(--radius-sm)',
-            boxShadow: 'var(--shadow-subtle)',
-            cursor: 'pointer',
-          }}
-        >
+        <button className="type-body flex items-center gap-1 px-3 py-1.5 font-[var(--btn-font-weight)] text-text-heading bg-transparent border border-border-light rounded-[var(--btn-radius)] shadow-app-subtle cursor-pointer hover:border-border-default transition-colors">
           Tambah
           <IconPlus size={14} stroke={2} />
         </button>

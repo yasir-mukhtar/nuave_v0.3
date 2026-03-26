@@ -15,6 +15,7 @@ import {
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 /* ── Types ── */
 
@@ -346,13 +347,10 @@ export default function BrandPage() {
               Kelola profil brand yang Anda audit di Nuave.
             </p>
           </div>
-          <button
-            onClick={() => router.push("/")}
-            className="flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-4 py-[9px] type-body font-semibold cursor-pointer"
-          >
+          <Button variant="brand" onClick={() => router.push("/")}>
             <IconPlus size={15} stroke={2} />
             Tambah Brand
-          </button>
+          </Button>
         </div>
 
         {/* Empty state */}
@@ -364,13 +362,10 @@ export default function BrandPage() {
             <p className="type-body text-text-muted text-center">
               Tambahkan brand pertama Anda untuk mulai audit visibilitas AI.
             </p>
-            <button
-              onClick={() => router.push("/")}
-              className="flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-5 py-2.5 type-body font-semibold cursor-pointer mt-2"
-            >
+            <Button variant="brand" onClick={() => router.push("/")} className="mt-2">
               <IconPlus size={15} stroke={2} />
               Tambah Brand
-            </button>
+            </Button>
           </div>
         ) : (
           /* Brand cards */
@@ -414,7 +409,7 @@ export default function BrandPage() {
               <h2 className="type-title m-0">
                 Edit Brand
               </h2>
-              <button onClick={closeEdit} className="bg-none border-none cursor-pointer text-text-muted p-1">
+              <button onClick={closeEdit} className="bg-transparent border-none cursor-pointer text-text-muted hover:text-text-heading transition-colors p-1">
                 <IconX size={18} stroke={1.5} />
               </button>
             </div>
@@ -460,7 +455,7 @@ export default function BrandPage() {
                         {d}
                         <button
                           onClick={() => removeChip("differentiators", i)}
-                          className="bg-none border-none cursor-pointer text-brand p-0 flex"
+                          className="bg-transparent border-none cursor-pointer text-brand p-0 flex"
                         >
                           <IconX size={12} stroke={2} />
                         </button>
@@ -487,7 +482,7 @@ export default function BrandPage() {
                         {c}
                         <button
                           onClick={() => removeChip("competitors", i)}
-                          className="bg-none border-none cursor-pointer text-text-muted p-0 flex"
+                          className="bg-transparent border-none cursor-pointer text-text-muted p-0 flex"
                         >
                           <IconX size={12} stroke={2} />
                         </button>
@@ -510,19 +505,11 @@ export default function BrandPage() {
 
             {/* Modal footer */}
             <div className="shrink-0 px-6 py-4 border-t border-border-default flex justify-end gap-2.5">
-              <button
-                onClick={closeEdit}
-                className="px-4 py-2 type-body font-medium bg-surface border border-border-default rounded-md cursor-pointer text-text-body"
-              >
-                Batal
-              </button>
-              <button
+              <Button variant="default" onClick={closeEdit}>Batal</Button>
+              <Button
+                variant="brand"
                 onClick={handleSave}
                 disabled={saving || !editForm.brand_name.trim()}
-                className={cn(
-                  "flex items-center gap-1.5 px-5 py-2 type-body font-semibold bg-brand text-white border-none rounded-md",
-                  saving || !editForm.brand_name.trim() ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
-                )}
               >
                 {saving ? (
                   <>
@@ -535,7 +522,7 @@ export default function BrandPage() {
                     Simpan
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </>
@@ -571,22 +558,10 @@ export default function BrandPage() {
               </div>
             </div>
             <div className="flex justify-end gap-2.5 mt-5">
-              <button
-                onClick={closeDelete}
-                className="px-4 py-2 type-body font-medium bg-surface border border-border-default rounded-md cursor-pointer text-text-body"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className={cn(
-                  "flex items-center gap-1.5 px-5 py-2 type-body font-semibold bg-red-600 text-white border-none rounded-md",
-                  deleting ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
-                )}
-              >
+              <Button variant="default" onClick={closeDelete}>Batal</Button>
+              <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
                 {deleting ? "Menghapus..." : "Hapus Brand"}
-              </button>
+              </Button>
             </div>
           </div>
         </>
@@ -744,9 +719,9 @@ function ActionButton({
       className={cn(
         "flex items-center justify-center w-8 h-8 rounded-sm bg-transparent border border-transparent transition-all duration-100",
         disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer opacity-100",
-        danger ? "text-red-600" : "text-text-muted",
+        danger ? "text-error" : "text-text-muted",
         !disabled && !danger && "hover:bg-surface hover:border-border-default",
-        !disabled && danger && "hover:bg-[#FEF2F2] hover:border-red-200"
+        !disabled && danger && "hover:bg-error-light hover:border-error/30"
       )}
     >
       {icon}

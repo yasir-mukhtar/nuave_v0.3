@@ -14,6 +14,7 @@ import {
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 /* ── Types ── */
 
@@ -514,7 +515,7 @@ export default function KontenPage() {
               </div>
               <button
                 onClick={closePanel}
-                className="bg-none border-none cursor-pointer p-1 text-text-muted shrink-0"
+                className="bg-transparent border-none cursor-pointer p-1 text-text-muted hover:text-text-heading transition-colors shrink-0"
               >
                 <IconX size={18} stroke={1.5} />
               </button>
@@ -556,25 +557,17 @@ export default function KontenPage() {
                   <p className="text-text-muted mb-4">
                     Konten belum dibuka. Buka konten ini untuk melihat saran perbaikan.
                   </p>
-                  <button
+                  <Button
+                    variant="brand"
                     onClick={() => handleReveal(selectedRec.id)}
                     disabled={revealingId === selectedRec.id}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-5 py-2.5 type-body font-semibold",
-                      revealingId === selectedRec.id ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
-                    )}
                   >
                     {revealingId === selectedRec.id ? (
-                      <>
-                        <ButtonSpinner size={14} />
-                        Membuat konten...
-                      </>
+                      <><ButtonSpinner size={14} /> Membuat konten...</>
                     ) : (
-                      <>
-                        <IconSparkles size={14} /> Buat Konten &middot; 1 kredit
-                      </>
+                      <><IconSparkles size={14} /> Buat Konten &middot; 1 kredit</>
                     )}
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

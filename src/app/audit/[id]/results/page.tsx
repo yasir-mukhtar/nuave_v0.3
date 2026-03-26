@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   IconCheck,
   IconX,
@@ -118,21 +119,9 @@ export default function ResultsPage() {
     return (
       <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg-page)", gap: "16px" }}>
         <p style={{ color: "#EF4444" }}>{error || "Audit tidak ditemukan."}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          style={{
-            fontSize: "14px",
-            fontWeight: 600,
-            color: "var(--purple)",
-            background: "transparent",
-            border: "1px solid var(--purple)",
-            borderRadius: "var(--radius-md)",
-            padding: "8px 16px",
-            cursor: "pointer",
-          }}
-        >
+        <Button variant="default" className="text-brand border-brand hover:text-brand" onClick={() => window.location.reload()}>
           Coba lagi
-        </button>
+        </Button>
       </div>
     );
   }
@@ -472,38 +461,12 @@ export default function ResultsPage() {
 
         {/* 3. CTA bar */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
-          <button
-            style={{
-              fontSize: "var(--text-sm)",
-              fontWeight: 500,
-              color: "var(--text-body)",
-              background: "#ffffff",
-              border: "1px solid var(--border-default)",
-              borderRadius: "var(--radius-md)",
-              padding: "10px 20px",
-              cursor: "pointer",
-            }}
-          >
+          <Button variant="default">
             Simpan laporan
-          </button>
-          <button
-            onClick={() => router.push(`/audit/${auditId}/recommendations`)}
-            style={{
-              fontSize: "var(--text-sm)",
-              fontWeight: 600,
-              color: "#ffffff",
-              background: "var(--purple)",
-              border: "none",
-              borderRadius: "var(--radius-md)",
-              padding: "10px 20px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
+          </Button>
+          <Button variant="brand" onClick={() => router.push(`/audit/${auditId}/recommendations`)}>
             Lihat Rekomendasi <IconArrowRight size={18} stroke={1.5} />
-          </button>
+          </Button>
         </div>
       </div>
 

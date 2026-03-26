@@ -6,6 +6,7 @@ import { IconChevronUp, IconChevronDown, IconPlus } from "@tabler/icons-react";
 import WizardLayout from "@/components/new-project/WizardLayout";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const REQUEST_TIMEOUT_MS = 120_000;
 const DEFAULT_SELECTION = 10;
@@ -511,9 +512,9 @@ export default function PromptsPage() {
                         onClick={() => addCustomPrompt(group.id)}
                         disabled={!customPrompt.trim()}
                         className={cn(
-                          "h-10 px-3.5 rounded-sm border-none font-body text-[13px] leading-[18px] font-medium text-white",
+                          "h-10 px-3.5 rounded-[var(--btn-radius)] border-none type-caption font-[var(--btn-font-weight)] text-white",
                           customPrompt.trim()
-                            ? "bg-brand cursor-pointer"
+                            ? "bg-[var(--btn-brand-bg)] cursor-pointer hover:bg-[var(--btn-brand-bg-hover)]"
                             : "bg-border-strong cursor-not-allowed"
                         )}
                       >
@@ -560,29 +561,13 @@ export default function PromptsPage() {
 
       {/* Action buttons */}
       <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="h-12 rounded-md border border-border-default bg-white text-text-heading font-body text-[15px] leading-[22px] font-medium cursor-pointer transition-colors duration-100 ease-in-out hover:border-border-strong"
-        >
+        <Button variant="default" size="lg" className="w-full" onClick={() => router.back()}>
           Kembali
-        </button>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          className={cn(
-            "h-12 rounded-md border-none font-body text-[15px] leading-[22px] font-medium text-white transition-colors duration-100 ease-in-out",
-            canSubmit
-              ? "bg-brand cursor-pointer hover:bg-brand-dark"
-              : "bg-border-strong cursor-not-allowed"
-          )}
-        >
-          <span className="flex items-center justify-center gap-2">
-            {loading && <ButtonSpinner size={16} />}
-            {loading ? "Memproses..." : `Jalankan Audit — ${totalSelected} kredit`}
-          </span>
-        </button>
+        </Button>
+        <Button variant="brand" size="lg" className="w-full" disabled={!canSubmit} onClick={handleSubmit}>
+          {loading && <ButtonSpinner size={16} />}
+          {loading ? "Memproses..." : `Jalankan Audit — ${totalSelected} kredit`}
+        </Button>
       </div>
     </WizardLayout>
   );

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { IconDownload, IconArrowRight } from "@tabler/icons-react";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
 import PromptDetailModal, { type PromptDetail } from "@/components/PromptDetailModal";
+import { Button } from "@/components/ui/button";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 
@@ -316,21 +317,14 @@ export default function ReportContent() {
         </Link>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleDownload}
-            disabled={downloading}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-md border border-border-default bg-white text-text-body type-body font-medium cursor-pointer"
-          >
+          <Button variant="default" onClick={handleDownload} disabled={downloading}>
             {downloading ? <ButtonSpinner size={14} color="var(--purple)" /> : <IconDownload size={16} stroke={1.5} />}
             {downloading ? "Mengunduh..." : "Unduh laporan"}
-          </button>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-md border-none bg-brand text-white type-body font-medium cursor-pointer transition-colors duration-100 ease-in-out hover:bg-brand-dark"
-          >
+          </Button>
+          <Button variant="brand" onClick={() => router.push("/dashboard")}>
             Dashboard
             <IconArrowRight size={16} stroke={1.5} />
-          </button>
+          </Button>
         </div>
       </header>
 

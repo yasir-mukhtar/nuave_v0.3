@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { IconArrowLeft } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 
 const PACKAGES = [
   {
@@ -88,11 +89,7 @@ export default function CreditsContent() {
                 router.push("/dashboard");
               }
             }}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "6px",
-              fontSize: "13px", color: "var(--text-muted)", background: "none",
-              border: "none", cursor: "pointer", padding: 0, marginBottom: "16px",
-            }}
+            className="inline-flex items-center gap-1.5 type-caption text-text-muted bg-transparent border-none cursor-pointer p-0 mb-4 hover:text-text-body transition-colors"
           >
             <IconArrowLeft size={16} stroke={1.5} />
             Kembali ke dashboard
@@ -186,19 +183,14 @@ export default function CreditsContent() {
               </div>
             </div>
 
-            <button
+            <Button
+              variant="brand"
+              className="w-full mb-3"
               onClick={handlePay}
               disabled={paying}
-              style={{
-                width: "100%", padding: "14px", borderRadius: 'var(--radius-md)',
-                fontSize: "15px", fontWeight: 600, color: "#ffffff",
-                background: paying ? "#9CA3AF" : "var(--purple)",
-                border: "none", cursor: paying ? "not-allowed" : "pointer",
-                transition: "all 150ms ease", marginBottom: "12px",
-              }}
             >
               {paying ? "Memproses..." : `Bayar ${selectedPkg.price} →`}
-            </button>
+            </Button>
 
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>

@@ -6,6 +6,7 @@ import { IconPlus, IconPencil, IconCheck, IconX } from "@tabler/icons-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import WizardLayout from "@/components/new-project/WizardLayout";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface Topic {
   id: string;
@@ -291,9 +292,9 @@ export default function TopicsPage() {
             onClick={addCustomTopic}
             disabled={!customName.trim()}
             className={cn(
-              "h-10 px-3.5 rounded-sm border-none font-body text-[13px] leading-[18px] font-medium text-white",
+              "h-10 px-3.5 rounded-[var(--btn-radius)] border-none type-caption font-[var(--btn-font-weight)] text-white",
               customName.trim()
-                ? "bg-brand cursor-pointer"
+                ? "bg-[var(--btn-brand-bg)] cursor-pointer hover:bg-[var(--btn-brand-bg-hover)]"
                 : "bg-border-strong cursor-not-allowed"
             )}
           >
@@ -313,26 +314,12 @@ export default function TopicsPage() {
 
       {/* Action buttons */}
       <div className="grid grid-cols-2 gap-3 mt-9">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="h-12 rounded-md border border-border-default bg-white text-text-heading font-body text-[15px] leading-[22px] font-medium cursor-pointer transition-colors duration-100 ease-in-out hover:border-border-strong"
-        >
+        <Button variant="default" size="lg" className="w-full" onClick={() => router.back()}>
           Kembali
-        </button>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={selectedCount === 0}
-          className={cn(
-            "h-12 rounded-md border-none font-body text-[15px] leading-[22px] font-medium text-white transition-colors duration-100 ease-in-out",
-            selectedCount > 0
-              ? "bg-brand cursor-pointer hover:bg-brand-dark"
-              : "bg-border-strong cursor-not-allowed"
-          )}
-        >
+        </Button>
+        <Button variant="brand" size="lg" className="w-full" disabled={selectedCount === 0} onClick={handleSubmit}>
           Lanjutkan
-        </button>
+        </Button>
       </div>
     </WizardLayout>
   );

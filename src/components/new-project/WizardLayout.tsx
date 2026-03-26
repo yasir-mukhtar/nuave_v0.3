@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 
@@ -25,13 +26,9 @@ export default function WizardLayout({ currentStep, totalSteps, children, onClos
           </span>
         </Link>
 
-        <button
-          onClick={onClose}
-          aria-label="Tutup"
-          className="flex h-10 w-10 items-center justify-center rounded-md border border-border-default bg-transparent text-text-body transition-colors duration-150 hover:border-border-strong hover:bg-surface active:bg-surface-raised cursor-pointer"
-        >
+        <Button variant="default" size="icon" onClick={onClose} aria-label="Tutup">
           <IconX size={20} stroke={1.5} />
-        </button>
+        </Button>
       </header>
 
       {/* Content */}

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 
@@ -102,12 +103,9 @@ export default function RunningContent() {
           <p className="type-body text-text-muted mb-6">
             Terjadi kesalahan saat menjalankan audit. Silakan coba lagi.
           </p>
-          <button
-            onClick={() => router.push("/new-project")}
-            className="h-[44px] px-6 rounded-md border-none bg-brand text-white type-body font-medium cursor-pointer"
-          >
+          <Button variant="brand" size="lg" onClick={() => router.push("/new-project")}>
             Coba lagi
-          </button>
+          </Button>
         </>
       ) : (
         <>

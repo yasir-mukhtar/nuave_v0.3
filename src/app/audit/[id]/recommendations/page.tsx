@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { Button } from "@/components/ui/button";
 import {
   IconSparkles,
   IconCopy,
   IconArrowLeft
 } from '@tabler/icons-react';
 import { ButtonSpinner } from "@/components/ButtonSpinner";
+import { cn } from "@/lib/utils";
 import { createBrowserClient } from '@supabase/ssr';
 
 interface Recommendation {
@@ -278,19 +280,9 @@ export default function RecommendationsPage() {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <button 
+        <button
           onClick={() => router.push(`/audit/${auditId}/results`)}
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '8px',
-            background: 'none',
-            border: 'none',
-            color: '#6B7280',
-            fontSize: '14px',
-            cursor: 'pointer',
-            fontWeight: 500
-          }}
+          className="flex items-center gap-2 type-body font-[var(--btn-font-weight)] text-text-muted bg-transparent border-none cursor-pointer hover:text-text-body transition-colors"
         >
           <IconArrowLeft size={18} stroke={1.5} /> Kembali ke hasil
         </button>
@@ -333,17 +325,10 @@ export default function RecommendationsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveFilter(tab.id as any)}
-                style={{
-                  background: isActive ? 'var(--purple)' : '#F3F4F6',
-                  color: isActive ? 'white' : '#374151',
-                  borderRadius: 'var(--radius-full)',
-                  padding: '6px 16px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s'
-                }}
+                className={cn(
+                  "type-caption font-[var(--btn-font-weight)] rounded-full px-4 py-1.5 border-none cursor-pointer transition-colors",
+                  isActive ? "bg-brand text-white" : "bg-surface-raised text-text-body hover:bg-surface"
+                )}
               >
                 {tab.label}
               </button>
@@ -427,30 +412,13 @@ export default function RecommendationsPage() {
 
                 {!isRevealed ? (
                   <div style={{ marginTop: 'auto' }}>
-                    <button
-                      onClick={() => handleReveal(rec.id)}
-                      disabled={revealingId === rec.id}
-                      style={{
-                        background: 'var(--purple)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: 'var(--radius-md)',
-                        padding: '8px 16px',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        cursor: revealingId === rec.id ? 'not-allowed' : 'pointer',
-                        opacity: revealingId === rec.id ? 0.7 : 1,
-                      }}
-                    >
+                    <Button variant="brand" size="sm" disabled={revealingId === rec.id} onClick={() => handleReveal(rec.id)}>
                       {revealingId === rec.id ? (
                         <><ButtonSpinner size={14} /> Memproses...</>
                       ) : (
                         <><IconSparkles size={14} /> Tampilkan Solusi · 1 kredit</>
                       )}
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <div style={{
@@ -466,16 +434,7 @@ export default function RecommendationsPage() {
                       </span>
                       <button
                         onClick={() => rec.suggested_copy && navigator.clipboard.writeText(rec.suggested_copy)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#6B7280',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontSize: '12px'
-                        }}
+                        className="flex items-center gap-1 type-caption text-text-muted bg-transparent border-none cursor-pointer hover:text-text-body transition-colors"
                       >
                         <IconCopy size={14} /> Salin
                       </button>

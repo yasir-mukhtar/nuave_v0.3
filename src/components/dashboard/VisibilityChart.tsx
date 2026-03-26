@@ -12,6 +12,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { IconChevronDown } from '@tabler/icons-react';
+import { cn } from '@/lib/utils';
 
 type AuditDataPoint = {
   date: string; // ISO string
@@ -184,20 +185,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
         <div ref={filterRef} style={{ position: 'relative' }}>
           <button
             onClick={() => dropdownOpen ? closeFilterDropdown() : setDropdownOpen(true)}
-            className="type-body"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              fontWeight: 500,
-              color: 'var(--text-body)',
-              background: '#ffffff',
-              border: '1px solid var(--border-light)',
-              borderRadius: 'var(--radius-sm)',
-              boxShadow: 'var(--shadow-subtle)',
-              cursor: 'pointer',
-            }}
+            className="type-body flex items-center gap-1.5 px-3 py-1.5 font-[var(--btn-font-weight)] text-text-body bg-white border border-border-light rounded-[var(--btn-radius)] shadow-app-subtle cursor-pointer hover:border-border-default transition-colors"
           >
             {filterOptions[filterIdx].label}
             <IconChevronDown size={14} stroke={2} />
@@ -223,22 +211,13 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
               {filterOptions.map((opt, idx) => (
                 <button
                   key={opt.days}
-                  onClick={() => {
-                    setFilterIdx(idx);
-                    closeFilterDropdown();
-                  }}
-                  className="type-body"
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    padding: '8px 14px',
-                    fontWeight: idx === filterIdx ? 600 : 400,
-                    color: idx === filterIdx ? 'var(--text-heading)' : 'var(--text-body)',
-                    background: idx === filterIdx ? '#F5F5F5' : 'transparent',
-                    border: 'none',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
+                  onClick={() => { setFilterIdx(idx); closeFilterDropdown(); }}
+                  className={cn(
+                    "type-body block w-full px-3.5 py-2 text-left border-none cursor-pointer transition-colors",
+                    idx === filterIdx
+                      ? "font-semibold text-text-heading bg-surface-raised"
+                      : "text-text-body bg-transparent hover:bg-surface"
+                  )}
                 >
                   {opt.label}
                 </button>

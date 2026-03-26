@@ -147,7 +147,7 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 w-full px-3 py-3 bg-transparent border-none cursor-pointer text-left hover:bg-[#f9f9f9]"
+              className="flex items-center gap-2 w-full px-3 py-3 bg-transparent border-none cursor-pointer text-left hover:bg-surface transition-colors"
             >
               <IconLogout size={20} stroke={1.5} className="text-[#374151]" />
               <span className="type-body font-medium text-text-body">Keluar</span>

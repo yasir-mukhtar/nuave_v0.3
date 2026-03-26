@@ -6,6 +6,7 @@ import WizardLayout from "@/components/new-project/WizardLayout";
 import SearchableSelect from "@/components/new-project/SearchableSelect";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { COUNTRIES, LANGUAGES } from "@/lib/constants";
 
@@ -395,21 +396,10 @@ export default function NewProjectContent() {
         )}
 
         {/* Submit */}
-        <button
-          type="submit"
-          disabled={!isValid || loading}
-          className={cn(
-            "w-full h-12 rounded-md border-none type-body font-medium text-white transition-colors duration-100 ease-in-out",
-            isValid && !loading
-              ? "bg-brand cursor-pointer hover:bg-brand-dark"
-              : "bg-border-strong cursor-not-allowed"
-          )}
-        >
-          <span className="flex items-center justify-center gap-2">
-            {loading && <ButtonSpinner size={16} />}
-            {loading ? "Memproses..." : "Lanjutkan"}
-          </span>
-        </button>
+        <Button type="submit" variant="brand" size="lg" className="w-full" disabled={!isValid || loading}>
+          {loading && <ButtonSpinner size={16} />}
+          {loading ? "Memproses..." : "Lanjutkan"}
+        </Button>
       </form>
 
       {/* NOTE: Embedded @keyframes spin — used by prefetch spinner. Consider moving to global CSS. */}

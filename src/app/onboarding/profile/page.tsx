@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IconPencil, IconX, IconPlus, IconArrowLeft, IconArrowRight } from '@tabler/icons-react';
 import { ButtonSpinner } from "@/components/ButtonSpinner";
+import { Button } from "@/components/ui/button";
 
 function ProgressBar({ active }: { active: number }) {
   return (
@@ -270,17 +271,7 @@ export default function ProfilePage() {
         >
           <button
             onClick={() => router.back()}
-            style={{
-              fontSize: "14px",
-              color: "var(--text-muted)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
+            className="flex items-center gap-1 type-body text-text-muted bg-transparent border-none cursor-pointer hover:text-text-body transition-colors p-0"
           >
             <IconArrowLeft size={18} stroke={1.5} /> Kembali
           </button>
@@ -340,17 +331,7 @@ export default function ProfilePage() {
                     boxSizing: "border-box",
                   }}
                 />
-                <button
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "var(--text-muted)",
-                    cursor: "pointer",
-                    padding: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
+                <button className="flex items-center bg-transparent border-none text-text-muted cursor-pointer p-1 hover:text-text-body transition-colors">
                   <IconPencil size={18} stroke={1.5} />
                 </button>
               </div>
@@ -427,24 +408,7 @@ export default function ProfilePage() {
               {error && (
                 <p style={{ fontSize: "13px", color: "#e53e3e", marginBottom: "10px" }}>{error}</p>
               )}
-              <button
-                onClick={handleGeneratePrompts}
-                disabled={loading}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  fontSize: "var(--text-base)",
-                  fontWeight: 600,
-                  color: "#ffffff",
-                  background: "var(--purple)",
-                  border: "none",
-                  borderRadius: "var(--radius-md)",
-                  padding: "12px 24px",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                }}
-              >
+              <Button variant="brand" size="lg" onClick={handleGeneratePrompts} disabled={loading}>
                 {loading ? (
                   <>
                     <ButtonSpinner size={16} /> Menyiapkan…
@@ -454,7 +418,7 @@ export default function ProfilePage() {
                     Buat Prompt <IconArrowRight size={18} stroke={1.5} />
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
 

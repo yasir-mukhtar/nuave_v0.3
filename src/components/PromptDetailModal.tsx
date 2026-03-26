@@ -69,7 +69,7 @@ export default function PromptDetailModal({
           </h2>
           <button
             onClick={handleClose}
-            className="flex items-center border-none bg-transparent p-1 text-text-muted cursor-pointer hover:text-text-heading"
+            className="flex items-center border-none bg-transparent p-1 text-text-muted cursor-pointer hover:text-text-heading transition-colors"
           >
             <IconX size={18} stroke={1.5} />
           </button>
