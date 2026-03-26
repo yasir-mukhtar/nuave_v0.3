@@ -63,7 +63,6 @@ export function ActiveProjectProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setActiveProjectId(null);
-    localStorage.removeItem('nuave_active_project');
     fetchProjects();
   }, [fetchProjects]);
 

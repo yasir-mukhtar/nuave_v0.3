@@ -53,7 +53,7 @@ export default function ResultsPage() {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Try sessionStorage first
         const cached = sessionStorage.getItem('nuave_audit')
         if (cached) {
@@ -65,14 +65,14 @@ export default function ResultsPage() {
             return
           }
         }
-        
+
         // Fall back to API
         const res = await fetch(`/api/audit/${auditId}/status`)
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
           throw new Error(errorData.error || 'Gagal mengambil data audit');
         }
-        
+
         const data = await res.json()
         if (data.status === 'complete') {
           setAuditData(data)

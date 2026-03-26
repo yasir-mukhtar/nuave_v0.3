@@ -38,6 +38,13 @@ export default function AuditRunningPage() {
           // Save full results to sessionStorage for results page
           sessionStorage.setItem('nuave_audit', JSON.stringify(data));
 
+          // Fire-and-forget: start generating recommendations early
+          fetch('/api/recommendations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audit_id: id }),
+          }).catch(() => {});
+
           // Let the loader finish its animation before redirecting
           redirectTimer.current = setTimeout(() => {
             router.push(`/audit/${id}/results`);

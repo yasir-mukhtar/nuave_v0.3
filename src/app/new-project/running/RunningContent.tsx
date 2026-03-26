@@ -62,6 +62,14 @@ export default function RunningContent() {
           if (pollRef.current) clearInterval(pollRef.current);
 
           sessionStorage.setItem("nuave_audit_result", JSON.stringify(data));
+
+          // Fire-and-forget: start generating recommendations early
+          fetch('/api/recommendations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audit_id: auditId }),
+          }).catch(() => {});
+
           setTimeout(() => router.push(`/new-project/report?audit_id=${auditId}`), 1500);
         } else if (data.status === "failed") {
           setStatus("failed");

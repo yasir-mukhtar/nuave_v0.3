@@ -4,6 +4,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { IconDownload, IconArrowRight } from "@tabler/icons-react";
+import { Tip } from "@/components/ui/tip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
 import PromptDetailModal, { type PromptDetail } from "@/components/PromptDetailModal";
 import { Button } from "@/components/ui/button";
@@ -135,6 +137,8 @@ export default function ReportContent() {
   const [REPORT, setReport] = useState<ReportData | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [selectedPrompt, setSelectedPrompt] = useState<PromptDetail | null>(null);
+  const [topRecs, setTopRecs] = useState<any[]>([]);
+  const [recsLoading, setRecsLoading] = useState(true);
   const reportRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = useCallback(async () => {
@@ -297,6 +301,58 @@ export default function ReportContent() {
     }
   }, [searchParams, router]);
 
+  // Fetch top recommendations (may already be generating from running page)
+  useEffect(() => {
+    const auditId = searchParams.get("audit_id");
+    if (!auditId) return;
+    let cancelled = false;
+    let pollInterval: NodeJS.Timeout | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
+
+    const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+
+    const fetchRecs = async () => {
+      try {
+        const res = await fetch('/api/recommendations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audit_id: auditId }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const recs = data.recommendations || data.data || [];
+        if (cancelled) return;
+
+        if (recs.length > 0) {
+          const sorted = [...recs].sort(
+            (a: any, b: any) => (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2)
+          );
+          setTopRecs(sorted.slice(0, 3));
+          setRecsLoading(false);
+          if (pollInterval) clearInterval(pollInterval);
+          if (timeoutId) clearTimeout(timeoutId);
+        }
+      } catch {
+        // Will retry on next poll
+      }
+    };
+
+    fetchRecs();
+    pollInterval = setInterval(fetchRecs, 4000);
+
+    // Timeout after 60s — gracefully hide section
+    timeoutId = setTimeout(() => {
+      if (pollInterval) clearInterval(pollInterval);
+      if (!cancelled) setRecsLoading(false);
+    }, 60000);
+
+    return () => {
+      cancelled = true;
+      if (pollInterval) clearInterval(pollInterval);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [searchParams]);
+
   if (!REPORT) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -321,8 +377,16 @@ export default function ReportContent() {
             {downloading ? <ButtonSpinner size={14} color="var(--purple)" /> : <IconDownload size={16} stroke={1.5} />}
             {downloading ? "Mengunduh..." : "Unduh laporan"}
           </Button>
-          <Button variant="brand" onClick={() => router.push("/dashboard")}>
-            Dashboard
+          <Button variant="brand" onClick={() => {
+            const projectRaw = sessionStorage.getItem("nuave_new_project");
+            if (projectRaw) {
+              const project = JSON.parse(projectRaw);
+              if (project.projectId) localStorage.setItem("nuave_active_project", project.projectId);
+              if (project.workspaceId) localStorage.setItem("nuave_active_workspace", project.workspaceId);
+            }
+            router.push("/content");
+          }}>
+            Lihat Rekomendasi
             <IconArrowRight size={16} stroke={1.5} />
           </Button>
         </div>
@@ -467,6 +531,138 @@ export default function ReportContent() {
               ))}
             </div>
           </div>
+
+          {/* Recommendations preview */}
+          <TooltipProvider delayDuration={300}>
+          {(() => {
+            const catConfig: Record<string, { label: string; tip: string }> = {
+              teknikal: {
+                label: "Teknikal",
+                tip: "Optimasi struktur situs untuk mesin AI: schema markup, structured data, kecepatan halaman, dan crawlability.",
+              },
+              web_copy: {
+                label: "Web Copy",
+                tip: "Perbaikan teks di halaman website: headline, CTA, FAQ, meta description, dan halaman produk.",
+              },
+              konten: {
+                label: "Konten",
+                tip: "Konten panjang yang meningkatkan otoritas topik: panduan, artikel perbandingan, how-to, dan blog post.",
+              },
+            };
+            const typeToCategory: Record<string, string> = {
+              technical: 'teknikal',
+              meta_structure: 'teknikal',
+              structure: 'teknikal',
+              web_copy: 'web_copy',
+              content: 'konten',
+              content_gap: 'konten',
+            };
+            const CatTag = ({ type }: { type: string }) => {
+              const cat = typeToCategory[type] || type;
+              const cfg = catConfig[cat] || { label: type, tip: "" };
+              return (
+                <Tip label={cfg.tip}>
+                  <span className="inline-flex items-center h-[24px] px-2 rounded-[4px] border border-[var(--border-light)] type-caption font-medium text-text-muted whitespace-nowrap cursor-default select-none">
+                    {cfg.label}
+                  </span>
+                </Tip>
+              );
+            };
+            const auditId = searchParams.get("audit_id");
+
+            const prioLabels: Record<string, string> = {
+              high: "Prioritas tinggi",
+              medium: "Prioritas sedang",
+              low: "Prioritas rendah",
+            };
+
+            const PrioBars = ({ priority }: { priority: string }) => {
+              const svg =
+                priority === "high" ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 cursor-default">
+                    <rect x="16" y="4" width="4" height="16" rx="2" fill="#FB2C36" />
+                    <rect x="10" y="8" width="4" height="12" rx="2" fill="#FB2C36" />
+                    <rect x="4" y="12" width="4" height="8" rx="2" fill="#FB2C36" />
+                  </svg>
+                ) : priority === "medium" ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 cursor-default">
+                    <rect x="16" y="4" width="4" height="16" rx="2" fill="#CCCCCC" />
+                    <rect x="10" y="8" width="4" height="12" rx="2" fill="#FF6900" />
+                    <rect x="4" y="12" width="4" height="8" rx="2" fill="#FF6900" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 cursor-default">
+                    <rect x="16" y="4" width="4" height="16" rx="2" fill="#CCCCCC" />
+                    <rect x="10" y="8" width="4" height="12" rx="2" fill="#CCCCCC" />
+                    <rect x="4" y="12" width="4" height="8" rx="2" fill="#F0B100" />
+                  </svg>
+                );
+              return <Tip label={prioLabels[priority] || "Prioritas"}>{svg}</Tip>;
+            };
+
+            if (recsLoading) {
+              return (
+                <>
+                  <div data-pdf-divider className="h-px bg-border-default mx-8" />
+                  <div data-pdf-pad className="pt-6 px-8 pb-6">
+                    <p className="type-body font-semibold text-text-heading mb-4">
+                      3 Rekomendasi Prioritas
+                    </p>
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="flex items-center gap-3 py-4 animate-pulse">
+                        <div className="w-5 h-5 rounded bg-border-default shrink-0" />
+                        <div className="flex-1 h-4 rounded bg-border-default" />
+                        <div className="w-16 h-6 rounded-sm bg-border-default shrink-0" />
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            }
+
+            if (topRecs.length === 0) return null;
+
+            return (
+              <>
+                <div data-pdf-divider className="h-px bg-border-default mx-8" />
+                <div data-pdf-pad className="pt-6 px-8 pb-2">
+                  <p className="type-body font-semibold text-text-heading mb-1">
+                    3 Rekomendasi Prioritas
+                  </p>
+
+                  <div className="flex flex-col">
+                    {topRecs.map((rec, i) => (
+                      <div key={i} className="flex items-center gap-3 py-4">
+                        <PrioBars priority={rec.priority} />
+                        <span className="type-body text-text-heading flex-1 line-clamp-1">
+                          {rec.title}
+                        </span>
+                        <CatTag type={rec.type} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div
+                    className="group flex items-center justify-between py-4 mt-2 border-t border-border-default cursor-pointer transition-colors"
+                    onClick={() => {
+                      // Set active project to the brand from this audit so /content shows the right one
+                      const projectRaw = sessionStorage.getItem("nuave_new_project");
+                      if (projectRaw) {
+                        const project = JSON.parse(projectRaw);
+                        if (project.projectId) localStorage.setItem("nuave_active_project", project.projectId);
+                        if (project.workspaceId) localStorage.setItem("nuave_active_workspace", project.workspaceId);
+                      }
+                      router.push("/content");
+                    }}
+                  >
+                    <span className="type-body text-[#8b8b8b] group-hover:text-foreground transition-colors">Lihat semua rekomendasi</span>
+                    <IconArrowRight size={18} stroke={1.5} className="text-[#8b8b8b] group-hover:text-foreground transition-colors" />
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+          </TooltipProvider>
 
           {/* Footer */}
           <div data-pdf-pad data-pdf-footer className="flex items-center justify-between py-5 px-8 border-t border-border-default bg-surface">
