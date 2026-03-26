@@ -124,7 +124,7 @@ function openReceiptWindow(txn: CreditTransaction, orgName: string) {
 
 export default function SettingsPage() {
   const supabase = createSupabaseBrowserClient();
-  const { activeWorkspaceId } = useActiveWorkspace();
+  const { activeWorkspaceId, refreshWorkspaces } = useActiveWorkspace();
 
   const [user, setUser] = useState<{ email: string; full_name: string } | null>(null);
   const [org, setOrg] = useState<Organization | null>(null);
@@ -196,6 +196,7 @@ export default function SettingsPage() {
     setWorkspaceName(draftName.trim());
     setEditingName(false);
     setSaving(false);
+    refreshWorkspaces();
   }
 
   function startEditing() {
