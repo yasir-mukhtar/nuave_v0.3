@@ -31,7 +31,7 @@ const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: IconSmartHome },
   { label: "Prompt", href: "/prompt", icon: IconMessageDots },
   { label: "Konten", href: "/content", icon: IconArticle },
-  { label: "Brand", href: "/brand", icon: IconRosetteAsterisk },
+  // { label: "Brand", href: "/brand", icon: IconRosetteAsterisk },
 ];
 
 function getInitial(name: string) {
