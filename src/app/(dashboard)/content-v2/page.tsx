@@ -391,7 +391,7 @@ function RecItem({
     <button
       onClick={onClick}
       className={cn(
-        "w-full text-left flex items-center gap-3 px-5 py-3.5 border-b border-border-light transition-colors",
+        "w-full text-left flex items-center gap-3 px-8 py-3.5 border-b border-border-light transition-colors",
         selected ? "bg-[var(--bg-surface-raised)]" : "hover:bg-[var(--bg-surface)]",
         dimmed && "opacity-45"
       )}
@@ -635,10 +635,10 @@ export default function KontenV2Page() {
       {/* ── LEFT PANEL ── */}
       <div
         className="flex flex-col min-h-0 border-r border-border-default shrink-0 bg-white"
-        style={{ width: 360 }}
+        style={{ width: 380 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 h-[52px] border-b border-border-default shrink-0">
+        <div className="flex items-center justify-between px-8 h-[52px] border-b border-border-default shrink-0">
           <div className="flex items-center gap-2">
             <span className="type-title text-text-heading">Rekomendasi</span>
           </div>
@@ -666,7 +666,7 @@ export default function KontenV2Page() {
 
         {/* Rekomendasi aktif counter */}
         {!allImplemented && (
-          <div className="flex items-center justify-between px-5 py-2.5 border-b border-border-default shrink-0">
+          <div className="flex items-center justify-between px-8 py-2.5 border-b border-border-default shrink-0">
             <div className="flex items-center gap-1.5">
               <span className="type-caption text-text-muted">Rekomendasi aktif</span>
               <Tip label="Anda dapat menyimpan hingga 10 rekomendasi yang belum diimplementasikan">
@@ -724,7 +724,7 @@ export default function KontenV2Page() {
                   <button
                     onClick={() => setShowImpl((v) => !v)}
                     className={cn(
-                      "flex items-center justify-between w-full px-5 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100 border-t border-border-light",
+                      "flex items-center justify-between w-full px-8 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100 border-t border-border-light",
                       showImpl ? "bg-surface-raised" : "bg-transparent hover:bg-surface"
                     )}
                   >
@@ -806,7 +806,7 @@ export default function KontenV2Page() {
         {selected ? (
           <>
             {/* Panel header */}
-            <div className="flex items-center justify-between px-6 h-[52px] border-b border-border-default shrink-0">
+            <div className="flex items-center justify-between px-8 h-[52px] border-b border-border-default shrink-0">
               <div className="flex items-center gap-2">
                 <span className="type-title text-text-heading">Detail</span>
                 <Tip label="Konten siap pakai yang dapat langsung diimplementasikan ke website Anda.">
@@ -833,7 +833,7 @@ export default function KontenV2Page() {
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto min-h-0 px-6 py-5">
+            <div className="flex-1 overflow-y-auto min-h-0 px-8 py-5">
               <div className="mb-3">
                 <CatTag cat={selected.category} />
               </div>
