@@ -68,7 +68,7 @@ function renderMarkdown(text: string) {
     if (line.match(/^[\-\*\u2022]\s/)) {
       const content = line.replace(/^[\-\*\u2022]\s/, "");
       return (
-        <div key={i} className="flex gap-2 mb-[3px] text-[14px] leading-6">
+        <div key={i} className="type-body flex gap-2 mb-[3px]">
           <span className="text-brand shrink-0">&#8226;</span>
           <span>{renderBold(content)}</span>
         </div>
@@ -301,8 +301,8 @@ export default function KontenPage() {
   if (recs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[400px] gap-3">
-        <p className="text-[16px] leading-6 font-semibold">Belum ada rekomendasi</p>
-        <p className="text-text-muted">Jalankan audit untuk mendapatkan rekomendasi konten.</p>
+        <p className="type-title">Belum ada rekomendasi</p>
+        <p className="type-body text-text-muted">Jalankan audit untuk mendapatkan rekomendasi konten.</p>
       </div>
     );
   }
@@ -333,10 +333,10 @@ export default function KontenPage() {
 
         {/* ── Header ── */}
         <div>
-          <h1 className="text-[20px] leading-7 mb-1 mt-0">
+          <h1 className="type-heading-sm mb-1 mt-0">
             Konten
           </h1>
-          <p className="text-text-muted m-0">
+          <p className="type-body text-text-muted m-0">
             Rekomendasi konten untuk meningkatkan visibilitas AI brand Anda.
           </p>
         </div>
@@ -344,10 +344,10 @@ export default function KontenPage() {
         {/* ── Progress bar ── */}
         <div className="p-5 rounded-md border border-border-default bg-white">
           <div className="flex justify-between items-center mb-2.5">
-            <span className="text-[13px] leading-4 font-semibold text-text-heading">
+            <span className="type-body font-semibold text-text-heading">
               Progress
             </span>
-            <span className="text-[13px] leading-4 text-text-muted">
+            <span className="type-body text-text-muted">
               {appliedCount} dari {totalCount} diterapkan
               {unlockedCount > 0 && ` \u00b7 ${unlockedCount} dibuka`}
             </span>
@@ -378,7 +378,7 @@ export default function KontenPage() {
                 key={tab.key}
                 onClick={() => setTypeFilter(tab.key)}
                 className={cn(
-                  "px-3.5 py-2 text-[13px] leading-4 font-medium border-none cursor-pointer transition-all duration-100",
+                  "px-3.5 py-2 type-body font-medium border-none cursor-pointer transition-all duration-100",
                   typeFilter === tab.key
                     ? "bg-white text-text-heading shadow-[0_1px_2px_rgba(0,0,0,0.06)] rounded-sm"
                     : "bg-transparent text-text-muted rounded-none"
@@ -395,7 +395,7 @@ export default function KontenPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-              className="py-[7px] pl-2.5 pr-7 text-[13px] leading-4 border border-border-default rounded-sm bg-white text-text-body cursor-pointer outline-none appearance-none bg-[url('data:image/svg+xml,%3csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2016%2016%27%3e%3cpath%20fill%3D%27none%27%20stroke%3D%27%236B7280%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-width%3D%272%27%20d%3D%27m2%205%206%206%206-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:12px_9px]"
+              className="py-[7px] pl-2.5 pr-7 type-body border border-border-default rounded-sm bg-white text-text-body cursor-pointer outline-none appearance-none bg-[url('data:image/svg+xml,%3csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2016%2016%27%3e%3cpath%20fill%3D%27none%27%20stroke%3D%27%236B7280%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-width%3D%272%27%20d%3D%27m2%205%206%206%206-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:12px_9px]"
             >
               <option value="all">Semua status</option>
               <option value="unlocked">Sudah dibuka</option>
@@ -409,7 +409,7 @@ export default function KontenPage() {
             <select
               value={brandFilter}
               onChange={(e) => setWorkspaceFilter(e.target.value)}
-              className="py-[7px] pl-2.5 pr-7 text-[13px] leading-4 border border-border-default rounded-sm bg-white text-text-body cursor-pointer outline-none appearance-none bg-[url('data:image/svg+xml,%3csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2016%2016%27%3e%3cpath%20fill%3D%27none%27%20stroke%3D%27%236B7280%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-width%3D%272%27%20d%3D%27m2%205%206%206%206-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:12px_9px]"
+              className="py-[7px] pl-2.5 pr-7 type-body border border-border-default rounded-sm bg-white text-text-body cursor-pointer outline-none appearance-none bg-[url('data:image/svg+xml,%3csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2016%2016%27%3e%3cpath%20fill%3D%27none%27%20stroke%3D%27%236B7280%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-width%3D%272%27%20d%3D%27m2%205%206%206%206-6%27/%3e%3c/svg%3e')] bg-no-repeat bg-[right_8px_center] bg-[length:12px_9px]"
             >
               <option value="all">Semua brand</option>
               {uniqueBrands.map(([id, name]) => (
@@ -419,7 +419,7 @@ export default function KontenPage() {
           )}
 
           {/* Credits indicator */}
-          <div className="ml-auto text-[13px] leading-4 text-text-muted font-medium">
+          <div className="ml-auto type-body text-text-muted font-medium">
             {credits !== null ? `${credits} kredit tersisa` : ""}
           </div>
         </div>
@@ -451,7 +451,7 @@ export default function KontenPage() {
                   >
                     {typeInfo.label}
                   </span>
-                  <span className="text-[12px] leading-4 text-text-muted">
+                  <span className="type-caption text-text-muted">
                     {appliedInGroup} dari {items.length} selesai
                   </span>
                 </div>
@@ -490,7 +490,7 @@ export default function KontenPage() {
               <div className="flex-1 min-w-0 pr-4">
                 <div className="flex gap-1.5 mb-2">
                   <span
-                    className="text-[11px] leading-4 font-semibold px-2 py-0.5 rounded-xs"
+                    className="type-caption font-semibold px-2 py-0.5 rounded-xs"
                     style={{
                       background: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).bg,
                       color: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).color,
@@ -499,7 +499,7 @@ export default function KontenPage() {
                     Prioritas {(PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).label}
                   </span>
                   <span
-                    className="text-[11px] leading-4 font-semibold px-2 py-0.5 rounded-xs"
+                    className="type-caption font-semibold px-2 py-0.5 rounded-xs"
                     style={{
                       background: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).bg,
                       color: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).color,
@@ -508,7 +508,7 @@ export default function KontenPage() {
                     {(TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).label}
                   </span>
                 </div>
-                <h2 className="text-[16px] leading-6 m-0">
+                <h2 className="type-title m-0">
                   {selectedRec.title}
                 </h2>
               </div>
@@ -523,7 +523,7 @@ export default function KontenPage() {
             {/* Panel body */}
             <div className="flex-1 overflow-y-auto px-6 py-5">
               {/* Description */}
-              <p className="text-[14px] leading-6 text-text-muted mb-5 mt-0">
+              <p className="type-body text-text-muted mb-5 mt-0">
                 {selectedRec.description}
               </p>
 
@@ -531,13 +531,13 @@ export default function KontenPage() {
                 <>
                   {/* Suggested copy header */}
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-[12px] leading-4 font-semibold text-brand uppercase tracking-wide">
+                    <span className="type-caption font-semibold text-brand uppercase tracking-wide">
                       Saran Perbaikan
                     </span>
                     <button
                       onClick={() => handleCopy(selectedRec.suggested_copy!)}
                       className={cn(
-                        "flex items-center gap-1 bg-none border-none cursor-pointer text-[12px] leading-4 transition-colors duration-100",
+                        "flex items-center gap-1 bg-none border-none cursor-pointer type-caption transition-colors duration-100",
                         copied ? "text-success" : "text-text-muted"
                       )}
                     >
@@ -560,7 +560,7 @@ export default function KontenPage() {
                     onClick={() => handleReveal(selectedRec.id)}
                     disabled={revealingId === selectedRec.id}
                     className={cn(
-                      "inline-flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-5 py-2.5 text-[13px] leading-4 font-semibold",
+                      "inline-flex items-center gap-1.5 bg-brand text-white border-none rounded-md px-5 py-2.5 type-body font-semibold",
                       revealingId === selectedRec.id ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
                     )}
                   >
@@ -585,7 +585,7 @@ export default function KontenPage() {
                 <button
                   onClick={() => handleToggleApplied(selectedRec.id, selectedRec.status === "applied")}
                   className={cn(
-                    "flex items-center gap-2 rounded-md px-4 py-2 text-[13px] leading-4 font-medium cursor-pointer transition-all duration-100",
+                    "flex items-center gap-2 rounded-md px-4 py-2 type-body font-medium cursor-pointer transition-all duration-100",
                     selectedRec.status === "applied"
                       ? "bg-[#F0FDF4] border border-[#BBF7D0] text-[#16A34A]"
                       : "bg-surface border border-border-default text-text-body"
@@ -599,7 +599,7 @@ export default function KontenPage() {
                 </button>
 
                 {selectedRec._brandName && (
-                  <span className="text-[12px] leading-4 text-text-muted">
+                  <span className="type-caption text-text-muted">
                     {selectedRec._brandName}
                   </span>
                 )}
@@ -666,27 +666,27 @@ function RecCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-1">
           <span
-            className="text-[11px] leading-4 font-semibold px-1.5 py-px rounded-xs"
+            className="type-caption font-semibold px-1.5 py-px rounded-xs"
             style={{ background: priorityInfo.bg, color: priorityInfo.color }}
           >
             {priorityInfo.label}
           </span>
           <span
-            className="text-[11px] leading-4 font-semibold px-1.5 py-px rounded-xs"
+            className="type-caption font-semibold px-1.5 py-px rounded-xs"
             style={{ background: typeInfo.bg, color: typeInfo.color }}
           >
             {typeInfo.label}
           </span>
           {rec._brandName && (
-            <span className="text-[11px] leading-4 text-text-muted ml-1">
+            <span className="type-caption text-text-muted ml-1">
               {rec._brandName}
             </span>
           )}
         </div>
-        <h3 className="text-[14px] leading-5 mb-0.5 mt-0">
+        <h3 className="type-body mb-0.5 mt-0">
           {rec.title}
         </h3>
-        <p className="text-[13px] leading-5 text-text-muted m-0 overflow-hidden text-ellipsis whitespace-nowrap">
+        <p className="type-body text-text-muted m-0 overflow-hidden text-ellipsis whitespace-nowrap">
           {rec.description}
         </p>
       </div>
@@ -694,7 +694,7 @@ function RecCard({
       {/* Action */}
       <div className="shrink-0">
         {isUnlocked ? (
-          <span className="text-[12px] leading-4 text-brand font-medium">
+          <span className="type-caption text-brand font-medium">
             Lihat &rarr;
           </span>
         ) : (
@@ -702,7 +702,7 @@ function RecCard({
             onClick={(e) => { e.stopPropagation(); onReveal(rec.id); }}
             disabled={isRevealing}
             className={cn(
-              "flex items-center gap-[5px] bg-brand text-white border-none rounded-sm px-3 py-[7px] text-[12px] leading-4 font-semibold whitespace-nowrap",
+              "flex items-center gap-[5px] bg-brand text-white border-none rounded-sm px-3 py-[7px] type-caption font-semibold whitespace-nowrap",
               isRevealing ? "cursor-not-allowed opacity-70" : "cursor-pointer opacity-100"
             )}
           >
