@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { IconChevronDown } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 type AuditDataPoint = {
   date: string; // ISO string
@@ -149,13 +150,13 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
 
         {/* Filter dropdown */}
         <div ref={filterRef} className="relative">
-          <button
+          <Button
+            variant="default"
             onClick={() => dropdownOpen ? closeFilterDropdown() : setDropdownOpen(true)}
-            className="type-body flex items-center gap-1.5 px-3 py-1.5 font-[var(--btn-font-weight)] text-text-body bg-white border border-border-light rounded-[var(--btn-radius)] shadow-app-subtle cursor-pointer hover:border-border-default transition-colors"
           >
             {filterOptions[filterIdx].label}
             <IconChevronDown size={14} stroke={2} />
-          </button>
+          </Button>
 
           {dropdownOpen && (
             <div

@@ -2,6 +2,7 @@
 
 import { IconPlus } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 type Competitor = {
   name: string;
@@ -26,10 +27,10 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
         <span className="type-title text-text-heading">
           Kompetitor
         </span>
-        <button className="type-body flex items-center gap-1 px-3 py-1.5 font-[var(--btn-font-weight)] text-text-heading bg-transparent border border-border-light rounded-[var(--btn-radius)] shadow-app-subtle cursor-pointer hover:border-border-default transition-colors">
+        <Button variant="default">
           Tambah
           <IconPlus size={14} stroke={2} />
-        </button>
+        </Button>
       </div>
 
       <div className="h-px bg-[var(--border-light)]" />
