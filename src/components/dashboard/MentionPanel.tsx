@@ -44,13 +44,13 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
             padding: '0 20px',
           }}
         >
-          <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)' }}>
+          <span className="type-title text-text-heading">
             Mention
           </span>
           {auditId && (
             <Link
               href={`/audit/${auditId}/results`}
-              className="text-label-13"
+              className="type-body"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -84,7 +84,7 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
           `}</style>
           {mentions.length === 0 ? (
             <div
-              className="text-label-13"
+              className="type-body"
               style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-muted)' }}
             >
               Belum ada data mention.
@@ -124,7 +124,7 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
                   />
                 )}
                 <span
-                  className="text-copy-14"
+                  className="type-body"
                   style={{ color: 'var(--text-body)' }}
                 >
                   {item.promptText}

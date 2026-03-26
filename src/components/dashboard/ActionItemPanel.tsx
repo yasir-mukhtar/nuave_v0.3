@@ -80,13 +80,13 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
           padding: '0 20px',
         }}
       >
-        <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)' }}>
+        <span className="type-title text-text-heading">
           Action Item
         </span>
         {auditId && (
           <Link
             href={`/audit/${auditId}/recommendations`}
-            className="text-label-13"
+            className="type-body"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -115,7 +115,7 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
       >
         {items.length === 0 ? (
           <div
-            className="text-label-13"
+            className="type-body"
             style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-muted)' }}
           >
             Belum ada action item.
@@ -156,13 +156,13 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p
-                      className="text-label-14"
+                      className="type-body"
                       style={{ fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}
                     >
                       {item.title}
                     </p>
                     <p
-                      className="text-copy-13"
+                      className="type-caption"
                       style={{
                         color: 'var(--text-muted)',
                         margin: '4px 0 0',
@@ -178,7 +178,7 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
                     {/* Badges */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
                       <span
-                        className="text-label-12"
+                        className="type-caption"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -191,7 +191,7 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
                         {priority.label}
                       </span>
                       <span
-                        className="text-label-12"
+                        className="type-caption"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',

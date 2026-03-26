@@ -59,16 +59,16 @@ function ChartTooltip({ active, payload }: any) {
         minWidth: '140px',
       }}
     >
-      <div className="text-label-12" style={{ color: '#9CA3AF', marginBottom: '6px' }}>
+      <div className="type-caption" style={{ color: '#9CA3AF', marginBottom: '6px' }}>
         {formatDateFull(data.date)}
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-        <span style={{ fontSize: '18px', fontWeight: 700, color: '#111827' }}>
+        <span className="type-body-lg font-bold text-text-heading">
           {score}%
         </span>
         {change != null && change !== 0 && (
           <span
-            className="text-label-12"
+            className="type-caption"
             style={{
               fontWeight: 600,
               color: change > 0 ? '#22C55E' : '#EF4444',
@@ -172,10 +172,10 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
         }}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-          <span style={{ fontSize: '32px', fontWeight: 700, color: 'var(--text-heading)' }}>
+          <span className="type-heading-md">
             {latestScore}%
           </span>
-          <span className="text-label-14" style={{ color: '#8B8B8B' }}>
+          <span className="type-caption text-text-muted">
             AI visibility score
           </span>
         </div>
@@ -184,7 +184,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
         <div ref={filterRef} style={{ position: 'relative' }}>
           <button
             onClick={() => dropdownOpen ? closeFilterDropdown() : setDropdownOpen(true)}
-            className="text-label-13"
+            className="type-body"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -227,7 +227,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
                     setFilterIdx(idx);
                     closeFilterDropdown();
                   }}
-                  className="text-label-13"
+                  className="type-body"
                   style={{
                     display: 'block',
                     width: '100%',
@@ -369,7 +369,7 @@ function EmptyChartState({ days }: { days: number }) {
         }}
       >
         {labels.map((label, i) => (
-          <span key={i} className="text-label-12" style={{ color: '#9CA3AF' }}>{label}</span>
+          <span key={i} className="type-caption" style={{ color: '#9CA3AF' }}>{label}</span>
         ))}
       </div>
       <div
@@ -383,10 +383,10 @@ function EmptyChartState({ days }: { days: number }) {
           gap: '8px',
         }}
       >
-        <p className="text-copy-14" style={{ color: 'var(--text-muted)', margin: 0, textAlign: 'center' }}>
+        <p className="type-body text-text-muted" style={{ margin: 0, textAlign: 'center' }}>
           Belum ada data audit.
         </p>
-        <p className="text-copy-13" style={{ color: '#9CA3AF', margin: 0, textAlign: 'center' }}>
+        <p className="type-caption text-text-placeholder" style={{ margin: 0, textAlign: 'center' }}>
           Jalankan audit pertama untuk melihat skor visibilitas Anda.
         </p>
       </div>

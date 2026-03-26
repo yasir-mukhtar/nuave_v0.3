@@ -62,11 +62,11 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
           padding: '0 20px',
         }}
       >
-        <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)' }}>
+        <span className="type-title text-text-heading">
           Kompetitor
         </span>
         <button
-          className="text-label-13"
+          className="type-body"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -101,7 +101,7 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
       >
         {competitors.length === 0 ? (
           <div
-            className="text-label-13"
+            className="type-body"
             style={{ padding: '24px 0', textAlign: 'center', color: 'var(--text-muted)' }}
           >
             Belum ada data kompetitor.
@@ -121,14 +121,14 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <CompetitorLogo name={comp.name} />
                 <span
-                  className="text-label-14"
+                  className="type-body"
                   style={{ color: 'var(--text-body)' }}
                 >
                   {comp.name}
                 </span>
               </div>
               <span
-                className="text-label-14"
+                className="type-body"
                 style={{ fontWeight: 500, color: 'var(--text-heading)' }}
               >
                 {comp.score.toFixed(1)}%
