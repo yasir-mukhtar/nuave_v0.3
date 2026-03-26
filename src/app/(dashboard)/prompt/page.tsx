@@ -143,7 +143,7 @@ export default function PromptsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[400px]">
-        <p className="text-text-muted text-[13px]">Memuat data prompt...</p>
+        <p className="type-body text-text-muted">Memuat data prompt...</p>
       </div>
     );
   }
@@ -152,8 +152,8 @@ export default function PromptsPage() {
   if (!activeProjectId) {
     return (
       <div className="flex flex-col items-center justify-center h-[400px] gap-3">
-        <p className="text-[16px] leading-6 font-semibold">Belum ada brand</p>
-        <p className="text-text-muted">Buat brand terlebih dahulu untuk mulai mengelola prompt.</p>
+        <p className="type-title">Belum ada brand</p>
+        <p className="type-body text-text-muted">Buat brand terlebih dahulu untuk mulai mengelola prompt.</p>
       </div>
     );
   }
@@ -173,10 +173,10 @@ export default function PromptsPage() {
         <div className="w-[380px] shrink-0 flex flex-col border-r border-border-default h-full">
           {/* Header */}
           <div className="flex items-center justify-between px-8 h-[52px] border-b border-border-default shrink-0">
-            <h2 className="text-[16px] leading-6 font-semibold m-0 font-body text-text-heading tracking-normal">Topik</h2>
+            <h2 className="type-title m-0 text-text-heading">Topik</h2>
             <button
               onClick={() => setCreateTopicOpen(true)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-[12px] leading-4 font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 type-caption font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer"
             >
               <IconPlus size={14} stroke={2} />
               Buat topik
@@ -218,14 +218,14 @@ export default function PromptsPage() {
                   )}
                 >
                   <span className={cn(
-                    "text-[13px] leading-5 flex items-center gap-1.5",
+                    "type-body flex items-center gap-1.5",
                     showArchive ? "font-semibold text-text-heading" : "text-text-muted"
                   )}>
                     <IconArchive size={14} stroke={1.5} />
                     Arsip
                   </span>
                   <span className={cn(
-                    "text-[12px] leading-5 shrink-0 ml-2 tabular-nums",
+                    "type-caption shrink-0 ml-2 tabular-nums",
                     showArchive ? "text-text-heading font-semibold" : "text-text-muted"
                   )}>
                     {archivedPrompts.length}
@@ -248,7 +248,7 @@ export default function PromptsPage() {
                 placeholder="Cari prompt..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-[30px] pl-[30px] pr-3 text-[13px] leading-5 border border-border-default rounded-sm bg-white text-text-body outline-none box-border"
+                className="w-full h-[30px] pl-[30px] pr-3 type-body border border-border-default rounded-sm bg-white text-text-body outline-none box-border"
               />
             </div>
 
@@ -261,7 +261,7 @@ export default function PromptsPage() {
           {/* Prompt rows */}
           <div className="flex-1 overflow-y-auto scroll-subtle">
             {filteredPrompts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-[200px] text-text-muted text-[13px]">
+              <div className="flex flex-col items-center justify-center h-[200px] type-body text-text-muted">
                 {search
                   ? "Tidak ada prompt yang cocok."
                   : showArchive
@@ -289,7 +289,7 @@ export default function PromptsPage() {
                   {/* Prompt text + edit icon */}
                   <div className="flex items-start gap-2 flex-1 min-w-0 pr-3">
                     <p className={cn(
-                      "text-[13px] leading-5 m-0 flex-1",
+                      "type-body m-0 flex-1",
                       p.is_active ? "text-text-body" : "text-text-muted"
                     )}>
                       {p.prompt_text}
@@ -305,7 +305,7 @@ export default function PromptsPage() {
                   {/* Mentioned icon with tooltip */}
                   <div className="w-[48px] flex justify-center shrink-0">
                     {p.mentioned === null ? (
-                      <span className="text-[13px] text-text-placeholder">&mdash;</span>
+                      <span className="type-body text-text-placeholder">&mdash;</span>
                     ) : (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -316,7 +316,7 @@ export default function PromptsPage() {
                             }
                           </span>
                         </TooltipTrigger>
-                        <TooltipContent side="top" className="text-[12px]">
+                        <TooltipContent side="top" className="type-caption">
                           {p.mentioned
                             ? "Brand disebut di audit terakhir"
                             : "Brand tidak disebut di audit terakhir"}
@@ -365,7 +365,7 @@ export default function PromptsPage() {
                               <IconArrowBackUp size={15} stroke={1.5} />
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="text-[12px]">Pulihkan</TooltipContent>
+                          <TooltipContent side="top" className="type-caption">Pulihkan</TooltipContent>
                         </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -376,7 +376,7 @@ export default function PromptsPage() {
                               <IconTrash size={15} stroke={1.5} />
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="text-[12px]">Hapus permanen</TooltipContent>
+                          <TooltipContent side="top" className="type-caption">Hapus permanen</TooltipContent>
                         </Tooltip>
                       </>
                     ) : (
@@ -395,13 +395,13 @@ export default function PromptsPage() {
 
           {/* Footer */}
           <div className="flex items-center justify-between px-8 h-[44px] border-t border-border-default bg-white shrink-0">
-            <span className="text-[12px] leading-4 text-text-muted">
+            <span className="type-caption text-text-muted">
               {filteredPrompts.length} ditampilkan
             </span>
             {!showArchive && topicPrompts.length > 0 && (
               <button
                 onClick={() => setArchiveAllOpen(true)}
-                className="inline-flex items-center gap-1 text-[12px] leading-4 font-medium text-text-muted bg-transparent border-none cursor-pointer px-0 hover:text-text-body transition-colors duration-100"
+                className="inline-flex items-center gap-1 type-caption font-medium text-text-muted bg-transparent border-none cursor-pointer px-0 hover:text-text-body transition-colors duration-100"
               >
                 <IconArchive size={13} stroke={1.5} />
                 Arsipkan semua
@@ -424,17 +424,17 @@ export default function PromptsPage() {
             style={{ animation: `${archiveAllClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
           >
             <div className="mb-4">
-              <h3 className="text-[15px] leading-5 font-semibold m-0 mb-1">
+              <h3 className="type-title m-0 mb-1">
                 Arsipkan semua prompt di topik ini?
               </h3>
-              <p className="text-[13px] leading-5 text-text-muted m-0">
+              <p className="type-body text-text-muted m-0">
                 <strong className="text-text-body">{topicPrompts.length} prompt</strong> di topik <strong className="text-text-body">&ldquo;{selectedTopicName}&rdquo;</strong> akan diarsipkan. Pengecekan harian akan dihentikan. Anda bisa memulihkan prompt dari arsip kapan saja.
               </p>
             </div>
             <div className="flex justify-end gap-2.5 mt-5">
               <button
                 onClick={closeArchiveAll}
-                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
+                className="px-4 py-2 type-body font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
               >
                 Batal
               </button>
@@ -466,8 +466,8 @@ export default function PromptsPage() {
           >
             <div className="flex items-start justify-between px-6 pt-6 pb-0">
               <div>
-                <h3 className="text-[16px] leading-6 font-semibold m-0">Buat topik baru</h3>
-                <p className="text-[13px] leading-5 text-text-muted mt-1 mb-0">
+                <h3 className="type-title m-0">Buat topik baru</h3>
+                <p className="type-body text-text-muted mt-1 mb-0">
                   Buat topik tanpa menyebut nama brand Anda. Setiap topik akan berisi prompt.
                 </p>
               </div>
@@ -499,8 +499,8 @@ export default function PromptsPage() {
           >
             <div className="flex items-start justify-between px-6 pt-6 pb-0">
               <div>
-                <h3 className="text-[16px] leading-6 font-semibold m-0">Buat prompt baru</h3>
-                <p className="text-[13px] leading-5 text-text-muted mt-1 mb-0">
+                <h3 className="type-title m-0">Buat prompt baru</h3>
+                <p className="type-body text-text-muted mt-1 mb-0">
                   Buat prompt tanpa menyebut nama brand Anda. Setiap baris akan menjadi prompt terpisah.
                 </p>
               </div>
@@ -533,17 +533,17 @@ export default function PromptsPage() {
             style={{ animation: `${archivePromptClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
           >
             <div className="mb-4">
-              <h3 className="text-[15px] leading-5 font-semibold m-0 mb-1">
+              <h3 className="type-title m-0 mb-1">
                 Arsipkan prompt ini?
               </h3>
-              <p className="text-[13px] leading-5 text-text-muted m-0">
+              <p className="type-body text-text-muted m-0">
                 Prompt <strong className="text-text-body">&ldquo;{archivePromptData.prompt_text.length > 80 ? archivePromptData.prompt_text.slice(0, 80) + "..." : archivePromptData.prompt_text}&rdquo;</strong> akan diarsipkan dan pengecekan harian dihentikan. Anda bisa memulihkan dari arsip kapan saja.
               </p>
             </div>
             <div className="flex justify-end gap-2.5 mt-5">
               <button
                 onClick={closeArchivePrompt}
-                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
+                className="px-4 py-2 type-body font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
               >
                 Batal
               </button>
@@ -574,17 +574,17 @@ export default function PromptsPage() {
             style={{ animation: `${permanentDeleteClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
           >
             <div className="mb-4">
-              <h3 className="text-[15px] leading-5 font-semibold m-0 mb-1">
+              <h3 className="type-title m-0 mb-1">
                 ✋ Yakin mau menghapus permanen?
               </h3>
-              <p className="text-[13px] leading-5 text-text-muted m-0">
+              <p className="type-body text-text-muted m-0">
                 Anda akan menghapus permanen prompt <strong className="text-text-body">&ldquo;{permanentDeletePrompt.prompt_text.length > 80 ? permanentDeletePrompt.prompt_text.slice(0, 80) + "..." : permanentDeletePrompt.prompt_text}&rdquo;</strong> beserta data audit terkait. Prompt yang sudah dihapus tidak dapat dikembalikan.
               </p>
             </div>
             <div className="flex justify-end gap-2.5 mt-5">
               <button
                 onClick={closePermanentDelete}
-                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
+                className="px-4 py-2 type-body font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
               >
                 Batal
               </button>
@@ -593,7 +593,7 @@ export default function PromptsPage() {
                   deletePromptPermanently(permanentDeleteId);
                   closePermanentDelete();
                 }}
-                className="flex items-center gap-1.5 px-5 py-2 text-[13px] leading-4 font-semibold bg-[#DC2626] text-white border-none rounded-sm cursor-pointer"
+                className="flex items-center gap-1.5 px-5 py-2 type-body font-semibold bg-[#DC2626] text-white border-none rounded-sm cursor-pointer"
               >
                 Hapus permanen
               </button>
@@ -615,17 +615,17 @@ export default function PromptsPage() {
             style={{ animation: `${deleteTopicClosing ? "modalOut" : "modalIn"} ${PANEL_ANIM_MS}ms cubic-bezier(0.16, 1, 0.3, 1) forwards` }}
           >
             <div className="mb-4">
-              <h3 className="text-[15px] leading-5 font-semibold m-0 mb-1">
+              <h3 className="type-title m-0 mb-1">
                 ✋ Yakin mau menghapus topik ini?
               </h3>
-              <p className="text-[13px] leading-5 text-text-muted m-0">
+              <p className="type-body text-text-muted m-0">
                 Anda akan menghapus permanen topik <strong className="text-text-body">&ldquo;{deleteTopicData.name}&rdquo;</strong>{deleteTopicPromptCount > 0 ? <> beserta <strong className="text-text-body">{deleteTopicPromptCount} prompt</strong> di dalamnya</> : null}. Topik dan prompt yang sudah dihapus tidak dapat dikembalikan.
               </p>
             </div>
             <div className="flex justify-end gap-2.5 mt-5">
               <button
                 onClick={closeDeleteTopic}
-                className="px-4 py-2 text-[13px] leading-4 font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
+                className="px-4 py-2 type-body font-medium bg-surface border border-border-default rounded-sm cursor-pointer text-text-body"
               >
                 Batal
               </button>
@@ -635,7 +635,7 @@ export default function PromptsPage() {
                   if (selectedTopicId === deleteTopicId) setSelectedTopicId(null);
                   closeDeleteTopic();
                 }}
-                className="flex items-center gap-1.5 px-5 py-2 text-[13px] leading-4 font-semibold bg-[#DC2626] text-white border-none rounded-sm cursor-pointer"
+                className="flex items-center gap-1.5 px-5 py-2 type-body font-semibold bg-[#DC2626] text-white border-none rounded-sm cursor-pointer"
               >
                 Hapus
               </button>
@@ -658,9 +658,9 @@ export default function PromptsPage() {
           >
             <div className="flex items-start justify-between px-6 pt-6 pb-0">
               <div>
-                <h3 className="text-[16px] leading-6 font-semibold m-0">Edit prompt</h3>
+                <h3 className="type-title m-0">Edit prompt</h3>
                 {editPromptData.mentioned !== null && (
-                  <p className="text-[13px] leading-5 text-text-muted mt-1 mb-0">
+                  <p className="type-body text-text-muted mt-1 mb-0">
                     Perubahan akan berlaku di pengecekan berikutnya.
                   </p>
                 )}
@@ -738,7 +738,7 @@ function EditPromptForm({
         <div className="form-field">
           <div className="flex items-center justify-between">
             <label>Prompt</label>
-            <span className="text-[12px] leading-4 text-text-muted">
+            <span className="type-caption text-text-muted">
               {promptText.length}/{maxLength}
             </span>
           </div>
@@ -827,7 +827,7 @@ function CreatePromptForm({
         <div className="form-field">
           <div className="flex items-center justify-between">
             <label>Prompt</label>
-            <span className="text-[12px] leading-4 text-text-muted">
+            <span className="type-caption text-text-muted">
               {promptText.length}/{maxLength}
             </span>
           </div>
@@ -983,19 +983,19 @@ function TopicRow({
             if (e.key === "Enter") commitEdit();
             if (e.key === "Escape") { setEditValue(name); setEditing(false); }
           }}
-          className="w-full px-2.5 py-1.5 text-[13px] leading-5 border border-brand rounded-xs bg-white text-text-heading outline-none"
+          className="w-full px-2.5 py-1.5 type-body border border-brand rounded-xs bg-white text-text-heading outline-none"
         />
         <div className="flex items-center gap-1 mt-1.5 justify-end">
           <button
             onClick={() => { setEditValue(name); setEditing(false); }}
-            className="inline-flex items-center gap-1 px-2 py-1 text-[11px] leading-3 font-medium text-text-muted bg-transparent border border-border-default rounded-xs cursor-pointer"
+            className="inline-flex items-center gap-1 px-2 py-1 type-caption font-medium text-text-muted bg-transparent border border-border-default rounded-xs cursor-pointer"
           >
             <IconX size={12} stroke={2} />
             Batal
           </button>
           <button
             onClick={commitEdit}
-            className="inline-flex items-center gap-1 px-2 py-1 text-[11px] leading-3 font-medium text-white bg-brand border-none rounded-xs cursor-pointer"
+            className="inline-flex items-center gap-1 px-2 py-1 type-caption font-medium text-white bg-brand border-none rounded-xs cursor-pointer"
           >
             <IconCheck size={12} stroke={2} />
             Simpan
@@ -1018,7 +1018,7 @@ function TopicRow({
       )}
     >
       <span className={cn(
-        "text-[13px] leading-5 flex-1 min-w-0 line-clamp-2",
+        "type-body flex-1 min-w-0 line-clamp-2",
         selected ? "font-semibold text-text-heading" : muted ? "text-text-muted" : "text-text-body"
       )}>
         {name}
@@ -1042,7 +1042,7 @@ function TopicRow({
       )}
 
       <span className={cn(
-        "text-[12px] leading-5 shrink-0 ml-2 tabular-nums",
+        "type-caption shrink-0 ml-2 tabular-nums",
         selected ? "text-text-heading font-semibold" : "text-text-muted"
       )}>
         {counts.active}/{counts.total}

@@ -64,7 +64,7 @@ export default function PromptDetailModal({
       >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-border-default px-6 pb-4 pt-5">
-          <h2 className="m-0 text-base font-semibold text-text-heading">
+          <h2 className="m-0 type-title text-text-heading">
             Hasil Prompt
           </h2>
           <button
@@ -82,7 +82,7 @@ export default function PromptDetailModal({
         >
           <div className="flex flex-col">
             {/* User prompt bubble */}
-            <div className="ml-auto mb-3 inline-block max-w-[85%] rounded-2xl rounded-br-xs bg-brand px-3.5 py-2.5 text-sm text-white shadow-sm">
+            <div className="ml-auto mb-3 inline-block max-w-[85%] rounded-2xl rounded-br-xs bg-brand px-3.5 py-2.5 type-body text-white shadow-sm">
               {result.prompt_text}
             </div>
 
@@ -94,7 +94,7 @@ export default function PromptDetailModal({
                 ) : (
                   <IconCircleXFilled size={20} className="text-red-600" />
                 )}
-                <span className="text-[13px] leading-4 font-medium text-text-heading">
+                <span className="type-body font-medium text-text-heading">
                   {brandName}{' '}
                   {result.brand_mentioned
                     ? 'disebutkan'
@@ -111,7 +111,7 @@ export default function PromptDetailModal({
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 border-t border-border-default px-6 py-3 text-center text-[11px] leading-4 text-text-placeholder">
+        <div className="shrink-0 border-t border-border-default px-6 py-3 text-center type-caption text-text-placeholder">
           Respons oleh GPT-4o dengan pencarian web ·{' '}
           {result.created_at
             ? new Date(result.created_at).toLocaleString('id-ID')
