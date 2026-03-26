@@ -190,7 +190,6 @@ export default function PromptsPage() {
             <h2 className="type-title m-0 text-text-heading">Topik</h2>
             <Button
               variant="default"
-              size="sm"
               onClick={() => setCreateTopicOpen(true)}
             >
               <IconPlus size={14} />
@@ -267,7 +266,7 @@ export default function PromptsPage() {
               />
             </div>
 
-            <Button variant="brand" size="sm" className="ml-auto" onClick={() => setCreatePromptOpen(true)}>
+            <Button variant="brand" className="ml-auto" onClick={() => setCreatePromptOpen(true)}>
               <IconPlus size={14} stroke={2} />
               Buat prompt
             </Button>

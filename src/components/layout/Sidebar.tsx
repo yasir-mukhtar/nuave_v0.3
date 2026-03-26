@@ -98,7 +98,6 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
                 alt={workspaceName}
                 width={18}
                 height={18}
-                className="block"
                 className="block object-contain"
                 onError={() => setFaviconError(true)}
               />
