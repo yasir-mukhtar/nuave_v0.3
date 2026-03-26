@@ -36,6 +36,7 @@ interface Rec {
   description: string;
   blocks: ContentBlock[];
   implemented: boolean;
+  createdAt: string; // ISO string
 }
 
 /* ── Config ── */
@@ -94,7 +95,22 @@ function dbRecToRec(dbRec: Record<string, any>): Rec {
     description: dbRec.description ?? "",
     blocks: parseSuggestedCopy(dbRec.suggested_copy),
     implemented: dbRec.status === "applied",
+    createdAt: dbRec.created_at ?? new Date().toISOString(),
   };
+}
+
+function formatRecDate(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const time = date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", hour12: false }).replace(":", ".");
+
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
+
+  if (date >= startOfToday) return `Hari ini · ${time}`;
+  if (date >= startOfYesterday) return `Kemarin · ${time}`;
+
+  return `${date.getDate()} ${date.toLocaleString("id-ID", { month: "short" })} · ${time}`;
 }
 
 /* ── Sub-components ── */
@@ -346,29 +362,6 @@ function GenerateModal({
 }
 
 function GeneratingOverlay({ apiReady, onDone, categories }: { apiReady: boolean; onDone: () => void; categories: Category[] }) {
-  const [done, setDone] = useState<Set<Category>>(new Set());
-  const animDoneRef = useRef(false);
-  const stableDone = useCallback(onDone, [onDone]);
-
-  useEffect(() => {
-    // Distribute animation checkmarks evenly across selected categories
-    const step = 3500 / (categories.length + 1);
-    const timers = categories.map((cat, i) =>
-      setTimeout(() => setDone((d) => new Set([...d, cat])), step * (i + 1))
-    );
-    const finalTimer = setTimeout(() => {
-      animDoneRef.current = true;
-      if (apiReady) stableDone();
-    }, 4200);
-    return () => [...timers, finalTimer].forEach(clearTimeout);
-  }, [stableDone]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // If API finishes after animation completes
-  useEffect(() => {
-    if (apiReady && animDoneRef.current) stableDone();
-  }, [apiReady, stableDone]);
-
-  const allDone = done.size === categories.length;
   const subtitle = categories.length === 1
     ? "1 kategori diproses"
     : `${categories.length} kategori diproses secara bersamaan`;
@@ -379,31 +372,28 @@ function GeneratingOverlay({ apiReady, onDone, categories }: { apiReady: boolean
         <h3 className="font-semibold text-text-heading type-title mb-1">Membuat rekomendasi...</h3>
         <p className="type-body text-text-muted mb-5">{subtitle}</p>
         <div className="space-y-3">
-          {categories.map((cat) => {
-            const isDone = done.has(cat);
-            return (
-              <div
-                key={cat}
-                className="flex items-center gap-3 py-3 px-4 rounded-lg border border-border-default"
-              >
-                <div className="shrink-0 w-5 h-5 flex items-center justify-center">
-                  {isDone ? (
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[#DCFCE7]">
-                      <IconCheck size={11} color="#16A34A" />
-                    </div>
-                  ) : (
-                    <div className="w-5 h-5 rounded-full border-2 animate-spin border-brand border-t-transparent" />
-                  )}
-                </div>
-                <CatTag cat={cat} />
-                <span className="type-body text-text-muted ml-auto">
-                  {isDone ? "Selesai" : "Memproses..."}
-                </span>
+          {categories.map((cat) => (
+            <div
+              key={cat}
+              className="flex items-center gap-3 py-3 px-4 rounded-lg border border-border-default"
+            >
+              <div className="shrink-0 w-5 h-5 flex items-center justify-center">
+                {apiReady ? (
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[#DCFCE7]">
+                    <IconCheck size={11} color="#16A34A" />
+                  </div>
+                ) : (
+                  <div className="w-5 h-5 rounded-full border-2 animate-spin border-brand border-t-transparent" />
+                )}
               </div>
-            );
-          })}
+              <CatTag cat={cat} />
+              <span className="type-body text-text-muted ml-auto">
+                {apiReady ? "Selesai" : "Memproses..."}
+              </span>
+            </div>
+          ))}
         </div>
-        {allDone && (
+        {apiReady && (
           <div className="mt-5 flex justify-end">
             <Button variant="brand" onClick={onDone}>Selesai</Button>
           </div>
@@ -428,6 +418,7 @@ export default function KontenV2Page() {
   const [apiReady, setApiReady] = useState(false);
   const [generatingCats, setGeneratingCats] = useState<Category[]>([]);
   const newRecsRef = useRef<Rec[]>([]);
+  const generateBrandIdRef = useRef<string | null>(null);
 
   // Override main scroll+padding so this page owns its own layout
   useEffect(() => {
@@ -509,6 +500,8 @@ export default function KontenV2Page() {
 
   async function startGenerate(categories: Category[]) {
     if (!activeProject?.id) return;
+    const brandId = activeProject.id; // capture stable — context may reset during async
+    generateBrandIdRef.current = brandId;
     setGeneratingCats(categories);
     setGenState("generating");
     setApiReady(false);
@@ -518,7 +511,7 @@ export default function KontenV2Page() {
       const res = await fetch("/api/recommendations/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ brand_id: activeProject.id, categories }),
+        body: JSON.stringify({ brand_id: brandId, categories }),
       });
       const data = await res.json();
 
@@ -544,19 +537,35 @@ export default function KontenV2Page() {
     setApiReady(true);
   }
 
-  const handleGenerateDone = useCallback(() => {
-    const incoming = newRecsRef.current;
-    if (incoming.length > 0) {
-      setRecs((prev) => {
-        const newOnes = incoming.filter((r) => !prev.some((p) => p.id === r.id));
-        newRecsRef.current = [];
-        if (newOnes.length > 0) setSelected(newOnes[0]);
-        return [...prev, ...newOnes];
-      });
-      toast(`${incoming.length} rekomendasi baru berhasil dibuat`);
-    }
+  const handleGenerateDone = useCallback(async () => {
     setGenState("idle");
-  }, []);
+    const brandId = generateBrandIdRef.current;
+    if (!brandId) return;
+
+    const supabase = createSupabaseBrowserClient();
+    const { data } = await supabase
+      .from("recommendations")
+      .select("*")
+      .eq("brand_id", brandId)
+      .in("status", ["open", "applied"])
+      .order("created_at", { ascending: true });
+
+    if (data) {
+      const mapped = data.map(dbRecToRec);
+      setRecs((prev) => {
+        const prevIds = new Set(prev.map((r) => r.id));
+        const newOnes = mapped.filter((r) => !prevIds.has(r.id));
+        if (newOnes.length > 0) {
+          setSelected(newOnes[0]);
+          toast(`${newOnes.length} rekomendasi baru berhasil dibuat`);
+        }
+        return mapped;
+      });
+    }
+
+    newRecsRef.current = [];
+    generateBrandIdRef.current = null;
+  }, []); // stable — reads from ref, not context
 
   /* ── Loading ── */
 
@@ -770,8 +779,9 @@ export default function KontenV2Page() {
 
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto min-h-0 px-8 py-5">
-                <div className="mb-3">
+                <div className="flex items-center justify-between mb-3">
                   <CatTag cat={selected.category} />
+                  <span className="type-caption text-text-muted">{formatRecDate(selected.createdAt)}</span>
                 </div>
                 <p className="type-heading-sm text-text-heading mb-2">{selected.title}</p>
                 <p className="type-body text-text-muted mb-6">{selected.description}</p>
