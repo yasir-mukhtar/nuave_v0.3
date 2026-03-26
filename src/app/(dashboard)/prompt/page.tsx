@@ -188,17 +188,18 @@ export default function PromptsPage() {
           {/* Header */}
           <div className="flex items-center justify-between px-8 h-[52px] border-b border-border-default shrink-0">
             <h2 className="type-title m-0 text-text-heading">Topik</h2>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setCreateTopicOpen(true)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 type-caption font-semibold text-text-body bg-transparent border border-border-default rounded-sm cursor-pointer"
             >
-              <IconPlus size={14} stroke={2} />
+              <IconPlus size={14} />
               Buat topik
-            </button>
+            </Button>
           </div>
 
           {/* Topic list */}
-          <div className="scroll-subtle flex-1 overflow-y-auto px-3 pt-3">
+          <div className="scroll-subtle flex-1 overflow-y-auto pt-3">
             <TopicRow
               name="Tanpa Topik"
               counts={getTopicCounts(null)}
@@ -221,11 +222,11 @@ export default function PromptsPage() {
             {/* Archive section */}
             {archivedPrompts.length > 0 && (
               <>
-                <div className="h-px bg-border-default mx-2 my-2" />
+                <div className="h-px bg-border-default mx-8 my-2" />
                 <div
                   onClick={() => { setShowArchive(true); setSearch(""); }}
                   className={cn(
-                    "flex items-center justify-between w-full px-5 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100",
+                    "flex items-center justify-between w-full px-8 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100",
                     showArchive
                       ? "bg-surface-raised"
                       : "bg-transparent hover:bg-surface"
@@ -988,7 +989,7 @@ function TopicRow({
 
   if (editing) {
     return (
-      <div className="px-3 py-1.5">
+      <div className="px-8 py-1.5">
         <input
           ref={inputRef}
           value={editValue}
@@ -1025,7 +1026,7 @@ function TopicRow({
     <div
       onClick={onClick}
       className={cn(
-        "flex items-start w-full px-5 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100 group",
+        "flex items-start w-full px-8 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100 group",
         selected
           ? "bg-surface-raised"
           : "bg-transparent hover:bg-surface"
@@ -1057,7 +1058,7 @@ function TopicRow({
 
       <span className={cn(
         "type-caption shrink-0 ml-2 tabular-nums",
-        selected ? "text-text-heading font-semibold" : "text-text-muted"
+        selected ? "text-text-heading" : "text-text-muted"
       )}>
         {counts.active}/{counts.total}
       </span>

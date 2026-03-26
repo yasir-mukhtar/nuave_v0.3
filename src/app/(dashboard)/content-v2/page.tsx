@@ -638,7 +638,7 @@ export default function KontenV2Page() {
         style={{ width: 360 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border-default shrink-0">
+        <div className="flex items-center justify-between px-5 h-[52px] border-b border-border-default shrink-0">
           <div className="flex items-center gap-2">
             <span className="type-title text-text-heading">Rekomendasi</span>
           </div>
@@ -673,10 +673,7 @@ export default function KontenV2Page() {
                 <IconInfoCircle size={13} className="text-text-muted cursor-default hover:text-text-body transition-colors" />
               </Tip>
             </div>
-            <span
-              className="type-caption font-semibold tabular-nums"
-              style={{ color: isAtLimit ? "#DC2626" : "var(--text-muted)" }}
-            >
+            <span className={cn("type-caption tabular-nums", isAtLimit ? "text-error" : "text-text-muted")}>
               {isAtLimit ? "10" : active.length}/10
             </span>
           </div>
@@ -696,7 +693,7 @@ export default function KontenV2Page() {
               <p className="font-semibold text-text-heading type-body mb-1.5">
                 Semua rekomendasi telah diimplementasi!
               </p>
-              <p className="type-caption text-text-muted mb-5">
+              <p className="type-body text-text-muted mb-5">
                 {implemented.length} rekomendasi selesai. Skor AI visibility Anda meningkat sejak
                 pertama menggunakan Konten.
               </p>
@@ -726,20 +723,26 @@ export default function KontenV2Page() {
                 <div>
                   <button
                     onClick={() => setShowImpl((v) => !v)}
-                    className="flex items-center justify-between w-full px-5 py-3 type-caption text-text-muted hover:bg-[var(--bg-surface)] transition-colors border-t border-border-light"
+                    className={cn(
+                      "flex items-center justify-between w-full px-5 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100 border-t border-border-light",
+                      showImpl ? "bg-surface-raised" : "bg-transparent hover:bg-surface"
+                    )}
                   >
-                    <span className="flex items-center gap-2 font-medium">
-                      <IconCheck size={14} />
+                    <span className={cn(
+                      "type-body flex items-center gap-1.5",
+                      showImpl ? "font-semibold text-text-heading" : "text-text-muted"
+                    )}>
+                      <IconCheck size={14} stroke={1.5} />
                       Terimplementasi
                     </span>
-                    <span className="flex items-center gap-2">
-                      <span className="type-caption font-semibold">{implemented.length}</span>
+                    <span className="flex items-center gap-1.5">
+                      <span className={cn(
+                        "type-caption shrink-0 tabular-nums",
+                        showImpl ? "text-text-heading font-semibold" : "text-text-muted"
+                      )}>{implemented.length}</span>
                       <IconChevronDown
                         size={14}
-                        style={{
-                          transform: showImpl ? "rotate(180deg)" : "rotate(0deg)",
-                          transition: "transform 0.2s ease",
-                        }}
+                        className={cn("transition-transform duration-200", showImpl && "rotate-180")}
                       />
                     </span>
                   </button>
@@ -803,7 +806,7 @@ export default function KontenV2Page() {
         {selected ? (
           <>
             {/* Panel header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border-default shrink-0">
+            <div className="flex items-center justify-between px-6 h-[52px] border-b border-border-default shrink-0">
               <div className="flex items-center gap-2">
                 <span className="type-title text-text-heading">Detail</span>
                 <Tip label="Konten siap pakai yang dapat langsung diimplementasikan ke website Anda.">
@@ -869,7 +872,7 @@ export default function KontenV2Page() {
         ) : (
           /* No selection state */
           <div className="flex flex-col items-center justify-center h-full text-center px-8">
-            <p className="type-caption text-text-muted max-w-xs">
+            <p className="type-body text-text-muted max-w-xs">
               Pilih rekomendasi untuk melihat detail dan konten yang siap diimplementasikan.
             </p>
           </div>
