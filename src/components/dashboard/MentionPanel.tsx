@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { IconCircleCheckFilled, IconCircleXFilled, IconArrowUpRight } from '@tabler/icons-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import PromptDetailModal, { type PromptDetail } from '@/components/PromptDetailModal';
 
 type Mention = {
@@ -23,46 +24,16 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
 
   return (
     <>
-      <div
-        style={{
-          border: '1px solid var(--border-light)',
-          borderRadius: 'var(--radius-sm)',
-          boxShadow: 'var(--shadow-subtle)',
-          background: '#ffffff',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <div className="border border-border-light rounded-[var(--radius-sm)] shadow-app-subtle bg-white flex flex-col">
         {/* Header */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            height: '56px',
-            flexShrink: 0,
-            padding: '0 20px',
-          }}
-        >
+        <div className="flex items-center justify-between h-14 shrink-0 px-5">
           <span className="type-title text-text-heading">
             Mention
           </span>
           {auditId && (
             <Link
               href={`/audit/${auditId}/results`}
-              className="type-body"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '6px 12px',
-                fontWeight: 500,
-                color: 'var(--text-heading)',
-                textDecoration: 'none',
-                border: '1px solid var(--border-light)',
-                borderRadius: 'var(--radius-sm)',
-                boxShadow: 'var(--shadow-subtle)',
-              }}
+              className="type-body flex items-center gap-1 px-3 py-1.5 font-[var(--btn-font-weight)] text-text-heading no-underline border border-border-light rounded-[var(--radius-sm)] shadow-app-subtle hover:border-border-default transition-colors"
             >
               Lihat semua
               <IconArrowUpRight size={14} stroke={2} />
@@ -70,30 +41,18 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
           )}
         </div>
 
-        <div style={{ height: '1px', background: 'var(--border-light)', flexShrink: 0 }} />
+        <div className="h-px bg-[var(--border-light)] shrink-0" />
 
         {/* Mention list */}
-        <div
-          className="scroll-subtle"
-          style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}
-        >
-          <style>{`
-            .mention-row:hover {
-              background: #F9FAFB !important;
-            }
-          `}</style>
+        <div className="scroll-subtle flex-1 overflow-y-auto py-1">
           {mentions.length === 0 ? (
-            <div
-              className="type-body"
-              style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-muted)' }}
-            >
+            <div className="type-body py-6 px-5 text-center text-text-muted">
               Belum ada data mention.
             </div>
           ) : (
             mentions.map((item, idx) => (
               <div
                 key={idx}
-                className="mention-row"
                 onClick={() =>
                   setSelectedResult({
                     prompt_text: item.promptText,
@@ -102,31 +61,17 @@ export default function MentionPanel({ mentions, auditId, brandName }: MentionPa
                     created_at: item.createdAt,
                   })
                 }
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '10px',
-                  padding: '10px 20px',
-                  borderBottom: idx < mentions.length - 1 ? '1px solid #F3F4F6' : 'none',
-                  cursor: 'pointer',
-                  transition: 'background 0.15s',
-                }}
+                className={cn(
+                  "flex items-start gap-2.5 px-5 py-2.5 cursor-pointer transition-colors hover:bg-surface",
+                  idx < mentions.length - 1 && "border-b border-[#F3F4F6]"
+                )}
               >
                 {item.brandMentioned ? (
-                  <IconCircleCheckFilled
-                    size={20}
-                    style={{ color: '#16A34A', flexShrink: 0, marginTop: '1px' }}
-                  />
+                  <IconCircleCheckFilled size={20} className="text-success shrink-0 mt-px" />
                 ) : (
-                  <IconCircleXFilled
-                    size={20}
-                    style={{ color: '#DC2626', flexShrink: 0, marginTop: '1px' }}
-                  />
+                  <IconCircleXFilled size={20} className="text-error shrink-0 mt-px" />
                 )}
-                <span
-                  className="type-body"
-                  style={{ color: 'var(--text-body)' }}
-                >
+                <span className="type-body text-text-body">
                   {item.promptText}
                 </span>
               </div>

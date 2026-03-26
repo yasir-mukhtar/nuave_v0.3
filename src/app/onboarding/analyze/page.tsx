@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { IconCheck, IconLoader2 } from '@tabler/icons-react';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const steps = [
   { state: "done", label: "Scraping website" },
@@ -41,11 +43,11 @@ export default function AnalyzePage() {
 
         const data = await res.json();
         sessionStorage.setItem('nuave_profile', JSON.stringify(data));
-        
+
         // Clear pending items
         sessionStorage.removeItem('nuave_pending_brand');
         sessionStorage.removeItem('nuave_pending_url');
-        
+
         router.push('/onboarding/profile');
       } catch (err: any) {
         console.error('Scrape error:', err);
@@ -55,147 +57,87 @@ export default function AnalyzePage() {
 
     triggerScrape();
   }, [router]);
+
   return (
-    <>
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin {
-          animation: spin 1s linear infinite;
-        }
-      `}</style>
+    <div className="min-h-screen bg-page flex items-center justify-center">
+      <div className="max-w-[480px] w-full px-6 py-10">
 
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "var(--bg-page)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div style={{ maxWidth: "480px", width: "100%", padding: "40px 24px" }}>
-
-          {/* Progress bar */}
-          <div style={{ marginBottom: "40px" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "10px",
-              }}
-            >
-              <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                Menganalisis brand kamu
-              </span>
-              <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                Langkah 2 dari 4
-              </span>
-            </div>
-            <div style={{ display: "flex", gap: "4px" }}>
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    height: "3px",
-                    flex: 1,
-                    borderRadius: "var(--radius-full)",
-                    background: i < 2 ? "var(--purple)" : "var(--border-default)",
-                  }}
-                />
-              ))}
-            </div>
+        {/* Progress bar */}
+        <div className="mb-10">
+          <div className="flex justify-between mb-2.5">
+            <span className="type-caption text-text-muted">Menganalisis brand kamu</span>
+            <span className="type-caption text-text-muted">Langkah 2 dari 4</span>
           </div>
-
-          {/* Step list */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {error ? (
-              <div style={{ textAlign: 'center', padding: '24px' }}>
-                <p style={{ color: 'var(--red)', marginBottom: '16px' }}>{error}</p>
-                <button 
-                  onClick={() => window.location.reload()}
-                  style={{
-                    background: 'var(--purple)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: 'var(--radius-md)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Coba lagi
-                </button>
-              </div>
-            ) : steps.map((step) => {
-              const isDone = step.state === "done";
-              const isActive = step.state === "active";
-
-              return (
-                <div
-                  key={step.label}
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: "14px",
-                    padding: "12px 16px",
-                    borderRadius: "var(--radius-md)",
-                    background: isActive ? "var(--bg-surface)" : "#ffffff",
-                    border: "1px solid var(--border-default)",
-                    borderLeft: isDone
-                      ? "3px solid var(--green)"
-                      : isActive
-                      ? "3px solid var(--purple)"
-                      : "1px solid var(--border-default)",
-                  }}
-                >
-                  {/* Icon circle */}
-                  <div
-                    style={{
-                      width: "24px",
-                      height: "24px",
-                      borderRadius: "50%",
-                      flexShrink: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: isDone
-                        ? "var(--green-light)"
-                        : isActive
-                        ? "transparent"
-                        : "var(--bg-surface-raised)",
-                      border: isActive ? "2px solid var(--purple)" : "none",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    {isDone && <IconCheck size={16} stroke={2.5} color="var(--green)" />}
-                    {isActive && <IconLoader2 size={18} stroke={2.5} color="var(--purple)" className="animate-spin" />}
-                  </div>
-
-                  {/* Label + subtitle */}
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: isDone || isActive ? (isActive ? 600 : 500) : 400,
-                        color: step.state === "pending" ? "var(--text-placeholder)" : "var(--text-heading)",
-                      }}
-                    >
-                      {step.label}
-                    </div>
-                    {"subtitle" in step && step.subtitle && (
-                      <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
-                        {step.subtitle}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="flex gap-1">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={cn(
+                  "h-[3px] flex-1 rounded-full",
+                  i < 2 ? "bg-brand" : "bg-border-default"
+                )}
+              />
+            ))}
           </div>
         </div>
+
+        {/* Step list */}
+        <div className="flex flex-col gap-2">
+          {error ? (
+            <div className="text-center py-6">
+              <p className="text-error mb-4">{error}</p>
+              <Button variant="brand" onClick={() => window.location.reload()}>
+                Coba lagi
+              </Button>
+            </div>
+          ) : steps.map((step) => {
+            const isDone = step.state === "done";
+            const isActive = step.state === "active";
+
+            return (
+              <div
+                key={step.label}
+                className={cn(
+                  "flex flex-row items-center gap-3.5 px-4 py-3 rounded-[var(--radius-md)] border border-border-default",
+                  isActive ? "bg-surface" : "bg-white",
+                  isDone && "border-l-[3px] border-l-[var(--green)]",
+                  isActive && "border-l-[3px] border-l-brand",
+                )}
+              >
+                {/* Icon circle */}
+                <div
+                  className={cn(
+                    "w-6 h-6 rounded-full shrink-0 flex items-center justify-center box-border",
+                    isDone && "bg-[var(--green-light)]",
+                    isActive && "border-2 border-brand",
+                    !isDone && !isActive && "bg-surface-raised"
+                  )}
+                >
+                  {isDone && <IconCheck size={16} stroke={2.5} color="var(--green)" />}
+                  {isActive && <IconLoader2 size={18} stroke={2.5} color="var(--purple)" className="animate-spin" />}
+                </div>
+
+                {/* Label + subtitle */}
+                <div>
+                  <div className={cn(
+                    "type-body",
+                    step.state === "pending" ? "text-text-placeholder" : "text-text-heading",
+                    isDone && "font-medium",
+                    isActive && "font-semibold",
+                  )}>
+                    {step.label}
+                  </div>
+                  {"subtitle" in step && step.subtitle && (
+                    <div className="type-caption text-text-muted mt-0.5">
+                      {step.subtitle}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -99,7 +99,7 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
                 width={18}
                 height={18}
                 className="block"
-                style={{ objectFit: "contain" }}
+                className="block object-contain"
                 onError={() => setFaviconError(true)}
               />
             </div>
@@ -133,9 +133,9 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 rounded-full bg-white border border-[#ececec] flex items-center justify-center shrink-0 overflow-hidden">
                   {faviconSrc && !faviconError ? (
-                    <img src={faviconSrc} alt={workspaceName} width={14} height={14} className="block" style={{ objectFit: "contain" }} />
+                    <img src={faviconSrc} alt={workspaceName} width={14} height={14} className="block object-contain" />
                   ) : (
-                    <span style={{ fontSize: "8px" }} className="font-semibold text-text-heading">{getInitial(workspaceName)}</span>
+                    <span className="text-[8px] font-semibold text-text-heading">{getInitial(workspaceName)}</span>
                   )}
                 </div>
                 <span className="type-body font-medium text-text-body truncate">{workspaceName}</span>

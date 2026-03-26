@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { LOTTIE_DATA } from "./lottie/recommendations-loader-data";
+import { cn } from "@/lib/utils";
 
-// --- Thinking messages that cycle during the audit ---
 const THINKING_MESSAGES = [
   "Mengirim pertanyaan ke ChatGPT...",
   "Mencari informasi di web...",
@@ -16,7 +16,7 @@ const THINKING_MESSAGES = [
   "Hampir selesai...",
 ];
 
-const MESSAGE_INTERVAL = 2500; // ms between messages
+const MESSAGE_INTERVAL = 2500;
 
 interface AuditRunningLoaderProps {
   completedPrompts: number;
@@ -53,21 +53,18 @@ function LottiePlayer({ animationData, size = 120 }: { animationData: any; size?
   return <div ref={containerRef} style={{ width: size, height: size }} />;
 }
 
-export default function AuditRunningLoader({
-  status,
-}: AuditRunningLoaderProps) {
+export default function AuditRunningLoader({ status }: AuditRunningLoaderProps) {
   const [msgIndex, setMsgIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
-  // Cycle through thinking messages with fade transition
   useEffect(() => {
     if (status !== "running") return;
 
     const interval = setInterval(() => {
-      setVisible(false); // fade out
+      setVisible(false);
       setTimeout(() => {
         setMsgIndex((prev) => (prev + 1) % THINKING_MESSAGES.length);
-        setVisible(true); // fade in
+        setVisible(true);
       }, 300);
     }, MESSAGE_INTERVAL);
 
@@ -90,18 +87,7 @@ export default function AuditRunningLoader({
       : THINKING_MESSAGES[msgIndex];
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#FFFFFF",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        padding: "40px 20px",
-      }}
-    >
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-5 py-10">
       <style>{`
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
@@ -110,32 +96,22 @@ export default function AuditRunningLoader({
       `}</style>
 
       {/* Lottie animation */}
-      <div style={{ marginBottom: 24 }}>
+      <div className="mb-6">
         <LottiePlayer animationData={LOTTIE_DATA} size={120} />
       </div>
 
       {/* Headline */}
-      <h2
-        style={{
-          margin: "0 0 8px",
-          fontSize: 20,
-          fontWeight: 600,
-          color: isFailed ? "#EF4444" : "#111827",
-          letterSpacing: "-0.3px",
-          textAlign: "center",
-        }}
-      >
+      <h2 className={cn(
+        "m-0 mb-2 text-[20px] font-semibold tracking-[-0.3px] text-center",
+        isFailed ? "text-error" : "text-text-heading"
+      )}>
         {headline}
       </h2>
 
       {/* Thinking message with fade */}
       <p
+        className="type-body text-text-muted text-center m-0 mb-8 h-[22px]"
         style={{
-          margin: "0 0 32px",
-          fontSize: 14,
-          color: "#6B7280",
-          textAlign: "center",
-          height: 22,
           opacity: isDone || isFailed ? 1 : visible ? 1 : 0,
           transition: "opacity 0.3s ease",
         }}
@@ -145,26 +121,11 @@ export default function AuditRunningLoader({
 
       {/* Indeterminate shimmer progress bar */}
       {!isFailed && !isDone && (
-        <div
-          style={{
-            width: "100%",
-            maxWidth: 320,
-            height: 3,
-            background: "#F3F4F6",
-            borderRadius: 999,
-            overflow: "hidden",
-            position: "relative",
-          }}
-        >
+        <div className="w-full max-w-[320px] h-[3px] bg-surface-raised rounded-full overflow-hidden relative">
           <div
+            className="absolute top-0 left-0 w-1/2 h-full rounded-full"
             style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "50%",
-              height: "100%",
               background: "linear-gradient(90deg, transparent, #533AFD, transparent)",
-              borderRadius: 999,
               animation: "shimmer 1.8s ease-in-out infinite",
             }}
           />

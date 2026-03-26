@@ -16,52 +16,25 @@ export default function Error({
   return (
     <>
       <style>{`
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
-        .dot-blink {
-          animation: blink 1s ease-in-out infinite;
-        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .dot-blink { animation: blink 1s ease-in-out infinite; }
       `}</style>
 
       {/* ── Mobile layout (< md) ── */}
       <div className="min-h-screen bg-white flex md:hidden flex-col px-6 pt-24">
         <div className="max-w-[360px]">
           <div className="flex items-center gap-2.5 mb-16">
-            <div className="dot-blink w-2 h-2 rounded-[2px] bg-[#EF4444] shrink-0" />
-            <span style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '20px',
-              fontWeight: 600,
-              letterSpacing: '-0.4px',
-              color: '#EF4444',
-              lineHeight: 1,
-            }}>
+            <div className="dot-blink w-2 h-2 rounded-[2px] bg-error shrink-0" />
+            <span className="text-[20px] font-semibold tracking-[-0.4px] text-error leading-none">
               Error
             </span>
           </div>
 
-          <h1 style={{ margin: 0, marginBottom: '4px', lineHeight: 1 }}>
-            <span style={{
-              fontFamily: 'var(--font-geist-sans), Geist, sans-serif',
-              fontSize: '40px',
-              fontWeight: 500,
-              letterSpacing: '-1.6px',
-              color: '#111827',
-            }}>
-              Waduh
-            </span>
+          <h1 className="m-0 mb-1 leading-none">
+            <span className="text-[40px] font-medium tracking-[-1.6px] text-text-heading">Waduh</span>
           </h1>
 
-          <p style={{
-            fontFamily: 'Inter, sans-serif',
-            fontSize: '18px',
-            fontWeight: 400,
-            color: '#6B7280',
-            margin: 0,
-            lineHeight: 1.4,
-          }}>
+          <p className="text-[18px] font-normal text-text-muted m-0 leading-snug">
             Terjadi kesalahan. Silakan coba lagi.
           </p>
 
@@ -78,39 +51,18 @@ export default function Error({
       <div className="min-h-screen bg-white hidden md:flex items-center justify-center">
         <div className="flex items-start gap-16">
           <div className="flex items-center gap-2.5 pt-2">
-            <div className="dot-blink w-2 h-2 rounded-[2px] bg-[#EF4444] shrink-0" />
-            <span style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '24px',
-              fontWeight: 600,
-              letterSpacing: '-0.48px',
-              color: '#EF4444',
-              lineHeight: 1,
-            }}>
+            <div className="dot-blink w-2 h-2 rounded-[2px] bg-error shrink-0" />
+            <span className="text-[24px] font-semibold tracking-[-0.48px] text-error leading-none">
               Error
             </span>
           </div>
 
           <div className="flex flex-col">
-            <h1 style={{ margin: 0, marginBottom: '6px', lineHeight: 1 }}>
-              <span style={{
-                fontFamily: 'var(--font-geist-sans), Geist, sans-serif',
-                fontSize: '48px',
-                fontWeight: 500,
-                letterSpacing: '-1.92px',
-                color: '#111827',
-              }}>
-                Waduh
-              </span>
+            <h1 className="m-0 mb-1.5 leading-none">
+              <span className="text-[48px] font-medium tracking-[-1.92px] text-text-heading">Waduh</span>
             </h1>
 
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '20px',
-              fontWeight: 400,
-              color: '#6B7280',
-              margin: 0,
-            }}>
+            <p className="text-[20px] font-normal text-text-muted m-0">
               Terjadi kesalahan. Silakan coba lagi.
             </p>
 

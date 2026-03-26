@@ -13,6 +13,7 @@ import {
   IconCircleXFilled
 } from '@tabler/icons-react';
 import PromptDetailModal from '@/components/PromptDetailModal';
+import { cn } from "@/lib/utils";
 
 interface AuditResult {
   prompt_text: string;
@@ -109,16 +110,16 @@ export default function ResultsPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-page)" }}>
-        <p style={{ color: "var(--text-muted)" }}>Memuat hasil...</p>
+      <div className="min-h-screen flex items-center justify-center bg-page">
+        <p className="type-body text-text-muted">Memuat hasil...</p>
       </div>
     );
   }
 
   if (error || !auditData) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "var(--bg-page)", gap: "16px" }}>
-        <p style={{ color: "#EF4444" }}>{error || "Audit tidak ditemukan."}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-page gap-4">
+        <p className="text-error">{error || "Audit tidak ditemukan."}</p>
         <Button variant="default" className="text-brand border-brand hover:text-brand" onClick={() => window.location.reload()}>
           Coba lagi
         </Button>
@@ -152,14 +153,7 @@ export default function ResultsPage() {
     const parts = text.split(regex);
     return parts.map((part, i) =>
       regex.test(part) ? (
-        <mark key={i} style={{
-          background: '#EDE9FF',
-          color: '#533AFD',
-          fontWeight: 500,
-          borderRadius: 'var(--radius-xs)',
-          padding: '0 2px',
-          fontStyle: 'normal'
-        }}>{part}</mark>
+        <mark key={i} className="bg-[#EDE9FF] text-brand font-medium rounded-[var(--radius-xs)] px-0.5 not-italic">{part}</mark>
       ) : <span key={i}>{part}</span>
     );
   }
@@ -238,13 +232,7 @@ export default function ResultsPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "var(--bg-page)",
-        padding: "48px 24px",
-      }}
-    >
+    <div className="min-h-screen bg-page px-6 py-12">
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateX(20px); }
@@ -254,21 +242,13 @@ export default function ResultsPage() {
           from { transform: translateY(100%) }
           to { transform: translateY(0) }
         }
-        .animate-modal-in {
-          animation: fadeIn 0.2s ease-out;
-        }
-        .result-row:hover {
-          background: #F9FAFB !important;
-          cursor: pointer;
-        }
+        .animate-modal-in { animation: fadeIn 0.2s ease-out; }
+        .result-row:hover { background: #F9FAFB !important; cursor: pointer; }
         @media (max-width: 768px) {
           .modal-panel {
-            width: 100vw !important;
-            height: 85vh !important;
-            bottom: 0 !important;
-            top: auto !important;
-            right: 0 !important;
-            left: 0 !important;
+            width: 100vw !important; height: 85vh !important;
+            bottom: 0 !important; top: auto !important;
+            right: 0 !important; left: 0 !important;
             transform: none !important;
             border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
             padding: 24px !important;
@@ -277,33 +257,14 @@ export default function ResultsPage() {
         }
       `}</style>
 
-      <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+      <div className="max-w-[800px] mx-auto">
 
-        <h1
-          style={{
-            fontSize: "var(--text-3xl)",
-            textAlign: "center",
-            marginBottom: "32px",
-            marginTop: 0,
-          }}
-        >
+        <h1 className="text-[length:var(--text-3xl)] text-center mb-8 mt-0">
           Visibility Score AI Kamu
         </h1>
 
         {/* 1. Score hero card */}
-        <div
-          style={{
-            background: "#ffffff",
-            border: "1px solid var(--border-default)",
-            borderRadius: "var(--radius-xl)",
-            padding: "40px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "16px",
-            marginBottom: "24px",
-          }}
-        >
+        <div className="bg-white border border-border-default rounded-[var(--radius-xl)] p-10 flex flex-col items-center gap-4 mb-6">
           {/* Score circle */}
           <svg width="160" height="160" viewBox="0 0 160 160">
             <circle cx="80" cy="80" r="68" fill="none" stroke="#E5E7EB" strokeWidth="10" />
@@ -326,67 +287,27 @@ export default function ResultsPage() {
           </svg>
 
           {/* Caption */}
-          <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", textAlign: "center", margin: 0 }}>
+          <p className="type-body text-text-muted text-center m-0">
             {auditData.brand_mention_count} dari {auditData.total_prompts} prompt menyebutkan brand kamu
           </p>
 
           {/* Competitor strip */}
-          <div
-            style={{
-              borderTop: "1px solid var(--border-default)",
-              paddingTop: "16px",
-              marginTop: "8px",
-              width: "100%",
-              textAlign: "center",
-            }}
-          >
-            <p style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginBottom: "10px", marginTop: 0 }}>
+          <div className="border-t border-border-default pt-4 mt-2 w-full text-center">
+            <p className="type-sm text-text-muted mb-2.5 mt-0">
               ChatGPT lebih banyak menyebutkan kompetitor ini:
             </p>
-            <div>
-              <span
-                style={{
-                  display: "inline-flex",
-                  background: "#F9FAFB",
-                  color: "var(--text-muted)",
-                  borderRadius: "var(--radius-md)",
-                  padding: "6px 14px",
-                  fontSize: "13px",
-                  fontStyle: "italic",
-                }}
-              >
-                Lihat rekomendasi untuk detailnya
-              </span>
-            </div>
+            <span className="inline-flex bg-surface text-text-muted rounded-[var(--radius-md)] px-3.5 py-1.5 type-caption italic">
+              Lihat rekomendasi untuk detailnya
+            </span>
           </div>
         </div>
 
         {/* 2. Prompt results card */}
-        <div
-          style={{
-            background: "#ffffff",
-            border: "1px solid var(--border-default)",
-            borderRadius: "var(--radius-lg)",
-            overflow: "hidden",
-            marginBottom: "24px",
-          }}
-        >
+        <div className="bg-white border border-border-default rounded-[var(--radius-lg)] overflow-hidden mb-6">
           {/* Card header */}
-          <div
-            style={{
-              padding: "16px 20px",
-              borderBottom: "1px solid var(--border-default)",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span style={{ fontSize: "var(--text-base)", fontWeight: 600, color: "var(--text-heading)" }}>
-              Hasil Prompt
-            </span>
-            <span style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}>
-              {auditData.total_prompts} diuji
-            </span>
+          <div className="px-5 py-4 border-b border-border-default flex justify-between items-center">
+            <span className="type-body font-semibold text-text-heading">Hasil Prompt</span>
+            <span className="type-sm text-text-muted">{auditData.total_prompts} diuji</span>
           </div>
 
           {/* Result rows */}
@@ -394,29 +315,16 @@ export default function ResultsPage() {
             <div
               key={i}
               onClick={() => setSelectedResult(result)}
-              className="result-row"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "14px",
-                padding: "14px 20px",
-                borderBottom: i < (auditData.results?.length || 0) - 1 ? "1px solid #F3F4F6" : "none",
-                transition: "background 0.2s",
-              }}
+              className={cn(
+                "result-row flex items-center gap-3.5 px-5 py-3.5 transition-colors",
+                i < (auditData.results?.length || 0) - 1 && "border-b border-[#F3F4F6]"
+              )}
             >
               {/* Icon */}
-              <div
-                style={{
-                  width: "24px",
-                  height: "24px",
-                  borderRadius: "50%",
-                  flexShrink: 0,
-                  background: result.brand_mentioned ? "#DCFCE7" : "#FEE2E2",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <div className={cn(
+                "w-6 h-6 rounded-full shrink-0 flex items-center justify-center",
+                result.brand_mentioned ? "bg-[#DCFCE7]" : "bg-[#FEE2E2]"
+              )}>
                 {result.brand_mentioned ? (
                   <IconCheck size={14} stroke={2.5} color="#22C55E" />
                 ) : (
@@ -425,34 +333,17 @@ export default function ResultsPage() {
               </div>
 
               {/* Prompt text */}
-              <span
-                style={{
-                  fontSize: "var(--text-sm)",
-                  color: "var(--text-body)",
-                  flex: 1,
-                  lineHeight: 1.4,
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                }}
-              >
+              <span className="type-sm text-text-body flex-1 leading-snug line-clamp-2">
                 {result.prompt_text}
               </span>
 
               {/* Badge */}
-              <span
-                style={{
-                  flexShrink: 0,
-                  borderRadius: "var(--radius-full)",
-                  padding: "3px 10px",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  background: result.brand_mentioned ? "#DCFCE7" : "#FEE2E2",
-                  color: result.brand_mentioned ? "#16A34A" : "#EF4444",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <span className={cn(
+                "shrink-0 rounded-full px-2.5 py-0.5 type-caption font-medium whitespace-nowrap",
+                result.brand_mentioned
+                  ? "bg-[#DCFCE7] text-success"
+                  : "bg-[#FEE2E2] text-error"
+              )}>
                 {result.brand_mentioned ? "Disebut" : "Tidak disebut"}
               </span>
             </div>
@@ -460,10 +351,8 @@ export default function ResultsPage() {
         </div>
 
         {/* 3. CTA bar */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
-          <Button variant="default">
-            Simpan laporan
-          </Button>
+        <div className="flex justify-end gap-3 mt-2">
+          <Button variant="default">Simpan laporan</Button>
           <Button variant="brand" onClick={() => router.push(`/audit/${auditId}/recommendations`)}>
             Lihat Rekomendasi <IconArrowRight size={18} stroke={1.5} />
           </Button>

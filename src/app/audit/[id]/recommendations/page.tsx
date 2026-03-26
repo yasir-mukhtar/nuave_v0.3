@@ -198,11 +198,7 @@ export default function RecommendationsPage() {
       if (line.match(/^#{1,3}\s/)) {
         const content = line.replace(/^#{1,3}\s/, '');
         return (
-          <p key={i} style={{
-            fontWeight: 600, fontSize: '14px',
-            color: '#111827', marginTop: '10px',
-            marginBottom: '2px'
-          }}>
+          <p key={i} className="type-body font-semibold text-text-heading mt-2.5 mb-0.5 m-0">
             {content}
           </p>
         );
@@ -210,22 +206,17 @@ export default function RecommendationsPage() {
       if (line.match(/^[\-\*•]\s/)) {
         const content = line.replace(/^[\-\*•]\s/, '');
         return (
-          <div key={i} style={{
-            display: 'flex', gap: '8px',
-            marginBottom: '3px', fontSize: '14px'
-          }}>
-            <span style={{ color: '#533AFD', flexShrink: 0 }}>•</span>
+          <div key={i} className="flex gap-2 mb-0.5 type-body">
+            <span className="text-brand shrink-0">•</span>
             <span dangerouslySetInnerHTML={{
               __html: content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             }} />
           </div>
         );
       }
-      if (line.trim() === '') return <div key={i} style={{ height: '6px' }} />;
+      if (line.trim() === '') return <div key={i} className="h-[6px]" />;
       return (
-        <p key={i} style={{
-          lineHeight: '1.7', marginBottom: '2px'
-        }}
+        <p key={i} className="type-body leading-[1.7] mb-0.5 m-0"
           dangerouslySetInnerHTML={{
             __html: line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           }} />
@@ -239,81 +230,54 @@ export default function RecommendationsPage() {
     return rec.type === activeFilter;
   });
 
-  const getPriorityBadgeStyle = (priority: string) => {
-    switch (priority) {
-      case 'high': return { background: '#FEE2E2', color: '#DC2626', label: 'Tinggi' };
-      case 'medium': return { background: '#FEF3C7', color: '#D97706', label: 'Sedang' };
-      case 'low': return { background: '#F3F4F6', color: '#6B7280', label: 'Rendah' };
-      default: return { background: '#F3F4F6', color: '#6B7280', label: priority };
-    }
+  const priorityBadgeConfig: Record<string, { label: string; className: string }> = {
+    high:   { label: 'Tinggi',  className: 'bg-[#FEE2E2] text-error' },
+    medium: { label: 'Sedang',  className: 'bg-[#FEF3C7] text-warning' },
+    low:    { label: 'Rendah',  className: 'bg-surface-raised text-text-muted' },
   };
 
-  const getTypeBadgeStyle = (type: string) => {
-    switch (type) {
-      case 'web_copy': return { background: '#EDE9FF', color: '#533AFD', label: 'Web Copy' };
-      case 'content_gap': return { background: '#DCFCE7', color: '#16A34A', label: 'Content Gap' };
-      case 'structure': 
-      case 'meta_structure': return { background: '#DBEAFE', color: '#2563EB', label: 'Meta & Structure' };
-      default: return { background: '#F3F4F6', color: '#374151', label: type };
-    }
+  const typeBadgeConfig: Record<string, { label: string; className: string }> = {
+    web_copy:       { label: 'Web Copy',         className: 'bg-[#EDE9FF] text-brand' },
+    content_gap:    { label: 'Content Gap',      className: 'bg-[#DCFCE7] text-success' },
+    structure:      { label: 'Meta & Structure', className: 'bg-[#DBEAFE] text-[#2563EB]' },
+    meta_structure: { label: 'Meta & Structure', className: 'bg-[#DBEAFE] text-[#2563EB]' },
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-page)' }}>
+    <div className="min-h-screen bg-page">
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulse-light {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
       `}</style>
 
       {/* TOPBAR */}
-      <div style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-        background: 'white',
-        borderBottom: '1px solid #E5E7EB',
-        padding: '16px 32px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
+      <div className="sticky top-0 z-10 bg-white border-b border-border-default px-8 py-4 flex justify-between items-center">
         <button
           onClick={() => router.push(`/audit/${auditId}/results`)}
           className="flex items-center gap-2 type-body font-[var(--btn-font-weight)] text-text-muted bg-transparent border-none cursor-pointer hover:text-text-body transition-colors"
         >
           <IconArrowLeft size={18} stroke={1.5} /> Kembali ke hasil
         </button>
-        
-        <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
-          {brandName} <span style={{ color: '#9CA3AF', fontWeight: 400 }}>Rekomendasi</span>
+
+        <div className="type-body font-semibold text-text-heading">
+          {brandName} <span className="text-text-muted font-normal">Rekomendasi</span>
         </div>
-        
-        <div style={{
-          background: '#F3F4F6',
-          padding: '6px 12px',
-          borderRadius: 'var(--radius-full)',
-          fontSize: '13px',
-          fontWeight: 600,
-          color: '#374151'
-        }}>
+
+        <div className="bg-surface-raised px-3 py-1.5 rounded-full type-caption font-semibold text-text-body">
           {credits !== null ? credits : '—'} kredit
         </div>
       </div>
 
       {/* HERO */}
-      <div style={{ padding: '32px 32px 0' }}>
-        <h1 style={{ fontSize: '24px', margin: '0 0 8px 0' }}>
+      <div className="px-8 pt-8">
+        <h1 className="text-[24px] m-0 mb-2">
           Begini cara agar ChatGPT menyebut bisnis kamu
         </h1>
-        <p style={{ fontSize: '16px', color: '#6B7280', margin: 0 }}>
+        <p className="type-body text-text-muted m-0">
           Perbaiki isu-isu ini untuk meningkatkan visibility score AI kamu
         </p>
 
         {/* FILTER TABS */}
-        <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
+        <div className="flex gap-2 mt-5">
           {[
             { id: 'all', label: 'Semua' },
             { id: 'web_copy', label: 'Web Copy' },
@@ -338,80 +302,58 @@ export default function RecommendationsPage() {
       </div>
 
       {/* RECOMMENDATIONS GRID */}
-      <div style={{ 
-        padding: '24px 32px', 
-        display: 'grid', 
-        gridTemplateColumns: '1fr', 
-        gap: '12px' 
-      }}>
+      <div className="px-8 py-6 grid grid-cols-1 gap-3">
         {loading || (recommendations.length === 0 && polling) ? (
           <>
             {[1,2,3,4].map((i) => (
-              <div key={i} className="card" style={{ height: '120px', animation: 'pulse-light 1.5s ease-in-out infinite' }}>
-                <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-                  <div style={{ width: "60px", height: "22px", borderRadius: "var(--radius-sm)", background: "#F3F4F6" }} />
-                  <div style={{ width: "80px", height: "22px", borderRadius: "var(--radius-sm)", background: "#F3F4F6" }} />
+              <div key={i} className="card h-[120px] animate-pulse">
+                <div className="flex gap-3 mb-4">
+                  <div className="w-[60px] h-[22px] rounded-[var(--radius-sm)] bg-surface-raised" />
+                  <div className="w-[80px] h-[22px] rounded-[var(--radius-sm)] bg-surface-raised" />
                 </div>
-                <div style={{ width: "70%", height: "20px", borderRadius: "var(--radius-sm)", background: "#F3F4F6", marginBottom: "10px" }} />
+                <div className="w-[70%] h-5 rounded-[var(--radius-sm)] bg-surface-raised mb-2.5" />
               </div>
             ))}
-            <p style={{ textAlign: "center", fontSize: "13px", color: "var(--text-muted)", marginTop: "16px" }}>
+            <p className="type-caption text-text-muted text-center mt-4">
               {polling ? "Menyiapkan rekomendasi kamu..." : "Memuat rekomendasi..."}
             </p>
           </>
         ) : recommendations.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: '#6B7280' }}>
+          <div className="text-center py-[60px] text-text-muted">
             <p>Tidak ada rekomendasi untuk audit ini.</p>
           </div>
         ) : (
           filteredRecommendations.map(rec => {
-            const priorityInfo = getPriorityBadgeStyle(rec.priority);
-            const typeStyle = getTypeBadgeStyle(rec.type);
+            const priorityInfo = priorityBadgeConfig[rec.priority] ?? priorityBadgeConfig.low;
+            const typeInfo = typeBadgeConfig[rec.type] ?? { label: rec.type, className: 'bg-surface-raised text-text-body' };
             const isRevealed = revealedIds.has(rec.id);
 
             return (
-              <div key={rec.id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <span style={{ 
-                      background: priorityInfo.background,
-                      color: priorityInfo.color,
-                      borderRadius: 'var(--radius-full)',
-                      padding: '2px 10px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      textTransform: 'capitalize'
-                    }}>
+              <div key={rec.id} className="card flex flex-col">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex gap-2">
+                    <span className={cn("rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize", priorityInfo.className)}>
                       Prioritas {priorityInfo.label}
                     </span>
-                    <span style={{ 
-                      background: typeStyle.background,
-                      color: typeStyle.color,
-                      borderRadius: 'var(--radius-full)',
-                      padding: '2px 10px',
-                      fontSize: '11px',
-                      fontWeight: 600
-                    }}>
-                      {typeStyle.label}
+                    <span className={cn("rounded-full px-2.5 py-0.5 text-[11px] font-semibold", typeInfo.className)}>
+                      {typeInfo.label}
                     </span>
                   </div>
                   {rec.page_target && (
-                    <span style={{ fontSize: '12px', color: '#9CA3AF', fontWeight: 500 }}>
+                    <span className="type-caption text-text-placeholder font-medium">
                       {rec.page_target}
                     </span>
                   )}
                 </div>
 
-                <h3 style={{ fontSize: '16px', margin: '8px 0 6px' }}>
-                  {rec.title}
-                </h3>
+                <h3 className="text-[16px] m-0 mt-2 mb-1.5">{rec.title}</h3>
 
-                <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: 1.6, margin: '0 0 16px 0' }}>
+                <p className="type-body text-text-muted leading-relaxed m-0 mb-4">
                   {rec.description}
                 </p>
 
                 {!isRevealed ? (
-                  <div style={{ marginTop: 'auto' }}>
+                  <div className="mt-auto">
                     <Button variant="brand" size="sm" disabled={revealingId === rec.id} onClick={() => handleReveal(rec.id)}>
                       {revealingId === rec.id ? (
                         <><ButtonSpinner size={14} /> Memproses...</>
@@ -421,15 +363,9 @@ export default function RecommendationsPage() {
                     </Button>
                   </div>
                 ) : (
-                  <div style={{
-                    marginTop: '12px',
-                    background: '#F9FAFB',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '16px'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '12px', color: 'var(--purple)', fontWeight: 600, textTransform: 'uppercase' }}>
+                  <div className="mt-3 bg-[#F9FAFB] border border-border-default rounded-[var(--radius-md)] p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="type-caption text-brand font-semibold uppercase">
                         Saran Perbaikan
                       </span>
                       <button
@@ -439,14 +375,12 @@ export default function RecommendationsPage() {
                         <IconCopy size={14} /> Salin
                       </button>
                     </div>
-                    <div style={{ lineHeight: 1.6 }}>
+                    <div className="leading-relaxed">
                       {rec.suggested_copy ? (
                         renderMarkdown(rec.suggested_copy)
                       ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#9CA3AF' }}>
-                          <span className="loader" style={{ 
-                            width: '16px', height: '16px', border: '2px solid #E5E7EB', borderTopColor: 'var(--purple)', borderRadius: '50%', animation: 'spin 1s linear infinite' 
-                          }} />
+                        <div className="flex items-center gap-2 text-text-placeholder">
+                          <span className="w-4 h-4 border-2 border-border-default border-t-brand rounded-full animate-spin" />
                           Menyiapkan solusi...
                         </div>
                       )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { IconPlus } from '@tabler/icons-react';
+import { cn } from '@/lib/utils';
 
 type Competitor = {
   name: string;
@@ -17,51 +18,11 @@ function getLogoUrl(name: string) {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 }
 
-function LogoFallback({ name }: { name: string }) {
-  return (
-    <div
-      style={{
-        width: 24,
-        height: 24,
-        borderRadius: 'var(--radius-sm)',
-        background: '#F3F4F6',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '11px',
-        fontWeight: 600,
-        color: 'var(--text-muted)',
-        flexShrink: 0,
-      }}
-    >
-      {name.charAt(0).toUpperCase()}
-    </div>
-  );
-}
-
 export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
   return (
-    <div
-      style={{
-        border: '1px solid var(--border-light)',
-        borderRadius: 'var(--radius-sm)',
-        boxShadow: 'var(--shadow-subtle)',
-        background: '#ffffff',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '424px',
-      }}
-    >
+    <div className="border border-border-light rounded-[var(--radius-sm)] shadow-app-subtle bg-white flex flex-col h-[424px]">
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '56px',
-          padding: '0 20px',
-        }}
-      >
+      <div className="flex items-center justify-between h-14 px-5 shrink-0">
         <span className="type-title text-text-heading">
           Kompetitor
         </span>
@@ -71,51 +32,30 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
         </button>
       </div>
 
-      <div style={{ height: '1px', background: 'var(--border-light)', margin: '0' }} />
+      <div className="h-px bg-[var(--border-light)]" />
 
       {/* Competitor list */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '0 20px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0px',
-        }}
-      >
+      <div className="flex-1 overflow-y-auto px-5 pb-5 flex flex-col">
         {competitors.length === 0 ? (
-          <div
-            className="type-body"
-            style={{ padding: '24px 0', textAlign: 'center', color: 'var(--text-muted)' }}
-          >
+          <div className="type-body py-6 text-center text-text-muted">
             Belum ada data kompetitor.
           </div>
         ) : (
           competitors.map((comp, idx) => (
             <div
               key={comp.name + idx}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 0',
-                borderTop: idx > 0 ? '1px solid #F3F4F6' : 'none',
-              }}
+              className={cn(
+                "flex items-center justify-between py-2.5",
+                idx > 0 && "border-t border-[#F3F4F6]"
+              )}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div className="flex items-center gap-2.5">
                 <CompetitorLogo name={comp.name} />
-                <span
-                  className="type-body"
-                  style={{ color: 'var(--text-body)' }}
-                >
+                <span className="type-body text-text-body">
                   {comp.name}
                 </span>
               </div>
-              <span
-                className="type-body"
-                style={{ fontWeight: 500, color: 'var(--text-heading)' }}
-              >
+              <span className="type-body font-medium text-text-heading">
                 {comp.score.toFixed(1)}%
               </span>
             </div>
@@ -135,7 +75,7 @@ function CompetitorLogo({ name }: { name: string }) {
       alt={name}
       width={24}
       height={24}
-      style={{ borderRadius: 'var(--radius-sm)', flexShrink: 0, background: '#F3F4F6' }}
+      className="rounded-[var(--radius-sm)] shrink-0 bg-[#F3F4F6]"
       onError={(e) => {
         const target = e.currentTarget;
         const parent = target.parentElement;

@@ -1,5 +1,6 @@
 import { IconArrowUpRight, IconSitemap, IconArticle, IconPencilCode } from '@tabler/icons-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 type ActionItem = {
   title: string;
@@ -44,61 +45,30 @@ function PriorityBarsLow() {
 }
 
 const priorityConfig = {
-  high: { label: 'Prioritas tinggi', color: '#7C3AED', Icon: PriorityBarsHigh },
-  medium: { label: 'Prioritas sedang', color: '#D97706', Icon: PriorityBarsMedium },
-  low: { label: 'Prioritas rendah', color: '#374151', Icon: PriorityBarsLow },
+  high:   { label: 'Prioritas tinggi',  textClass: 'text-brand',       Icon: PriorityBarsHigh },
+  medium: { label: 'Prioritas sedang',  textClass: 'text-warning',     Icon: PriorityBarsMedium },
+  low:    { label: 'Prioritas rendah',  textClass: 'text-text-body',   Icon: PriorityBarsLow },
 };
 
 const typeConfig: Record<string, { label: string; Icon: typeof IconSitemap }> = {
-  meta: { label: 'Meta & struktur', Icon: IconSitemap },
-  structure: { label: 'Meta & struktur', Icon: IconSitemap },
-  content_gap: { label: 'Konten', Icon: IconArticle },
-  web_copy: { label: 'Web copy', Icon: IconPencilCode },
+  meta:        { label: 'Meta & struktur', Icon: IconSitemap },
+  structure:   { label: 'Meta & struktur', Icon: IconSitemap },
+  content_gap: { label: 'Konten',          Icon: IconArticle },
+  web_copy:    { label: 'Web copy',        Icon: IconPencilCode },
 };
 
 export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps) {
   return (
-    <div
-      style={{
-        border: '1px solid var(--border-light)',
-        borderRadius: 'var(--radius-sm)',
-        boxShadow: 'var(--shadow-subtle)',
-        background: '#ffffff',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="border border-border-light rounded-[var(--radius-sm)] shadow-app-subtle bg-white flex flex-col overflow-hidden">
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '56px',
-          flexShrink: 0,
-          padding: '0 20px',
-        }}
-      >
+      <div className="flex items-center justify-between h-14 shrink-0 px-5">
         <span className="type-title text-text-heading">
           Action Item
         </span>
         {auditId && (
           <Link
             href={`/audit/${auditId}/recommendations`}
-            className="type-body"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              fontWeight: 500,
-              color: 'var(--text-heading)',
-              textDecoration: 'none',
-              border: '1px solid var(--border-light)',
-              borderRadius: 'var(--radius-sm)',
-              boxShadow: 'var(--shadow-subtle)',
-            }}
+            className="type-body flex items-center gap-1 px-3 py-1.5 font-[var(--btn-font-weight)] text-text-heading no-underline border border-border-light rounded-[var(--radius-sm)] shadow-app-subtle hover:border-border-default transition-colors"
           >
             Lihat semua
             <IconArrowUpRight size={14} stroke={2} />
@@ -106,18 +76,12 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
         )}
       </div>
 
-      <div style={{ height: '1px', background: 'var(--border-light)', flexShrink: 0 }} />
+      <div className="h-px bg-[var(--border-light)] shrink-0" />
 
       {/* Items list */}
-      <div
-        className="scroll-subtle"
-        style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}
-      >
+      <div className="scroll-subtle flex-1 overflow-y-auto py-1">
         {items.length === 0 ? (
-          <div
-            className="type-body"
-            style={{ padding: '24px 20px', textAlign: 'center', color: 'var(--text-muted)' }}
-          >
+          <div className="type-body py-6 px-5 text-center text-text-muted">
             Belum ada action item.
           </div>
         ) : (
@@ -129,77 +93,31 @@ export default function ActionItemPanel({ items, auditId }: ActionItemPanelProps
             return (
               <div
                 key={idx}
-                style={{
-                  padding: '16px 20px',
-                  borderBottom: idx < items.length - 1 ? '1px solid #F3F4F6' : 'none',
-                }}
+                className={cn(
+                  "px-5 py-4",
+                  idx < items.length - 1 && "border-b border-[#F3F4F6]"
+                )}
               >
                 {/* Number + Title */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span
-                    style={{
-                      width: '22px',
-                      height: '22px',
-                      borderRadius: '50%',
-                      background: 'var(--purple)',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      flexShrink: 0,
-                      marginTop: '1px',
-                    }}
-                  >
+                <div className="flex items-start gap-2.5">
+                  <span className="w-[22px] h-[22px] rounded-full bg-brand text-white flex items-center justify-center text-[11px] font-semibold shrink-0 mt-px">
                     {idx + 1}
                   </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p
-                      className="type-body"
-                      style={{ fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}
-                    >
+                  <div className="flex-1 min-w-0">
+                    <p className="type-body font-semibold text-text-heading m-0">
                       {item.title}
                     </p>
-                    <p
-                      className="type-caption"
-                      style={{
-                        color: 'var(--text-muted)',
-                        margin: '4px 0 0',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}
-                    >
+                    <p className="type-caption text-text-muted mt-1 m-0 line-clamp-2">
                       {item.description}
                     </p>
 
                     {/* Badges */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
-                      <span
-                        className="type-caption"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontWeight: 500,
-                          color: priority.color,
-                        }}
-                      >
+                    <div className="flex items-center gap-2 mt-2.5">
+                      <span className={cn("type-caption inline-flex items-center gap-1 font-medium", priority.textClass)}>
                         <priority.Icon />
                         {priority.label}
                       </span>
-                      <span
-                        className="type-caption"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          fontWeight: 500,
-                          color: 'var(--text-muted)',
-                        }}
-                      >
+                      <span className="type-caption inline-flex items-center gap-1 font-medium text-text-muted">
                         <TypeIcon size={14} stroke={1.5} />
                         {typeInfo.label}
                       </span>

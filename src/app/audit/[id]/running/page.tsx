@@ -89,48 +89,13 @@ export default function AuditRunningPage() {
 
   if (error) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#ffffff",
-          textAlign: "center",
-          padding: "24px",
-          fontFamily: "var(--font-geist-sans), sans-serif",
-        }}
-      >
-        <div style={{
-          width: "120px",
-          height: "120px",
-          borderRadius: "50%",
-          background: "#FEF2F2",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "24px"
-        }}>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white text-center p-6">
+        <div className="w-[120px] h-[120px] rounded-full bg-[#FEF2F2] flex items-center justify-center mb-6">
           <IconAlertTriangle size={48} stroke={1.5} color="#EF4444" />
         </div>
-        <h1 style={{ fontSize: "24px", margin: "0 0 8px 0" }}>
-          Terjadi kesalahan
-        </h1>
-        <p style={{ fontSize: "16px", color: "#6B7280", margin: "0 0 24px 0" }}>
-          {error}
-        </p>
-        <a
-          href="/"
-          style={{
-            background: "#533AFD",
-            color: "#ffffff",
-            padding: "12px 24px",
-            borderRadius: "var(--radius-md)",
-            fontWeight: 600,
-            textDecoration: "none"
-          }}
-        >
+        <h1 className="text-[24px] m-0 mb-2">Terjadi kesalahan</h1>
+        <p className="type-body text-text-muted m-0 mb-6">{error}</p>
+        <a href="/" className="bg-brand text-white px-6 py-3 rounded-[var(--radius-md)] font-semibold no-underline">
           Coba lagi
         </a>
       </div>

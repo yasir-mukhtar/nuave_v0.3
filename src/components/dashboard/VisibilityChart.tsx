@@ -50,31 +50,16 @@ function ChartTooltip({ active, payload }: any) {
   const change = data._change;
 
   return (
-    <div
-      style={{
-        background: '#ffffff',
-        border: '1px solid var(--border-light)',
-        borderRadius: 'var(--radius-sm)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-        padding: '10px 14px',
-        minWidth: '140px',
-      }}
-    >
-      <div className="type-caption" style={{ color: '#9CA3AF', marginBottom: '6px' }}>
+    <div className="bg-white border border-border-light rounded-[var(--radius-sm)] shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-2.5 px-3.5 min-w-[140px]">
+      <div className="type-caption text-text-placeholder mb-1.5">
         {formatDateFull(data.date)}
       </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+      <div className="flex items-baseline gap-2">
         <span className="type-body-lg font-bold text-text-heading">
           {score}%
         </span>
         {change != null && change !== 0 && (
-          <span
-            className="type-caption"
-            style={{
-              fontWeight: 600,
-              color: change > 0 ? '#22C55E' : '#EF4444',
-            }}
-          >
+          <span className={cn("type-caption font-semibold", change > 0 ? "text-success" : "text-error")}>
             {change > 0 ? '+' : ''}{change}%
           </span>
         )}
@@ -150,29 +135,10 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
   }, [xDomain, days]);
 
   return (
-    <div
-      style={{
-        border: '1px solid var(--border-light)',
-        borderRadius: 'var(--radius-sm)',
-        boxShadow: 'var(--shadow-subtle)',
-        background: '#ffffff',
-        height: '424px',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <div className="border border-border-light rounded-[var(--radius-sm)] shadow-app-subtle bg-white h-[424px] flex flex-col">
       {/* Header row */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '56px',
-          flexShrink: 0,
-          padding: '0 24px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+      <div className="flex items-center justify-between h-14 shrink-0 px-6">
+        <div className="flex items-baseline gap-2">
           <span className="type-heading-md">
             {latestScore}%
           </span>
@@ -182,7 +148,7 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
         </div>
 
         {/* Filter dropdown */}
-        <div ref={filterRef} style={{ position: 'relative' }}>
+        <div ref={filterRef} className="relative">
           <button
             onClick={() => dropdownOpen ? closeFilterDropdown() : setDropdownOpen(true)}
             className="type-body flex items-center gap-1.5 px-3 py-1.5 font-[var(--btn-font-weight)] text-text-body bg-white border border-border-light rounded-[var(--btn-radius)] shadow-app-subtle cursor-pointer hover:border-border-default transition-colors"
@@ -193,20 +159,10 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
 
           {dropdownOpen && (
             <div
-              className={dropdownClosing ? "popover-down-out" : "popover-down"}
-              style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: '4px',
-                background: '#ffffff',
-                border: '1px solid var(--border-light)',
-                borderRadius: 'var(--radius-sm)',
-                boxShadow: 'var(--shadow-modal)',
-                overflow: 'hidden',
-                zIndex: 20,
-                minWidth: '160px',
-              }}
+              className={cn(
+                "absolute top-full right-0 mt-1 bg-white border border-border-light rounded-[var(--radius-sm)] shadow-[var(--shadow-modal)] overflow-hidden z-20 min-w-[160px]",
+                dropdownClosing ? "popover-down-out" : "popover-down"
+              )}
             >
               {filterOptions.map((opt, idx) => (
                 <button
@@ -227,10 +183,10 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
         </div>
       </div>
 
-      <div style={{ height: '1px', background: 'var(--border-light)', flexShrink: 0 }} />
+      <div className="h-px bg-[var(--border-light)] shrink-0" />
 
       {/* Chart area */}
-      <div style={{ flex: 1, minHeight: 0, padding: '20px 24px 24px', position: 'relative' }}>
+      <div className="flex-1 min-h-0 p-5 px-6 pb-6 relative">
         {isEmpty ? (
           <EmptyChartState days={days} />
         ) : (
@@ -307,19 +263,11 @@ function EmptyChartState({ days }: { days: number }) {
   }
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <div className="w-full h-full relative flex flex-col">
       <svg
         width="100%"
         height="100%"
-        style={{ position: 'absolute', inset: 0 }}
+        className="absolute inset-0"
         preserveAspectRatio="none"
       >
         {[0.2, 0.4, 0.6, 0.8, 1.0].map((ratio) => (
@@ -336,36 +284,16 @@ function EmptyChartState({ days }: { days: number }) {
         ))}
       </svg>
       {/* Date labels */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          justifyContent: 'space-between',
-          padding: '0 4px',
-        }}
-      >
+      <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1">
         {labels.map((label, i) => (
-          <span key={i} className="type-caption" style={{ color: '#9CA3AF' }}>{label}</span>
+          <span key={i} className="type-caption text-text-placeholder">{label}</span>
         ))}
       </div>
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-        }}
-      >
-        <p className="type-body text-text-muted" style={{ margin: 0, textAlign: 'center' }}>
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+        <p className="type-body text-text-muted m-0 text-center">
           Belum ada data audit.
         </p>
-        <p className="type-caption text-text-placeholder" style={{ margin: 0, textAlign: 'center' }}>
+        <p className="type-caption text-text-placeholder m-0 text-center">
           Jalankan audit pertama untuk melihat skor visibilitas Anda.
         </p>
       </div>

@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { IconPencil, IconArrowLeft, IconRefresh, IconArrowRight, IconCheck, IconX } from '@tabler/icons-react';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface Prompt {
   id: string;
@@ -14,16 +16,14 @@ interface Prompt {
 
 function ProgressBar({ active }: { active: number }) {
   return (
-    <div style={{ display: "flex", gap: "4px", maxWidth: "200px", width: "100%" }}>
+    <div className="flex gap-1 max-w-[200px] w-full">
       {[0, 1, 2, 3].map((i) => (
         <div
           key={i}
-          style={{
-            height: "3px",
-            flex: 1,
-            borderRadius: "var(--radius-full)",
-            background: i < active ? "var(--purple)" : "var(--border-default)",
-          }}
+          className={cn(
+            "h-[3px] flex-1 rounded-full",
+            i < active ? "bg-brand" : "bg-border-default"
+          )}
         />
       ))}
     </div>
@@ -77,7 +77,6 @@ export default function PromptsPage() {
     );
     setPrompts(updated);
 
-    // Sync sessionStorage
     const stored = sessionStorage.getItem("nuave_prompts");
     if (stored) {
       try {
@@ -90,9 +89,7 @@ export default function PromptsPage() {
     setEditingIndex(null);
   };
 
-  const cancelEdit = () => {
-    setEditingIndex(null);
-  };
+  const cancelEdit = () => setEditingIndex(null);
 
   const handleRunAudit = () => {
     setError(null);
@@ -100,7 +97,7 @@ export default function PromptsPage() {
     try {
       const profileStr = sessionStorage.getItem("nuave_profile");
       const profileData = profileStr ? JSON.parse(profileStr) : null;
-      
+
       const workspace_id = profileData?.workspace_id || crypto.randomUUID();
       const brand_name = profileData?.profile?.brand_name || "";
       const website_url = profileData?.profile?.website_url || profileData?.website_url || "";
@@ -109,12 +106,11 @@ export default function PromptsPage() {
         sessionStorage.getItem("nuave_prompts") || '{"prompts":[]}'
       );
 
-      // Start audit in background (don't await)
       fetch("/api/run-audit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          workspace_id, 
+        body: JSON.stringify({
+          workspace_id,
           prompts: storedPrompts,
           brand_name,
           website_url,
@@ -123,16 +119,14 @@ export default function PromptsPage() {
       }).then(async (res) => {
         const data = await res.json();
         if (data.audit_id) {
-          // Save the audit_id immediately for the running screen
           sessionStorage.setItem("nuave_pending_audit_id", data.audit_id);
         }
       }).catch(err => {
         console.error("Audit error:", err);
       });
 
-      // Immediately redirect to running screen
       router.push("/audit/temp/running");
-      
+
     } catch (err: any) {
       console.error("Audit error:", err);
       setError(err.message || "Terjadi kesalahan saat menjalankan audit.");
@@ -141,16 +135,8 @@ export default function PromptsPage() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "var(--bg-page)",
-        }}
-      >
-        <p style={{ color: "var(--text-muted)" }}>Memuat prompt...</p>
+      <div className="min-h-screen flex items-center justify-center bg-page">
+        <p className="type-body text-text-muted">Memuat prompt...</p>
       </div>
     );
   }
@@ -158,57 +144,21 @@ export default function PromptsPage() {
   return (
     <>
       <style>{`
-        .prompt-row {
-          transition: border-color var(--transition-fast), background var(--transition-fast);
-        }
-        .prompt-row:hover {
-          border-color: var(--purple) !important;
-          background: #FAFBFF !important;
-        }
-        .prompt-row:hover .pencil-btn {
-          color: var(--purple);
-        }
-        .pencil-btn {
-          color: var(--text-placeholder);
-          transition: color var(--transition-fast);
-        }
-        .back-btn:hover, .regen-btn:hover {
-          color: var(--text-heading);
-        }
+        .prompt-row { transition: border-color var(--transition-fast), background var(--transition-fast); }
+        .prompt-row:hover { border-color: var(--purple) !important; background: #FAFBFF !important; }
+        .prompt-row:hover .pencil-btn { color: var(--purple); }
+        .pencil-btn { color: var(--text-placeholder); transition: color var(--transition-fast); }
+        .back-btn:hover, .regen-btn:hover { color: var(--text-heading); }
       `}</style>
 
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "var(--bg-page)",
-          padding: "40px 32px 80px",
-        }}
-      >
-        <div style={{ maxWidth: "680px", margin: "0 auto" }}>
+      <div className="min-h-screen bg-page px-8 pt-10 pb-20">
+        <div className="max-w-[680px] mx-auto">
+
           {/* Top bar */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "32px",
-            }}
-          >
+          <div className="flex items-center justify-between mb-8">
             <button
-              className="back-btn"
+              className="back-btn flex items-center gap-1 type-body text-text-muted bg-transparent border-none cursor-pointer p-0 transition-colors"
               onClick={() => router.back()}
-              style={{
-                fontSize: "14px",
-                color: "var(--text-muted)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                transition: "color var(--transition-fast)",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
             >
               <IconArrowLeft size={18} stroke={1.5} /> Kembali
             </button>
@@ -216,78 +166,37 @@ export default function PromptsPage() {
             <ProgressBar active={4} />
 
             <button
-              className="regen-btn"
-              style={{
-                fontSize: "14px",
-                color: "var(--text-muted)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: 0,
-                transition: "color var(--transition-fast)",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
+              className="regen-btn flex items-center gap-1 type-body text-text-muted bg-transparent border-none cursor-pointer p-0 transition-colors"
             >
               <IconRefresh size={18} stroke={1.5} /> Regenerasi
             </button>
           </div>
 
           {/* Section header */}
-          <div style={{ marginBottom: "24px" }}>
-            <h1
-              style={{
-                fontSize: "var(--text-2xl)",
-                margin: 0,
-              }}
-            >
-              Saran prompt
-            </h1>
-            <p
-              style={{
-                fontSize: "var(--text-base)",
-                color: "var(--text-muted)",
-                marginTop: "4px",
-                marginBottom: 0,
-              }}
-            >
+          <div className="mb-6">
+            <h1 className="text-[length:var(--text-2xl)] m-0">Saran prompt</h1>
+            <p className="type-body text-text-muted mt-1 mb-0">
               Kami akan menanyakan ini ke ChatGPT untuk mengukur visibilitas brand kamu.
             </p>
           </div>
 
           {error && (
-            <div
-              style={{
-                background: "#FEF2F2",
-                border: "1px solid #FECACA",
-                borderRadius: "var(--radius-md)",
-                padding: "12px 16px",
-                marginBottom: "24px",
-                color: "#991B1B",
-                fontSize: "var(--text-sm)",
-              }}
-            >
+            <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-[var(--radius-md)] px-4 py-3 mb-6 text-[#991B1B] type-sm">
               {error}
             </div>
           )}
 
           {/* Prompt list */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div className="flex flex-col gap-2">
             {prompts.map((prompt, index) => (
               <div
                 key={prompt.id || index}
-                className="prompt-row"
-                style={{
-                  background: "#ffffff",
-                  border: `1px solid ${editingIndex === index ? "var(--purple)" : "var(--border-default)"}`,
-                  borderRadius: "var(--radius-md)",
-                  padding: "14px 18px",
-                  display: "flex",
-                  alignItems: editingIndex === index ? "flex-end" : "center",
-                  justifyContent: "space-between",
-                  gap: "12px",
-                }}
+                className={cn(
+                  "prompt-row bg-white rounded-[var(--radius-md)] px-[18px] py-3.5 flex gap-3 border",
+                  editingIndex === index
+                    ? "items-end border-brand"
+                    : "items-center border-border-default"
+                )}
               >
                 {editingIndex === index ? (
                   <>
@@ -300,49 +209,22 @@ export default function PromptsPage() {
                         if (e.key === "Escape") cancelEdit();
                       }}
                       rows={2}
-                      style={{
-                        flex: 1,
-                        fontSize: "var(--text-sm)",
-                        color: "var(--text-body)",
-                        lineHeight: 1.5,
-                        border: "none",
-                        background: "transparent",
-                        outline: "none",
-                        resize: "none",
-                        fontFamily: "inherit",
-                        padding: 0,
-                      }}
+                      className="flex-1 type-sm text-text-body leading-snug border-none bg-transparent outline-none resize-none font-[inherit] p-0"
                     />
-                    <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
+                    <div className="flex gap-1 shrink-0">
                       <button
                         onClick={cancelEdit}
-                        style={{
-                          background: "var(--bg-surface)",
-                          border: "1px solid var(--border-default)",
-                          borderRadius: "var(--radius-xs)",
-                          cursor: "pointer",
-                          padding: "4px",
-                          display: "flex",
-                          alignItems: "center",
-                          color: "var(--text-muted)",
-                        }}
+                        className="bg-surface border border-border-default rounded-[var(--radius-xs)] cursor-pointer p-1 flex items-center text-text-muted hover:text-text-body transition-colors"
                       >
                         <IconX size={16} stroke={2} />
                       </button>
                       <button
                         onClick={saveEdit}
                         disabled={!editValue.trim()}
-                        style={{
-                          background: "var(--purple)",
-                          border: "none",
-                          borderRadius: "var(--radius-xs)",
-                          cursor: editValue.trim() ? "pointer" : "not-allowed",
-                          padding: "4px",
-                          display: "flex",
-                          alignItems: "center",
-                          color: "#ffffff",
-                          opacity: editValue.trim() ? 1 : 0.4,
-                        }}
+                        className={cn(
+                          "bg-brand border-none rounded-[var(--radius-xs)] p-1 flex items-center text-white",
+                          editValue.trim() ? "cursor-pointer opacity-100" : "cursor-not-allowed opacity-40"
+                        )}
                       >
                         <IconCheck size={16} stroke={2} />
                       </button>
@@ -350,28 +232,12 @@ export default function PromptsPage() {
                   </>
                 ) : (
                   <>
-                    <span
-                      style={{
-                        fontSize: "var(--text-sm)",
-                        color: "var(--text-body)",
-                        lineHeight: 1.5,
-                        flex: 1,
-                      }}
-                    >
+                    <span className="type-sm text-text-body leading-snug flex-1">
                       {prompt.prompt_text}
                     </span>
                     <button
-                      className="pencil-btn"
+                      className="pencil-btn bg-transparent border-none cursor-pointer p-1 shrink-0 flex items-center"
                       onClick={() => startEditing(index)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "4px",
-                        flexShrink: 0,
-                        display: "flex",
-                        alignItems: "center",
-                      }}
                     >
                       <IconPencil size={18} stroke={1.5} />
                     </button>
@@ -384,40 +250,10 @@ export default function PromptsPage() {
       </div>
 
       {/* Sticky bottom bar */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          background: "#ffffff",
-          borderTop: "1px solid var(--border-default)",
-          padding: "16px 32px",
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          zIndex: 100,
-        }}
-      >
-        <button
-          onClick={handleRunAudit}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "var(--text-base)",
-            fontWeight: 600,
-            color: "#ffffff",
-            background: "var(--purple)",
-            border: "none",
-            borderRadius: "var(--radius-md)",
-            padding: "10px 24px",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
-        >
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border-default px-8 py-4 flex justify-end items-center z-[100]">
+        <Button variant="brand" onClick={handleRunAudit}>
           Lihat hasil <IconArrowRight size={18} stroke={1.5} />
-        </button>
+        </Button>
       </div>
     </>
   );
