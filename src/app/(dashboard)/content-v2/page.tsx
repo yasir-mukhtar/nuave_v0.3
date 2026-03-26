@@ -803,11 +803,30 @@ export default function KontenV2Page() {
         {selected ? (
           <>
             {/* Panel header */}
-            <div className="flex items-center gap-2 px-6 py-4 border-b border-border-default shrink-0">
-              <span className="type-title text-text-heading">Detail</span>
-              <Tip label="Konten siap pakai yang dapat langsung diimplementasikan ke website Anda.">
-                <IconInfoCircle size={14} className="text-text-muted cursor-default" />
-              </Tip>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border-default shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="type-title text-text-heading">Detail</span>
+                <Tip label="Konten siap pakai yang dapat langsung diimplementasikan ke website Anda.">
+                  <IconInfoCircle size={14} className="text-text-muted cursor-default" />
+                </Tip>
+              </div>
+              {selected.implemented ? (
+                <button
+                  onClick={() => handleUnmarkImplemented(selected.id)}
+                  className="flex items-center gap-1.5 type-body font-medium text-error hover:opacity-80 transition-opacity"
+                >
+                  Belum diimplementasi
+                  <IconX size={16} />
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleMarkImplemented(selected.id)}
+                  className="flex items-center gap-1.5 type-body font-medium text-text-muted hover:text-text-body transition-colors"
+                >
+                  Sudah diimplementasi
+                  <IconCheck size={16} />
+                </button>
+              )}
             </div>
 
             {/* Scrollable content */}
@@ -846,27 +865,6 @@ export default function KontenV2Page() {
               <div className="h-2" />
             </div>
 
-            {/* Sticky bottom action */}
-            <div className="px-6 py-4 border-t border-border-default bg-white shrink-0">
-              {selected.implemented ? (
-                <button
-                  onClick={() => handleUnmarkImplemented(selected.id)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md border border-border-default type-caption font-medium text-text-muted hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors group"
-                >
-                  <IconCheck size={15} className="text-green-600 group-hover:text-red-500 transition-colors" />
-                  <span className="group-hover:hidden">Sudah diimplementasi</span>
-                  <span className="hidden group-hover:inline">Batalkan implementasi</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleMarkImplemented(selected.id)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md border border-border-default type-caption font-semibold text-text-body hover:bg-[var(--bg-surface)] transition-colors"
-                >
-                  <IconCheck size={15} />
-                  Sudah diimplementasi
-                </button>
-              )}
-            </div>
           </>
         ) : (
           /* No selection state */
