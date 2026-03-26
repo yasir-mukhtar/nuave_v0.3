@@ -63,9 +63,9 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-screen flex-col overflow-hidden">
       <LowCreditsBanner />
-      <div className="flex flex-1">
+      <div className="flex min-h-0 flex-1">
         <Sidebar
           credits={credits}
           userName={userName}
@@ -74,9 +74,9 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
           projectName={projectName}
           websiteUrl={workspaceWebsiteUrl}
         />
-        <div className="ml-64 flex min-w-0 flex-1 flex-col bg-page">
+        <div className="ml-64 flex min-h-0 min-w-0 flex-1 flex-col bg-page">
           <Topbar />
-          <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-8">
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-8">
             {children}
           </main>
         </div>

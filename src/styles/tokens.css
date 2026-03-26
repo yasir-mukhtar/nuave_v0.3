@@ -3,6 +3,7 @@
   --bg-page: #ffffff;
   --bg-surface: #f9fafb;
   --bg-surface-raised: #f3f4f6;
+  --bg-neutral: #f5f5f5;
   --border-default: #e5e7eb;
   --border-light: #ececec;
   --border-strong: #d1d5db;
@@ -20,15 +21,25 @@
   --amber: #f59e0b;
   --amber-light: #fef3c7;
 
-  /* Typography */
-  --text-xs: 0.75rem;
-  --text-sm: 0.8125rem;
-  --text-base: 0.9375rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 2rem;
-  --text-4xl: 3rem;
+  /* Typography — fixed perfect-fourth scale (14px base, ratio 1.333) */
+  /* @link https://utopia.fyi/type/calculator?c=375,14,1.333,1440,14,1.333,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+  --step--2: 0.4924rem;   /*  ~7.9px */
+  --step--1: 0.6564rem;   /* ~10.5px */
+  --step-0:  0.875rem;    /*    14px */
+  --step-1:  1.1664rem;   /* ~18.7px */
+  --step-2:  1.5548rem;   /* ~24.9px */
+  --step-3:  2.0725rem;   /* ~33.2px */
+  --step-4:  2.7627rem;   /* ~44.2px */
+  --step-5:  3.6826rem;   /* ~58.9px */
+
+  /* Semantic aliases — use these in components */
+  --text-caption:    var(--step--1); /* ~10.5px — timestamps, meta, micro labels */
+  --text-body:       var(--step-0);  /*    14px — default body, descriptions     */
+  --text-body-lg:    var(--step-1);  /* ~18.7px — intro text, card subtitles     */
+  --text-heading-sm: var(--step-2);  /* ~24.9px — h3, section subheads           */
+  --text-heading-md: var(--step-3);  /* ~33.2px — h2, page section titles        */
+  --text-heading-lg: var(--step-4);  /* ~44.2px — h1, page titles               */
+  --text-display:    var(--step-5);  /* ~58.9px — hero/display                  */
 
   /* Spacing */
   --space-xs: 4px;

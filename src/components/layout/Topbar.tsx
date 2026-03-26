@@ -59,13 +59,13 @@ export default function Topbar() {
   return (
     <div className="flex items-center justify-between h-[52px] px-8 border-b border-border-light">
       {/* Left: page title */}
-      <span className="text-[14px] font-medium text-[#0d0d0d]">{pageTitle}</span>
+      <span className="type-title text-text-heading">{pageTitle}</span>
 
       {/* Right: project switcher */}
       <div ref={dropdownRef} className="relative">
         <button
           onClick={() => open ? closeDropdown() : setOpen(true)}
-          className="flex items-center gap-1.5 max-w-[280px] bg-transparent border border-border-light rounded-sm px-3 py-1.5 cursor-pointer font-medium text-sm text-text-heading shadow-app-subtle"
+          className="flex items-center gap-1.5 max-w-[280px] bg-transparent border border-border-light rounded-sm px-3 py-1.5 cursor-pointer type-body font-medium text-text-heading shadow-app-subtle"
           title={rawName}
         >
           <span className="truncate">{projectName}</span>
@@ -91,7 +91,7 @@ export default function Topbar() {
                       closeDropdown();
                     }}
                     className={cn(
-                      "flex items-center gap-2 w-full px-3.5 py-2.5 bg-transparent border-none cursor-pointer text-sm text-text-heading text-left",
+                      "flex items-center gap-2 w-full px-3.5 py-2.5 bg-transparent border-none cursor-pointer type-body text-text-heading text-left",
                       isActive ? "font-semibold" : "font-normal"
                     )}
                   >
@@ -114,7 +114,7 @@ export default function Topbar() {
                   closeDropdown();
                   router.push("/new-project?new=1");
                 }}
-                className="flex items-center gap-2 w-full px-3.5 py-2.5 font-medium text-sm text-text-heading bg-transparent border-none cursor-pointer text-left"
+                className="flex items-center gap-2 w-full px-3.5 py-2.5 type-body font-medium text-text-heading bg-transparent border-none cursor-pointer text-left"
               >
                 <IconPlus size={16} stroke={2} />
                 Tambah proyek

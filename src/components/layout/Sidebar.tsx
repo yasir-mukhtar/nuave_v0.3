@@ -104,11 +104,11 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
               />
             </div>
           ) : (
-            <div className="w-7 h-7 rounded-full bg-white border border-[#ececec] flex items-center justify-center text-[11px] font-semibold text-[#0d0d0d] shrink-0">
+            <div className="w-7 h-7 rounded-full bg-white border border-[#ececec] flex items-center justify-center type-caption font-semibold text-text-heading shrink-0">
               {getInitial(workspaceName)}
             </div>
           )}
-          <span className="text-[14px] font-medium text-[#0d0d0d] truncate flex-1">{workspaceName}</span>
+          <span className="type-body font-medium text-text-heading truncate flex-1">{workspaceName}</span>
           <IconSelector size={16} stroke={2} className="text-[#8b8b8b] shrink-0" />
         </div>
 
@@ -123,7 +123,7 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
             {/* Email */}
             <div className="px-3 py-2 flex items-center gap-2">
               <IconMail size={20} stroke={1.5} className="text-[#374151] shrink-0" />
-              <span className="text-[12px] text-[#374151] truncate">{userEmail}</span>
+              <span className="type-caption text-text-body truncate">{userEmail}</span>
             </div>
 
             <div className="border-t border-[#ececec]" />
@@ -135,10 +135,10 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
                   {faviconSrc && !faviconError ? (
                     <img src={faviconSrc} alt={workspaceName} width={14} height={14} className="block" style={{ objectFit: "contain" }} />
                   ) : (
-                    <span className="text-[8px] font-semibold text-[#0d0d0d]">{getInitial(workspaceName)}</span>
+                    <span style={{ fontSize: "8px" }} className="font-semibold text-text-heading">{getInitial(workspaceName)}</span>
                   )}
                 </div>
-                <span className="text-[14px] font-medium text-[#374151] truncate">{workspaceName}</span>
+                <span className="type-body font-medium text-text-body truncate">{workspaceName}</span>
               </div>
             </div>
 
@@ -150,7 +150,7 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
               className="flex items-center gap-2 w-full px-3 py-3 bg-transparent border-none cursor-pointer text-left hover:bg-[#f9f9f9]"
             >
               <IconLogout size={20} stroke={1.5} className="text-[#374151]" />
-              <span className="text-[14px] font-medium text-[#374151]">Keluar</span>
+              <span className="type-body font-medium text-text-body">Keluar</span>
             </button>
           </div>
         )}
@@ -172,7 +172,7 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
                 stroke={1.5}
                 className={cn("transition-colors", isActive ? "text-foreground" : "text-[#8b8b8b] group-hover:text-foreground")}
               />
-              <span className={cn("text-[14px] font-medium transition-colors", isActive ? "text-foreground" : "text-[#8b8b8b] group-hover:text-foreground")}>
+              <span className={cn("type-body font-medium transition-colors", isActive ? "text-foreground" : "text-[#8b8b8b] group-hover:text-foreground")}>
                 {item.label}
               </span>
             </Link>
@@ -191,10 +191,10 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
 
         {/* Secondary links */}
         <div className="flex flex-col gap-6 mb-6">
-          <Link href="/support" className="text-[14px] font-medium text-[#8b8b8b] no-underline transition-colors hover:text-foreground">
+          <Link href="/support" className="type-body font-medium text-[#8b8b8b] no-underline transition-colors hover:text-foreground">
             Bantuan
           </Link>
-          <Link href="/settings" className="text-[14px] font-medium text-[#8b8b8b] no-underline transition-colors hover:text-foreground">
+          <Link href="/settings" className="type-body font-medium text-[#8b8b8b] no-underline transition-colors hover:text-foreground">
             Pengaturan
           </Link>
         </div>
@@ -203,12 +203,12 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
         <Link href="/dashboard/credits" className="group h-5 flex items-center justify-between no-underline">
           <div className="flex items-center gap-1.5">
             <IconCoins size={16} stroke={1.5} className="text-[#533afd]" />
-            <span className="text-[14px]">
+            <span className="type-body">
               <span className="text-[#533afd] font-semibold">{credits}</span>
-              <span className="text-[#6b7280] transition-colors group-hover:text-foreground"> kredit</span>
+              <span className="text-text-muted transition-colors group-hover:text-foreground"> kredit</span>
             </span>
           </div>
-          <div className="flex items-center gap-0.5 text-[14px] font-medium text-[#6b7280] transition-colors group-hover:text-foreground">
+          <div className="flex items-center gap-0.5 type-body font-medium text-text-muted transition-colors group-hover:text-foreground">
             Beli
             <IconArrowUpRight size={16} stroke={1.5} />
           </div>
