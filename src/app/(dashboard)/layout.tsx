@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -25,6 +26,8 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   // Workspace favicon: use the first brand's website (stable), not the active project's
   const workspaceWebsiteUrl = projects[projects.length - 1]?.website_url ?? undefined;
   const projectWebsiteUrl = activeProject?.website_url ?? undefined;
+  const pathname = usePathname();
+  const hideTopbar = pathname?.startsWith("/settings");
 
   useEffect(() => {
     localStorage.removeItem('nuave_credits');
@@ -76,7 +79,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
           websiteUrl={workspaceWebsiteUrl}
         />
         <div className="ml-64 flex min-h-0 min-w-0 flex-1 flex-col bg-page">
-          <Topbar />
+          {!hideTopbar && <Topbar />}
           <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-8">
             {children}
           </main>

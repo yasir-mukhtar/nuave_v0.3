@@ -23,6 +23,7 @@ export default function Topbar() {
     if (pathname?.startsWith("/prompt")) return "Prompt";
     if (pathname?.startsWith("/content")) return "Konten";
     if (pathname?.startsWith("/brand")) return "Brand";
+    if (pathname?.startsWith("/settings")) return "Pengaturan";
     return "Dashboard";
   })();
   const [open, setOpen] = useState(false);
