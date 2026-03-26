@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from "react";
 import { IconCheck } from "@tabler/icons-react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 /* ── Card data ── */
 const CARDS = [
@@ -88,21 +89,13 @@ export default function HowItWorks() {
   }, []);
 
   return (
-    <div id="cara-kerja" ref={sectionRef} className="lp-hiw-section" style={{ position: "relative", background: "var(--lp-bg)", paddingTop: 120 }}>
+    <div id="cara-kerja" ref={sectionRef} className="lp-hiw-section relative pt-[120px]" style={{ background: "var(--lp-bg)" }}>
       {/* Sticky heading */}
-      <div className="lp-hiw-sticky-heading" style={{
-        position: "sticky",
-        top: 80,
-        zIndex: 10,
-        paddingTop: 0,
-        paddingBottom: 40,
-        paddingLeft: 32,
-        paddingRight: 32,
-        pointerEvents: "none",
-        opacity: headingOpacity,
-        transition: "opacity 0.1s linear",
-      }}>
-        <div style={{ maxWidth: 868, margin: "0 auto", textAlign: "center" }}>
+      <div
+        className="lp-hiw-sticky-heading sticky top-20 z-10 pb-10 px-8 pointer-events-none"
+        style={{ opacity: headingOpacity, transition: "opacity 0.1s linear" }}
+      >
+        <div className="max-w-[868px] mx-auto text-center">
           <h2 className="lp-hiw-heading">
             Nuave membantu brand Anda muncul dalam jawaban ChatGPT
           </h2>
@@ -110,143 +103,80 @@ export default function HowItWorks() {
       </div>
 
       {/* Cards scroll area */}
-      <div style={{ paddingBottom: 120 }}>
-        {CARDS.map((card, i) => {
-          const isLast = i === CARDS.length - 1;
-          const scale = 1;
-          const opacity = 1;
-
-          return (
+      <div className="pb-[120px]">
+        {CARDS.map((card, i) => (
+          <div
+            key={i}
+            className="lp-hiw-card-wrapper sticky px-8 pb-6 mb-6"
+            style={{ top: 232, zIndex: 20 + i }}
+          >
             <div
-              key={i}
-              className="lp-hiw-card-wrapper"
-              style={{
-                position: "sticky",
-                top: 232,
-                zIndex: 20 + i,
-                paddingLeft: 32,
-                paddingRight: 32,
-                paddingBottom: 24,
-                marginBottom: 24,
-              }}
+              className="lp-hiw-card-grid max-w-[868px] mx-auto grid grid-cols-2 rounded-[12px] overflow-hidden bg-white border border-[#E5E7EB] shadow-[0_8px_40px_rgba(0,0,0,0.10)] min-h-[360px]"
+              style={{ transformOrigin: "top center" }}
             >
-              <div className="lp-hiw-card-grid" style={{
-                maxWidth: 868,
-                margin: "0 auto",
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                borderRadius: 12,
-                overflow: "hidden",
-                background: "#ffffff",
-                border: "1px solid #E5E7EB",
-                boxShadow: "0 8px 40px rgba(0,0,0,0.10)",
-                transform: `scale(${scale})`,
-                opacity,
-                transition: "transform 0.05s linear, opacity 0.05s linear",
-                transformOrigin: "top center",
-                minHeight: 360,
-              }}>
-                {/* Left panel — white */}
-                <div className="lp-hiw-left-panel" style={{
-                  background: "#ffffff",
-                  padding: 40,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  order: card.flip ? 2 : 1,
-                }}>
-                  <div>
-                    {/* Step circle */}
-                    <div style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      background: "var(--lp-purple)",
-                      color: "#fff",
-                      fontSize: 24,
-                      fontWeight: 700,
-                      letterSpacing: "-0.5px",
-                      lineHeight: 1.4,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 24,
-                      fontFamily: "'Inter', sans-serif",
-                    }}>
-                      {card.step}
-                    </div>
-                    <h3 style={{ marginBottom: 12 }}>
-                      {card.title}
-                    </h3>
-                    <p style={{
-                      fontSize: 16,
-                      lineHeight: "28px",
-                      color: "#858585",
-                      marginBottom: 24,
-                    }}>
-                      {card.desc}
-                    </p>
+              {/* Left panel — white */}
+              <div className={cn(
+                "lp-hiw-left-panel bg-white p-10 flex flex-col justify-between",
+                card.flip ? "order-2" : "order-1"
+              )}>
+                <div>
+                  {/* Step circle */}
+                  <div className="w-10 h-10 rounded-full bg-[var(--lp-purple)] text-white text-[24px] font-bold tracking-[-0.5px] leading-[1.4] flex items-center justify-center mb-6">
+                    {card.step}
                   </div>
-                  {/* Checklist */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {card.checks.map((check, j) => (
-                      <div key={j} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <IconCheck size={16} color="var(--lp-text-primary)" stroke={2} style={{ flexShrink: 0 }} />
-                        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, fontWeight: 400, lineHeight: "28px", color: "var(--lp-text-primary)" }}>{check}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <h3 className="mb-3">
+                    {card.title}
+                  </h3>
+                  <p className="text-[16px] leading-[28px] text-[#858585] mb-6">
+                    {card.desc}
+                  </p>
                 </div>
+                {/* Checklist */}
+                <div className="flex flex-col gap-2.5">
+                  {card.checks.map((check, j) => (
+                    <div key={j} className="flex items-center gap-2.5">
+                      <IconCheck size={16} color="var(--lp-text-primary)" stroke={2} className="shrink-0" />
+                      <span className="text-[16px] font-normal leading-[28px] text-[var(--lp-text-primary)]">{check}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-                {/* Right panel — image bg with preview (desktop) */}
-                <div className="lp-hiw-right-panel" style={{
-                  backgroundImage: card.rightBg,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  position: "relative",
-                  overflow: "hidden",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  order: card.flip ? 1 : 2,
-                }}>
+              {/* Right panel — image bg with preview (desktop) */}
+              <div
+                className={cn(
+                  "lp-hiw-right-panel relative overflow-hidden flex items-center justify-center bg-cover bg-center",
+                  card.flip ? "order-1" : "order-2"
+                )}
+                style={{ backgroundImage: card.rightBg }}
+              >
+                <Image
+                  src={card.preview}
+                  alt={card.title}
+                  width={480}
+                  height={360}
+                  className="w-[75%] h-auto object-contain rounded-[8px] shadow-[0_4px_24px_rgba(0,0,0,0.08)]"
+                />
+              </div>
+
+              {/* Mobile preview image */}
+              <div className="lp-hiw-mobile-preview p-3 order-3">
+                <div
+                  className="bg-cover bg-center rounded-[8px] p-6 flex justify-center items-center"
+                  style={{ backgroundImage: card.rightBg }}
+                >
                   <Image
                     src={card.preview}
                     alt={card.title}
                     width={480}
                     height={360}
-                    style={{ width: "75%", height: "auto", objectFit: "contain", borderRadius: "8px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}
+                    className="w-[80%] h-auto object-contain rounded-[8px] shadow-[0_4px_24px_rgba(0,0,0,0.08)]"
                   />
-                </div>
-
-                {/* Mobile preview image */}
-                <div className="lp-hiw-mobile-preview" style={{
-                  padding: 12,
-                  order: 3,
-                }}>
-                  <div style={{
-                    backgroundImage: card.rightBg,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    borderRadius: 8,
-                    padding: 24,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}>
-                    <Image
-                      src={card.preview}
-                      alt={card.title}
-                      width={480}
-                      height={360}
-                      style={{ width: "80%", height: "auto", objectFit: "contain", borderRadius: "8px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}
-                    />
-                  </div>
                 </div>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </div>
   );

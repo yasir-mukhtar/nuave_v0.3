@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { IconCheck, IconX, IconArrowRight, IconChevronDown, IconBrandOpenai, IconTarget, IconMessageChatbot, IconFileText, IconCpu, IconCreditCard, IconCoins } from '@tabler/icons-react';
+import { IconChevronDown, IconCoins } from '@tabler/icons-react';
+import { cn } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Footer from "@/components/Footer";
 import HowItWorks from "@/components/HowItWorks";
@@ -25,15 +26,6 @@ const STATS = [
     title: "Pembelian di Kunjungan Pertama",
     body: "73% pengunjung yang datang dari pencarian AI langsung membeli pada kunjungan pertama.",
   },
-];
-
-const FEATURES = [
-  { icon: IconTarget, title: "Visibility Score 0–100", desc: "Skor yang jelas dan terukur untuk menilai seberapa terlihat brand Anda di jawaban AI." },
-  { icon: IconBrandOpenai, title: "Analisis Kompetitor", desc: "Lihat apakah kompetitor Anda disebut di jawaban ChatGPT — dan berapa sering." },
-  { icon: IconMessageChatbot, title: "10 Prompt Realistis", desc: "Pertanyaan nyata yang diajukan konsumen ke ChatGPT tentang industri Anda." },
-  { icon: IconFileText, title: "Rekomendasi Konten AI", desc: "Dapatkan saran konten spesifik untuk meningkatkan visibilitas brand di AI." },
-  { icon: IconCpu, title: "Dual-AI Engine", desc: "Ditenagai Claude + GPT-4o untuk analisis yang lebih akurat dan komprehensif." },
-  { icon: IconCreditCard, title: "Pay Per Audit", desc: "Sistem kredit tanpa langganan. 10 kredit gratis saat mendaftar, cukup untuk 1 audit." },
 ];
 
 const PRICING = [
@@ -98,14 +90,6 @@ const FAQS = [
   },
 ];
 
-const MOCK_PROMPTS = [
-  { prompt: "Apa platform terbaik untuk audit AI di Indonesia?", mentioned: false },
-  { prompt: "Rekomendasi tool SEO untuk bisnis kecil", mentioned: true },
-  { prompt: "Bagaimana cara meningkatkan visibilitas online?", mentioned: false },
-  { prompt: "Tool apa yang bisa cek brand visibility di ChatGPT?", mentioned: false },
-  { prompt: "Apa itu AEO dan siapa yang menyediakannya?", mentioned: true },
-];
-
 /* ───── Hero Asset URLs (Framer CDN) ───── */
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 const BG_GRADIENT = "https://framerusercontent.com/images/aaSazir73GbncCCLDZdoqquukeY.png";
@@ -131,25 +115,10 @@ function scrollToSection(id: string) {
 }
 
 function NavAnchor({ label, sectionId }: { label: string; sectionId: string }) {
-  const [hovered, setHovered] = useState(false);
   return (
     <button
       onClick={() => scrollToSection(sectionId)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: "none",
-        border: "none",
-        padding: 0,
-        cursor: "pointer",
-        fontFamily: "Inter, sans-serif",
-        fontWeight: 500,
-        fontSize: 14,
-        lineHeight: "24px",
-        color: hovered ? "#6C3FF5" : "var(--lp-text-primary)",
-        textDecoration: "none",
-        transition: "color 0.15s ease",
-      }}
+      className="bg-transparent border-none p-0 cursor-pointer text-[14px] font-medium leading-[24px] text-[var(--lp-text-primary)] hover:text-brand transition-colors duration-150"
     >
       {label}
     </button>
@@ -159,11 +128,9 @@ function NavAnchor({ label, sectionId }: { label: string; sectionId: string }) {
 /* ───── Nav (Framer design) ───── */
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
-  const [kontakHovered, setKontakHovered] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check auth state on mount
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -178,14 +145,12 @@ function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close mobile menu on resize to desktop
   useEffect(() => {
     const onResize = () => { if (window.innerWidth > 768) setMobileMenuOpen(false); };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Prevent body scroll when menu is open
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -224,44 +189,22 @@ function Nav() {
           }}
         >
           {/* Logo */}
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-            <img src={LOGO_SVG} alt="Nuave logo" width={28} height={28} style={{ objectFit: "contain" }} />
-            <span
-              style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 600,
-                fontSize: 20,
-                color: "#0d0d0d",
-              }}
-            >
-              Nuave
-            </span>
+          <Link href="/" className="flex items-center gap-2 no-underline">
+            <img src={LOGO_SVG} alt="Nuave logo" width={28} height={28} className="object-contain" />
+            <span className="text-[20px] font-semibold text-[#0d0d0d]">Nuave</span>
           </Link>
 
           {/* Links (desktop) */}
-          <div className="lp-nav-links" style={{ display: "flex", alignItems: "center", gap: 32 }}>
+          <div className="lp-nav-links flex items-center gap-8">
             <NavAnchor label="Cara Kerja" sectionId="cara-kerja" />
             <NavAnchor label="Harga" sectionId="harga" />
             <NavAnchor label="FAQ" sectionId="faq" />
             <a
               href="/support"
-              onMouseEnter={() => setKontakHovered(true)}
-              onMouseLeave={() => setKontakHovered(false)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 500,
-                fontSize: 14,
-                lineHeight: "24px",
-                color: kontakHovered ? "#6C3FF5" : "var(--lp-text-primary)",
-                textDecoration: "none",
-                transition: "color 0.15s ease",
-              }}
+              className="flex items-center gap-1 text-[14px] font-medium leading-[24px] text-[var(--lp-text-primary)] no-underline hover:text-brand transition-colors duration-150"
             >
               Kontak
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ marginTop: 1 }}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="mt-px">
                 <path d="M3.5 2.5H9.5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M9.5 2.5L2.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -271,37 +214,16 @@ function Nav() {
           {/* Masuk / Dashboard button (desktop) */}
           <Link
             href={isLoggedIn ? "/dashboard" : "/auth"}
-            className="btn-lp-black lp-nav-masuk"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "8px 20px",
-              color: "#fff",
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 500,
-              fontSize: 14,
-              lineHeight: "1.7em",
-              borderRadius: 6,
-              textDecoration: "none",
-              cursor: "pointer",
-            }}
+            className="btn-lp-black lp-nav-masuk flex items-center justify-center px-5 py-2 text-white text-[14px] font-medium leading-[1.7em] rounded-[6px] no-underline cursor-pointer"
           >
             {isLoggedIn ? "Dashboard" : "Masuk"}
           </Link>
 
           {/* Hamburger button (mobile) */}
           <button
-            className="lp-nav-hamburger"
+            className="lp-nav-hamburger hidden bg-transparent border-none cursor-pointer p-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Menu"
-            style={{
-              display: "none",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 8,
-            }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               {mobileMenuOpen ? (
@@ -322,12 +244,8 @@ function Nav() {
 
       {/* Mobile menu overlay */}
       <div
-        className="lp-mobile-menu-overlay"
+        className="lp-mobile-menu-overlay fixed inset-0 z-[99] bg-black/20"
         style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 99,
-          background: "rgba(0,0,0,0.2)",
           backdropFilter: mobileMenuOpen ? "blur(1px)" : "blur(0px)",
           WebkitBackdropFilter: mobileMenuOpen ? "blur(1px)" : "blur(0px)",
           opacity: mobileMenuOpen ? 1 : 0,
@@ -339,21 +257,9 @@ function Nav() {
 
       {/* Mobile menu drawer */}
       <div
-        className="lp-mobile-menu"
+        className="lp-mobile-menu fixed left-4 right-4 z-[101] bg-white rounded-[12px] border border-[rgba(117,115,114,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12)] py-2 flex flex-col items-center"
         style={{
-          position: "fixed",
           top: 92,
-          left: 16,
-          right: 16,
-          zIndex: 101,
-          background: "#ffffff",
-          borderRadius: 12,
-          border: "1px solid rgba(117, 115, 114, 0.15)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-          padding: "8px 0",
-          flexDirection: "column",
-          alignItems: "center",
-          display: "flex",
           opacity: mobileMenuOpen ? 1 : 0,
           transform: mobileMenuOpen ? "translateY(0) scale(1)" : "translateY(-12px) scale(0.97)",
           pointerEvents: mobileMenuOpen ? "auto" : "none",
@@ -362,56 +268,35 @@ function Nav() {
       >
         <button
           onClick={() => { scrollToSection("cara-kerja"); setMobileMenuOpen(false); }}
-          style={{
-            background: "none", border: "none", cursor: "pointer", textAlign: "center",
-            padding: "14px 20px", fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: 16, width: "100%",
-            color: "var(--lp-text-primary)",
-          }}
+          className="bg-transparent border-none cursor-pointer text-center px-5 py-3.5 text-[16px] font-medium w-full text-[var(--lp-text-primary)]"
         >
           Cara Kerja
         </button>
         <button
           onClick={() => { scrollToSection("harga"); setMobileMenuOpen(false); }}
-          style={{
-            background: "none", border: "none", cursor: "pointer", textAlign: "center",
-            padding: "14px 20px", fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: 16, width: "100%",
-            color: "var(--lp-text-primary)",
-          }}
+          className="bg-transparent border-none cursor-pointer text-center px-5 py-3.5 text-[16px] font-medium w-full text-[var(--lp-text-primary)]"
         >
           Harga
         </button>
         <button
           onClick={() => { scrollToSection("faq"); setMobileMenuOpen(false); }}
-          style={{
-            background: "none", border: "none", cursor: "pointer", textAlign: "center",
-            padding: "14px 20px", fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: 16, width: "100%",
-            color: "var(--lp-text-primary)",
-          }}
+          className="bg-transparent border-none cursor-pointer text-center px-5 py-3.5 text-[16px] font-medium w-full text-[var(--lp-text-primary)]"
         >
           FAQ
         </button>
         <a
           href="/support"
           onClick={() => setMobileMenuOpen(false)}
-          style={{
-            padding: "14px 20px", fontFamily: "Inter, sans-serif", fontWeight: 500, fontSize: 16,
-            color: "var(--lp-text-primary)", textDecoration: "none", textAlign: "center", display: "block", width: "100%",
-          }}
+          className="px-5 py-3.5 text-[16px] font-medium text-[var(--lp-text-primary)] no-underline text-center block w-full"
         >
           Kontak
         </a>
-        <div style={{ height: 1, background: "#E5E7EB", margin: "4px 16px" }} />
-        <div style={{ padding: "12px 16px", width: "100%", boxSizing: "border-box" }}>
+        <div className="h-px bg-[#E5E7EB] mx-4 self-stretch" />
+        <div className="px-4 py-3 w-full box-border">
           <Link
             href={isLoggedIn ? "/dashboard" : "/auth"}
             onClick={() => setMobileMenuOpen(false)}
-            className="btn-lp-black"
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              padding: "12px 20px", color: "#fff", fontFamily: "Inter, sans-serif",
-              fontWeight: 500, fontSize: 15, borderRadius: 8, textDecoration: "none",
-              cursor: "pointer", width: "100%",
-            }}
+            className="btn-lp-black flex items-center justify-center px-5 py-3 text-white text-[15px] font-medium rounded-[8px] no-underline cursor-pointer w-full"
           >
             {isLoggedIn ? "Dashboard" : "Masuk"}
           </Link>
@@ -444,183 +329,57 @@ function HeroSection() {
   };
 
   return (
-    <section
-      className="lp-root lp-hero-section"
-      style={{
-        position: "relative",
-        width: "100%",
-        padding: "120px 30px 0",
-        display: "flex",
-        justifyContent: "center",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1200,
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+    <section className="lp-root lp-hero-section relative w-full pt-[120px] px-[30px] flex justify-center overflow-hidden">
+      <div className="max-w-[1200px] w-full flex flex-col items-center">
         {/* Text content */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 24,
-          }}
-        >
+        <div className="flex flex-col items-center gap-6">
           {/* Headline */}
-          <h1
-            className="lp-hero-heading"
-            style={{
-              maxWidth: 800,
-              textAlign: "center",
-              margin: 0,
-            }}
-          >
+          <h1 className="lp-hero-heading max-w-[800px] text-center m-0">
             Lihat seberapa sering ChatGPT menyebut brand Anda
           </h1>
 
           {/* Subtitle */}
-          <p
-            className="lp-hero-subtitle"
-            style={{
-              maxWidth: 740,
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 400,
-              fontSize: 18,
-              lineHeight: "1.7em",
-              letterSpacing: -0.5,
-              color: "var(--lp-text-secondary)",
-              textAlign: "center",
-              margin: 0,
-            }}
-          >
+          <p className="lp-hero-subtitle max-w-[740px] text-[18px] font-normal leading-[1.7em] tracking-[-0.5px] text-[var(--lp-text-secondary)] text-center m-0">
             Jutaan orang kini melakukan pencarian lewat AI. Nuave melacak brand Anda dalam jawaban ChatGPT dan memberi rekomendasi perbaikan.
           </p>
 
           {/* CTA Button */}
           <Link
             href="/auth"
-            className="btn-lp-purple"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "12px 22px",
-              color: "#fff",
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 500,
-              fontSize: 14,
-              lineHeight: "1.7em",
-              borderRadius: 6,
-              border: "1px solid var(--lp-border)",
-              textDecoration: "none",
-              cursor: "pointer",
-            }}
+            className="btn-lp-purple inline-flex items-center px-[22px] py-3 text-white text-[14px] font-medium leading-[1.7em] rounded-[6px] border border-[var(--lp-border)] no-underline cursor-pointer"
           >
             Audit brand Anda — Gratis!
           </Link>
         </div>
 
         {/* Preview area */}
-        <div
-          className="lp-hero-preview"
-          style={{
-            marginTop: 64,
-            width: "100%",
-            position: "relative",
-          }}
-        >
+        <div className="lp-hero-preview mt-16 w-full relative">
           {/* Purple gradient background */}
-          <div
-            style={{
-              position: "relative",
-              width: "100%",
-              aspectRatio: "1.82094",
-              borderRadius: 12,
-              border: "1px solid var(--lp-border)",
-              overflow: "hidden",
-            }}
-          >
+          <div className="relative w-full aspect-[1.82094] rounded-[12px] border border-[var(--lp-border)] overflow-hidden">
             <img
               src={BG_GRADIENT}
               alt=""
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "center",
-                display: "block",
-              }}
+              className="w-full h-full object-cover object-center block"
             />
 
             {/* Overlay content */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                padding: "40px 40px 0",
-                gap: 24,
-              }}
-            >
+            <div className="absolute inset-0 flex flex-col items-center pt-10 px-10 gap-6">
               {/* Stepper bar */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0,
-                  padding: "8px 14px",
-                  backgroundColor: "#fff",
-                  borderRadius: 10,
-                  border: "1px solid var(--lp-border)",
-                  boxShadow: "rgba(0, 0, 0, 0.04) 0px 1px 4px 0px",
-                  height: 43,
-                }}
-              >
+              <div className="flex items-center gap-0 px-3.5 py-2 bg-white rounded-[10px] border border-[var(--lp-border)] shadow-[rgba(0,0,0,0.04)_0px_1px_4px_0px] h-[43px]">
                 {HERO_STEPS.map((step, i) => (
                   <button
                     key={step}
                     onClick={() => handleStepClick(i)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 14,
-                      padding: "0 14px 0 0",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      fontFamily: "Inter, sans-serif",
-                      fontWeight: 500,
-                      fontSize: 16,
-                      lineHeight: "1.7em",
-                      whiteSpace: "nowrap",
-                      color: activeStep === i ? "var(--lp-text-primary)" : "var(--lp-text-secondary)",
-                    }}
+                    className="flex items-center gap-3.5 pr-3.5 bg-transparent border-none cursor-pointer text-[16px] font-medium leading-[1.7em] whitespace-nowrap"
+                    style={{ color: activeStep === i ? "var(--lp-text-primary)" : "var(--lp-text-secondary)" }}
                   >
-                    {/* Fixed 20px indicator box — dot and circle share same center */}
-                    <div
-                      style={{
-                        width: 20,
-                        height: 20,
-                        flexShrink: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
+                    {/* Fixed 20px indicator box */}
+                    <div className="w-5 h-5 shrink-0 flex items-center justify-center">
                       {activeStep === i ? (
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                           <circle cx="10" cy="10" r="10" fill="#0a0a0a" />
                           <text
-                            x="10"
-                            y="10"
+                            x="10" y="10"
                             textAnchor="middle"
                             dominantBaseline="central"
                             fill="#fff"
@@ -633,14 +392,7 @@ function HeroSection() {
                           </text>
                         </svg>
                       ) : (
-                        <div
-                          style={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: 100,
-                            backgroundColor: "var(--lp-border)",
-                          }}
-                        />
+                        <div className="w-2 h-2 rounded-full bg-[var(--lp-border)]" />
                       )}
                     </div>
                     {step}
@@ -648,36 +400,20 @@ function HeroSection() {
                 ))}
               </div>
 
-              {/* Dashboard mockup card — outer container */}
-              <div
-                style={{
-                  width: "100%",
-                  maxWidth: 900,
-                  height: 504,
-                  padding: 16,
-                  backdropFilter: "blur(54px)",
-                  WebkitBackdropFilter: "blur(54px)",
-                  backgroundColor: "rgba(255, 255, 255, 0.54)",
-                  borderRadius: 12,
-                  boxShadow: "rgba(0, 0, 0, 0.08) 0px 8px 32px 0px",
-                  overflow: "hidden",
-                  position: "relative",
-                }}
-              >
+              {/* Dashboard mockup card */}
+              <div className="w-full max-w-[900px] h-[504px] p-4 backdrop-blur-[54px] bg-white/[0.54] rounded-[12px] shadow-[rgba(0,0,0,0.08)_0px_8px_32px_0px] overflow-hidden relative">
                 {DASHBOARD_IMAGES.map((src, i) => (
                   <img
                     key={src}
                     src={src}
                     alt="Dashboard"
+                    className="object-cover object-top rounded-[6px]"
                     style={{
                       position: i === 0 ? "relative" : "absolute",
                       top: i === 0 ? 0 : 16,
                       left: i === 0 ? 0 : 16,
                       width: i === 0 ? "100%" : "calc(100% - 32px)",
                       height: i === 0 ? "100%" : "calc(100% - 32px)",
-                      objectFit: "cover",
-                      objectPosition: "top center",
-                      borderRadius: 6,
                       opacity: activeStep === i ? 1 : 0,
                       transition: "opacity 0.5s ease",
                     }}
@@ -698,7 +434,7 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
-    <div className="lp-page" style={{ minHeight: "100vh", background: "#ffffff" }}>
+    <div className="lp-page min-h-screen bg-white">
 
       {/* ──── Nav + Hero + AI Logos (Framer design) ──── */}
       <div style={{ background: "var(--lp-bg, #f7f7f5)" }}>
@@ -712,67 +448,29 @@ export default function Home() {
           100% { transform: translateX(-50%); }
         }
       `}</style>
-      <section
-        className="lp-marquee-section"
-        style={{
-          width: "100%",
-          paddingTop: 120,
-          paddingBottom: 96,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 32,
-          overflow: "hidden",
-        }}
-      >
-        <p
-          className="lp-marquee-text"
-          style={{
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 400,
-            fontSize: 18,
-            lineHeight: "1.5em",
-            color: "#0A0A0A",
-            textAlign: "center",
-            margin: 0,
-            padding: "0 30px",
-          }}
-        >
+      <section className="lp-marquee-section w-full pt-[120px] pb-24 flex flex-col items-center gap-8 overflow-hidden">
+        <p className="lp-marquee-text text-[18px] font-normal leading-[1.5em] text-[#0A0A0A] text-center m-0 px-[30px]">
           Dikembangkan untuk pencarian berbasis AI — sekarang dan di masa depan
         </p>
 
         {/* Marquee track */}
         <div
+          className="w-full max-w-[1045px] mx-auto overflow-hidden"
           style={{
-            width: "100%",
-            maxWidth: 1045,
-            margin: "0 auto",
-            overflow: "hidden",
             maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
             WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
           }}
         >
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 96,
-              width: "max-content",
-              animation: "marquee-scroll 60s linear infinite",
-            }}
+            className="flex items-center gap-24 w-max"
+            style={{ animation: "marquee-scroll 60s linear infinite" }}
           >
-            {/* Duplicate the set 4× for seamless loop */}
             {[...AI_LOGOS, ...AI_LOGOS, ...AI_LOGOS, ...AI_LOGOS].map((logo, i) => (
               <img
                 key={`${logo.alt}-${i}`}
                 src={logo.src}
                 alt={logo.alt}
-                style={{
-                  display: "block",
-                  flexShrink: 0,
-                  height: 28,
-                  width: "auto",
-                }}
+                className="block shrink-0 h-7 w-auto"
               />
             ))}
           </div>
@@ -781,21 +479,16 @@ export default function Home() {
       </div>{/* end Framer hero+marquee wrapper */}
 
       {/* ──── Problem Section ──── */}
-      <section className="lp-problem-section" style={{ background: "#ffffff", padding: "120px 32px" }}>
-        <div style={{ maxWidth: 1044, margin: "0 auto" }}>
+      <section className="lp-problem-section bg-white px-8 py-[120px]">
+        <div className="max-w-[1044px] mx-auto">
 
           {/* Heading */}
-          <h2 className="lp-problem-heading" style={{
-            textAlign: "center",
-            margin: "0 0 56px 0",
-          }}>
+          <h2 className="lp-problem-heading text-center m-0 mb-14">
             Apakah brand Anda muncul di ChatGPT?
           </h2>
 
           {/* Two cards */}
-          <div className="lp-problem-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-
-            {/* Card 1 — purple */}
+          <div className="lp-problem-grid grid grid-cols-2 gap-6">
             {[
               {
                 bg: "/bg-purple.png",
@@ -810,62 +503,25 @@ export default function Home() {
                 chips: ["Jasa digital marketing untuk startup", "Software akuntansi terbaik untuk UMKM", "Vendor cloud storage terpercaya di Indonesia"],
               },
             ].map((card) => (
-              <div key={card.number} className="lp-problem-card" style={{
-                position: "relative",
-                borderRadius: 12,
-                border: "1px solid #E5E7EB",
-                overflow: "hidden",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                minHeight: 480,
-                backgroundImage: `url('${card.bg}')`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}>
+              <div
+                key={card.number}
+                className="lp-problem-card relative rounded-[12px] border border-[#E5E7EB] overflow-hidden flex flex-col justify-between min-h-[480px] bg-cover bg-center"
+                style={{ backgroundImage: `url('${card.bg}')` }}
+              >
                 {/* Top content */}
-                <div style={{ padding: "40px 40px 0 40px" }}>
-                  <p style={{
-                    fontFamily: "Inter, sans-serif",
-                    fontWeight: 500,
-                    fontSize: 48,
-                    letterSpacing: "-2px",
-                    lineHeight: "1.2em",
-                    color: "#111827",
-                    margin: "0 0 20px 0",
-                  }}>
+                <div className="pt-10 px-10">
+                  <p className="text-[48px] font-medium tracking-[-2px] leading-[1.2em] text-[#111827] m-0 mb-5">
                     {card.number}
                   </p>
-                  <p style={{
-                    fontFamily: "Inter, sans-serif",
-                    fontWeight: 500,
-                    fontSize: 22,
-                    letterSpacing: "-0.5px",
-                    lineHeight: "1.4em",
-                    color: "#111827",
-                    margin: 0,
-                    maxWidth: 340,
-                  }}>
+                  <p className="text-[22px] font-medium tracking-[-0.5px] leading-[1.4em] text-[#111827] m-0 max-w-[340px]">
                     {card.desc}
                   </p>
                 </div>
 
                 {/* Bottom chips */}
-                <div style={{ padding: "120px 40px 40px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
+                <div className="pt-[120px] px-10 pb-10 flex flex-col gap-2.5">
                   {card.chips.map((chip) => (
-                    <span key={chip} style={{
-                      display: "inline-block",
-                      alignSelf: "flex-start",
-                      fontFamily: "Inter, sans-serif",
-                      fontWeight: 400,
-                      fontSize: 16,
-                      color: "#111827",
-                      background: "rgba(255,255,255,0.85)",
-                      border: "1px solid rgba(0,0,0,0.08)",
-                      borderRadius: 999,
-                      padding: "8px 16px",
-                      backdropFilter: "blur(4px)",
-                    }}>
+                    <span key={chip} className="inline-block self-start text-[16px] font-normal text-[#111827] bg-white/85 border border-black/[0.08] rounded-full px-4 py-2 backdrop-blur-[4px]">
                       {chip}
                     </span>
                   ))}
@@ -882,97 +538,49 @@ export default function Home() {
 
 
       {/* ──── Stats ──── */}
-      <section className="lp-stats-section" style={{ background: "#F9FAFB", paddingTop: 120, paddingBottom: 120 }}>
+      <section className="lp-stats-section bg-[#F9FAFB] pt-[120px] pb-[120px]">
 
-        {/* Heading + subtitle — padded inward */}
-        <div style={{ padding: "0 32px", textAlign: "center", marginBottom: 24 }}>
-          <h2 className="lp-stats-heading" style={{
-            margin: "0 0 20px 0",
-          }}>
+        {/* Heading + subtitle */}
+        <div className="px-8 text-center mb-6">
+          <h2 className="lp-stats-heading m-0 mb-5">
             Jadi yang Pertama Ditemukan<br className="lp-stats-br" />di Era <em>Answer Engine</em>
           </h2>
-          <p className="lp-stats-subtitle" style={{
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 400,
-            fontSize: 20,
-            letterSpacing: "-0.5px",
-            lineHeight: "1.7em",
-            color: "#6B7280",
-            margin: 0,
-          }}>
+          <p className="lp-stats-subtitle text-[20px] font-normal tracking-[-0.5px] leading-[1.7em] text-[#6B7280] m-0">
             Nuave membantu brand Anda ditemukan, dipercaya,<br className="lp-stats-br" />dan langsung dipilih di pencarian AI.
           </p>
         </div>
 
-        {/* Top divider — full width */}
-        <div style={{ height: 1, background: "#E5E7EB" }} />
+        {/* Top divider */}
+        <div className="h-px bg-[#E5E7EB]" />
 
-        {/* Stats grid — max-width 1044px, centered */}
-        <div className="lp-stats-grid-inner" style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          maxWidth: 1044,
-          margin: "0 auto",
-        }}>
+        {/* Stats grid */}
+        <div className="lp-stats-grid-inner grid grid-cols-3 max-w-[1044px] mx-auto">
           {STATS.map((stat, i) => (
-            <div key={i} className="lp-stat-item" style={{
-              padding: "48px 40px",
-              borderLeft: i === 0 ? "1px solid #E5E7EB" : "none",
-              borderRight: "1px solid #E5E7EB",
-            }}>
-              <p style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 600,
-                fontSize: 40,
-                letterSpacing: "-1px",
-                lineHeight: "1.4em",
-                color: "#111827",
-                margin: "0 0 8px 0",
-              }}>
+            <div key={i} className={cn("lp-stat-item px-10 py-12 border-r border-[#E5E7EB]", i === 0 && "border-l border-[#E5E7EB]")}>
+              <p className="text-[40px] font-semibold tracking-[-1px] leading-[1.4em] text-[#111827] m-0 mb-2">
                 {stat.number}
               </p>
-              <p style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 500,
-                fontSize: 24,
-                letterSpacing: "-0.5px",
-                lineHeight: "1.4em",
-                color: "#111827",
-                margin: "0 0 12px 0",
-              }}>
+              <p className="text-[24px] font-medium tracking-[-0.5px] leading-[1.4em] text-[#111827] m-0 mb-3">
                 {stat.title}
               </p>
-              <p style={{
-                fontFamily: "Inter, sans-serif",
-                fontWeight: 400,
-                fontSize: 16,
-                lineHeight: "1.7em",
-                color: "#6B7280",
-                margin: 0,
-              }}>
+              <p className="text-[16px] font-normal leading-[1.7em] text-[#6B7280] m-0">
                 {stat.body}
               </p>
             </div>
           ))}
         </div>
 
-        {/* Bottom divider — full width */}
-        <div style={{ height: 1, background: "#E5E7EB" }} />
+        {/* Bottom divider */}
+        <div className="h-px bg-[#E5E7EB]" />
 
         {/* Source reference */}
-        <p style={{
-          textAlign: "center",
-          marginTop: 24,
-          fontFamily: "Inter, sans-serif",
-          fontSize: 13,
-          color: "#9CA3AF",
-        }}>
+        <p className="text-center mt-6 text-[13px] text-[#9CA3AF]">
           Sumber:{" "}
           <a
             href="https://mybrandi.ai/referrals-from-ai-vs-google/"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#9CA3AF", textDecoration: "underline" }}
+            className="text-[#9CA3AF] underline"
           >
             MyBrandi.ai
           </a>
@@ -981,7 +589,7 @@ export default function Home() {
             href="https://superprompt.com/blog/ai-search-traffic-conversion-rates-5x-higher-than-google-2025-data"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#9CA3AF", textDecoration: "underline" }}
+            className="text-[#9CA3AF] underline"
           >
             Superprompt
           </a>
@@ -990,109 +598,49 @@ export default function Home() {
       </section>
 
       {/* ──── Pricing ──── */}
-      <section id="harga" className="lp-pricing-section" style={{ background: "#ffffff", padding: "72px 32px" }}>
-        <div style={{ maxWidth: 740, margin: "0 auto" }}>
+      <section id="harga" className="lp-pricing-section bg-white px-8 py-[72px]">
+        <div className="max-w-[740px] mx-auto">
 
           {/* Title + subtitle */}
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <h2 className="lp-pricing-heading" style={{
-              margin: "0 0 16px 0",
-            }}>
+          <div className="text-center mb-14">
+            <h2 className="lp-pricing-heading m-0 mb-4">
               Harga
             </h2>
-            <p style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 400,
-              fontSize: 16,
-              lineHeight: "1.6em",
-              color: "#6B7280",
-              margin: 0,
-            }}>
+            <p className="text-[16px] font-normal leading-[1.6em] text-[#6B7280] m-0">
               Nuave menggunakan sistem kredit yang lebih fleksibel dari sistem langganan.
             </p>
           </div>
 
           {/* Cards */}
-          <div className="lp-pricing-grid-inner" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          <div className="lp-pricing-grid-inner grid grid-cols-2 gap-6">
             {PRICING.map((pkg) => (
-              <div key={pkg.name} style={{
-                position: "relative",
-                padding: 32,
-                borderRadius: 12,
-                background: "#ffffff",
-                border: "1px solid #E5E7EB",
-                display: "flex",
-                flexDirection: "column",
-              }}>
+              <div key={pkg.name} className="relative p-8 rounded-[12px] bg-white border border-[#E5E7EB] flex flex-col">
                 {/* Badge */}
                 {pkg.badge && (
-                  <div style={{
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                    background: "#6C3FF5",
-                    color: "#ffffff",
-                    fontFamily: "Inter, sans-serif",
-                    fontWeight: 500,
-                    fontSize: 13,
-                    padding: "5px 14px",
-                    borderRadius: 999,
-                    whiteSpace: "nowrap",
-                  }}>
+                  <div className="absolute top-4 right-4 bg-brand text-white text-[13px] font-medium px-3.5 py-[5px] rounded-full whitespace-nowrap">
                     {pkg.badge}
                   </div>
                 )}
 
                 {/* Plan name */}
-                <p style={{
-                  fontFamily: "Inter, sans-serif",
-                  fontWeight: 600,
-                  fontSize: 20,
-                  color: "#111827",
-                  margin: "0 0 8px 0",
-                }}>
+                <p className="text-[20px] font-semibold text-[#111827] m-0 mb-2">
                   {pkg.name}
                 </p>
 
                 {/* Description */}
-                <p style={{
-                  fontFamily: "Inter, sans-serif",
-                  fontWeight: 400,
-                  fontSize: 14,
-                  color: "#6B7280",
-                  margin: "0 0 24px 0",
-                }}>
+                <p className="text-[14px] font-normal text-[#6B7280] m-0 mb-6">
                   {pkg.desc}
                 </p>
 
                 {/* Price */}
-                <p style={{
-                  fontFamily: "Inter, sans-serif",
-                  fontWeight: 500,
-                  fontSize: 60,
-                  letterSpacing: "-2px",
-                  lineHeight: "72px",
-                  color: "#111827",
-                  margin: "0 0 24px 0",
-                }}>
+                <p className="text-[60px] font-medium tracking-[-2px] leading-[72px] text-[#111827] m-0 mb-6">
                   {pkg.price}
                 </p>
 
                 {/* Credits */}
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 32,
-                }}>
-                  <IconCoins size={18} stroke={1.5} color="#6B7280" />
-                  <span style={{
-                    fontFamily: "Inter, sans-serif",
-                    fontWeight: 400,
-                    fontSize: 16,
-                    lineHeight: "28px",
-                    color: "#374151",
-                  }}>
+                <div className="flex items-center gap-2 mb-8">
+                  <IconCoins size={18} stroke={1.5} className="text-[#6B7280]" />
+                  <span className="text-[16px] font-normal leading-[28px] text-[#374151]">
                     {pkg.credits} kredit
                   </span>
                 </div>
@@ -1103,21 +651,12 @@ export default function Home() {
                     sessionStorage.setItem('nuave_pending_package', pkg.name.toLowerCase());
                     window.location.href = '/auth';
                   }}
-                  className={pkg.highlight ? "btn-lp-purple" : undefined}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    padding: "14px 24px",
-                    borderRadius: 8,
-                    fontFamily: "Inter, sans-serif",
-                    fontWeight: 500,
-                    fontSize: 14,
-                    cursor: "pointer",
-                    background: pkg.highlight ? undefined : "#ffffff",
-                    color: pkg.highlight ? "#ffffff" : "#111827",
-                    border: pkg.highlight ? "none" : "1px solid #E5E7EB",
-                    marginTop: "auto",
-                  }}
+                  className={cn(
+                    "block w-full py-3.5 px-6 rounded-[8px] text-[14px] font-medium cursor-pointer mt-auto",
+                    pkg.highlight
+                      ? "btn-lp-purple text-white border-none"
+                      : "bg-white text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors"
+                  )}
                 >
                   Beli paket {pkg.name}
                 </button>
@@ -1128,74 +667,35 @@ export default function Home() {
       </section>
 
       {/* ──── FAQ ──── */}
-      <section id="faq" className="lp-faq-section" style={{ background: "#F9FAFB", padding: "72px 32px 80px" }}>
-        <div style={{ maxWidth: 740, margin: "0 auto" }}>
-          <h2 className="lp-faq-heading" style={{
-            textAlign: "center",
-            marginBottom: 48,
-          }}>
+      <section id="faq" className="lp-faq-section bg-[#F9FAFB] px-8 pt-[72px] pb-20">
+        <div className="max-w-[740px] mx-auto">
+          <h2 className="lp-faq-heading text-center mb-12">
             Frequently Asked Questions (FAQ)
           </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="flex flex-col gap-4">
             {FAQS.map((faq, i) => (
-              <div key={i} style={{
-                background: "#ffffff",
-                border: "1px solid #E5E7EB",
-                borderRadius: 12,
-                overflow: "hidden",
-              }}>
+              <div key={i} className="bg-white border border-[#E5E7EB] rounded-[12px] overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 16,
-                    width: "100%",
-                    padding: 24,
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
+                  className="flex items-center justify-between gap-4 w-full p-6 bg-transparent border-none cursor-pointer text-left"
                 >
-                  <span style={{
-                    fontFamily: "Inter, sans-serif",
-                    fontWeight: 600,
-                    fontSize: 18,
-                    letterSpacing: "-0.5px",
-                    lineHeight: "1.7em",
-                    color: "#111827",
-                  }}>
+                  <span className="text-[18px] font-semibold tracking-[-0.5px] leading-[1.7em] text-[#111827]">
                     {faq.q}
                   </span>
                   <IconChevronDown
                     size={20}
                     stroke={1.5}
-                    color="#6B7280"
-                    style={{
-                      flexShrink: 0,
-                      transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.3s ease",
-                    }}
+                    className="shrink-0 text-[#6B7280] transition-transform duration-300"
+                    style={{ transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)" }}
                   />
                 </button>
                 {/* Smooth expand/collapse via CSS grid trick */}
-                <div style={{
-                  display: "grid",
-                  gridTemplateRows: openFaq === i ? "1fr" : "0fr",
-                  transition: "grid-template-rows 0.3s ease",
-                }}>
-                  <div style={{ overflow: "hidden" }}>
-                    <p style={{
-                      fontFamily: "Inter, sans-serif",
-                      fontWeight: 400,
-                      fontSize: 16,
-                      lineHeight: "1.6em",
-                      color: "#6B7280",
-                      margin: 0,
-                      padding: "0 24px 24px",
-                    }}>
+                <div
+                  className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                  style={{ gridTemplateRows: openFaq === i ? "1fr" : "0fr" }}
+                >
+                  <div className="overflow-hidden">
+                    <p className="text-[16px] font-normal leading-[1.6em] text-[#6B7280] m-0 px-6 pb-6">
                       {faq.a}
                     </p>
                   </div>
@@ -1207,47 +707,17 @@ export default function Home() {
       </section>
 
       {/* ──── Final CTA ──── */}
-      <section className="lp-cta-section" style={{
-        width: "100%",
-        minHeight: 516,
-        padding: "144px 32px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        overflow: "hidden",
-        backgroundImage: "url('/bg-cta.png')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}>
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 40,
-          textAlign: "center",
-        }}>
-          <h2 className="lp-cta-heading" style={{
-            margin: 0,
-            maxWidth: 720,
-          }}>
+      <section
+        className="lp-cta-section w-full min-h-[516px] px-8 py-[144px] flex items-center justify-center relative overflow-hidden bg-cover bg-center"
+        style={{ backgroundImage: "url('/bg-cta.png')" }}
+      >
+        <div className="flex flex-col items-center gap-10 text-center">
+          <h2 className="lp-cta-heading m-0 max-w-[720px]">
             Siap menjadi jawaban pertama ChatGPT?
           </h2>
           <Link
             href="/auth"
-            className="btn-lp-black"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "14px 28px",
-              color: "#fff",
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 500,
-              fontSize: 14,
-              borderRadius: 8,
-              textDecoration: "none",
-              cursor: "pointer",
-            }}
+            className="btn-lp-black inline-flex items-center px-7 py-3.5 text-white text-[14px] font-medium rounded-[8px] no-underline cursor-pointer"
           >
             Audit brand Anda — Gratis
           </Link>

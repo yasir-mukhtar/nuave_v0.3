@@ -429,13 +429,11 @@ function GenerateModal({
   const cats: Category[] = ["teknikal", "web_copy", "konten"];
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.4)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl w-[440px] p-6"
-        style={{ boxShadow: "var(--shadow-modal)" }}
+        className="bg-white rounded-xl w-[440px] p-6 shadow-[var(--shadow-modal)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-5">
@@ -491,8 +489,7 @@ function GenerateModal({
           </button>
           <button
             onClick={onGenerate}
-            className="flex-1 py-2 type-caption font-semibold rounded-md text-white flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90"
-            style={{ background: "var(--purple)" }}
+            className="flex-1 py-2 type-caption font-semibold rounded-md text-white bg-brand flex items-center justify-center gap-1.5 transition-opacity hover:opacity-90"
           >
             <IconSparkles size={14} />
             Buat sekarang · 10 kredit
@@ -518,14 +515,8 @@ function GeneratingOverlay({ onDone }: { onDone: () => void }) {
   }, [stableDone]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.4)" }}
-    >
-      <div
-        className="bg-white rounded-xl w-[440px] p-6"
-        style={{ boxShadow: "var(--shadow-modal)" }}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-xl w-[440px] p-6 shadow-[var(--shadow-modal)]">
         <h3 className="font-semibold text-text-heading type-body mb-1">
           Membuat rekomendasi...
         </h3>
@@ -542,20 +533,11 @@ function GeneratingOverlay({ onDone }: { onDone: () => void }) {
               >
                 <div className="shrink-0 w-5 h-5 flex items-center justify-center">
                   {isDone ? (
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center"
-                      style={{ background: "#DCFCE7" }}
-                    >
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[#DCFCE7]">
                       <IconCheck size={11} color="#16A34A" />
                     </div>
                   ) : (
-                    <div
-                      className="w-5 h-5 rounded-full border-2 animate-spin"
-                      style={{
-                        borderColor: "var(--purple)",
-                        borderTopColor: "transparent",
-                      }}
-                    />
+                    <div className="w-5 h-5 rounded-full border-2 animate-spin border-brand border-t-transparent" />
                   )}
                 </div>
                 <CatTag cat={cat} />
@@ -637,8 +619,7 @@ export default function KontenV2Page() {
     <div className="flex h-full w-full">
       {/* ── LEFT PANEL ── */}
       <div
-        className="flex flex-col min-h-0 border-r border-border-default shrink-0 bg-white"
-        style={{ width: 380 }}
+        className="flex flex-col min-h-0 border-r border-border-default shrink-0 bg-white w-[380px]"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-8 h-[52px] border-b border-border-default shrink-0">
@@ -686,10 +667,7 @@ export default function KontenV2Page() {
           {allImplemented ? (
             /* ── All-implemented success state ── */
             <div className="flex flex-col items-center justify-center h-full px-6 text-center">
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-                style={{ background: "#DCFCE7" }}
-              >
+              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-[#DCFCE7]">
                 <IconCheck size={22} color="#16A34A" />
               </div>
               <p className="font-semibold text-text-heading type-body mb-1.5">
@@ -701,8 +679,7 @@ export default function KontenV2Page() {
               </p>
               <button
                 onClick={() => setGenState("modal")}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-md type-caption font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ background: "var(--purple)" }}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-md type-caption font-semibold text-white bg-brand transition-opacity hover:opacity-90"
               >
                 <IconSparkles size={14} />
                 Buat rekomendasi baru · 10 kredit

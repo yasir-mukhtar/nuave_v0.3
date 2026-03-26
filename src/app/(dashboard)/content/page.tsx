@@ -36,18 +36,18 @@ type TypeGroup = "web_copy" | "content_gap" | "meta_structure" | "all";
 
 /* ── Helpers ── */
 
-const TYPE_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  web_copy: { label: "Web Copy", bg: "#EDE9FF", color: "#533AFD" },
-  content_gap: { label: "Konten", bg: "#DCFCE7", color: "#16A34A" },
-  meta_structure: { label: "Meta & Struktur", bg: "#DBEAFE", color: "#2563EB" },
-  structure: { label: "Meta & Struktur", bg: "#DBEAFE", color: "#2563EB" },
-  meta: { label: "Meta & Struktur", bg: "#DBEAFE", color: "#2563EB" },
+const TYPE_CONFIG: Record<string, { label: string; className: string }> = {
+  web_copy: { label: "Web Copy", className: "bg-[#EDE9FF] text-brand" },
+  content_gap: { label: "Konten", className: "bg-[#DCFCE7] text-success" },
+  meta_structure: { label: "Meta & Struktur", className: "bg-[#DBEAFE] text-[#2563EB]" },
+  structure: { label: "Meta & Struktur", className: "bg-[#DBEAFE] text-[#2563EB]" },
+  meta: { label: "Meta & Struktur", className: "bg-[#DBEAFE] text-[#2563EB]" },
 };
 
-const PRIORITY_CONFIG: Record<string, { label: string; bg: string; color: string }> = {
-  high: { label: "Tinggi", bg: "#FEE2E2", color: "#DC2626" },
-  medium: { label: "Sedang", bg: "#FEF3C7", color: "#D97706" },
-  low: { label: "Rendah", bg: "#F3F4F6", color: "#6B7280" },
+const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
+  high: { label: "Tinggi", className: "bg-[#FEE2E2] text-error" },
+  medium: { label: "Sedang", className: "bg-[#FEF3C7] text-warning" },
+  low: { label: "Rendah", className: "bg-[#F3F4F6] text-text-muted" },
 };
 
 function normalizeType(type: string): string {
@@ -441,14 +441,13 @@ export default function KontenPage() {
           /* Grouped by type */
           groupOrder.filter((t) => grouped[t]?.length).map((type) => {
             const items = grouped[type]!;
-            const typeInfo = TYPE_CONFIG[type] ?? { label: type, bg: "#F3F4F6", color: "#374151" };
+            const typeInfo = TYPE_CONFIG[type] ?? { label: type, className: "bg-[#F3F4F6] text-text-body" };
             const appliedInGroup = items.filter((r) => r.status === "applied").length;
             return (
               <div key={type}>
                 <div className="flex items-center gap-2.5 mb-3">
                   <span
-                    className="text-[11px] leading-4 font-semibold px-2.5 py-[3px] rounded-xs uppercase tracking-wide"
-                    style={{ background: typeInfo.bg, color: typeInfo.color }}
+                    className={cn("text-[11px] leading-4 font-semibold px-2.5 py-[3px] rounded-xs uppercase tracking-wide", typeInfo.className)}
                   >
                     {typeInfo.label}
                   </span>
@@ -490,22 +489,10 @@ export default function KontenPage() {
             <div className="shrink-0 px-6 pt-5 pb-4 border-b border-border-default flex justify-between items-start">
               <div className="flex-1 min-w-0 pr-4">
                 <div className="flex gap-1.5 mb-2">
-                  <span
-                    className="type-caption font-semibold px-2 py-0.5 rounded-xs"
-                    style={{
-                      background: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).bg,
-                      color: (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).color,
-                    }}
-                  >
+                  <span className={cn("type-caption font-semibold px-2 py-0.5 rounded-xs", (PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).className)}>
                     Prioritas {(PRIORITY_CONFIG[selectedRec.priority] ?? PRIORITY_CONFIG.low).label}
                   </span>
-                  <span
-                    className="type-caption font-semibold px-2 py-0.5 rounded-xs"
-                    style={{
-                      background: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).bg,
-                      color: (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).color,
-                    }}
-                  >
+                  <span className={cn("type-caption font-semibold px-2 py-0.5 rounded-xs", (TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).className)}>
                     {(TYPE_CONFIG[selectedRec.type] ?? TYPE_CONFIG.web_copy).label}
                   </span>
                 </div>
@@ -622,7 +609,7 @@ function RecCard({
   onToggleApplied: (id: string, current: boolean) => void;
   selectedId: string | null;
 }) {
-  const typeInfo = TYPE_CONFIG[rec.type] ?? { label: rec.type, bg: "#F3F4F6", color: "#374151" };
+  const typeInfo = TYPE_CONFIG[rec.type] ?? { label: rec.type, className: "bg-[#F3F4F6] text-text-body" };
   const priorityInfo = PRIORITY_CONFIG[rec.priority] ?? PRIORITY_CONFIG.low;
   const isUnlocked = !!rec.suggested_copy;
   const isRevealing = revealingId === rec.id;
@@ -658,16 +645,10 @@ function RecCard({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-1">
-          <span
-            className="type-caption font-semibold px-1.5 py-px rounded-xs"
-            style={{ background: priorityInfo.bg, color: priorityInfo.color }}
-          >
+          <span className={cn("type-caption font-semibold px-1.5 py-px rounded-xs", priorityInfo.className)}>
             {priorityInfo.label}
           </span>
-          <span
-            className="type-caption font-semibold px-1.5 py-px rounded-xs"
-            style={{ background: typeInfo.bg, color: typeInfo.color }}
-          >
+          <span className={cn("type-caption font-semibold px-1.5 py-px rounded-xs", typeInfo.className)}>
             {typeInfo.label}
           </span>
           {rec._brandName && (

@@ -1,11 +1,8 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
 import { IconBrandX, IconBrandInstagram, IconBrandLinkedin } from "@tabler/icons-react";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
-const PURPLE = "#6C3FF5";
-const MUTED = "#6B7280";
 
 const NAV_LINKS = [
   { label: "Syarat dan Ketentuan", href: "/terms" },
@@ -19,136 +16,63 @@ const SOCIAL = [
   { icon: IconBrandInstagram, href: "https://instagram.com/nuave.ai", label: "Instagram" },
 ];
 
-function NavLink({ label, href }: { label: string; href: string }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <Link
-      href={href}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        fontFamily: "Inter, sans-serif",
-        fontWeight: 400,
-        fontSize: 14,
-        lineHeight: "20px",
-        color: hovered ? PURPLE : MUTED,
-        textDecoration: "none",
-        transition: "color 0.15s ease",
-      }}
-    >
-      {label}
-    </Link>
-  );
-}
-
-function SocialIcon({ icon: Icon, href, label }: { icon: typeof IconBrandX; href: string; label: string }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={label}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: 36,
-        height: 36,
-        borderRadius: 8,
-        backgroundColor: hovered ? PURPLE : "#111827",
-        color: "#ffffff",
-        textDecoration: "none",
-        flexShrink: 0,
-        transition: "background-color 0.15s ease",
-      }}
-    >
-      <Icon size={18} stroke={1.5} />
-    </a>
-  );
-}
-
 export default function Footer() {
   return (
-    <footer className="lp-footer" style={{ padding: "110px 32px", background: "#ffffff" }}>
-      <div style={{ maxWidth: 1045, margin: "0 auto" }}>
+    <footer className="lp-footer px-8 py-[110px] bg-white">
+      <div className="max-w-[1045px] mx-auto">
 
         {/* Row 1: Footer menu + Social icons */}
-        <div className="lp-footer-row1" style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 72,
-        }}>
-          <div className="lp-footer-nav" style={{ display: "flex", alignItems: "center", gap: 32 }}>
+        <div className="lp-footer-row1 flex items-center justify-between mb-[72px]">
+          <div className="lp-footer-nav flex items-center gap-8">
             {NAV_LINKS.map((link) => (
-              <NavLink key={link.label} {...link} />
+              <Link
+                key={link.label}
+                href={link.href}
+                className="text-[14px] font-normal leading-[20px] text-[#6B7280] no-underline hover:text-brand transition-colors duration-150"
+              >
+                {link.label}
+              </Link>
             ))}
           </div>
 
-          <div className="lp-footer-social" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span className="lp-footer-social-label" style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 400,
-              fontSize: 14,
-              lineHeight: "20px",
-              color: MUTED,
-              marginRight: 4,
-            }}>
+          <div className="lp-footer-social flex items-center gap-3">
+            <span className="lp-footer-social-label text-[14px] font-normal leading-[20px] text-[#6B7280] mr-1">
               Ikuti Kami
             </span>
-            <div className="lp-footer-social-icons" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              {SOCIAL.map((s) => (
-                <SocialIcon key={s.label} {...s} />
+            <div className="lp-footer-social-icons flex items-center gap-3">
+              {SOCIAL.map(({ icon: Icon, href, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="flex items-center justify-center w-9 h-9 rounded-[8px] bg-[#111827] text-white no-underline shrink-0 hover:bg-brand transition-colors duration-150"
+                >
+                  <Icon size={18} stroke={1.5} />
+                </a>
               ))}
             </div>
           </div>
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: "#E5E7EB" }} />
+        <div className="h-px bg-[#E5E7EB]" />
 
         {/* Row 2: Logo + tagline + copyright */}
-        <div className="lp-footer-row2" style={{
-          marginTop: 56,
-          display: "flex",
-          alignItems: "center",
-          gap: 32,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <img src={LOGO_SVG} alt="Nuave" width={28} height={28} style={{ objectFit: "contain" }} />
-            <span style={{
-              fontFamily: "Inter, sans-serif",
-              fontWeight: 600,
-              fontSize: 18,
-              color: "#111827",
-            }}>
+        <div className="lp-footer-row2 mt-14 flex items-center gap-8">
+          <div className="flex items-center gap-2">
+            <img src={LOGO_SVG} alt="Nuave" width={28} height={28} className="object-contain" />
+            <span className="text-[18px] font-semibold text-[#111827]">
               Nuave
             </span>
           </div>
 
-          <p style={{
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 400,
-            fontSize: 14,
-            lineHeight: "20px",
-            color: MUTED,
-            margin: 0,
-          }}>
+          <p className="text-[14px] font-normal leading-[20px] text-[#6B7280] m-0">
             Nuave membantu brand Anda muncul dalam pencarian di ChatGPT
           </p>
 
-          <p className="lp-footer-copyright" style={{
-            fontFamily: "Inter, sans-serif",
-            fontWeight: 400,
-            fontSize: 14,
-            lineHeight: "20px",
-            color: MUTED,
-            margin: 0,
-            marginLeft: "auto",
-          }}>
+          <p className="lp-footer-copyright text-[14px] font-normal leading-[20px] text-[#6B7280] m-0 ml-auto">
             © {new Date().getFullYear()} Nuave · Hak cipta dilindungi
           </p>
         </div>

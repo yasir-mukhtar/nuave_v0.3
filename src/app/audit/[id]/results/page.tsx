@@ -164,7 +164,7 @@ export default function ResultsPage() {
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return (
-          <strong key={i} style={{ fontWeight: 600 }}>
+          <strong key={i} className="font-semibold">
             {highlightBrand(part.slice(2, -2), brandName)}
           </strong>
         );
@@ -180,13 +180,7 @@ export default function ResultsPage() {
       if (line.match(/^#{1,3}\s/)) {
         const content = line.replace(/^#{1,3}\s/, '');
         return (
-          <p key={i} style={{
-            fontWeight: 600,
-            fontSize: '14px',
-            color: '#111827',
-            marginTop: '12px',
-            marginBottom: '4px'
-          }}>
+          <p key={i} className="type-body font-semibold text-text-heading mt-3 mb-1">
             {renderInline(content)}
           </p>
         );
@@ -195,36 +189,23 @@ export default function ResultsPage() {
       if (line.match(/^[\-\*•]\s/)) {
         const content = line.replace(/^[\-\*•]\s/, '');
         return (
-          <div key={i} style={{
-            display: 'flex',
-            gap: '8px',
-            marginBottom: '4px',
-          }}>
-            <span style={{ color: '#533AFD', flexShrink: 0 }}>•</span>
+          <div key={i} className="flex gap-2 mb-1">
+            <span className="text-brand shrink-0">•</span>
             <span>{renderInline(content)}</span>
           </div>
         );
       }
       // Horizontal rule
       if (line.match(/^---/)) {
-        return (
-          <hr key={i} style={{
-            border: 'none',
-            borderTop: '1px solid #E5E7EB',
-            margin: '12px 0'
-          }} />
-        );
+        return <hr key={i} className="border-none border-t border-[#E5E7EB] my-3" />;
       }
       // Empty line
       if (line.trim() === '') {
-        return <div key={i} style={{ height: '8px' }} />;
+        return <div key={i} className="h-2" />;
       }
       // Normal paragraph
       return (
-        <p key={i} style={{
-          lineHeight: '1.7',
-          marginBottom: '4px'
-        }}>
+        <p key={i} className="type-body leading-[1.7] mb-1">
           {renderInline(line)}
         </p>
       );

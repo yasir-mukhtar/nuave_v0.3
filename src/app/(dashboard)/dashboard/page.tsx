@@ -178,10 +178,10 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-8">
       {/* Greeting + action */}
       <div>
-        <h1 className="type-heading-sm" style={{ margin: 0, whiteSpace: 'nowrap' }}>
+        <h1 className="type-heading-sm m-0 whitespace-nowrap">
           Selamat datang, {data.firstName}
         </h1>
-        <p className="type-body text-text-muted" style={{ margin: 0 }}>
+        <p className="type-body text-text-muted m-0">
           Berikut performa AI visibility{" "}
           <span className="text-text-heading font-medium">{data.brandName}</span>
         </p>

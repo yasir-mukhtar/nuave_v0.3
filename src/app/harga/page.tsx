@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconArrowLeft } from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
 import Footer from "@/components/Footer";
 
 const PACKAGES = [
@@ -98,29 +99,20 @@ export default function HargaPage() {
   const router = useRouter();
 
   return (
-    <div style={{ minHeight: "100vh", background: "#ffffff" }}>
+    <div className="min-h-screen bg-white">
 
       {/* Navbar */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 100,
-        background: "rgba(255,255,255,0.95)",
-        backdropFilter: "blur(8px)",
-        borderBottom: "1px solid var(--border-default)",
-        padding: "0 32px", height: "56px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-      }}>
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src="/logo-nuave.svg" alt="Nuave" width="32" height="32" style={{ display: 'block' }} />
-            <span style={{ fontWeight: 700, fontSize: '18px', color: '#111827' }}>Nuave</span>
-          </div>
+      <header className="sticky top-0 z-[100] bg-white/95 backdrop-blur-[8px] border-b border-border-default px-8 h-14 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 no-underline">
+          <img src="/logo-nuave.svg" alt="Nuave" width="32" height="32" className="block" />
+          <span className="text-[18px] font-bold text-text-heading">Nuave</span>
         </Link>
       </header>
 
       {/* Hero */}
-      <section style={{ background: "var(--surface)", borderBottom: "1px solid var(--border-default)", padding: "48px 32px" }}>
-        <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-          <div style={{ marginBottom: "20px" }}>
+      <section className="bg-surface border-b border-border-default px-8 py-12">
+        <div className="max-w-[800px] mx-auto">
+          <div className="mb-5">
             <button
               onClick={() => {
                 if (window.history.length > 1) {
@@ -129,11 +121,7 @@ export default function HargaPage() {
                   router.push("/");
                 }
               }}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: "6px",
-                fontSize: "13px", color: "var(--text-muted)", background: "none",
-                border: "none", padding: 0, cursor: "pointer",
-              }}
+              className="inline-flex items-center gap-1.5 type-caption text-text-muted bg-transparent border-none p-0 cursor-pointer hover:text-text-body transition-colors"
             >
               <IconArrowLeft size={16} stroke={1.5} /> Kembali
             </button>
@@ -141,61 +129,57 @@ export default function HargaPage() {
         </div>
       </section>
 
-      <section style={{ textAlign: "center", padding: "64px 24px 48px" }}>
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: "6px",
-          background: "var(--purple-light)", border: "1px solid #C4B5FD",
-          borderRadius: 'var(--radius-full)', padding: "4px 14px",
-          fontSize: "12px", fontWeight: 500, color: "var(--purple)", marginBottom: "24px",
-        }}>
-          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--purple)" }} />
+      <section className="text-center px-6 pt-16 pb-12">
+        <div className="inline-flex items-center gap-1.5 bg-[var(--purple-light)] border border-[#C4B5FD] rounded-full px-3.5 py-1 text-[12px] font-medium text-brand mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-brand" />
           Bayar sekali, pakai kapan saja
         </div>
-        <h1 style={{ fontSize: "40px", margin: "0 0 16px 0", lineHeight: 1.2 }}>
+        <h1 className="text-[40px] m-0 mb-4 leading-[1.2]">
           Harga yang sederhana,<br />tanpa langganan
         </h1>
-        <p style={{ fontSize: "16px", color: "var(--text-muted)", maxWidth: "480px", margin: "0 auto 8px", lineHeight: 1.6 }}>
+        <p className="type-body text-text-muted max-w-[480px] mx-auto mb-2 leading-relaxed">
           Beli kredit saat butuh. Mulai gratis dengan 10 kredit — cukup untuk 1 audit lengkap.
         </p>
       </section>
 
       {/* Pricing Cards */}
-      <section style={{ maxWidth: "1040px", margin: "0 auto", padding: "0 24px 64px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
+      <section className="max-w-[1040px] mx-auto px-6 pb-16">
+        <div className="grid grid-cols-3 gap-6">
           {PACKAGES.map((pkg) => (
-            <div key={pkg.id} style={{
-              position: "relative",
-              background: pkg.popular ? "var(--purple)" : "#ffffff",
-              border: `1px solid ${pkg.popular ? "var(--purple)" : "var(--border-default)"}`,
-              borderRadius: 'var(--radius-xl)',
-              padding: "32px 28px",
-              boxShadow: pkg.popular ? "0 8px 32px rgba(108,63,245,0.25)" : "0 1px 2px rgba(0,0,0,0.05)",
-              transform: pkg.popular ? "scale(1.03)" : "none",
-            }}>
+            <div key={pkg.id} className={cn(
+              "relative rounded-[var(--radius-xl)] px-7 py-8",
+              pkg.popular
+                ? "bg-brand border border-brand shadow-[0_8px_32px_rgba(108,63,245,0.25)] scale-[1.03]"
+                : "bg-white border border-border-default shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
+            )}>
               {pkg.popular && (
-                <div style={{
-                  position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)",
-                  background: "#ffffff", color: "var(--purple)",
-                  fontSize: "11px", fontWeight: 700, letterSpacing: "0.05em",
-                  padding: "4px 14px", borderRadius: 'var(--radius-full)',
-                  border: "1px solid var(--border-default)",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                  whiteSpace: "nowrap",
-                }}>
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-brand text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-full border border-border-default shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
                   ⭐ PALING POPULER
                 </div>
               )}
 
-              <p style={{ fontSize: "13px", fontWeight: 600, color: pkg.popular ? "rgba(255,255,255,0.7)" : "var(--text-muted)", margin: "0 0 8px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <p className={cn(
+                "text-[13px] font-semibold m-0 mb-2 uppercase tracking-[0.05em]",
+                pkg.popular ? "text-white/70" : "text-text-muted"
+              )}>
                 {pkg.name}
               </p>
-              <p style={{ fontSize: "32px", fontWeight: 700, color: pkg.popular ? "#ffffff" : "var(--text-heading)", margin: "0 0 4px 0" }}>
+              <p className={cn(
+                "text-[32px] font-bold m-0 mb-1",
+                pkg.popular ? "text-white" : "text-text-heading"
+              )}>
                 {pkg.price}
               </p>
-              <p style={{ fontSize: "13px", color: pkg.popular ? "rgba(255,255,255,0.6)" : "var(--text-muted)", margin: "0 0 20px 0" }}>
+              <p className={cn(
+                "text-[13px] m-0 mb-5",
+                pkg.popular ? "text-white/60" : "text-text-muted"
+              )}>
                 {pkg.credits} kredit
               </p>
-              <p style={{ fontSize: "13px", color: pkg.popular ? "rgba(255,255,255,0.8)" : "var(--text-body)", margin: "0 0 24px 0", lineHeight: 1.5 }}>
+              <p className={cn(
+                "text-[13px] m-0 mb-6 leading-relaxed",
+                pkg.popular ? "text-white/80" : "text-text-body"
+              )}>
                 {pkg.description}
               </p>
 
@@ -204,24 +188,28 @@ export default function HargaPage() {
                   sessionStorage.setItem('nuave_pending_package', pkg.id);
                   window.location.href = '/auth';
                 }}
-                style={{
-                  display: "block", width: "100%", textAlign: "center",
-                  padding: "12px 24px", borderRadius: 'var(--radius-md)',
-                  fontSize: "14px", fontWeight: 600,
-                  background: pkg.popular ? "#ffffff" : "var(--purple)",
-                  color: pkg.popular ? "var(--purple)" : "#ffffff",
-                  border: "none", cursor: "pointer",
-                  marginBottom: "28px",
-                }}
+                className={cn(
+                  "block w-full text-center px-6 py-3 rounded-[var(--radius-md)] type-body font-semibold border-none cursor-pointer mb-7 hover:opacity-90 transition-opacity",
+                  pkg.popular ? "bg-white text-brand" : "bg-brand text-white"
+                )}
               >
                 Beli {pkg.name} →
               </button>
 
-              <div style={{ borderTop: `1px solid ${pkg.popular ? "rgba(255,255,255,0.2)" : "var(--border-default)"}`, paddingTop: "24px" }}>
+              <div className={cn(
+                "border-t pt-6",
+                pkg.popular ? "border-white/20" : "border-border-default"
+              )}>
                 {pkg.features.map((f, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "10px" }}>
-                    <span style={{ color: pkg.popular ? "rgba(255,255,255,0.9)" : "#22C55E", fontWeight: 700, fontSize: "14px", flexShrink: 0, marginTop: "1px" }}>✓</span>
-                    <span style={{ fontSize: "13px", color: pkg.popular ? "rgba(255,255,255,0.85)" : "var(--text-body)", lineHeight: 1.4 }}>{f}</span>
+                  <div key={i} className="flex items-start gap-2.5 mb-2.5">
+                    <span className={cn(
+                      "font-bold text-[14px] shrink-0 mt-px",
+                      pkg.popular ? "text-white/90" : "text-success"
+                    )}>✓</span>
+                    <span className={cn(
+                      "text-[13px] leading-snug",
+                      pkg.popular ? "text-white/85" : "text-text-body"
+                    )}>{f}</span>
                   </div>
                 ))}
               </div>
@@ -230,9 +218,9 @@ export default function HargaPage() {
         </div>
 
         {/* Free trial note */}
-        <p style={{ textAlign: "center", fontSize: "13px", color: "var(--text-muted)", marginTop: "32px" }}>
+        <p className="text-center type-caption text-text-muted mt-8">
           Belum yakin?{" "}
-          <Link href="/" style={{ color: "var(--purple)", fontWeight: 500, textDecoration: "none" }}>
+          <Link href="/" className="text-brand font-medium no-underline hover:opacity-80 transition-opacity">
             Mulai dengan 10 kredit gratis →
           </Link>
           {" "}Tidak perlu kartu kredit.
@@ -240,33 +228,33 @@ export default function HargaPage() {
       </section>
 
       {/* Credit Usage Table */}
-      <section style={{ background: "var(--surface)", borderTop: "1px solid var(--border-default)", borderBottom: "1px solid var(--border-default)", padding: "64px 24px" }}>
-        <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <h2 style={{ textAlign: "center", marginBottom: "8px" }}>
+      <section className="bg-surface border-t border-b border-border-default px-6 py-16">
+        <div className="max-w-[640px] mx-auto">
+          <h2 className="text-center mb-2">
             Berapa kredit yang dibutuhkan?
           </h2>
-          <p style={{ fontSize: "14px", color: "var(--text-muted)", textAlign: "center", marginBottom: "32px" }}>
+          <p className="type-body text-text-muted text-center mb-8">
             Setiap tindakan menggunakan kredit sesuai tabel berikut.
           </p>
-          <div style={{ border: "1px solid var(--border-default)", borderRadius: 'var(--radius-lg)', overflow: "hidden", background: "#ffffff" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
+          <div className="border border-border-default rounded-[var(--radius-lg)] overflow-hidden bg-white">
+            <table className="w-full border-collapse type-body">
               <thead>
-                <tr style={{ background: "var(--surface)" }}>
-                  <th style={{ textAlign: "left", padding: "14px 20px", color: "var(--text-body)", fontWeight: 600, borderBottom: "1px solid var(--border-default)" }}>Tindakan</th>
-                  <th style={{ textAlign: "right", padding: "14px 20px", color: "var(--text-body)", fontWeight: 600, borderBottom: "1px solid var(--border-default)" }}>Kredit</th>
+                <tr className="bg-surface">
+                  <th className="text-left px-5 py-3.5 text-text-body font-semibold border-b border-border-default">Tindakan</th>
+                  <th className="text-right px-5 py-3.5 text-text-body font-semibold border-b border-border-default">Kredit</th>
                 </tr>
               </thead>
               <tbody>
                 {CREDIT_USAGE.map((row, i) => (
-                  <tr key={i} style={{ borderBottom: i < CREDIT_USAGE.length - 1 ? "1px solid var(--border-default)" : "none" }}>
-                    <td style={{ padding: "14px 20px", color: "var(--text-heading)", fontWeight: 500 }}>{row.action}</td>
-                    <td style={{ padding: "14px 20px", textAlign: "right" }}>
-                      <span style={{
-                        background: row.credits === "Gratis" ? "#DCFCE7" : "var(--purple-light)",
-                        color: row.credits === "Gratis" ? "#16A34A" : "var(--purple)",
-                        fontSize: "12px", fontWeight: 600,
-                        padding: "3px 10px", borderRadius: 'var(--radius-full)',
-                      }}>
+                  <tr key={i} className={cn(i < CREDIT_USAGE.length - 1 && "border-b border-border-default")}>
+                    <td className="px-5 py-3.5 text-text-heading font-medium">{row.action}</td>
+                    <td className="px-5 py-3.5 text-right">
+                      <span className={cn(
+                        "text-[12px] font-semibold px-2.5 py-[3px] rounded-full",
+                        row.credits === "Gratis"
+                          ? "bg-[#DCFCE7] text-success"
+                          : "bg-[var(--purple-light)] text-brand"
+                      )}>
                         {row.credits}
                       </span>
                     </td>
@@ -279,21 +267,17 @@ export default function HargaPage() {
       </section>
 
       {/* Payment Methods */}
-      <section style={{ padding: "64px 24px", textAlign: "center" }}>
-        <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <h2 style={{ marginBottom: "8px" }}>
+      <section className="px-6 py-16 text-center">
+        <div className="max-w-[640px] mx-auto">
+          <h2 className="mb-2">
             Metode pembayaran
           </h2>
-          <p style={{ fontSize: "14px", color: "var(--text-muted)", marginBottom: "32px" }}>
+          <p className="type-body text-text-muted mb-8">
             Pembayaran diproses secara aman melalui Midtrans.
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", justifyContent: "center" }}>
+          <div className="flex flex-wrap gap-3 justify-center">
             {["Transfer Bank (VA)", "GoPay", "OVO", "QRIS", "Indomaret", "Alfamart", "Kartu Kredit / Debit"].map((method) => (
-              <span key={method} style={{
-                background: "var(--surface)", border: "1px solid var(--border-default)",
-                borderRadius: 'var(--radius-md)', padding: "8px 16px",
-                fontSize: "13px", fontWeight: 500, color: "var(--text-body)",
-              }}>
+              <span key={method} className="bg-surface border border-border-default rounded-[var(--radius-md)] px-4 py-2 type-caption font-medium text-text-body">
                 {method}
               </span>
             ))}
@@ -302,16 +286,16 @@ export default function HargaPage() {
       </section>
 
       {/* FAQ */}
-      <section style={{ background: "var(--surface)", borderTop: "1px solid var(--border-default)", padding: "64px 24px" }}>
-        <div style={{ maxWidth: "640px", margin: "0 auto" }}>
-          <h2 style={{ textAlign: "center", marginBottom: "40px" }}>
+      <section className="bg-surface border-t border-border-default px-6 py-16">
+        <div className="max-w-[640px] mx-auto">
+          <h2 className="text-center mb-10">
             Pertanyaan yang sering ditanya
           </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div className="flex flex-col gap-4">
             {FAQS.map((faq, i) => (
-              <div key={i} style={{ background: "#ffffff", border: "1px solid var(--border-default)", borderRadius: 'var(--radius-lg)', padding: "20px 24px" }}>
-                <p style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-heading)", margin: "0 0 8px 0" }}>{faq.q}</p>
-                <p style={{ fontSize: "14px", color: "var(--text-body)", margin: 0, lineHeight: 1.6 }}>{faq.a}</p>
+              <div key={i} className="bg-white border border-border-default rounded-[var(--radius-lg)] px-6 py-5">
+                <p className="type-body font-semibold text-text-heading m-0 mb-2">{faq.q}</p>
+                <p className="type-body text-text-body m-0 leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
@@ -319,20 +303,15 @@ export default function HargaPage() {
       </section>
 
       {/* CTA Banner */}
-      <section style={{ padding: "64px 24px", textAlign: "center" }}>
-        <div style={{ maxWidth: "560px", margin: "0 auto" }}>
-          <h2 style={{ fontSize: "28px", marginBottom: "12px" }}>
+      <section className="px-6 py-16 text-center">
+        <div className="max-w-[560px] mx-auto">
+          <h2 className="text-[28px] mb-3">
             Mulai audit AI pertama Anda — gratis
           </h2>
-          <p style={{ fontSize: "15px", color: "var(--text-muted)", marginBottom: "28px" }}>
+          <p className="type-body text-text-muted mb-7">
             Daftar sekarang dan dapatkan 10 kredit gratis. Tidak perlu kartu kredit.
           </p>
-          <Link href="/" style={{
-            display: "inline-block",
-            background: "var(--purple)", color: "#ffffff",
-            fontSize: "15px", fontWeight: 600, textDecoration: "none",
-            padding: "14px 32px", borderRadius: 'var(--radius-md)',
-          }}>
+          <Link href="/" className="inline-block bg-brand text-white type-body font-semibold no-underline px-8 py-3.5 rounded-[var(--radius-md)] hover:opacity-90 transition-opacity">
             Coba gratis sekarang →
           </Link>
         </div>

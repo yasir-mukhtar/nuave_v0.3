@@ -2,8 +2,9 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { IconArrowLeft } from "@tabler/icons-react";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const PACKAGES = [
@@ -51,36 +52,26 @@ export default function CreditsContent() {
   async function handlePay() {
     setPaying(true);
     // TODO: call /api/credits/purchase with selected package
-    // For now, show placeholder
     await new Promise((r) => setTimeout(r, 800));
     alert("Pembayaran akan segera tersedia. Terima kasih atas kesabaran Anda!");
     setPaying(false);
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#ffffff" }}>
+    <div className="min-h-screen bg-white">
 
       {/* Header */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 100,
-        background: "rgba(255,255,255,0.95)",
-        backdropFilter: "blur(8px)",
-        borderBottom: "1px solid var(--border-default)",
-        padding: "0 32px", height: "56px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-      }}>
-        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src="/logo-nuave.svg" alt="Nuave" width="32" height="32" style={{ display: 'block' }} />
-            <span style={{ fontWeight: 700, fontSize: '18px', color: '#111827' }}>Nuave</span>
-          </div>
+      <header className="sticky top-0 z-[100] bg-white/95 backdrop-blur-[8px] border-b border-border-default px-8 h-14 flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-2 no-underline">
+          <img src="/logo-nuave.svg" alt="Nuave" width="32" height="32" className="block" />
+          <span className="text-[18px] font-bold text-text-heading">Nuave</span>
         </Link>
       </header>
 
-      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "48px 24px" }}>
+      <main className="max-w-[900px] mx-auto px-6 py-12">
 
         {/* Back button + Title */}
-        <div style={{ marginBottom: "40px" }}>
+        <div className="mb-10">
           <button
             onClick={() => {
               if (window.history.length > 1) {
@@ -94,92 +85,84 @@ export default function CreditsContent() {
             <IconArrowLeft size={16} stroke={1.5} />
             Kembali ke dashboard
           </button>
-          <h1 style={{ fontSize: "28px", margin: "0 0 8px 0" }}>
+          <h1 className="text-[28px] m-0 mb-2">
             Beli Kredit
           </h1>
-          <p style={{ fontSize: "15px", color: "var(--text-muted)", margin: 0 }}>
+          <p className="type-body text-text-muted m-0">
             Pilih paket yang sesuai dengan kebutuhan bisnis Anda.
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "32px", alignItems: "start" }}>
+        <div className="grid grid-cols-[1fr_320px] gap-8 items-start">
 
           {/* Package selector */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div className="flex flex-col gap-4">
             {PACKAGES.map((pkg) => (
               <button
                 key={pkg.id}
                 onClick={() => setSelected(pkg.id)}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "20px 24px", borderRadius: 'var(--radius-lg)', cursor: "pointer",
-                  background: selected === pkg.id ? "var(--purple-light)" : "#ffffff",
-                  border: `2px solid ${selected === pkg.id ? "var(--purple)" : "var(--border-default)"}`,
-                  textAlign: "left", transition: "all 150ms ease",
-                }}
+                className={cn(
+                  "flex items-center justify-between px-6 py-5 rounded-[var(--radius-lg)] cursor-pointer text-left transition-all duration-150",
+                  selected === pkg.id
+                    ? "bg-[var(--purple-light)] border-2 border-brand"
+                    : "bg-white border-2 border-border-default"
+                )}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div className="flex items-center gap-4">
                   {/* Radio */}
-                  <div style={{
-                    width: "20px", height: "20px", borderRadius: "50%",
-                    border: `2px solid ${selected === pkg.id ? "var(--purple)" : "#D1D5DB"}`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0,
-                  }}>
+                  <div className={cn(
+                    "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                    selected === pkg.id ? "border-brand" : "border-[#D1D5DB]"
+                  )}>
                     {selected === pkg.id && (
-                      <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "var(--purple)" }} />
+                      <div className="w-2.5 h-2.5 rounded-full bg-brand" />
                     )}
                   </div>
                   <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                      <span style={{ fontSize: "15px", fontWeight: 600, color: "var(--text-heading)" }}>{pkg.name}</span>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="type-body font-semibold text-text-heading">{pkg.name}</span>
                       {pkg.popular && (
-                        <span style={{
-                          fontSize: "10px", fontWeight: 700, color: "var(--purple)",
-                          background: "var(--purple-light)", padding: "2px 8px",
-                          borderRadius: 'var(--radius-full)', letterSpacing: "0.05em",
-                        }}>POPULER</span>
+                        <span className="text-[10px] font-bold text-brand bg-[var(--purple-light)] px-2 py-px rounded-full tracking-[0.05em]">
+                          POPULER
+                        </span>
                       )}
                     </div>
-                    <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0 }}>{pkg.description}</p>
+                    <p className="type-caption text-text-muted m-0">{pkg.description}</p>
                   </div>
                 </div>
-                <div style={{ textAlign: "right", flexShrink: 0, marginLeft: "16px" }}>
-                  <div style={{ fontSize: "18px", fontWeight: 700, color: selected === pkg.id ? "var(--purple)" : "var(--text-heading)" }}>
+                <div className="text-right shrink-0 ml-4">
+                  <div className={cn("text-[18px] font-bold", selected === pkg.id ? "text-brand" : "text-text-heading")}>
                     {pkg.price}
                   </div>
-                  <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{pkg.credits} kredit</div>
+                  <div className="type-caption text-text-muted">{pkg.credits} kredit</div>
                 </div>
               </button>
             ))}
           </div>
 
           {/* Order summary */}
-          <div style={{
-            background: "var(--surface)", border: "1px solid var(--border-default)",
-            borderRadius: 'var(--radius-xl)', padding: "28px", position: "sticky", top: "72px",
-          }}>
-            <h2 style={{ fontSize: "16px", margin: "0 0 20px 0" }}>
+          <div className="bg-surface border border-border-default rounded-[var(--radius-xl)] p-7 sticky top-[72px]">
+            <h2 className="type-body font-semibold m-0 mb-5">
               Ringkasan Pesanan
             </h2>
 
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "var(--text-muted)" }}>Paket</span>
-              <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--text-heading)" }}>{selectedPkg.name}</span>
+            <div className="flex justify-between mb-3">
+              <span className="type-body text-text-muted">Paket</span>
+              <span className="type-body font-medium text-text-heading">{selectedPkg.name}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-              <span style={{ fontSize: "14px", color: "var(--text-muted)" }}>Kredit</span>
-              <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--text-heading)" }}>{selectedPkg.credits} kredit</span>
+            <div className="flex justify-between mb-3">
+              <span className="type-body text-text-muted">Kredit</span>
+              <span className="type-body font-medium text-text-heading">{selectedPkg.credits} kredit</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-              <span style={{ fontSize: "14px", color: "var(--text-muted)" }}>Masa berlaku</span>
-              <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--text-heading)" }}>Tidak kadaluarsa</span>
+            <div className="flex justify-between mb-5">
+              <span className="type-body text-text-muted">Masa berlaku</span>
+              <span className="type-body font-medium text-text-heading">Tidak kadaluarsa</span>
             </div>
 
-            <div style={{ borderTop: "1px solid var(--border-default)", paddingTop: "16px", marginBottom: "20px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "15px", fontWeight: 600, color: "var(--text-heading)" }}>Total</span>
-                <span style={{ fontSize: "20px", fontWeight: 700, color: "var(--purple)" }}>{selectedPkg.price}</span>
+            <div className="border-t border-border-default pt-4 mb-5">
+              <div className="flex justify-between">
+                <span className="type-body font-semibold text-text-heading">Total</span>
+                <span className="text-[20px] font-bold text-brand">{selectedPkg.price}</span>
               </div>
             </div>
 
@@ -192,20 +175,18 @@ export default function CreditsContent() {
               {paying ? "Memproses..." : `Bayar ${selectedPkg.price} →`}
             </Button>
 
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+            <div className="flex items-center justify-center gap-1.5">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>Pembayaran aman via Midtrans</span>
+              <span className="type-caption text-text-muted">Pembayaran aman via Midtrans</span>
             </div>
 
-            <div style={{ marginTop: "20px", borderTop: "1px solid var(--border-default)", paddingTop: "16px" }}>
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "0 0 6px 0", fontWeight: 600 }}>Metode pembayaran:</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+            <div className="mt-5 border-t border-border-default pt-4">
+              <p className="type-caption text-text-muted m-0 mb-1.5 font-semibold">Metode pembayaran:</p>
+              <div className="flex flex-wrap gap-1.5">
                 {["Virtual Account", "GoPay", "OVO", "QRIS", "Indomaret"].map((m) => (
-                  <span key={m} style={{
-                    fontSize: "11px", color: "var(--text-muted)",
-                    background: "#ffffff", border: "1px solid var(--border-default)",
-                    borderRadius: 'var(--radius-xs)', padding: "2px 8px",
-                  }}>{m}</span>
+                  <span key={m} className="text-[11px] text-text-muted bg-white border border-border-default rounded-[var(--radius-xs)] px-2 py-px">
+                    {m}
+                  </span>
                 ))}
               </div>
             </div>
