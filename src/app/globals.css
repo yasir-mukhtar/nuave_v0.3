@@ -70,6 +70,19 @@
   .type-heading-md { font-family: var(--font-heading); font-size: var(--text-heading-md); line-height: 1.2; font-weight: 700; } /* ~33.2px */
   .type-heading-lg { font-family: var(--font-heading); font-size: var(--text-heading-lg); line-height: 1.1; font-weight: 700; } /* ~44.2px */
   .type-display    { font-family: var(--font-heading); font-size: var(--text-display);    line-height: 1.0; font-weight: 700; } /* ~58.9px */
+
+  /* Nav item label — 400 by default, 500 on hover or when active */
+  .type-nav {
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    font-weight: 400;
+    transition: color 0.15s ease, font-weight 0.15s ease;
+  }
+  .nav-item:hover .type-nav,
+  .nav-item[data-active="true"] .type-nav {
+    font-weight: 500;
+  }
 }
 
 .form-field {

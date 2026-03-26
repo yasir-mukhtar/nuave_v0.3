@@ -166,13 +166,13 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
               : pathname?.startsWith(item.href);
 
           return (
-            <Link key={item.href} href={item.href} className="no-underline group flex items-center gap-2">
+            <Link key={item.href} href={item.href} data-active={isActive} className="nav-item no-underline group flex items-center gap-2">
               <Icon
                 size={20}
                 stroke={1.5}
                 className={cn("transition-colors", isActive ? "text-foreground" : "text-[#8b8b8b] group-hover:text-foreground")}
               />
-              <span className={cn("type-body font-medium transition-colors", isActive ? "text-foreground" : "text-[#8b8b8b] group-hover:text-foreground")}>
+              <span className={cn("type-nav", isActive ? "text-foreground" : "text-[#8b8b8b] group-hover:text-foreground")}>
                 {item.label}
               </span>
             </Link>
