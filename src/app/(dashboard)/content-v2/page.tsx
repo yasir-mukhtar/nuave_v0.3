@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tip } from "@/components/ui/tip";
 
-/* ─── Types ─── */
+/* ── Types ── */
 
 type Category = "teknikal" | "web_copy" | "konten";
 type Priority = "high" | "medium" | "low";
@@ -35,7 +35,7 @@ interface Rec {
   implemented: boolean;
 }
 
-/* ─── Config ─── */
+/* ── Config ── */
 
 const CAT: Record<Category, { label: string; bg: string; color: string; tip: string }> = {
   teknikal: {
@@ -64,7 +64,7 @@ const PRIO: Record<Priority, { label: string; color: string }> = {
   low: { label: "Prioritas rendah", color: "#6B7280" },
 };
 
-/* ─── Audit scores (for generate modal priority preview) ─── */
+/* ── Audit scores (for generate modal priority preview) ── */
 
 const AUDIT_SCORES: Record<Category, number> = {
   teknikal: 34,
@@ -72,7 +72,7 @@ const AUDIT_SCORES: Record<Category, number> = {
   konten: 28,
 };
 
-/* ─── Mock Data ─── */
+/* ── Mock Data ── */
 
 const INITIAL_RECS: Rec[] = [
   {
@@ -241,7 +241,7 @@ const INITIAL_RECS: Rec[] = [
   },
 ];
 
-/* ─── Sub-components ─── */
+/* ── Sub-components ── */
 
 function PrioBars({ priority }: { priority: Priority }) {
   const label = PRIO[priority].label;
@@ -410,7 +410,7 @@ function RecItem({
   );
 }
 
-/* ─── Generate Modal ─── */
+/* ── Generate Modal ── */
 
 function categoryPrioHint(score: number): { label: string; color: string } {
   if (score < 40) return { label: "Prioritas tinggi", color: "#DC2626" };
@@ -570,7 +570,7 @@ function GeneratingOverlay({ onDone }: { onDone: () => void }) {
   );
 }
 
-/* ─── Main Page ─── */
+/* ── Main Page ── */
 
 type GenState = "idle" | "modal" | "generating";
 type DemoMode = "normal" | "limit";

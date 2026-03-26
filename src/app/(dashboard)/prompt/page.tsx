@@ -70,6 +70,20 @@ export default function PromptsPage() {
   const [editPromptData, setEditPromptData] = useState<PromptWithAudit | null>(null);
   const [editPromptClosing, setEditPromptClosing] = useState(false);
 
+  // Override main's scroll+padding so this page owns its own layout
+  useEffect(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+    const prevOverflow = main.style.overflow;
+    const prevPadding = main.style.padding;
+    main.style.overflow = "hidden";
+    main.style.padding = "0";
+    return () => {
+      main.style.overflow = prevOverflow;
+      main.style.padding = prevPadding;
+    };
+  }, []);
+
   const loading = projectLoading || dataLoading;
 
   // Filter prompts
@@ -167,7 +181,7 @@ export default function PromptsPage() {
         @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
       `}</style>
 
-      <div className="flex h-[calc(100vh-52px)] -m-8 bg-white overflow-hidden">
+      <div className="flex h-full w-full bg-white overflow-hidden">
 
         {/* ═══════ LEFT PANEL: Topics ═══════ */}
         <div className="w-[380px] shrink-0 flex flex-col border-r border-border-default h-full">

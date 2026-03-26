@@ -63,7 +63,7 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
   }, []);
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden" data-lenis-prevent>
       <LowCreditsBanner />
       <div className="flex min-h-0 flex-1">
         <Sidebar
