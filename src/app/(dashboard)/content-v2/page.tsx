@@ -10,6 +10,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tip } from "@/components/ui/tip";
@@ -612,10 +613,12 @@ export default function KontenV2Page() {
 
   function handleMarkImplemented(id: string) {
     setRecs((prev) => prev.map((r) => (r.id === id ? { ...r, implemented: true } : r)));
+    toast("Rekomendasi ditandai sudah diimplementasi");
   }
 
   function handleUnmarkImplemented(id: string) {
     setRecs((prev) => prev.map((r) => (r.id === id ? { ...r, implemented: false } : r)));
+    toast("Rekomendasi ditandai belum diimplementasi");
   }
 
   const handleGenerateDone = useCallback(() => {
@@ -651,9 +654,8 @@ export default function KontenV2Page() {
           >
             <span>
               <Button
-                variant="outline"
+                variant="default"
                 size="sm"
-                className="h-[30px]"
                 disabled={isAtLimit}
                 onClick={() => !isAtLimit && setGenState("modal")}
               >

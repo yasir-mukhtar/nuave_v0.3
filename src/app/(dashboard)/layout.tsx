@@ -8,6 +8,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import LowCreditsBanner from "@/components/LowCreditsBanner";
 import { ActiveWorkspaceProvider, useActiveWorkspace } from "@/hooks/useActiveWorkspace";
 import { ActiveProjectProvider, useActiveProject } from "@/hooks/useActiveProject";
+import { Toaster } from "@/components/ui/sonner";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -87,10 +88,13 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <ActiveWorkspaceProvider>
-      <ActiveProjectProvider>
-        <DashboardLayoutInner>{children}</DashboardLayoutInner>
-      </ActiveProjectProvider>
-    </ActiveWorkspaceProvider>
+    <>
+      <ActiveWorkspaceProvider>
+        <ActiveProjectProvider>
+          <DashboardLayoutInner>{children}</DashboardLayoutInner>
+        </ActiveProjectProvider>
+      </ActiveWorkspaceProvider>
+      <Toaster />
+    </>
   );
 }

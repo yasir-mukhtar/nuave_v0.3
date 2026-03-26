@@ -50,7 +50,7 @@ export default function SearchableSelect({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
-            variant="outline"
+            variant="default"
             role="combobox"
             aria-expanded={open}
             className={cn(
