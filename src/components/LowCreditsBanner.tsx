@@ -31,7 +31,7 @@ export default function LowCreditsBanner() {
         />
         <p
           className={cn(
-            "m-0 text-sm",
+            "m-0 type-body",
             isEmpty ? "text-red-900" : "text-amber-800"
           )}
         >
@@ -42,7 +42,7 @@ export default function LowCreditsBanner() {
         <Link
           href="/dashboard/credits"
           className={cn(
-            "ml-1 whitespace-nowrap rounded-sm px-3.5 py-1 text-[13px] leading-4 font-semibold text-white no-underline",
+            "ml-1 whitespace-nowrap rounded-sm px-3.5 py-1 type-body font-semibold text-white no-underline",
             isEmpty ? "bg-error" : "bg-amber-600"
           )}
         >
