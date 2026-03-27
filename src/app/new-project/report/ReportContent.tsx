@@ -509,9 +509,9 @@ export default function ReportContent() {
       {/* ── Page header ── */}
       <div className="max-w-[800px] mx-auto pt-10">
         <div className="flex items-center justify-between mb-6">
-          <span className="type-report-title text-text-heading">
+          <h1 className="type-page-title text-text-heading">
             Laporan Visibilitas AI
-          </span>
+          </h1>
           <CTAButtons
             onDownload={handleDownload}
             downloading={downloading}
@@ -715,9 +715,9 @@ export default function ReportContent() {
         style={{ transform: `translateY(${bottomBarTranslate}%)` }}
       >
         <div className="max-w-[800px] mx-auto h-16 flex items-center justify-between">
-          <span className="type-report-title-sm text-text-heading">
+          <h2 className="type-subtitle text-text-heading">
             Laporan Visibilitas AI
-          </span>
+          </h2>
           <CTAButtons
             onDownload={handleDownload}
             downloading={downloading}

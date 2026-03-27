@@ -35,6 +35,8 @@
   /* Semantic aliases — use these in components */
   --text-caption:    0.75rem;        /*    12px — timestamps, meta, micro labels */
   --text-body:       var(--step-0);  /*    14px — default body, descriptions     */
+  --text-subtitle:   1rem;           /*    16px — bar titles, secondary headings */
+  --text-page-title: 1.125rem;      /*    18px — page titles, primary headings  */
   --text-body-lg:    var(--step-1);  /* ~18.7px — intro text, card subtitles     */
   --text-heading-sm: var(--step-2);  /* ~24.9px — h3, section subheads           */
   --text-heading-md: var(--step-3);  /* ~33.2px — h2, page section titles        */
