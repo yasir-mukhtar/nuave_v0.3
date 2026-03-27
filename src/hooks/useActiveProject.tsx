@@ -45,7 +45,7 @@ export function ActiveProjectProvider({ children }: { children: ReactNode }) {
     // v3: query brands table (was projects)
     const { data } = await supabase
       .from('brands')
-      .select('id, workspace_id, created_by, name, website_url, language, company_overview, differentiators, industry, target_audience, onboarding_completed_at, created_at, updated_at')
+      .select('id, workspace_id, created_by, name, website_url, language, company_overview, differentiators, industry, target_audience, onboarding_completed_at, monitoring_enabled, monitoring_paused_at, created_at, updated_at')
       .eq('workspace_id', activeWorkspaceId)
       .order('created_at', { ascending: false });
 

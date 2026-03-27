@@ -11,6 +11,7 @@ import {
   IconExternalLink,
   IconCheck,
   IconAlertTriangle,
+  IconRadar,
 } from "@tabler/icons-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
@@ -27,6 +28,8 @@ type BrandWorkspace = {
   differentiators: string[];
   competitors: string[];
   created_at: string;
+  monitoring_enabled: boolean;
+  monitoring_paused_at: string | null;
   // Computed stats
   _totalAudits: number;
   _latestScore: number | null;
@@ -99,7 +102,7 @@ export default function BrandPage() {
     // v3: fetch brands (not workspaces)
     const { data: brandRows } = await supabase
       .from("brands")
-      .select("id, workspace_id, name, website_url, company_overview, differentiators, created_at")
+      .select("id, workspace_id, name, website_url, company_overview, differentiators, monitoring_enabled, monitoring_paused_at, created_at")
       .in("workspace_id", wsIds)
       .order("created_at", { ascending: false });
 
@@ -160,6 +163,8 @@ export default function BrandPage() {
         differentiators: b.differentiators ?? [],
         competitors: competitorsByBrand[b.id] ?? [],
         created_at: b.created_at,
+        monitoring_enabled: b.monitoring_enabled ?? false,
+        monitoring_paused_at: b.monitoring_paused_at ?? null,
         _totalAudits: brandAudits.length,
         _latestScore: latestAudit?.visibility_score ?? null,
         _mentionRate: mentionRate,
@@ -281,6 +286,28 @@ export default function BrandPage() {
     }
   }
 
+  async function handleToggleMonitoring(brandId: string, enabled: boolean) {
+    try {
+      const res = await fetch(`/api/brands/${brandId}/monitoring`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBrands((prev) =>
+          prev.map((b) =>
+            b.id === brandId
+              ? { ...b, monitoring_enabled: data.monitoring_enabled, monitoring_paused_at: data.monitoring_paused_at }
+              : b
+          )
+        );
+      }
+    } catch {
+      // Silently fail — user can retry
+    }
+  }
+
   function addChip(field: "differentiators" | "competitors", value: string) {
     const trimmed = value.trim();
     if (!trimmed) return;
@@ -378,6 +405,7 @@ export default function BrandPage() {
                 onEdit={() => openEdit(brand)}
                 onDelete={() => openDelete(brand.id)}
                 onRescrape={() => handleRescrape(brand.id)}
+                onToggleMonitoring={(enabled) => handleToggleMonitoring(brand.id, enabled)}
                 onSelect={() => {
                   setActiveWorkspaceId(brand.id);
                   router.push("/dashboard");
@@ -578,6 +606,7 @@ function BrandCard({
   onEdit,
   onDelete,
   onRescrape,
+  onToggleMonitoring,
   onSelect,
 }: {
   brand: BrandWorkspace;
@@ -585,6 +614,7 @@ function BrandCard({
   onEdit: () => void;
   onDelete: () => void;
   onRescrape: () => void;
+  onToggleMonitoring: (enabled: boolean) => void;
   onSelect: () => void;
 }) {
   const isRescraping = rescrapingId === brand.id;
@@ -662,6 +692,37 @@ function BrandCard({
           ))}
         </div>
       )}
+
+      {/* Monitoring toggle */}
+      <div className="flex items-center justify-between py-3 mb-1">
+        <div className="flex items-center gap-2.5">
+          <IconRadar size={16} className={brand.monitoring_enabled ? "text-success" : "text-text-muted"} />
+          <div>
+            <span className="type-caption font-medium text-text-heading">Monitoring Harian</span>
+            <span className="type-caption text-text-muted ml-1.5">
+              {brand.monitoring_paused_at
+                ? "Dijeda — kredit tidak cukup"
+                : brand.monitoring_enabled
+                  ? "Aktif · 09:00 WIB · 1 kredit/prompt"
+                  : "Nonaktif"}
+            </span>
+          </div>
+        </div>
+        <button
+          onClick={() => onToggleMonitoring(!brand.monitoring_enabled)}
+          className={cn(
+            "relative w-9 h-5 rounded-full border-none cursor-pointer transition-colors duration-200 shrink-0",
+            brand.monitoring_enabled ? "bg-brand" : "bg-border-default"
+          )}
+        >
+          <span
+            className={cn(
+              "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+              brand.monitoring_enabled ? "translate-x-[18px]" : "translate-x-0.5"
+            )}
+          />
+        </button>
+      </div>
 
       {/* Stats row */}
       <div className="flex gap-6 pt-3.5 border-t border-border-default">

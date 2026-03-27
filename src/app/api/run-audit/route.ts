@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/server';
 import { extractProblemsForAudit } from '@/lib/problems';
-
-const OPENAI_MODEL = "gpt-4o-2024-11-20";
-
-interface PromptRequest {
-  id: string;
-  prompt_text: string;
-  stage: string;
-  language: string;
-}
+import {
+  type PromptInput,
+  processPromptBatches,
+  extractCompetitors,
+  calculateVisibilityScore,
+} from '@/lib/audit-engine';
 
 export async function POST(req: NextRequest) {
   let auditId: string | null = null;
@@ -22,7 +19,7 @@ export async function POST(req: NextRequest) {
     const brand_id: string = body.brand_id;
     const { prompts, brand_name: requestBrandName } = body as {
       brand_id: string;
-      prompts: PromptRequest[];
+      prompts: PromptInput[];
       brand_name?: string;
     };
 
@@ -68,6 +65,7 @@ export async function POST(req: NextRequest) {
         total_prompts: prompts.length,
         brand_mention_count: 0,
         credits_used: creditsNeeded,
+        audit_type: 'manual',
       })
       .select('id')
       .single();
@@ -90,7 +88,6 @@ export async function POST(req: NextRequest) {
         });
 
       if (rpcError) {
-        // Credit deduction failed — abort audit
         await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
         return NextResponse.json(
           { success: false, error: 'Gagal memproses kredit. Silakan coba lagi.' },
@@ -121,8 +118,8 @@ export async function POST(req: NextRequest) {
     );
 
     // Use waitUntil if available (Edge Runtime)
-    if (typeof (globalThis as any).EdgeRuntime !== 'undefined') {
-      // @ts-ignore
+    if (typeof (globalThis as Record<string, unknown>).EdgeRuntime !== 'undefined') {
+      // @ts-expect-error waitUntil may exist on Edge Runtime globalThis
       globalThis.waitUntil?.(backgroundProcess);
     }
 
@@ -144,106 +141,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
-const CONCURRENCY = 10; // max parallel OpenAI calls per batch
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-interface AuditResultRow {
-  audit_id: string;
-  prompt_id: string | null;
-  prompt_text: string;
-  ai_response: string;
-  brand_mentioned: boolean;
-  mention_context: string | null;
-  mention_sentiment: string;
-  competitor_mentions: string[];
-  position_rank: null;
-}
-
-async function runSinglePrompt(
-  prompt: PromptRequest,
-  auditId: string,
-  brandLower: string,
-  brandNoSpaces: string,
-): Promise<{ row: AuditResultRow; mentioned: boolean }> {
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      temperature: 0,
-      input: prompt.prompt_text,
-      tools: [{
-        type: "web_search_preview",
-        user_location: {
-          type: "approximate",
-          country: prompt.language === 'ms' ? 'MY' : 'ID',
-          city: prompt.language === 'ms' ? 'Kuala Lumpur' : 'Jakarta',
-        },
-        search_context_size: "medium",
-      }],
-    }),
-  });
-
-  const data = await response.json();
-
-  let responseText = '';
-  if (data.output && Array.isArray(data.output)) {
-    for (const item of data.output) {
-      if (item.type === 'message' && item.content) {
-        for (const content of item.content) {
-          if (content.type === 'output_text' && content.text) {
-            responseText = content.text;
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  const responseLower = responseText.toLowerCase();
-  let brandMentioned = responseLower.includes(brandLower);
-  if (!brandMentioned && brandLower.includes(' ')) {
-    brandMentioned = responseLower.includes(brandNoSpaces);
-  }
-
-  let mentionContext: string | null = null;
-  if (brandMentioned) {
-    let index = responseLower.indexOf(brandLower);
-    let matchLength = brandLower.length;
-    if (index === -1 && brandLower.includes(' ')) {
-      index = responseLower.indexOf(brandNoSpaces);
-      matchLength = brandNoSpaces.length;
-    }
-    if (index !== -1) {
-      const start = Math.max(0, index - 100);
-      const end = Math.min(responseText.length, index + matchLength + 100);
-      mentionContext = responseText.substring(start, end);
-    }
-  }
-
-  return {
-    mentioned: brandMentioned,
-    row: {
-      audit_id: auditId,
-      prompt_id: UUID_RE.test(prompt.id) ? prompt.id : null,
-      prompt_text: prompt.prompt_text,
-      ai_response: responseText,
-      brand_mentioned: brandMentioned,
-      mention_context: mentionContext,
-      mention_sentiment: 'positive',
-      competitor_mentions: [],
-      position_rank: null,
-    },
-  };
-}
-
 async function processAuditInBackground(
   auditId: string,
   brandId: string,
-  prompts: PromptRequest[],
+  prompts: PromptInput[],
   brandName: string,
   userId: string | null,
   orgId: string | null,
@@ -252,58 +153,13 @@ async function processAuditInBackground(
   const supabase = createSupabaseAdminClient();
 
   try {
-    const brandLower = brandName.trim().toLowerCase();
-    const brandNoSpaces = brandLower.replace(/\s+/g, '');
-
-    const allRows: AuditResultRow[] = [];
-    let totalBrandMentionCount = 0;
-
-    // Process prompts in parallel batches of CONCURRENCY
-    for (let i = 0; i < prompts.length; i += CONCURRENCY) {
-      const batch = prompts.slice(i, i + CONCURRENCY);
-
-      const results = await Promise.allSettled(
-        batch.map(p => runSinglePrompt(p, auditId, brandLower, brandNoSpaces))
-      );
-
-      for (const result of results) {
-        if (result.status === 'fulfilled') {
-          allRows.push(result.value.row);
-          if (result.value.mentioned) totalBrandMentionCount++;
-        } else {
-          // Individual prompt failed — continue with remaining results
-        }
-      }
-
-      // Insert batch results immediately so polling progress updates
-      const batchRows = results
-        .filter((r): r is PromiseFulfilledResult<{ row: AuditResultRow; mentioned: boolean }> => r.status === 'fulfilled')
-        .map(r => r.value.row);
-
-      if (batchRows.length > 0) {
-        const { error: insertErr } = await supabase.from('audit_results').insert(batchRows);
-        // insertErr is non-fatal — results may partially persist
-      }
-    }
-
-    const visibilityScore = prompts.length > 0
-      ? Math.round((totalBrandMentionCount / prompts.length) * 100)
-      : 0;
-
-    // Internal API calls: use VERCEL_URL in production, localhost in dev
-    const internalBase = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : `http://localhost:${process.env.PORT || 3000}`;
-    const postBody = JSON.stringify({ audit_id: auditId });
-    const postHeaders = { 'Content-Type': 'application/json' };
+    // Run all prompts and insert results via shared engine
+    const { totalMentions } = await processPromptBatches(auditId, prompts, brandName);
+    const visibilityScore = calculateVisibilityScore(totalMentions, prompts.length);
 
     // Extract competitors before marking complete (so report page has data immediately)
     try {
-      await fetch(`${internalBase}/api/competitors/extract`, {
-        method: 'POST',
-        headers: postHeaders,
-        body: postBody,
-      });
+      await extractCompetitors(auditId);
     } catch {
       // Competitor extraction failure should not block audit completion
     }
@@ -319,7 +175,7 @@ async function processAuditInBackground(
       .from('audits')
       .update({
         status: 'complete',
-        brand_mention_count: totalBrandMentionCount,
+        brand_mention_count: totalMentions,
         visibility_score: visibilityScore,
         completed_at: new Date().toISOString(),
       })

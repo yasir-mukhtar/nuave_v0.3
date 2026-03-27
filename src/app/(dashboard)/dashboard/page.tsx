@@ -7,6 +7,9 @@ import {
   IconArrowRight,
   IconChartBar,
   IconClipboardCheck,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconRadar,
   IconWallet,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -31,7 +34,10 @@ type DashboardData = {
   totalAudits: number;
   avgScore: number;
   creditsRemaining: number;
-  completeAudits: { id: string; visibility_score: number; completed_at: string | null; status: string }[];
+  completeAudits: { id: string; visibility_score: number; completed_at: string | null; status: string; audit_type: string }[];
+  monitoringEnabled: boolean;
+  monitoringPausedAt: string | null;
+  lastMonitoringAt: string | null;
 };
 
 export default function DashboardPage() {
@@ -62,7 +68,7 @@ export default function DashboardPage() {
 
       const { data: audits } = await supabase
         .from("audits")
-        .select("id, visibility_score, completed_at, status")
+        .select("id, visibility_score, completed_at, status, audit_type")
         .eq("brand_id", activeProjectId)
         .order("completed_at", { ascending: false });
 
@@ -190,6 +196,10 @@ export default function DashboardPage() {
         creditsRemaining = creditsData.credits ?? 0;
       } catch {}
 
+      // Find the latest monitoring audit timestamp
+      const lastMonitoringAudit = completeAudits.find((a) => (a as any).audit_type === 'monitoring');
+      const lastMonitoringAt = lastMonitoringAudit?.completed_at ?? null;
+
       setData({
         firstName,
         brandName,
@@ -203,7 +213,10 @@ export default function DashboardPage() {
         totalAudits,
         avgScore,
         creditsRemaining,
-        completeAudits,
+        completeAudits: completeAudits as DashboardData["completeAudits"],
+        monitoringEnabled: activeProject?.monitoring_enabled ?? false,
+        monitoringPausedAt: activeProject?.monitoring_paused_at ?? null,
+        lastMonitoringAt,
       });
       setLoading(false);
     }
@@ -231,6 +244,13 @@ export default function DashboardPage() {
           <span className="text-text-heading font-medium">{data.brandName}</span>
         </p>
       </div>
+
+      {/* Monitoring status */}
+      <MonitoringStatusBar
+        enabled={data.monitoringEnabled}
+        pausedAt={data.monitoringPausedAt}
+        lastRunAt={data.lastMonitoringAt}
+      />
 
       {/* Chart + Competitors row */}
       <div className="grid grid-cols-[1fr_320px] gap-5 items-stretch">
@@ -305,9 +325,59 @@ function StatCard({ label, value, icon }: { label: string; value: string | numbe
   );
 }
 
+function MonitoringStatusBar({
+  enabled,
+  pausedAt,
+  lastRunAt,
+}: {
+  enabled: boolean;
+  pausedAt: string | null;
+  lastRunAt: string | null;
+}) {
+  if (!enabled && !pausedAt) {
+    // Monitoring not activated — don't show anything
+    return null;
+  }
+
+  const isPaused = enabled && pausedAt !== null;
+
+  let lastRunLabel = "";
+  if (lastRunAt) {
+    const diff = Date.now() - new Date(lastRunAt).getTime();
+    const hours = Math.floor(diff / 3_600_000);
+    if (hours < 1) lastRunLabel = "baru saja";
+    else if (hours < 24) lastRunLabel = `${hours} jam lalu`;
+    else lastRunLabel = `${Math.floor(hours / 24)} hari lalu`;
+  }
+
+  if (isPaused) {
+    return (
+      <div className="card flex items-center gap-3 px-4 py-3 border-warning/30 bg-warning/5">
+        <IconPlayerPause size={16} className="text-warning shrink-0" />
+        <span className="type-caption text-text-muted">
+          Monitoring dijeda — kredit tidak cukup.{" "}
+          <Link href="/settings" className="text-brand underline">Tambah kredit</Link>
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card flex items-center gap-3 px-4 py-3 border-success/30 bg-success/5">
+      <IconRadar size={16} className="text-success shrink-0" />
+      <span className="type-caption text-text-muted">
+        Monitoring aktif
+        {lastRunLabel && <> · Terakhir: {lastRunLabel}</>}
+        {" "}· Berikutnya ~09:00 WIB
+      </span>
+    </div>
+  );
+}
+
 function AuditRow({ audit, brandName }: { audit: DashboardData["completeAudits"][number]; brandName: string }) {
   const score = audit.visibility_score || 0;
   const scoreColor = score >= 70 ? "text-success" : score >= 40 ? "text-warning" : "text-error";
+  const isMonitoring = audit.audit_type === "monitoring";
 
   const date = audit.completed_at
     ? new Date(audit.completed_at).toLocaleDateString("en-US", {
@@ -324,11 +394,18 @@ function AuditRow({ audit, brandName }: { audit: DashboardData["completeAudits"]
           {brandName.charAt(0).toUpperCase()}
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="type-title text-text-heading">
-            {brandName}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="type-title text-text-heading">
+              {brandName}
+            </span>
+            {isMonitoring && (
+              <span className="type-caption px-1.5 py-0.5 rounded-sm bg-brand-light text-brand font-medium">
+                Monitoring
+              </span>
+            )}
+          </div>
           <span className="type-caption text-text-muted">
-            Audited on {date}
+            {isMonitoring ? "Checked on" : "Audited on"} {date}
           </span>
         </div>
       </div>

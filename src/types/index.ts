@@ -70,6 +70,8 @@ export type Brand = {
   industry: string | null;
   target_audience: string | null;
   onboarding_completed_at: string | null; // gates free credit claim
+  monitoring_enabled: boolean;
+  monitoring_paused_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -131,6 +133,7 @@ export type Audit = {
   total_prompts: number | null;
   brand_mention_count: number | null;
   credits_used: number;
+  audit_type: 'manual' | 'monitoring';
   created_at: string;
   completed_at: string | null;
 };
