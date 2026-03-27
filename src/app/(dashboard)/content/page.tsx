@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   IconSparkles,
   IconCopy,
   IconCheck,
   IconChevronDown,
   IconInfoCircle,
-  IconX,
+  IconRefresh,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -16,140 +16,38 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Tip } from "@/components/ui/tip";
 import { useActiveProject } from "@/hooks/useActiveProject";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { ButtonSpinner } from "@/components/ButtonSpinner";
+import type { AuditProblem, Recommendation } from "@/types";
 
 /* ── Types ── */
 
-type Category = "teknikal" | "web_copy" | "konten";
-type Priority = "high" | "medium" | "low";
+type Severity = "high" | "medium" | "low";
 
-interface ContentBlock {
-  label: string;
-  body: string;
-  copyable: boolean;
-}
-
-interface Rec {
-  id: string;
-  category: Category;
-  priority: Priority;
-  title: string;
-  description: string;
-  blocks: ContentBlock[];
-  implemented: boolean;
-  createdAt: string; // ISO string
+interface ProblemWithRecs extends AuditProblem {
+  recommendations: Recommendation[];
 }
 
 /* ── Config ── */
 
-const CAT: Record<Category, { label: string; bg: string; color: string; tip: string }> = {
-  teknikal: {
-    label: "Teknikal",
-    bg: "#DBEAFE",
-    color: "#2563EB",
-    tip: "Optimasi struktur situs untuk mesin AI: schema markup, structured data, kecepatan halaman, dan crawlability.",
-  },
-  web_copy: {
-    label: "Web Copy",
-    bg: "#EDE9FF",
-    color: "#533AFD",
-    tip: "Perbaikan teks di halaman website: headline, CTA, FAQ, meta description, dan halaman produk.",
-  },
-  konten: {
-    label: "Konten",
-    bg: "#DCFCE7",
-    color: "#16A34A",
-    tip: "Konten panjang yang meningkatkan otoritas topik: panduan, artikel perbandingan, how-to, dan blog post.",
-  },
+const SEVERITY: Record<Severity, { label: string; bg: string; color: string }> = {
+  high:   { label: "Tinggi",  bg: "#FEE2E2", color: "#DC2626" },
+  medium: { label: "Sedang",  bg: "#FEF3C7", color: "#D97706" },
+  low:    { label: "Rendah",  bg: "#F3F4F6", color: "#6B7280" },
 };
 
-const PRIO: Record<Priority, { label: string; color: string }> = {
-  high: { label: "Prioritas tinggi", color: "#DC2626" },
-  medium: { label: "Prioritas sedang", color: "#D97706" },
-  low: { label: "Prioritas rendah", color: "#6B7280" },
+const ACTION_TYPE: Record<string, { label: string }> = {
+  technical: { label: "Teknikal" },
+  web_copy:  { label: "Web Copy" },
+  content:   { label: "Konten" },
 };
+
+const STATUS_GROUPS = [
+  { key: "unresolved",  label: "Belum Selesai" },
+  { key: "in_progress", label: "Sedang Dikerjakan" },
+  { key: "resolved",    label: "Selesai" },
+] as const;
 
 /* ── Helpers ── */
-
-function dbTypeToCategory(type: string | null): Category {
-  if (type === "technical") return "teknikal";
-  if (type === "content") return "konten";
-  return "web_copy";
-}
-
-function parseSuggestedCopy(suggestedCopy: string | null): ContentBlock[] {
-  if (!suggestedCopy) return [];
-  try {
-    const parsed = JSON.parse(suggestedCopy);
-    if (Array.isArray(parsed)) return parsed as ContentBlock[];
-  } catch {}
-  // Fallback for old markdown-style suggested_copy
-  return [{ label: "Saran Perbaikan", body: suggestedCopy, copyable: true }];
-}
-
-function dbRecToRec(dbRec: Record<string, any>): Rec {
-  return {
-    id: dbRec.id,
-    category: dbTypeToCategory(dbRec.type),
-    priority: (dbRec.priority ?? "medium") as Priority,
-    title: dbRec.title,
-    description: dbRec.description ?? "",
-    blocks: parseSuggestedCopy(dbRec.suggested_copy),
-    implemented: dbRec.status === "applied",
-    createdAt: dbRec.created_at ?? new Date().toISOString(),
-  };
-}
-
-function formatRecDate(iso: string): string {
-  const date = new Date(iso);
-  const now = new Date();
-  const time = date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", hour12: false }).replace(":", ".");
-
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
-
-  if (date >= startOfToday) return `Hari ini · ${time}`;
-  if (date >= startOfYesterday) return `Kemarin · ${time}`;
-
-  return `${date.getDate()} ${date.toLocaleString("id-ID", { month: "short" })} · ${time}`;
-}
-
-/* ── Sub-components ── */
-
-function PrioBars({ priority }: { priority: Priority }) {
-  const label = PRIO[priority].label;
-  const icon =
-    priority === "high" ? (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 cursor-default">
-        <rect x="16" y="4" width="4" height="16" rx="2" fill="#FB2C36" />
-        <rect x="10" y="8" width="4" height="12" rx="2" fill="#FB2C36" />
-        <rect x="4" y="12" width="4" height="8" rx="2" fill="#FB2C36" />
-      </svg>
-    ) : priority === "medium" ? (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 cursor-default">
-        <rect x="16" y="4" width="4" height="16" rx="2" fill="#CCCCCC" />
-        <rect x="10" y="8" width="4" height="12" rx="2" fill="#FF6900" />
-        <rect x="4" y="12" width="4" height="8" rx="2" fill="#FF6900" />
-      </svg>
-    ) : (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 cursor-default">
-        <rect x="16" y="4" width="4" height="16" rx="2" fill="#CCCCCC" />
-        <rect x="10" y="8" width="4" height="12" rx="2" fill="#CCCCCC" />
-        <rect x="4" y="12" width="4" height="8" rx="2" fill="#F0B100" />
-      </svg>
-    );
-  return <Tip label={label}>{icon}</Tip>;
-}
-
-function CatTag({ cat }: { cat: Category }) {
-  const cfg = CAT[cat];
-  return (
-    <Tip label={cfg.tip}>
-      <span className="inline-flex items-center h-[24px] px-2 rounded-[4px] border border-[var(--border-light)] type-caption font-medium text-text-muted whitespace-nowrap cursor-default select-none">
-        {cfg.label}
-      </span>
-    </Tip>
-  );
-}
 
 function renderBodyLine(line: string, i: number) {
   const bold = (text: string) =>
@@ -166,7 +64,7 @@ function renderBodyLine(line: string, i: number) {
   if (line.startsWith("- ")) {
     return (
       <div key={i} className="flex gap-2 type-body">
-        <span className="shrink-0 text-text-muted">•</span>
+        <span className="shrink-0 text-text-muted">&#8226;</span>
         <span>{bold(line.slice(2))}</span>
       </div>
     );
@@ -183,6 +81,29 @@ function renderBodyLine(line: string, i: number) {
     <p key={i} className="type-body">
       {bold(line)}
     </p>
+  );
+}
+
+/* ── Sub-components ── */
+
+function SeverityBadge({ severity }: { severity: Severity }) {
+  const cfg = SEVERITY[severity] ?? SEVERITY.low;
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold shrink-0"
+      style={{ backgroundColor: cfg.bg, color: cfg.color }}
+    >
+      {cfg.label}
+    </span>
+  );
+}
+
+function ActionTypeBadge({ type }: { type: string }) {
+  const cfg = ACTION_TYPE[type] ?? { label: type };
+  return (
+    <span className="inline-flex items-center h-[24px] px-2 rounded-[4px] border border-[var(--border-light)] type-caption font-medium text-text-muted whitespace-nowrap">
+      {cfg.label}
+    </span>
   );
 }
 
@@ -236,17 +157,20 @@ function InfoBlock({ label, body }: { label: string; body: string }) {
   );
 }
 
-function RecItem({
-  rec,
+function ProblemItem({
+  problem,
   selected,
   onClick,
   dimmed = false,
 }: {
-  rec: Rec;
+  problem: ProblemWithRecs;
   selected: boolean;
   onClick: () => void;
   dimmed?: boolean;
 }) {
+  const severity = (problem.severity ?? "low") as Severity;
+  const recCount = problem.recommendations.length;
+
   return (
     <button
       onClick={onClick}
@@ -256,169 +180,36 @@ function RecItem({
         dimmed && "opacity-45"
       )}
     >
-      <PrioBars priority={rec.priority} />
+      <SeverityBadge severity={severity} />
       <span
         className={cn(
           "flex-1 min-w-0 type-body leading-snug truncate",
           selected ? "font-semibold text-text-heading" : "text-text-body"
         )}
       >
-        {rec.title}
+        {problem.title}
       </span>
-      <CatTag cat={rec.category} />
+      {recCount > 0 && (
+        <span className="type-caption text-text-muted shrink-0">
+          {recCount} rek
+        </span>
+      )}
     </button>
-  );
-}
-
-/* ── Generate Modal ── */
-
-const CREDITS_PER_CAT = Math.ceil(10 / 3); // 4 each, 3 cats = 12 → cap at 10
-
-function categoryCredits(count: number) {
-  if (count === 0) return 0;
-  if (count === 3) return 10;
-  return count * CREDITS_PER_CAT;
-}
-
-function GenerateModal({
-  brandName,
-  onClose,
-  onGenerate,
-}: {
-  brandName: string;
-  onClose: () => void;
-  onGenerate: (categories: Category[]) => void;
-}) {
-  const allCats: Category[] = ["teknikal", "web_copy", "konten"];
-  const [selectedCats, setSelectedCats] = useState<Set<Category>>(new Set(allCats));
-
-  function toggleCat(cat: Category) {
-    setSelectedCats((prev) => {
-      const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat);
-      else next.add(cat);
-      return next;
-    });
-  }
-
-  const selectedList = allCats.filter((c) => selectedCats.has(c));
-  const credits = categoryCredits(selectedList.length);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-xl w-[440px] p-6 shadow-[var(--shadow-modal)]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between mb-5">
-          <div>
-            <h3 className="font-semibold text-text-heading type-body">Buat Rekomendasi Baru</h3>
-            <p className="type-body text-text-muted mt-0.5">Berdasarkan data brand {brandName}</p>
-          </div>
-          <button onClick={onClose} className="text-text-muted hover:text-text-body mt-0.5">
-            <IconX size={17} />
-          </button>
-        </div>
-
-        <div className="space-y-2 mb-5">
-          {allCats.map((cat) => {
-            const checked = selectedCats.has(cat);
-            return (
-              <div
-                key={cat}
-                onClick={() => toggleCat(cat)}
-                className="flex items-center gap-3 py-2.5 px-3 rounded-lg border border-border-default cursor-pointer hover:bg-[var(--bg-surface)] transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggleCat(cat)}
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-4 h-4 accent-brand shrink-0 cursor-pointer"
-                />
-                <CatTag cat={cat} />
-                <span className="type-caption text-text-muted ml-auto">1 rekomendasi</span>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="flex justify-end">
-          <Button
-            variant="brand"
-            disabled={selectedList.length === 0}
-            onClick={() => onGenerate(selectedList)}
-          >
-            <IconSparkles size={14} />
-            Buat sekarang · {credits} kredit
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function GeneratingOverlay({ apiReady, onDone, categories }: { apiReady: boolean; onDone: () => void; categories: Category[] }) {
-  const subtitle = categories.length === 1
-    ? "1 kategori diproses"
-    : `${categories.length} kategori diproses secara bersamaan`;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-xl w-[440px] p-6 shadow-[var(--shadow-modal)]">
-        <h3 className="font-semibold text-text-heading type-title mb-1">Membuat rekomendasi...</h3>
-        <p className="type-body text-text-muted mb-5">{subtitle}</p>
-        <div className="space-y-3">
-          {categories.map((cat) => (
-            <div
-              key={cat}
-              className="flex items-center gap-3 py-3 px-4 rounded-lg border border-border-default"
-            >
-              <div className="shrink-0 w-5 h-5 flex items-center justify-center">
-                {apiReady ? (
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center bg-[#DCFCE7]">
-                    <IconCheck size={11} color="#16A34A" />
-                  </div>
-                ) : (
-                  <div className="w-5 h-5 rounded-full border-2 animate-spin border-brand border-t-transparent" />
-                )}
-              </div>
-              <CatTag cat={cat} />
-              <span className="type-body text-text-muted ml-auto">
-                {apiReady ? "Selesai" : "Memproses..."}
-              </span>
-            </div>
-          ))}
-        </div>
-        {apiReady && (
-          <div className="mt-5 flex justify-end">
-            <Button variant="brand" onClick={onDone}>Selesai</Button>
-          </div>
-        )}
-      </div>
-    </div>
   );
 }
 
 /* ── Main Page ── */
 
-type GenState = "idle" | "modal" | "generating";
-
-export default function KontenV2Page() {
+export default function ContentPage() {
   const { activeProject, loading: projectLoading } = useActiveProject();
 
-  const [recs, setRecs] = useState<Rec[]>([]);
-  const [selected, setSelected] = useState<Rec | null>(null);
-  const [showImpl, setShowImpl] = useState(false);
-  const [genState, setGenState] = useState<GenState>("idle");
+  const [problems, setProblems] = useState<ProblemWithRecs[]>([]);
+  const [selected, setSelected] = useState<ProblemWithRecs | null>(null);
   const [loading, setLoading] = useState(true);
-  const [apiReady, setApiReady] = useState(false);
-  const [generatingCats, setGeneratingCats] = useState<Category[]>([]);
-  const newRecsRef = useRef<Rec[]>([]);
-  const generateBrandIdRef = useRef<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [recheckLoading, setRecheckLoading] = useState(false);
+  const [severityFilter, setSeverityFilter] = useState<"all" | Severity>("all");
+  const [showResolved, setShowResolved] = useState(false);
 
   // Override main scroll+padding so this page owns its own layout
   useEffect(() => {
@@ -434,84 +225,85 @@ export default function KontenV2Page() {
     };
   }, []);
 
-  // Fetch recommendations for active brand
-  useEffect(() => {
-    if (projectLoading) return;
-    if (!activeProject?.id) {
-      setRecs([]);
+  // Fetch problems with linked recommendations
+  const fetchProblems = useCallback(async () => {
+    if (!activeProject?.id) return;
+    setLoading(true);
+    const supabase = createSupabaseBrowserClient();
+
+    // Fetch problems for this brand
+    const { data: problemsData, error } = await supabase
+      .from("audit_problems")
+      .select("*")
+      .eq("brand_id", activeProject.id)
+      .order("created_at", { ascending: true });
+
+    if (error || !problemsData) {
       setLoading(false);
       return;
     }
 
-    async function fetchRecs() {
-      setLoading(true);
-      const supabase = createSupabaseBrowserClient();
-      const { data, error } = await supabase
-        .from("recommendations")
-        .select("*")
-        .eq("brand_id", activeProject!.id)
-        .in("status", ["open", "applied"])
-        .order("created_at", { ascending: true });
+    // Sort by severity: high → medium → low
+    const order: Record<string, number> = { high: 0, medium: 1, low: 2 };
+    const sorted = [...problemsData].sort(
+      (a, b) => (order[a.severity ?? "low"] ?? 2) - (order[b.severity ?? "low"] ?? 2)
+    );
 
-      if (!error && data) {
-        const mapped = data.map(dbRecToRec);
-        setRecs(mapped);
-        setSelected(mapped.find((r) => !r.implemented) ?? mapped[0] ?? null);
+    // Fetch all recommendations for this brand that have a problem_id
+    const { data: recsData } = await supabase
+      .from("recommendations")
+      .select("*")
+      .eq("brand_id", activeProject.id)
+      .not("problem_id", "is", null);
+
+    // Group recommendations by problem_id
+    const recsByProblem: Record<string, Recommendation[]> = {};
+    if (recsData) {
+      for (const rec of recsData) {
+        if (rec.problem_id) {
+          if (!recsByProblem[rec.problem_id]) recsByProblem[rec.problem_id] = [];
+          recsByProblem[rec.problem_id].push(rec as Recommendation);
+        }
       }
-      setLoading(false);
     }
 
-    fetchRecs();
-  }, [activeProject?.id, projectLoading]);
+    // Merge
+    const merged: ProblemWithRecs[] = sorted.map((p) => ({
+      ...p,
+      recommendations: recsByProblem[p.id] ?? [],
+    }));
 
-  // Keep selected in sync when recs update
+    setProblems(merged);
+    // Select first unresolved, or first overall
+    const firstUnresolved = merged.find((p) => p.status !== "resolved");
+    setSelected((prev) => {
+      if (prev) {
+        const updated = merged.find((p) => p.id === prev.id);
+        if (updated) return updated;
+      }
+      return firstUnresolved ?? merged[0] ?? null;
+    });
+    setLoading(false);
+  }, [activeProject?.id]);
+
   useEffect(() => {
-    if (selected) {
-      const updated = recs.find((r) => r.id === selected.id);
-      setSelected(updated ?? null);
+    if (projectLoading) return;
+    if (!activeProject?.id) {
+      setProblems([]);
+      setLoading(false);
+      return;
     }
-  }, [recs]); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchProblems();
+  }, [activeProject?.id, projectLoading, fetchProblems]);
 
-  const active = recs.filter((r) => !r.implemented);
-  const implemented = recs.filter((r) => r.implemented);
-  const LIMIT = 10;
-  const isAtLimit = active.length >= LIMIT;
-  const allImplemented = recs.length > 0 && active.length === 0;
-
-  async function handleMarkImplemented(id: string) {
-    setRecs((prev) => prev.map((r) => (r.id === id ? { ...r, implemented: true } : r)));
-    toast("Rekomendasi ditandai sudah diimplementasi");
-    await fetch(`/api/recommendations/${id}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "applied" }),
-    });
-  }
-
-  async function handleUnmarkImplemented(id: string) {
-    setRecs((prev) => prev.map((r) => (r.id === id ? { ...r, implemented: false } : r)));
-    toast("Rekomendasi ditandai belum diimplementasi");
-    await fetch(`/api/recommendations/${id}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "open" }),
-    });
-  }
-
-  async function startGenerate(categories: Category[]) {
-    if (!activeProject?.id) return;
-    const brandId = activeProject.id; // capture stable — context may reset during async
-    generateBrandIdRef.current = brandId;
-    setGeneratingCats(categories);
-    setGenState("generating");
-    setApiReady(false);
-    newRecsRef.current = [];
-
+  // Handle generate recommendations for a problem
+  async function handleGenerate(problemId: string) {
+    setGenerating(true);
     try {
-      const res = await fetch("/api/recommendations/generate", {
+      const res = await fetch("/api/recommendations/generate-for-problem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ brand_id: brandId, categories }),
+        body: JSON.stringify({ problem_id: problemId }),
       });
       const data = await res.json();
 
@@ -519,60 +311,124 @@ export default function KontenV2Page() {
         if (res.status === 402) {
           toast("Kredit tidak cukup. Beli kredit untuk melanjutkan.");
         } else {
-          toast("Gagal membuat rekomendasi. Coba lagi.");
+          toast(data.error || "Gagal membuat rekomendasi. Coba lagi.");
         }
-        setGenState("idle");
+        setGenerating(false);
         return;
       }
 
-      if (data.recommendations?.length) {
-        newRecsRef.current = (data.recommendations as Record<string, any>[]).map(dbRecToRec);
-      }
+      toast(`${data.recommendations_generated} rekomendasi berhasil dibuat`);
+      await fetchProblems(); // Refresh data
     } catch {
       toast("Gagal membuat rekomendasi. Coba lagi.");
-      setGenState("idle");
-      return;
     }
-
-    setApiReady(true);
+    setGenerating(false);
   }
 
-  const handleGenerateDone = useCallback(async () => {
-    setGenState("idle");
-    const brandId = generateBrandIdRef.current;
-    if (!brandId) return;
+  // Handle mark recommendation as implemented
+  async function handleMarkImplemented(recId: string) {
+    // Optimistic update
+    setProblems((prev) =>
+      prev.map((p) => ({
+        ...p,
+        recommendations: p.recommendations.map((r) =>
+          r.id === recId ? { ...r, status: "applied" as const } : r
+        ),
+      }))
+    );
+    setSelected((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        recommendations: prev.recommendations.map((r) =>
+          r.id === recId ? { ...r, status: "applied" as const } : r
+        ),
+      };
+    });
+    toast("Rekomendasi ditandai sudah diimplementasi");
+    await fetch(`/api/recommendations/${recId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "applied" }),
+    });
+  }
 
-    const supabase = createSupabaseBrowserClient();
-    const { data } = await supabase
-      .from("recommendations")
-      .select("*")
-      .eq("brand_id", brandId)
-      .in("status", ["open", "applied"])
-      .order("created_at", { ascending: true });
+  async function handleUnmarkImplemented(recId: string) {
+    setProblems((prev) =>
+      prev.map((p) => ({
+        ...p,
+        recommendations: p.recommendations.map((r) =>
+          r.id === recId ? { ...r, status: "open" as const } : r
+        ),
+      }))
+    );
+    setSelected((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        recommendations: prev.recommendations.map((r) =>
+          r.id === recId ? { ...r, status: "open" as const } : r
+        ),
+      };
+    });
+    toast("Rekomendasi ditandai belum diimplementasi");
+    await fetch(`/api/recommendations/${recId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "open" }),
+    });
+  }
 
-    if (data) {
-      const mapped = data.map(dbRecToRec);
-      setRecs((prev) => {
-        const prevIds = new Set(prev.map((r) => r.id));
-        const newOnes = mapped.filter((r) => !prevIds.has(r.id));
-        if (newOnes.length > 0) {
-          setSelected(newOnes[0]);
-          toast(`${newOnes.length} rekomendasi baru berhasil dibuat`);
-        }
-        return mapped;
+  // Handle recheck problem
+  async function handleRecheck() {
+    if (!selected) return;
+    setRecheckLoading(true);
+    try {
+      const res = await fetch("/api/problems/recheck", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ problem_id: selected.id }),
       });
-    }
+      const data = await res.json();
 
-    newRecsRef.current = [];
-    generateBrandIdRef.current = null;
-  }, []); // stable — reads from ref, not context
+      if (!res.ok) {
+        if (res.status === 402) {
+          toast("Kredit tidak cukup. Beli kredit untuk melanjutkan.");
+        } else {
+          toast(data.error || "Recheck gagal. Coba lagi.");
+        }
+        setRecheckLoading(false);
+        return;
+      }
+
+      await fetchProblems();
+
+      if (data.resolved === "yes") toast.success(data.explanation);
+      else if (data.resolved === "partial") toast(data.explanation);
+      else toast.error(data.explanation);
+    } catch {
+      toast("Recheck gagal. Coba lagi.");
+    }
+    setRecheckLoading(false);
+  }
+
+  /* ── Filter problems ── */
+
+  const filtered = problems.filter((p) => {
+    if (severityFilter !== "all" && p.severity !== severityFilter) return false;
+    return true;
+  });
+
+  const unresolved = filtered.filter((p) => p.status === "unresolved");
+  const inProgress = filtered.filter((p) => p.status === "in_progress");
+  const resolved = filtered.filter((p) => p.status === "resolved");
 
   /* ── Loading ── */
 
   if (projectLoading || loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="type-body text-text-muted">Memuat rekomendasi...</p>
+        <p className="type-body text-text-muted">Memuat masalah...</p>
       </div>
     );
   }
@@ -584,7 +440,7 @@ export default function KontenV2Page() {
       <div className="flex flex-col items-center justify-center h-full text-center px-8">
         <p className="type-title text-text-heading mb-2">Pilih brand terlebih dahulu</p>
         <p className="type-body text-text-muted">
-          Pilih brand aktif dari topbar untuk melihat rekomendasi.
+          Pilih brand aktif dari topbar untuk melihat masalah dan rekomendasi.
         </p>
       </div>
     );
@@ -592,33 +448,21 @@ export default function KontenV2Page() {
 
   /* ── Empty state ── */
 
-  if (recs.length === 0) {
+  if (problems.length === 0) {
     return (
-      <TooltipProvider delayDuration={300}>
-        <div className="flex flex-col items-center justify-center h-full text-center px-8">
-          <p className="type-title text-text-heading mb-2">Belum ada rekomendasi</p>
-          <p className="type-body text-text-muted mb-6 max-w-sm">
-            Buat rekomendasi pertama untuk {activeProject.name} dan tingkatkan visibilitas AI brand Anda.
-          </p>
-          <Button variant="brand" onClick={() => setGenState("modal")}>
-            <IconSparkles size={14} />
-            Buat rekomendasi · 10 kredit
-          </Button>
-        </div>
-
-        {genState === "modal" && (
-          <GenerateModal
-            brandName={activeProject.name}
-            onClose={() => setGenState("idle")}
-            onGenerate={startGenerate}
-          />
-        )}
-        {genState === "generating" && (
-          <GeneratingOverlay apiReady={apiReady} onDone={handleGenerateDone} categories={generatingCats} />
-        )}
-      </TooltipProvider>
+      <div className="flex flex-col items-center justify-center h-full text-center px-8">
+        <p className="type-title text-text-heading mb-2">Belum ada masalah terdeteksi</p>
+        <p className="type-body text-text-muted mb-6 max-w-sm">
+          Jalankan audit untuk {activeProject.name} untuk mendeteksi masalah visibilitas AI.
+        </p>
+      </div>
     );
   }
+
+  /* ── Check if all recs for selected problem are implemented ── */
+  const selectedRecs = selected?.recommendations ?? [];
+  const hasRecs = selectedRecs.length > 0;
+  const allRecsImplemented = hasRecs && selectedRecs.every((r) => r.status === "applied");
 
   /* ── Main view ── */
 
@@ -630,118 +474,112 @@ export default function KontenV2Page() {
         <div className="flex flex-col min-h-0 border-r border-border-default shrink-0 bg-white w-[380px]">
           {/* Header */}
           <div className="flex items-center justify-between px-8 h-[52px] border-b border-border-default shrink-0">
-            <span className="type-title text-text-heading">Rekomendasi</span>
-            <Tip
-              label={
-                isAtLimit
-                  ? "Tandai minimal 1 rekomendasi sebagai terimplementasi untuk membuka slot baru."
-                  : "Hasilkan 3 rekomendasi baru (1 per kategori) · 10 kredit"
-              }
-            >
-              <span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={isAtLimit}
-                  onClick={() => !isAtLimit && setGenState("modal")}
-                >
-                  <IconSparkles size={13} />
-                  Buat rekomendasi
-                </Button>
-              </span>
-            </Tip>
+            <span className="type-title text-text-heading">Masalah</span>
           </div>
 
-          {/* Active counter */}
-          {!allImplemented && (
-            <div className="flex items-center justify-between px-8 py-2.5 border-b border-border-default shrink-0">
-              <div className="flex items-center gap-1.5">
-                <span className="type-caption text-text-muted">Rekomendasi aktif</span>
-                <Tip label="Anda dapat menyimpan hingga 10 rekomendasi yang belum diimplementasikan">
-                  <IconInfoCircle size={13} className="text-text-muted cursor-default hover:text-text-body transition-colors" />
-                </Tip>
-              </div>
-              <span className={cn("type-caption tabular-nums", isAtLimit ? "text-error" : "text-text-muted")}>
-                {active.length}/10
-              </span>
-            </div>
-          )}
-
-          {/* List */}
-          <div className="flex-1 overflow-y-auto min-h-0">
-            {allImplemented ? (
-              <div className="flex flex-col items-center justify-center h-full px-6 text-center">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-[#DCFCE7]">
-                  <IconCheck size={22} color="#16A34A" />
-                </div>
-                <p className="font-semibold text-text-heading type-body mb-1.5">
-                  Semua rekomendasi telah diimplementasi!
-                </p>
-                <p className="type-body text-text-muted mb-5">
-                  {implemented.length} rekomendasi selesai. Skor AI visibility Anda meningkat sejak
-                  pertama menggunakan Konten.
-                </p>
+          {/* Severity filter */}
+          <div className="flex items-center gap-1.5 px-8 py-2.5 border-b border-border-default shrink-0">
+            {(["all", "high", "medium", "low"] as const).map((sev) => {
+              const isActive = severityFilter === sev;
+              const label = sev === "all" ? "Semua" : SEVERITY[sev].label;
+              return (
                 <button
-                  onClick={() => setGenState("modal")}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-md type-caption font-semibold text-white bg-brand transition-opacity hover:opacity-90"
+                  key={sev}
+                  onClick={() => setSeverityFilter(sev)}
+                  className={cn(
+                    "type-caption font-medium rounded-full px-3 py-1 border-none cursor-pointer transition-colors",
+                    isActive ? "bg-brand text-white" : "bg-surface-raised text-text-body hover:bg-surface"
+                  )}
                 >
-                  <IconSparkles size={14} />
-                  Buat rekomendasi baru · 10 kredit
+                  {label}
                 </button>
-              </div>
-            ) : (
+              );
+            })}
+          </div>
+
+          {/* Problem list */}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {/* Unresolved */}
+            {unresolved.length > 0 && (
               <>
-                {active.map((rec) => (
-                  <RecItem
-                    key={rec.id}
-                    rec={rec}
-                    selected={selected?.id === rec.id}
-                    onClick={() => setSelected(rec)}
+                <div className="px-8 py-2 type-caption text-text-muted font-medium border-b border-border-light">
+                  Belum Selesai ({unresolved.length})
+                </div>
+                {unresolved.map((p) => (
+                  <ProblemItem
+                    key={p.id}
+                    problem={p}
+                    selected={selected?.id === p.id}
+                    onClick={() => setSelected(p)}
                   />
                 ))}
-
-                {implemented.length > 0 && (
-                  <div>
-                    <button
-                      onClick={() => setShowImpl((v) => !v)}
-                      className={cn(
-                        "flex items-center justify-between w-full px-8 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100 border-t border-border-light",
-                        showImpl ? "bg-surface-raised" : "bg-transparent hover:bg-surface"
-                      )}
-                    >
-                      <span className={cn(
-                        "type-body flex items-center gap-1.5",
-                        showImpl ? "font-semibold text-text-heading" : "text-text-muted"
-                      )}>
-                        <IconCheck size={14} stroke={1.5} />
-                        Terimplementasi
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <span className={cn(
-                          "type-caption shrink-0 tabular-nums",
-                          showImpl ? "text-text-heading font-semibold" : "text-text-muted"
-                        )}>
-                          {implemented.length}
-                        </span>
-                        <IconChevronDown
-                          size={14}
-                          className={cn("transition-transform duration-200", showImpl && "rotate-180")}
-                        />
-                      </span>
-                    </button>
-                    {showImpl &&
-                      implemented.map((rec) => (
-                        <RecItem
-                          key={rec.id}
-                          rec={rec}
-                          selected={selected?.id === rec.id}
-                          onClick={() => setSelected(rec)}
-                          dimmed
-                        />
-                      ))}
-                  </div>
-                )}
               </>
+            )}
+
+            {/* In Progress */}
+            {inProgress.length > 0 && (
+              <>
+                <div className="px-8 py-2 type-caption text-text-muted font-medium border-b border-border-light">
+                  Sedang Dikerjakan ({inProgress.length})
+                </div>
+                {inProgress.map((p) => (
+                  <ProblemItem
+                    key={p.id}
+                    problem={p}
+                    selected={selected?.id === p.id}
+                    onClick={() => setSelected(p)}
+                  />
+                ))}
+              </>
+            )}
+
+            {/* Resolved */}
+            {resolved.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setShowResolved((v) => !v)}
+                  className={cn(
+                    "flex items-center justify-between w-full px-8 py-2.5 rounded-sm cursor-pointer text-left transition-colors duration-100 border-t border-border-light",
+                    showResolved ? "bg-surface-raised" : "bg-transparent hover:bg-surface"
+                  )}
+                >
+                  <span className={cn(
+                    "type-body flex items-center gap-1.5",
+                    showResolved ? "font-semibold text-text-heading" : "text-text-muted"
+                  )}>
+                    <IconCheck size={14} stroke={1.5} />
+                    Selesai
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className={cn(
+                      "type-caption shrink-0 tabular-nums",
+                      showResolved ? "text-text-heading font-semibold" : "text-text-muted"
+                    )}>
+                      {resolved.length}
+                    </span>
+                    <IconChevronDown
+                      size={14}
+                      className={cn("transition-transform duration-200", showResolved && "rotate-180")}
+                    />
+                  </span>
+                </button>
+                {showResolved &&
+                  resolved.map((p) => (
+                    <ProblemItem
+                      key={p.id}
+                      problem={p}
+                      selected={selected?.id === p.id}
+                      onClick={() => setSelected(p)}
+                      dimmed
+                    />
+                  ))}
+              </div>
+            )}
+
+            {filtered.length === 0 && (
+              <div className="type-body py-6 px-8 text-center text-text-muted">
+                Tidak ada masalah dengan filter ini.
+              </div>
             )}
           </div>
         </div>
@@ -753,56 +591,125 @@ export default function KontenV2Page() {
               {/* Panel header */}
               <div className="flex items-center justify-between px-8 h-[52px] border-b border-border-default shrink-0">
                 <div className="flex items-center gap-2">
-                  <span className="type-title text-text-heading">Detail</span>
-                  <Tip label="Konten siap pakai yang dapat langsung diimplementasikan ke website Anda.">
+                  <span className="type-title text-text-heading">Detail Masalah</span>
+                  <Tip label="Analisis masalah visibilitas AI dan rekomendasi perbaikan.">
                     <IconInfoCircle size={14} className="text-text-muted cursor-default" />
                   </Tip>
                 </div>
-                {selected.implemented ? (
-                  <button
-                    onClick={() => handleUnmarkImplemented(selected.id)}
-                    className="flex items-center gap-1.5 type-body font-medium text-error hover:opacity-80 transition-opacity"
-                  >
-                    Belum diimplementasi
-                    <IconX size={16} />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleMarkImplemented(selected.id)}
-                    className="flex items-center gap-1.5 type-body font-medium text-text-muted hover:text-text-body transition-colors"
-                  >
-                    Sudah diimplementasi
-                    <IconCheck size={16} />
-                  </button>
-                )}
               </div>
 
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto min-h-0 px-8 py-5">
-                <div className="flex items-center justify-between mb-3">
-                  <CatTag cat={selected.category} />
-                  <span className="type-caption text-text-muted">{formatRecDate(selected.createdAt)}</span>
+                {/* Problem info */}
+                <div className="flex items-center gap-2 mb-3">
+                  <SeverityBadge severity={(selected.severity ?? "low") as Severity} />
+                  {selected.problem_type && (
+                    <span className="type-caption text-text-muted">{selected.problem_type.replace(/_/g, " ")}</span>
+                  )}
                 </div>
                 <p className="type-heading-sm text-text-heading mb-2">{selected.title}</p>
                 <p className="type-body text-text-muted mb-6">{selected.description}</p>
 
-                {selected.blocks.length > 0 ? (
-                  selected.blocks.map((block, i) => {
-                    const isMonospace =
-                      block.body.trimStart().startsWith("{") && block.body.includes('"@');
-                    return block.copyable ? (
-                      <CopyBlock key={i} label={block.label} body={block.body} mono={isMonospace} />
-                    ) : (
-                      <InfoBlock key={i} label={block.label} body={block.body} />
-                    );
-                  })
-                ) : (
-                  <p className="type-body text-text-muted italic">
-                    {selected.implemented
-                      ? "Rekomendasi ini telah ditandai sebagai terimplementasi."
-                      : "Tidak ada konten tersedia untuk rekomendasi ini."}
+                {/* Recommendations section */}
+                <div className="border-t border-border-default pt-5">
+                  <p className="type-body font-semibold text-text-heading mb-4">
+                    Rekomendasi ({selectedRecs.length})
                   </p>
-                )}
+
+                  {selectedRecs.length > 0 ? (
+                    <div className="space-y-4">
+                      {selectedRecs.map((rec) => {
+                        const isImplemented = rec.status === "applied";
+                        return (
+                          <div key={rec.id} className="border border-border-default rounded-[var(--radius-md)] p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                {rec.type && <ActionTypeBadge type={rec.type} />}
+                                {rec.priority && (
+                                  <span className={cn(
+                                    "type-caption font-medium",
+                                    rec.priority === "high" ? "text-error" : rec.priority === "medium" ? "text-warning" : "text-text-muted"
+                                  )}>
+                                    {rec.priority === "high" ? "Prioritas tinggi" : rec.priority === "medium" ? "Prioritas sedang" : "Prioritas rendah"}
+                                  </span>
+                                )}
+                              </div>
+                              {isImplemented ? (
+                                <button
+                                  onClick={() => handleUnmarkImplemented(rec.id)}
+                                  className="flex items-center gap-1 type-caption font-medium text-success hover:opacity-80 transition-opacity cursor-pointer"
+                                >
+                                  <IconCheck size={14} /> Diimplementasi
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleMarkImplemented(rec.id)}
+                                  className="flex items-center gap-1 type-caption font-medium text-text-muted hover:text-text-body transition-colors cursor-pointer"
+                                >
+                                  Tandai selesai
+                                </button>
+                              )}
+                            </div>
+
+                            <p className="type-body font-semibold text-text-heading mb-1">{rec.title}</p>
+                            <p className="type-body text-text-muted mb-3">{rec.description}</p>
+
+                            {rec.suggested_copy && (
+                              (() => {
+                                // Try parsing as JSON blocks (from old generate endpoint)
+                                try {
+                                  const blocks = JSON.parse(rec.suggested_copy);
+                                  if (Array.isArray(blocks)) {
+                                    return blocks.map((block: any, i: number) => {
+                                      const isMonospace = block.body?.trimStart().startsWith("{") && block.body?.includes('"@');
+                                      return block.copyable
+                                        ? <CopyBlock key={i} label={block.label} body={block.body} mono={isMonospace} />
+                                        : <InfoBlock key={i} label={block.label} body={block.body} />;
+                                    });
+                                  }
+                                } catch { /* not JSON, render as text */ }
+                                // Plain text suggested copy
+                                return <CopyBlock label="Saran Perbaikan" body={rec.suggested_copy} />;
+                              })()
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="type-body text-text-muted mb-4">
+                        Belum ada rekomendasi untuk masalah ini.
+                      </p>
+                      <Button
+                        variant="brand"
+                        disabled={generating}
+                        onClick={() => handleGenerate(selected.id)}
+                      >
+                        {generating ? (
+                          <><ButtonSpinner size={14} /> Membuat rekomendasi...</>
+                        ) : (
+                          <><IconSparkles size={14} /> Generate Rekomendasi &middot; 5 kredit</>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Recheck CTA — visible when all recs are implemented */}
+                  {allRecsImplemented && (
+                    <div className="mt-6 pt-5 border-t border-border-default text-center">
+                      <Button
+                        variant="outline"
+                        onClick={handleRecheck}
+                        disabled={recheckLoading}
+                      >
+                        <IconRefresh size={14} />
+                        {recheckLoading ? "Memeriksa..." : "Periksa Ulang Masalah"}
+                      </Button>
+                      <p className="type-caption text-text-muted mt-2">Menggunakan 1 kredit</p>
+                    </div>
+                  )}
+                </div>
 
                 <div className="h-2" />
               </div>
@@ -810,23 +717,11 @@ export default function KontenV2Page() {
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center px-8">
               <p className="type-body text-text-muted max-w-xs">
-                Pilih rekomendasi untuk melihat detail dan konten yang siap diimplementasikan.
+                Pilih masalah untuk melihat detail dan rekomendasi perbaikan.
               </p>
             </div>
           )}
         </div>
-
-        {/* ── Modals ── */}
-        {genState === "modal" && (
-          <GenerateModal
-            brandName={activeProject.name}
-            onClose={() => setGenState("idle")}
-            onGenerate={startGenerate}
-          />
-        )}
-        {genState === "generating" && (
-          <GeneratingOverlay apiReady={apiReady} onDone={handleGenerateDone} categories={generatingCats} />
-        )}
       </div>
     </TooltipProvider>
   );

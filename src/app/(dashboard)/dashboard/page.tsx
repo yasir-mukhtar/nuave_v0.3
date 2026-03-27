@@ -25,7 +25,7 @@ type DashboardData = {
   latestScore: number;
   competitors: { name: string; score: number }[];
   mentions: { promptText: string; brandMentioned: boolean; aiResponse: string; createdAt?: string }[];
-  actionItems: { title: string; description: string; priority: "high" | "medium" | "low"; type: string }[];
+  actionItems: { title: string; description: string; severity: "high" | "medium" | "low"; problem_type: string }[];
   latestAuditId?: string;
   totalAudits: number;
   avgScore: number;
@@ -121,20 +121,25 @@ export default function DashboardPage() {
 
       let actionItems: DashboardData["actionItems"] = [];
 
-      // v3: recommendations are brand-level, not audit-level
-      const { data: recs } = await supabase
-        .from("recommendations")
-        .select("title, description, priority, type")
+      // v3: problems are brand-level, ordered by severity
+      const { data: problemItems } = await supabase
+        .from("audit_problems")
+        .select("title, description, severity, problem_type")
         .eq("brand_id", activeProjectId)
-        .eq("status", "open")
+        .eq("status", "unresolved")
         .order("created_at", { ascending: true });
 
-      if (recs) {
-        actionItems = recs.map((r) => ({
-          title: r.title ?? "",
-          description: r.description ?? "",
-          priority: (r.priority as "high" | "medium" | "low") ?? "low",
-          type: r.type ?? "web_copy",
+      if (problemItems) {
+        // Sort by severity: high → medium → low
+        const order: Record<string, number> = { high: 0, medium: 1, low: 2 };
+        const sorted = [...problemItems].sort(
+          (a, b) => (order[a.severity ?? "low"] ?? 2) - (order[b.severity ?? "low"] ?? 2)
+        );
+        actionItems = sorted.map((p) => ({
+          title: p.title ?? "",
+          description: p.description ?? "",
+          severity: (p.severity as "high" | "medium" | "low") ?? "low",
+          problem_type: p.problem_type ?? "",
         }));
       }
 

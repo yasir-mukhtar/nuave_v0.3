@@ -301,7 +301,7 @@ export default function ReportContent() {
     }
   }, [searchParams, router]);
 
-  // Fetch top recommendations (may already be generating from running page)
+  // Fetch top problems (may already be extracting from running page)
   useEffect(() => {
     const auditId = searchParams.get("audit_id");
     if (!auditId) return;
@@ -309,23 +309,22 @@ export default function ReportContent() {
     let pollInterval: NodeJS.Timeout | null = null;
     let timeoutId: NodeJS.Timeout | null = null;
 
-    const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+    const severityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
 
-    const fetchRecs = async () => {
+    const fetchProblems = async () => {
       try {
-        const res = await fetch('/api/recommendations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ audit_id: auditId }),
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        const recs = data.recommendations || data.data || [];
+        const supabase = (await import("@/lib/supabase/client")).createSupabaseBrowserClient();
+        const { data: problems } = await supabase
+          .from('audit_problems')
+          .select('severity, title, description')
+          .eq('audit_id', auditId)
+          .order('created_at', { ascending: true });
+
         if (cancelled) return;
 
-        if (recs.length > 0) {
-          const sorted = [...recs].sort(
-            (a: any, b: any) => (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2)
+        if (problems && problems.length > 0) {
+          const sorted = [...problems].sort(
+            (a: any, b: any) => (severityOrder[a.severity] ?? 2) - (severityOrder[b.severity] ?? 2)
           );
           setTopRecs(sorted.slice(0, 3));
           setRecsLoading(false);
@@ -337,8 +336,8 @@ export default function ReportContent() {
       }
     };
 
-    fetchRecs();
-    pollInterval = setInterval(fetchRecs, 4000);
+    fetchProblems();
+    pollInterval = setInterval(fetchProblems, 4000);
 
     // Timeout after 60s — gracefully hide section
     timeoutId = setTimeout(() => {
@@ -600,19 +599,24 @@ export default function ReportContent() {
               return <Tip label={prioLabels[priority] || "Prioritas"}>{svg}</Tip>;
             };
 
+            const severityBadge: Record<string, { label: string; className: string }> = {
+              high:   { label: 'Tinggi',  className: 'bg-[#FEE2E2] text-[#DC2626]' },
+              medium: { label: 'Sedang',  className: 'bg-[#FEF3C7] text-[#D97706]' },
+              low:    { label: 'Rendah',  className: 'bg-[#F3F4F6] text-[#6B7280]' },
+            };
+
             if (recsLoading) {
               return (
                 <>
                   <div data-pdf-divider className="h-px bg-border-default mx-8" />
                   <div data-pdf-pad className="pt-6 px-8 pb-6">
                     <p className="type-body font-semibold text-text-heading mb-4">
-                      3 Rekomendasi Prioritas
+                      3 Masalah Teratas
                     </p>
                     {[0, 1, 2].map((i) => (
                       <div key={i} className="flex items-center gap-3 py-4 animate-pulse">
-                        <div className="w-5 h-5 rounded bg-border-default shrink-0" />
+                        <div className="w-16 h-5 rounded-full bg-border-default shrink-0" />
                         <div className="flex-1 h-4 rounded bg-border-default" />
-                        <div className="w-16 h-6 rounded-sm bg-border-default shrink-0" />
                       </div>
                     ))}
                   </div>
@@ -627,25 +631,31 @@ export default function ReportContent() {
                 <div data-pdf-divider className="h-px bg-border-default mx-8" />
                 <div data-pdf-pad className="pt-6 px-8 pb-2">
                   <p className="type-body font-semibold text-text-heading mb-1">
-                    3 Rekomendasi Prioritas
+                    3 Masalah Teratas
                   </p>
 
                   <div className="flex flex-col">
-                    {topRecs.map((rec, i) => (
-                      <div key={i} className="flex items-center gap-3 py-4">
-                        <PrioBars priority={rec.priority} />
-                        <span className="type-body text-text-heading flex-1 line-clamp-1">
-                          {rec.title}
-                        </span>
-                        <CatTag type={rec.type} />
-                      </div>
-                    ))}
+                    {topRecs.map((problem: any, i: number) => {
+                      const badge = severityBadge[problem.severity] ?? severityBadge.low;
+                      return (
+                        <div key={i} className="flex items-start gap-3 py-4">
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold shrink-0 mt-0.5 ${badge.className}`}>
+                            {badge.label}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <span className="type-body text-text-heading line-clamp-1">{problem.title}</span>
+                            {problem.description && (
+                              <p className="type-caption text-text-muted mt-0.5 m-0 line-clamp-1">{problem.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <div
                     className="group flex items-center justify-between py-4 mt-2 border-t border-border-default cursor-pointer transition-colors"
                     onClick={() => {
-                      // Set active project to the brand from this audit so /content shows the right one
                       const projectRaw = sessionStorage.getItem("nuave_new_project");
                       if (projectRaw) {
                         const project = JSON.parse(projectRaw);
@@ -655,7 +665,7 @@ export default function ReportContent() {
                       router.push("/content");
                     }}
                   >
-                    <span className="type-body text-[#8b8b8b] group-hover:text-foreground transition-colors">Lihat semua rekomendasi</span>
+                    <span className="type-body text-[#8b8b8b] group-hover:text-foreground transition-colors">Lihat semua masalah</span>
                     <IconArrowRight size={18} stroke={1.5} className="text-[#8b8b8b] group-hover:text-foreground transition-colors" />
                   </div>
                 </div>

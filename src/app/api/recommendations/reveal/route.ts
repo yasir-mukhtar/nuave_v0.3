@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { createSupabaseAdminClient } from '@/lib/supabase/server';
+import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -12,7 +12,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'recommendation_id required' }, { status: 400 });
     }
 
+    // Authenticate user (server client carries request cookies)
+    const serverSupabase = await createSupabaseServerClient();
+    const { data: { user } } = await serverSupabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Look up org_id via organization_members (same pattern as /api/user/credits)
+    const { data: omData } = await serverSupabase
+      .from('organization_members')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle();
+
+    if (!omData?.org_id) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+    }
+
+    // Admin client for recommendation queries and RPC (SECURITY DEFINER)
     const supabase = createSupabaseAdminClient();
+
+    // Deduct 1 credit atomically before proceeding
+    const { data: newBalance, error: rpcError } = await supabase
+      .rpc('deduct_credits', {
+        p_org_id: omData.org_id,
+        p_amount: 1,
+        p_actioned_by: user.id,
+        p_audit_id: null,
+        p_description: 'Recommendation reveal',
+      });
+
+    if (rpcError) {
+      console.error('deduct_credits RPC error:', rpcError);
+      return NextResponse.json({ error: 'Credit deduction failed' }, { status: 500 });
+    }
+
+    if (newBalance === -1) {
+      return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
+    }
 
     // v3: join recommendations → brands (not → audits → workspaces)
     const { data: rec, error: recError } = await supabase

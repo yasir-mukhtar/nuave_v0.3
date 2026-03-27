@@ -163,6 +163,27 @@ export type CompetitorSnapshot = {
   created_at: string;
 };
 
+// ── Audit Problems ────────────────────────────────────────────
+export type AuditProblemSeverity = 'high' | 'medium' | 'low';
+export type AuditProblemStatus = 'unresolved' | 'in_progress' | 'resolved';
+
+export type AuditProblem = {
+  id: string;
+  audit_id: string;
+  audit_result_id: string | null;
+  brand_id: string;
+  problem_key: string;
+  severity: AuditProblemSeverity | null;
+  problem_type: string | null;
+  title: string | null;
+  description: string | null;
+  status: AuditProblemStatus;
+  first_seen_audit_id: string | null;
+  last_seen_audit_id: string | null;
+  resolved_at: string | null;
+  created_at: string;
+};
+
 // ── Recommendations ───────────────────────────────────────────
 export type RecommendationType = 'technical' | 'web_copy' | 'content';
 export type RecommendationSubtype =
@@ -184,6 +205,7 @@ export type Recommendation = {
   description: string | null;
   page_target: string | null;
   suggested_copy: string | null;
+  problem_id: string | null;
   status: RecommendationStatus;
   applied_at: string | null;
   resolved_at: string | null;
@@ -191,6 +213,28 @@ export type Recommendation = {
   credits_used: number;
   created_at: string;
   updated_at: string;
+};
+
+// ── Audit Problem + Recommendation Composites ────────────────
+export type AuditProblemWithRecs = AuditProblem & {
+  recommendations: Recommendation[];
+};
+
+export type ProblemExtractionResult = {
+  problems_found: number;
+  audit_id: string;
+};
+
+export type GenerateForProblemResult = {
+  recommendations_generated: number;
+  problem_id: string;
+};
+
+export type RecheckResult = {
+  resolved: 'yes' | 'partial' | 'no';
+  explanation: string;
+  problem_id: string;
+  new_status: 'resolved' | 'in_progress' | 'unresolved';
 };
 
 // ── Content Assets ────────────────────────────────────────────

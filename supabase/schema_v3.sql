@@ -22,6 +22,7 @@ DROP FUNCTION IF EXISTS effective_role(uuid) CASCADE;
 DROP TABLE IF EXISTS public.content_assets      CASCADE;
 DROP TABLE IF EXISTS public.blog_posts          CASCADE;
 DROP TABLE IF EXISTS public.recommendations     CASCADE;
+DROP TABLE IF EXISTS public.audit_problems      CASCADE;
 DROP TABLE IF EXISTS public.competitor_snapshots CASCADE;
 DROP TABLE IF EXISTS public.competitor_analysis CASCADE;
 DROP TABLE IF EXISTS public.audit_results       CASCADE;
@@ -243,6 +244,40 @@ CREATE TABLE public.competitor_snapshots (
   created_at         TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 
+-- ── AUDIT PROBLEMS ──────────────────────────────────────────────
+-- Structured problems extracted from audit results by AI.
+-- problem_key = stable dedup key: {sha256_12(prompt_text)}::{problem_type}
+-- Uses prompt_text (not prompt_id) because prompt_id is nullable and
+-- can become NULL on prompt archival (ON DELETE SET NULL).
+--
+-- Cross-audit tracking via first_seen / last_seen pattern
+-- (consistent with recommendations).
+--
+-- Status lifecycle:
+--   unresolved → in_progress  (user started working on it)
+--   in_progress → resolved    (recheck confirms fix)
+--   resolved → unresolved     (regression in later audit)
+CREATE TABLE public.audit_problems (
+  id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  audit_id            UUID        NOT NULL REFERENCES public.audits(id) ON DELETE CASCADE,
+  audit_result_id     UUID        REFERENCES public.audit_results(id) ON DELETE SET NULL,
+  brand_id            UUID        NOT NULL REFERENCES public.brands(id) ON DELETE CASCADE,
+  problem_key         TEXT        NOT NULL,  -- {sha256_12(prompt_text)}::{problem_type}
+  severity            TEXT,       -- high | medium | low
+  problem_type        TEXT,       -- e.g. missing_mention, weak_context, competitor_dominance
+  title               TEXT,
+  description         TEXT,
+  status              TEXT        NOT NULL DEFAULT 'unresolved',
+  first_seen_audit_id UUID        REFERENCES public.audits(id) ON DELETE SET NULL,
+  last_seen_audit_id  UUID        REFERENCES public.audits(id) ON DELETE SET NULL,
+  resolved_at         TIMESTAMPTZ,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  CONSTRAINT audit_problem_severity_values CHECK (severity IN ('high', 'medium', 'low')),
+  CONSTRAINT audit_problem_status_values   CHECK (status IN ('unresolved', 'in_progress', 'resolved')),
+  CONSTRAINT uq_brand_problem_key          UNIQUE (brand_id, problem_key)
+);
+
 -- ── RECOMMENDATIONS ──────────────────────────────────────────────
 -- Brand-level persistent backlog. NOT tied to a single audit.
 -- source_audit_id = audit that first identified this gap.
@@ -276,6 +311,8 @@ CREATE TABLE public.recommendations (
   credits_used        INTEGER     NOT NULL DEFAULT 0,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  problem_id          UUID        REFERENCES public.audit_problems(id) ON DELETE SET NULL,
 
   CONSTRAINT recommendation_status_values CHECK (status IN ('open', 'applied', 'dismissed', 'resolved')),
   CONSTRAINT recommendation_type_values   CHECK (type IN ('technical', 'web_copy', 'content'))
@@ -363,6 +400,14 @@ CREATE INDEX idx_audit_results_prompt_id  ON public.audit_results(prompt_id);
 -- Competitor snapshot access patterns
 CREATE INDEX idx_competitor_snaps_audit_id       ON public.competitor_snapshots(audit_id);
 CREATE INDEX idx_competitor_snaps_competitor_id  ON public.competitor_snapshots(competitor_id);
+
+-- Audit problem access patterns
+CREATE INDEX idx_audit_problems_audit_id            ON public.audit_problems(audit_id);
+CREATE INDEX idx_audit_problems_audit_result_id     ON public.audit_problems(audit_result_id);
+CREATE INDEX idx_audit_problems_brand_id            ON public.audit_problems(brand_id);
+CREATE INDEX idx_audit_problems_status              ON public.audit_problems(status);
+CREATE INDEX idx_audit_problems_first_seen_audit_id ON public.audit_problems(first_seen_audit_id);
+CREATE INDEX idx_audit_problems_last_seen_audit_id  ON public.audit_problems(last_seen_audit_id);
 
 -- Recommendation access patterns
 CREATE INDEX idx_recommendations_brand_id          ON public.recommendations(brand_id);
@@ -625,6 +670,7 @@ ALTER TABLE public.brand_competitors     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audits                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_results         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.competitor_snapshots  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_problems        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.recommendations       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.content_assets        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.credit_transactions   ENABLE ROW LEVEL SECURITY;
@@ -806,6 +852,20 @@ CREATE POLICY "competitor_snaps_select_via_brand"
       WHERE brand_id IN (SELECT brand_id FROM public.user_brands())
     )
   );
+
+-- ── audit_problems ───────────────────────────────────────────────
+CREATE POLICY "audit_problems_select_via_brand"
+  ON public.audit_problems FOR SELECT
+  USING (brand_id IN (SELECT brand_id FROM public.user_brands()));
+
+CREATE POLICY "audit_problems_insert_via_brand"
+  ON public.audit_problems FOR INSERT
+  WITH CHECK (brand_id IN (SELECT brand_id FROM public.user_brands()));
+
+-- Status updates (unresolved/in_progress/resolved) allowed by members.
+CREATE POLICY "audit_problems_update_status_member"
+  ON public.audit_problems FOR UPDATE
+  USING (brand_id IN (SELECT brand_id FROM public.user_brands()));
 
 -- ── recommendations ───────────────────────────────────────────────
 CREATE POLICY "recommendations_select_via_brand"

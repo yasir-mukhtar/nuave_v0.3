@@ -38,8 +38,8 @@ export default function AuditRunningPage() {
           // Save full results to sessionStorage for results page
           sessionStorage.setItem('nuave_audit', JSON.stringify(data));
 
-          // Fire-and-forget: start generating recommendations early
-          fetch('/api/recommendations', {
+          // Fire-and-forget: start extracting problems early
+          fetch('/api/problems/extract', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ audit_id: id }),

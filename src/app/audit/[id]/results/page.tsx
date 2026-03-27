@@ -335,7 +335,7 @@ export default function ResultsPage() {
         <div className="flex justify-end gap-3 mt-2">
           <Button variant="default">Simpan laporan</Button>
           <Button variant="brand" onClick={() => router.push(`/audit/${auditId}/recommendations`)}>
-            Lihat Rekomendasi <IconArrowRight size={18} stroke={1.5} />
+            Lihat Masalah yang Ditemukan <IconArrowRight size={18} stroke={1.5} />
           </Button>
         </div>
       </div>

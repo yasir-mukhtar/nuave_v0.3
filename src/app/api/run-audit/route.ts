@@ -301,16 +301,16 @@ async function processAuditInBackground(
       })
       .eq('id', auditId);
 
-    // Auto-generate recommendations after audit completes
+    // Extract problems from audit results after completion
     try {
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nuave.ai';
-      await fetch(`${baseUrl}/api/recommendations`, {
+      await fetch(`${baseUrl}/api/problems/extract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ audit_id: auditId }),
       });
     } catch (err) {
-      console.error('Auto-generate recommendations failed:', err);
+      console.error('Problem extraction failed:', err);
     }
 
   } catch (error) {
