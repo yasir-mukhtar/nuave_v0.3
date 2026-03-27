@@ -71,6 +71,28 @@
   .type-heading-lg { font-family: var(--font-heading); font-size: var(--text-heading-lg); line-height: 1.1; font-weight: 700; } /* ~44.2px */
   .type-display    { font-family: var(--font-heading); font-size: var(--text-display);    line-height: 1.0; font-weight: 700; } /* ~58.9px */
 
+  /* Report page title — Geist 600 */
+  .type-report-title    { font-family: var(--font-heading); font-size: 18px; font-weight: 600; line-height: normal; }
+  .type-report-title-sm { font-family: var(--font-heading); font-size: 16px; font-weight: 600; line-height: normal; }
+
+  /* Table column header — Inter 600 12px */
+  .type-col-header {
+    font-family: var(--font-body);
+    font-size: var(--text-caption);
+    font-weight: 600;
+    line-height: normal;
+    color: var(--text-muted);
+    text-decoration: none !important;
+  }
+
+  /* Dotted underline modifier — signals hover/tooltip affordance */
+  .type-col-header--hint {
+    -webkit-text-decoration: underline dotted !important;
+    text-decoration: underline dotted !important;
+    text-decoration-skip-ink: auto;
+    text-underline-position: from-font;
+  }
+
   /* Nav item — exposes --_nav-weight so child .type-nav inherits it */
   .nav-item               { --_nav-weight: 400; }
   .nav-item:hover,
