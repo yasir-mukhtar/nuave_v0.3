@@ -92,6 +92,20 @@ export async function POST(request: Request) {
       }
     }
 
+    // Idempotency: check if recommendations already exist for this problem
+    const { data: existingRecs } = await admin
+      .from('recommendations')
+      .select('id')
+      .eq('problem_id', problem_id)
+      .limit(1);
+
+    if (existingRecs && existingRecs.length > 0) {
+      return NextResponse.json(
+        { error: 'Recommendations already generated for this problem' },
+        { status: 409 }
+      );
+    }
+
     // Look up org_id via brands → workspaces → org_id
     const { data: workspace } = await admin
       .from('workspaces')
@@ -212,7 +226,7 @@ Return only valid JSON. No preamble, no markdown.`;
   } catch (error: any) {
     console.error('Generate-for-problem error:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }

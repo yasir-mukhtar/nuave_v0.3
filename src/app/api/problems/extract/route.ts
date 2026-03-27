@@ -221,7 +221,7 @@ Return only valid JSON. No preamble, no markdown.`;
   } catch (error: any) {
     console.error('Problem extraction error:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }

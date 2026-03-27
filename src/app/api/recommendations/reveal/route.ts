@@ -54,21 +54,58 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
     }
 
-    // v3: join recommendations → brands (not → audits → workspaces)
+    // v3: join recommendations → brands → workspaces for auth check
     const { data: rec, error: recError } = await supabase
       .from('recommendations')
-      .select('*, brands!inner(name, website_url)')
+      .select('*, brands!inner(name, website_url, workspace_id)')
       .eq('id', recommendation_id)
       .single();
 
     if (recError || !rec) {
-      console.error('Recommendation fetch error:', recError);
       return NextResponse.json({ error: 'Recommendation not found' }, { status: 404 });
     }
 
-    const brand = (rec.brands as { name: string; website_url: string | null } | null);
-    const brandName = brand?.name || 'the brand';
-    const websiteUrl = brand?.website_url || '';
+    // Verify user has access to this recommendation's brand/workspace
+    const brandData = rec.brands as { name: string; website_url: string | null; workspace_id: string };
+    const { data: wsMembership } = await supabase
+      .from('workspace_members')
+      .select('user_id')
+      .eq('workspace_id', brandData.workspace_id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!wsMembership) {
+      // Check org-level access
+      const { data: ws } = await supabase
+        .from('workspaces')
+        .select('org_id')
+        .eq('id', brandData.workspace_id)
+        .single();
+
+      if (ws) {
+        const { data: orgMember } = await supabase
+          .from('organization_members')
+          .select('user_id')
+          .eq('org_id', ws.org_id)
+          .eq('user_id', user.id)
+          .in('role', ['owner', 'admin'])
+          .maybeSingle();
+
+        if (!orgMember) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+      } else {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+    }
+
+    // Idempotency: if already revealed, return cached copy without charging
+    if (rec.suggested_copy) {
+      return NextResponse.json({ suggested_copy: rec.suggested_copy });
+    }
+
+    const brandName = brandData.name || 'the brand';
+    const websiteUrl = brandData.website_url || '';
     const pageTarget = rec.page_target || 'Relevant page';
 
     const prompt = `You are an AEO copywriting expert.
@@ -116,7 +153,7 @@ Be specific, actionable, and ready to use. No preamble.`;
   } catch (error: any) {
     console.error('Reveal API Error:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
