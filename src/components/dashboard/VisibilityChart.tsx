@@ -1,28 +1,38 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
-  ReferenceLine,
 } from 'recharts';
 import { IconChevronDown } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
+import { getFaviconUrl } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 type AuditDataPoint = {
   date: string; // ISO string
   score: number;
+  competitors: Record<string, number>;
+};
+
+type ChartCompetitor = {
+  name: string;
+  score: number;
+  website_url?: string | null;
 };
 
 type VisibilityChartProps = {
   data: AuditDataPoint[];
   latestScore: number;
+  brandName: string;
+  brandWebsiteUrl: string | null;
+  competitors: ChartCompetitor[];
 };
 
 const filterOptions = [
@@ -30,6 +40,22 @@ const filterOptions = [
   { label: '2 minggu terakhir', days: 14 },
   { label: '1 minggu terakhir', days: 7 },
 ];
+
+// Muted, distinguishable palette for competitor lines
+const COMPETITOR_COLORS = [
+  '#DC2626', // red
+  '#6B7280', // gray
+  '#2563EB', // blue
+  '#D97706', // amber
+  '#059669', // emerald
+  '#7C3AED', // violet
+  '#DB2777', // pink
+  '#0891B2', // cyan
+  '#CA8A04', // yellow
+  '#4F46E5', // indigo
+];
+
+const BRAND_COLOR = '#533AFD';
 
 function formatDateShort(dateStr: string) {
   const d = new Date(dateStr);
@@ -41,37 +67,105 @@ function formatDateFull(dateStr: string) {
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-/** Custom tooltip */
-function ChartTooltip({ active, payload }: any) {
+/** Peec AI-style tooltip showing all brands */
+function ChartTooltip({
+  active,
+  payload,
+  brandName,
+  brandWebsiteUrl,
+  competitorList,
+  competitorColorMap,
+}: any) {
   if (!active || !payload || !payload.length) return null;
   const data = payload[0]?.payload;
-  if (!data || data.score == null) return null;
+  if (!data) return null;
 
-  const score = data.score;
-  const change = data._change;
+  const brandScore = data.score;
+
+  // Build entries: brand first, then competitors sorted by score desc
+  type Entry = { name: string; score: number; color: string; websiteUrl?: string | null; isBrand: boolean };
+  const entries: Entry[] = [
+    { name: brandName, score: brandScore ?? 0, color: BRAND_COLOR, websiteUrl: brandWebsiteUrl, isBrand: true },
+  ];
+
+  for (const comp of competitorList) {
+    const key = `comp_${comp.name}`;
+    const score = data[key] ?? 0;
+    entries.push({
+      name: comp.name,
+      score,
+      color: competitorColorMap[comp.name] ?? '#9CA3AF',
+      websiteUrl: comp.website_url,
+      isBrand: false,
+    });
+  }
+
+  // Sort all entries by score desc (brand ranks naturally among competitors)
+  entries.sort((a, b) => b.score - a.score);
 
   return (
-    <div className="bg-white border border-border-light rounded-[var(--radius-sm)] shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-2.5 px-3.5 min-w-[140px]">
-      <div className="type-caption text-text-placeholder mb-1.5">
+    <div className="bg-white border border-border-light rounded-[var(--radius-sm)] shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-3 min-w-[200px]">
+      <div className="type-caption text-text-placeholder mb-2">
         {formatDateFull(data.date)}
       </div>
-      <div className="flex items-baseline gap-2">
-        <span className="type-body-lg font-bold text-text-heading">
-          {score}%
-        </span>
-        {change != null && change !== 0 && (
-          <span className={cn("type-caption font-semibold", change > 0 ? "text-success" : "text-error")}>
-            {change > 0 ? '+' : ''}{change}%
-          </span>
-        )}
+      <div className="flex flex-col gap-1.5">
+        {entries.map((entry) => (
+          <div key={entry.name} className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 min-w-0">
+              <div
+                className="w-2.5 h-2.5 rounded-[3px] shrink-0"
+                style={{ backgroundColor: entry.color }}
+              />
+              <TooltipLogo name={entry.name} websiteUrl={entry.websiteUrl} />
+              <span className="type-caption text-text-body truncate">
+                {entry.name}
+              </span>
+            </div>
+            <span className="type-caption font-semibold text-text-heading tabular-nums shrink-0">
+              {entry.score.toFixed(1)}%
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-const gridYTicks = [20, 40, 60, 80, 100];
+function TooltipLogo({ name, websiteUrl }: { name: string; websiteUrl?: string | null }) {
+  const [failed, setFailed] = useState(false);
+  const logoUrl = getFaviconUrl(name, websiteUrl);
 
-export default function VisibilityChart({ data, latestScore }: VisibilityChartProps) {
+  if (failed) {
+    return (
+      <div className="w-4 h-4 rounded-[3px] bg-surface-raised flex items-center justify-center shrink-0">
+        <span className="text-[8px] font-semibold text-text-muted leading-none">
+          {name.charAt(0).toUpperCase()}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={logoUrl}
+      alt=""
+      width={16}
+      height={16}
+      className="rounded-[3px] shrink-0 bg-surface-raised"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+const gridYTicks = [0, 25, 50, 75, 100];
+
+export default function VisibilityChart({
+  data,
+  latestScore,
+  brandName,
+  brandWebsiteUrl,
+  competitors,
+}: VisibilityChartProps) {
   const [filterIdx, setFilterIdx] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [dropdownClosing, setDropdownClosing] = useState(false);
@@ -99,6 +193,15 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
 
   const days = filterOptions[filterIdx].days;
 
+  // Assign stable colors to competitors
+  const competitorColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    competitors.forEach((c, i) => {
+      map[c.name] = COMPETITOR_COLORS[i % COMPETITOR_COLORS.length];
+    });
+    return map;
+  }, [competitors]);
+
   const filteredData = useMemo(() => {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - days);
@@ -107,15 +210,21 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
       .filter((d) => new Date(d.date) >= cutoff)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    return sorted.map((d, i) => ({
-      ...d,
-      ts: new Date(d.date).getTime(),
-      _change: i > 0 ? d.score - sorted[i - 1].score : null,
-    }));
-  }, [data, days]);
+    return sorted.map((d) => {
+      const point: Record<string, any> = {
+        date: d.date,
+        ts: new Date(d.date).getTime(),
+        score: d.score,
+      };
+      // Flatten competitor scores into the data point
+      for (const comp of competitors) {
+        point[`comp_${comp.name}`] = d.competitors[comp.name] ?? 0;
+      }
+      return point;
+    });
+  }, [data, days, competitors]);
 
   const isEmpty = filteredData.length === 0;
-  const isSinglePoint = filteredData.length === 1;
 
   const xDomain = useMemo(() => {
     const now = new Date();
@@ -134,6 +243,19 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
     }
     return ticks;
   }, [xDomain, days]);
+
+  const tooltipContent = useCallback(
+    (props: any) => (
+      <ChartTooltip
+        {...props}
+        brandName={brandName}
+        brandWebsiteUrl={brandWebsiteUrl}
+        competitorList={competitors}
+        competitorColorMap={competitorColorMap}
+      />
+    ),
+    [brandName, brandWebsiteUrl, competitors, competitorColorMap]
+  );
 
   return (
     <div className="border border-border-light rounded-[var(--radius-sm)] shadow-app-subtle bg-white h-[424px] flex flex-col">
@@ -192,16 +314,10 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
           <EmptyChartState days={days} />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
+            <LineChart
               data={filteredData}
               margin={{ top: 4, right: 4, bottom: 0, left: -20 }}
             >
-              <defs>
-                <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#533AFD" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#533AFD" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
               <CartesianGrid
                 horizontal
                 vertical={false}
@@ -220,31 +336,43 @@ export default function VisibilityChart({ data, latestScore }: VisibilityChartPr
                 tick={{ fontSize: 12, fill: '#9CA3AF' }}
                 dy={8}
               />
-              <YAxis domain={[0, 100]} ticks={gridYTicks} hide />
+              <YAxis
+                domain={[0, 100]}
+                ticks={gridYTicks}
+                tickFormatter={(v) => `${v}%`}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                width={45}
+              />
               <Tooltip
-                content={<ChartTooltip />}
+                content={tooltipContent}
                 cursor={{ stroke: '#D1D5DB', strokeWidth: 1, strokeDasharray: '4 4' }}
               />
-              <Area
+              {/* Competitor lines (render first so brand line is on top) */}
+              {competitors.map((comp) => (
+                <Line
+                  key={comp.name}
+                  type="monotone"
+                  dataKey={`comp_${comp.name}`}
+                  stroke={competitorColorMap[comp.name]}
+                  strokeWidth={1.5}
+                  dot={false}
+                  activeDot={{ r: 4, fill: competitorColorMap[comp.name], stroke: '#ffffff', strokeWidth: 2 }}
+                  connectNulls={false}
+                />
+              ))}
+              {/* Brand line (on top, thicker) */}
+              <Line
                 type="monotone"
                 dataKey="score"
-                stroke={isSinglePoint ? 'transparent' : '#533AFD'}
-                strokeWidth={2}
-                fill="url(#scoreGradient)"
-                dot={isSinglePoint ? { r: 5, fill: '#533AFD', stroke: '#ffffff', strokeWidth: 2 } : false}
-                activeDot={{ r: 5, fill: '#533AFD', stroke: '#ffffff', strokeWidth: 2 }}
+                stroke={BRAND_COLOR}
+                strokeWidth={2.5}
+                dot={filteredData.length === 1 ? { r: 5, fill: BRAND_COLOR, stroke: '#ffffff', strokeWidth: 2 } : false}
+                activeDot={{ r: 5, fill: BRAND_COLOR, stroke: '#ffffff', strokeWidth: 2 }}
                 connectNulls={false}
               />
-              {isSinglePoint && (
-                <ReferenceLine
-                  y={filteredData[0].score}
-                  stroke="#533AFD"
-                  strokeDasharray="6 4"
-                  strokeWidth={1.5}
-                  strokeOpacity={0.4}
-                />
-              )}
-            </AreaChart>
+            </LineChart>
           </ResponsiveContainer>
         )}
       </div>

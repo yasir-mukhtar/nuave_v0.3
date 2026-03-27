@@ -21,7 +21,8 @@ import { cn } from "@/lib/utils";
 type DashboardData = {
   firstName: string;
   brandName: string;
-  chartData: { date: string; score: number }[];
+  brandWebsiteUrl: string | null;
+  chartData: { date: string; score: number; competitors: Record<string, number> }[];
   latestScore: number;
   competitors: { name: string; score: number; website_url?: string | null }[];
   mentions: { promptText: string; brandMentioned: boolean; aiResponse: string; createdAt?: string }[];
@@ -72,59 +73,82 @@ export default function DashboardPage() {
           ? Math.round(completeAudits.reduce((acc, a) => acc + (a.visibility_score || 0), 0) / totalAudits)
           : 0;
 
+      // Fetch competitor snapshots for all completed audits to build trend lines
+      const completeAuditIds = completeAudits.map((a) => a.id);
+      let competitorSnapshotsByAudit: Record<string, Record<string, number>> = {};
+
+      if (completeAuditIds.length > 0) {
+        const { data: snapshots } = await supabase
+          .from("competitor_snapshots")
+          .select("audit_id, competitor_name, mention_frequency")
+          .in("audit_id", completeAuditIds);
+
+        if (snapshots) {
+          for (const snap of snapshots) {
+            if (!competitorSnapshotsByAudit[snap.audit_id]) {
+              competitorSnapshotsByAudit[snap.audit_id] = {};
+            }
+            const freq = (snap.mention_frequency ?? 0) * 100;
+            competitorSnapshotsByAudit[snap.audit_id][snap.competitor_name] = freq;
+          }
+        }
+      }
+
+      // Pick top 10 competitors from the latest audit only
+      const latestAuditCompetitors = completeAudits[0]
+        ? competitorSnapshotsByAudit[completeAudits[0].id] ?? {}
+        : {};
+      const top10Names = Object.entries(latestAuditCompetitors)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([name]) => name);
+
+      // Only include top 10 competitors in chart data
       const chartData = completeAudits
         .filter((a) => a.completed_at)
-        .map((a) => ({
-          date: a.completed_at as string,
-          score: a.visibility_score ?? 0,
-        }));
+        .map((a) => {
+          const allComps = competitorSnapshotsByAudit[a.id] ?? {};
+          const filtered: Record<string, number> = {};
+          for (const name of top10Names) {
+            if (name in allComps) filtered[name] = allComps[name];
+          }
+          return {
+            date: a.completed_at as string,
+            score: a.visibility_score ?? 0,
+            competitors: filtered,
+          };
+        });
 
       const latestScore = completeAudits[0]?.visibility_score ?? 0;
       const latestAuditId = completeAudits[0]?.id;
 
-      let competitors: { name: string; score: number; website_url?: string | null }[] = [];
+      // Fetch competitor URLs from brand_competitors (shared by panel + chart)
+      const { data: brandCompetitors } = await supabase
+        .from("brand_competitors")
+        .select("name, website_url")
+        .eq("brand_id", activeProjectId);
+
+      const competitorUrlMap: Record<string, string | null> = {};
+      (brandCompetitors || []).forEach((c) => {
+        competitorUrlMap[c.name] = c.website_url;
+      });
+
+      // Derive competitors list from the same snapshot data used by the chart
+      const competitors = top10Names.map((name) => ({
+        name,
+        score: latestAuditCompetitors[name] ?? 0,
+        website_url: competitorUrlMap[name] ?? null,
+      }));
+
       let mentions: DashboardData["mentions"] = [];
 
       if (latestAuditId) {
         const { data: auditResults } = await supabase
           .from("audit_results")
-          .select("prompt_text, brand_mentioned, competitor_mentions, ai_response, created_at")
+          .select("prompt_text, brand_mentioned, ai_response, created_at")
           .eq("audit_id", latestAuditId);
 
         if (auditResults && auditResults.length > 0) {
-          const totalPrompts = auditResults.length;
-          const mentionCounts: Record<string, number> = {};
-
-          for (const result of auditResults) {
-            const compMentions = result.competitor_mentions ?? [];
-            const unique = [...new Set((compMentions as string[]).map((m) => m.trim()))];
-            for (const name of unique) {
-              if (name) {
-                mentionCounts[name] = (mentionCounts[name] || 0) + 1;
-              }
-            }
-          }
-
-          // Fetch competitor URLs from brand_competitors
-          const { data: brandCompetitors } = await supabase
-            .from("brand_competitors")
-            .select("name, website_url")
-            .eq("brand_id", activeProjectId);
-
-          const competitorUrlMap: Record<string, string | null> = {};
-          (brandCompetitors || []).forEach((c) => {
-            competitorUrlMap[c.name] = c.website_url;
-          });
-
-          competitors = Object.entries(mentionCounts)
-            .map(([name, count]) => ({
-              name,
-              score: (count / totalPrompts) * 100,
-              website_url: competitorUrlMap[name] ?? null,
-            }))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10);
-
           mentions = auditResults.map((r) => ({
             promptText: r.prompt_text ?? "",
             brandMentioned: r.brand_mentioned ?? false,
@@ -169,6 +193,7 @@ export default function DashboardPage() {
       setData({
         firstName,
         brandName,
+        brandWebsiteUrl: activeProject?.website_url ?? null,
         chartData,
         latestScore,
         competitors,
@@ -209,7 +234,13 @@ export default function DashboardPage() {
 
       {/* Chart + Competitors row */}
       <div className="grid grid-cols-[1fr_320px] gap-5 items-stretch">
-        <VisibilityChart data={data.chartData} latestScore={data.latestScore} />
+        <VisibilityChart
+          data={data.chartData}
+          latestScore={data.latestScore}
+          brandName={data.brandName}
+          brandWebsiteUrl={data.brandWebsiteUrl}
+          competitors={data.competitors}
+        />
         <CompetitorPanel competitors={data.competitors} />
       </div>
 
