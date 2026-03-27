@@ -633,14 +633,17 @@ export default function ReportContent() {
                 <p className="type-body text-text-muted mb-3">
                   Brand berikut disebutkan oleh AI
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   {report.competitors.map((name) => (
-                    <span
+                    <div
                       key={name}
-                      className="inline-flex items-center h-8 px-4 rounded-full border border-border-default type-body text-text-body"
+                      className="inline-flex items-center gap-2 h-8 pl-1 pr-3 rounded-sm border border-border-default"
                     >
-                      {name}
-                    </span>
+                      <div className="w-6 h-6 rounded-xs bg-surface-raised flex items-center justify-center type-caption font-semibold text-text-muted shrink-0">
+                        {name.charAt(0)}
+                      </div>
+                      <span className="type-caption font-medium text-text-body">{name}</span>
+                    </div>
                   ))}
                 </div>
               </div>

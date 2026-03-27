@@ -97,6 +97,7 @@ export async function GET(
           ai_response: r.ai_response,
           brand_mentioned: r.brand_mentioned,
           mention_context: r.mention_context,
+          competitor_mentions: r.competitor_mentions ?? [],
           created_at: r.created_at
         }))
       });
