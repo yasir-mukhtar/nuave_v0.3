@@ -63,13 +63,6 @@ export default function RunningContent() {
 
           sessionStorage.setItem("nuave_audit_result", JSON.stringify(data));
 
-          // Fire-and-forget: start extracting problems early
-          fetch('/api/problems/extract', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ audit_id: auditId }),
-          }).catch(() => {});
-
           setTimeout(() => router.push(`/new-project/report?audit_id=${auditId}`), 1500);
         } else if (data.status === "failed") {
           setStatus("failed");

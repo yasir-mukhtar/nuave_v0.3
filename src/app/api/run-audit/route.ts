@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/server';
+import { extractProblemsForAudit } from '@/lib/problems';
 
 const OPENAI_MODEL = "gpt-4o-2024-11-20";
 
@@ -307,6 +308,13 @@ async function processAuditInBackground(
       // Competitor extraction failure should not block audit completion
     }
 
+    // Extract problems before marking complete (so findings are ready on report page)
+    try {
+      await extractProblemsForAudit(auditId, brandId);
+    } catch {
+      // Problem extraction failure should not block audit completion
+    }
+
     await supabase
       .from('audits')
       .update({
@@ -316,17 +324,6 @@ async function processAuditInBackground(
         completed_at: new Date().toISOString(),
       })
       .eq('id', auditId);
-
-    // Post-processing: extract problems (competitors already extracted above)
-    try {
-      await fetch(`${internalBase}/api/problems/extract`, {
-        method: 'POST',
-        headers: postHeaders,
-        body: postBody,
-      });
-    } catch {
-      // Problem extraction failure should not block
-    }
 
   } catch {
     await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);

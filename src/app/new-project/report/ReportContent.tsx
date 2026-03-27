@@ -487,13 +487,11 @@ export default function ReportContent() {
     }
   }, [searchParams, router]);
 
-  /* ── Fetch problems ── */
+  /* ── Fetch problems (ready by the time audit is complete) ── */
   useEffect(() => {
     const auditId = searchParams.get("audit_id");
     if (!auditId) return;
     let cancelled = false;
-    let pollInterval: NodeJS.Timeout | null = null;
-    let timeoutId: NodeJS.Timeout | null = null;
 
     const fetchProblems = async () => {
       try {
@@ -511,27 +509,16 @@ export default function ReportContent() {
             (a, b) => (SEVERITY_ORDER[a.severity] ?? 2) - (SEVERITY_ORDER[b.severity] ?? 2)
           );
           setProblems(sorted);
-          setProblemsLoading(false);
-          if (pollInterval) clearInterval(pollInterval);
-          if (timeoutId) clearTimeout(timeoutId);
         }
+        setProblemsLoading(false);
       } catch {
-        // Will retry on next poll
+        if (!cancelled) setProblemsLoading(false);
       }
     };
 
     fetchProblems();
-    pollInterval = setInterval(fetchProblems, 4000);
-    timeoutId = setTimeout(() => {
-      if (pollInterval) clearInterval(pollInterval);
-      if (!cancelled) setProblemsLoading(false);
-    }, 60000);
 
-    return () => {
-      cancelled = true;
-      if (pollInterval) clearInterval(pollInterval);
-      if (timeoutId) clearTimeout(timeoutId);
-    };
+    return () => { cancelled = true; };
   }, [searchParams]);
 
   if (!report) {
