@@ -86,12 +86,24 @@ export async function GET(
         console.error('Error fetching audit results:', resultsError);
       }
 
+      // Fetch competitor URLs from brand_competitors
+      const { data: brandCompetitors } = await supabase
+        .from('brand_competitors')
+        .select('name, website_url')
+        .eq('brand_id', audit.brand_id);
+
+      const competitorUrls: Record<string, string | null> = {};
+      (brandCompetitors || []).forEach((c: { name: string; website_url: string | null }) => {
+        competitorUrls[c.name] = c.website_url;
+      });
+
       return NextResponse.json({
         status: 'complete',
         audit_id: audit.id,
         visibility_score: audit.visibility_score,
         brand_mention_count: audit.brand_mention_count,
         total_prompts: audit.total_prompts,
+        competitor_urls: competitorUrls,
         results: (results || []).map(r => ({
           prompt_text: r.prompt_text,
           ai_response: r.ai_response,

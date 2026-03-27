@@ -291,6 +291,24 @@ async function processAuditInBackground(
       ? Math.round((totalBrandMentionCount / prompts.length) * 100)
       : 0;
 
+    // Internal API calls: use VERCEL_URL in production, localhost in dev
+    const internalBase = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT || 3000}`;
+    const postBody = JSON.stringify({ audit_id: auditId });
+    const postHeaders = { 'Content-Type': 'application/json' };
+
+    // Extract competitors before marking complete (so report page has data immediately)
+    try {
+      await fetch(`${internalBase}/api/competitors/extract`, {
+        method: 'POST',
+        headers: postHeaders,
+        body: postBody,
+      });
+    } catch {
+      // Competitor extraction failure should not block audit completion
+    }
+
     await supabase
       .from('audits')
       .update({
@@ -301,16 +319,15 @@ async function processAuditInBackground(
       })
       .eq('id', auditId);
 
-    // Extract problems from audit results after completion
+    // Post-processing: extract problems (competitors already extracted above)
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nuave.ai';
-      await fetch(`${baseUrl}/api/problems/extract`, {
+      await fetch(`${internalBase}/api/problems/extract`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audit_id: auditId }),
+        headers: postHeaders,
+        body: postBody,
       });
-    } catch (err) {
-      console.error('Problem extraction failed:', err);
+    } catch {
+      // Problem extraction failure should not block
     }
 
   } catch (error) {

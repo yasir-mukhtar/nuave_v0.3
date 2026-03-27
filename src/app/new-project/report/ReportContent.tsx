@@ -13,6 +13,11 @@ const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1Q
 
 /* ── Types ── */
 
+interface CompetitorInfo {
+  name: string;
+  websiteUrl: string | null;
+}
+
 interface ReportData {
   brandName: string;
   brandUrl: string;
@@ -22,7 +27,7 @@ interface ReportData {
   level: string;
   mentionedCount: number;
   totalPrompts: number;
-  competitors: string[];
+  competitors: CompetitorInfo[];
   results: PromptResult[];
 }
 
@@ -100,10 +105,19 @@ function buildReport(): ReportData {
   });
   const mentionedCount = results.filter((r) => r.mentioned).length;
 
-  const competitorSet = new Set<string>();
+  const competitorUrls: Record<string, string | null> = audit.competitor_urls ?? {};
+  const competitorMap = new Map<string, string | null>();
   (audit.results || []).forEach((r: { competitor_mentions?: string[] }) => {
-    (r.competitor_mentions || []).forEach((c: string) => competitorSet.add(c));
+    (r.competitor_mentions || []).forEach((c: string) => {
+      if (!competitorMap.has(c)) {
+        competitorMap.set(c, competitorUrls[c] ?? null);
+      }
+    });
   });
+
+  const competitors: CompetitorInfo[] = Array.from(competitorMap.entries())
+    .slice(0, 6)
+    .map(([name, websiteUrl]) => ({ name, websiteUrl }));
 
   return {
     brandName: project.brandName || "Brand",
@@ -117,7 +131,7 @@ function buildReport(): ReportData {
     level: getVisibilityLevel(score),
     mentionedCount,
     totalPrompts: audit.total_prompts || results.length,
-    competitors: Array.from(competitorSet).slice(0, 6),
+    competitors,
     results,
   };
 }
@@ -228,6 +242,29 @@ function MentionedIcon({ mentioned }: { mentioned: boolean }) {
         <path d="M2.5 2.5L7.5 7.5M7.5 2.5L2.5 7.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     </div>
+  );
+}
+
+function CompetitorLogo({ name, websiteUrl }: { name: string; websiteUrl: string | null }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!websiteUrl || failed) {
+    return (
+      <div className="w-6 h-6 rounded-xs bg-surface-raised flex items-center justify-center type-caption font-semibold text-text-muted shrink-0">
+        {name.charAt(0)}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={`https://www.google.com/s2/favicons?domain=${websiteUrl}&sz=32`}
+      alt={name}
+      width={24}
+      height={24}
+      className="rounded-xs shrink-0 bg-surface-raised"
+      onError={() => setFailed(true)}
+    />
   );
 }
 
@@ -634,14 +671,12 @@ export default function ReportContent() {
                   Brand berikut disebutkan oleh AI
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  {report.competitors.map((name) => (
+                  {report.competitors.map(({ name, websiteUrl }) => (
                     <div
                       key={name}
                       className="inline-flex items-center gap-2 h-8 pl-1 pr-3 rounded-sm border border-border-default"
                     >
-                      <div className="w-6 h-6 rounded-xs bg-surface-raised flex items-center justify-center type-caption font-semibold text-text-muted shrink-0">
-                        {name.charAt(0)}
-                      </div>
+                      <CompetitorLogo name={name} websiteUrl={websiteUrl} />
                       <span className="type-caption font-medium text-text-body">{name}</span>
                     </div>
                   ))}

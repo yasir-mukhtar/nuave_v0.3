@@ -23,7 +23,7 @@ type DashboardData = {
   brandName: string;
   chartData: { date: string; score: number }[];
   latestScore: number;
-  competitors: { name: string; score: number }[];
+  competitors: { name: string; score: number; website_url?: string | null }[];
   mentions: { promptText: string; brandMentioned: boolean; aiResponse: string; createdAt?: string }[];
   actionItems: { title: string; description: string; severity: "high" | "medium" | "low"; problem_type: string }[];
   latestAuditId?: string;
@@ -82,7 +82,7 @@ export default function DashboardPage() {
       const latestScore = completeAudits[0]?.visibility_score ?? 0;
       const latestAuditId = completeAudits[0]?.id;
 
-      let competitors: { name: string; score: number }[] = [];
+      let competitors: { name: string; score: number; website_url?: string | null }[] = [];
       let mentions: DashboardData["mentions"] = [];
 
       if (latestAuditId) {
@@ -105,8 +105,23 @@ export default function DashboardPage() {
             }
           }
 
+          // Fetch competitor URLs from brand_competitors
+          const { data: brandCompetitors } = await supabase
+            .from("brand_competitors")
+            .select("name, website_url")
+            .eq("brand_id", activeProjectId);
+
+          const competitorUrlMap: Record<string, string | null> = {};
+          (brandCompetitors || []).forEach((c) => {
+            competitorUrlMap[c.name] = c.website_url;
+          });
+
           competitors = Object.entries(mentionCounts)
-            .map(([name, count]) => ({ name, score: (count / totalPrompts) * 100 }))
+            .map(([name, count]) => ({
+              name,
+              score: (count / totalPrompts) * 100,
+              website_url: competitorUrlMap[name] ?? null,
+            }))
             .sort((a, b) => b.score - a.score)
             .slice(0, 10);
 

@@ -1,21 +1,25 @@
 'use client';
 
+import { useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 type Competitor = {
   name: string;
-  score: number; // percentage of audit prompts where this competitor appeared
+  score: number;
+  website_url?: string | null;
 };
 
 type CompetitorPanelProps = {
   competitors: Competitor[];
 };
 
-function getLogoUrl(name: string) {
-  // Use Google favicon service as a best-effort logo
-  const domain = name.toLowerCase().replace(/\s+/g, '') + '.com';
+function getLogoUrl(comp: Competitor) {
+  if (comp.website_url) {
+    return `https://www.google.com/s2/favicons?domain=${comp.website_url}&sz=32`;
+  }
+  const domain = comp.name.toLowerCase().replace(/\s+/g, '') + '.com';
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 }
 
@@ -51,7 +55,7 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
               )}
             >
               <div className="flex items-center gap-2.5">
-                <CompetitorLogo name={comp.name} />
+                <CompetitorLogo comp={comp} />
                 <span className="type-body text-text-body">
                   {comp.name}
                 </span>
@@ -67,28 +71,26 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
   );
 }
 
-function CompetitorLogo({ name }: { name: string }) {
-  const logoUrl = getLogoUrl(name);
+function CompetitorLogo({ comp }: { comp: Competitor }) {
+  const [failed, setFailed] = useState(false);
+  const logoUrl = getLogoUrl(comp);
+
+  if (failed) {
+    return (
+      <div className="w-6 h-6 rounded-sm bg-surface-raised flex items-center justify-center type-caption font-semibold text-text-muted shrink-0">
+        {comp.name.charAt(0).toUpperCase()}
+      </div>
+    );
+  }
 
   return (
     <img
       src={logoUrl}
-      alt={name}
+      alt={comp.name}
       width={24}
       height={24}
-      className="rounded-[var(--radius-sm)] shrink-0 bg-[#F3F4F6]"
-      onError={(e) => {
-        const target = e.currentTarget;
-        const parent = target.parentElement;
-        if (parent) {
-          target.style.display = 'none';
-          const fallback = document.createElement('div');
-          fallback.style.cssText =
-            'width:24px;height:24px;border-radius:var(--radius-sm);background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#6B7280;flex-shrink:0;';
-          fallback.textContent = name.charAt(0).toUpperCase();
-          parent.insertBefore(fallback, target);
-        }
-      }}
+      className="rounded-sm shrink-0 bg-surface-raised"
+      onError={() => setFailed(true)}
     />
   );
 }
