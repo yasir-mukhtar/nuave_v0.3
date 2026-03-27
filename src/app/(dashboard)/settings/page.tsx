@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useActiveWorkspace } from '@/hooks/useActiveWorkspace';
@@ -126,6 +126,14 @@ function openReceiptWindow(txn: CreditTransaction, orgName: string) {
 const validTabs: SectionId[] = ['profil', 'workspace', 'kredit', 'pembelian'];
 
 export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-20"><span className="type-body text-text-muted">Memuat...</span></div>}>
+      <SettingsContent />
+    </Suspense>
+  );
+}
+
+function SettingsContent() {
   const supabase = createSupabaseBrowserClient();
   const searchParams = useSearchParams();
   const { activeWorkspaceId, refreshWorkspaces } = useActiveWorkspace();
