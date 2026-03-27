@@ -125,16 +125,25 @@ Return only valid JSON. No preamble, no markdown.`;
         parsed = JSON.parse(
           rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
         );
-      } catch {
+      } catch (parseErr) {
+        console.warn(`[competitors/extract] Failed to parse batch ${i / BATCH_SIZE + 1}:`, (parseErr as Error).message);
         continue;
       }
 
-      // Collect results
       for (const result of batch) {
         const competitors = parsed[result.id];
         if (competitors && Array.isArray(competitors) && competitors.length > 0) {
           resultCompetitors.set(result.id, competitors);
         }
+      }
+    }
+
+    // Build a lookup: lowercase name → properly-cased name (first occurrence wins)
+    const properNameMap = new Map<string, string>();
+    for (const competitors of resultCompetitors.values()) {
+      for (const c of competitors) {
+        const key = c.name.toLowerCase();
+        if (!properNameMap.has(key)) properNameMap.set(key, c.name);
       }
     }
 
@@ -148,8 +157,7 @@ Return only valid JSON. No preamble, no markdown.`;
     }
 
     // --- Step 2: Upsert brand_competitors ---
-    // Aggregate all unique competitors across all results
-    const allCompetitors = new Map<string, string | null>(); // name → best website_url
+    const allCompetitors = new Map<string, string | null>();
     for (const competitors of resultCompetitors.values()) {
       for (const c of competitors) {
         const key = c.name.toLowerCase();
@@ -159,14 +167,12 @@ Return only valid JSON. No preamble, no markdown.`;
       }
     }
 
-    // Track competitor_id for snapshots
-    const competitorIdMap = new Map<string, string>(); // lowercase name → id
+    const competitorIdMap = new Map<string, string>();
 
     for (const [lowerName, inferredUrl] of allCompetitors) {
       const existing = existingMap.get(lowerName);
 
       if (existing) {
-        // Only update website_url if currently null
         if (!existing.website_url && inferredUrl) {
           await admin
             .from('brand_competitors')
@@ -175,18 +181,11 @@ Return only valid JSON. No preamble, no markdown.`;
         }
         competitorIdMap.set(lowerName, existing.id);
       } else {
-        // Find the properly-cased name from the first occurrence
-        let properName = lowerName;
-        for (const competitors of resultCompetitors.values()) {
-          const match = competitors.find((c) => c.name.toLowerCase() === lowerName);
-          if (match) { properName = match.name; break; }
-        }
-
         const { data: inserted } = await admin
           .from('brand_competitors')
           .insert({
             brand_id: audit.brand_id,
-            name: properName,
+            name: properNameMap.get(lowerName) ?? lowerName,
             website_url: inferredUrl,
           })
           .select('id')
@@ -199,7 +198,7 @@ Return only valid JSON. No preamble, no markdown.`;
     }
 
     // --- Step 3: Insert competitor_snapshots ---
-    const mentionCounts = new Map<string, number>(); // lowercase name → count
+    const mentionCounts = new Map<string, number>();
     for (const competitors of resultCompetitors.values()) {
       const seen = new Set<string>();
       for (const c of competitors) {
@@ -215,14 +214,7 @@ Return only valid JSON. No preamble, no markdown.`;
     const snapshots = Array.from(mentionCounts.entries()).map(([lowerName, count]) => ({
       audit_id,
       competitor_id: competitorIdMap.get(lowerName) ?? null,
-      competitor_name: (() => {
-        // Find properly-cased name
-        for (const competitors of resultCompetitors.values()) {
-          const match = competitors.find((c) => c.name.toLowerCase() === lowerName);
-          if (match) return match.name;
-        }
-        return lowerName;
-      })(),
+      competitor_name: properNameMap.get(lowerName) ?? lowerName,
       mention_count: count,
       mention_frequency: count / totalPrompts,
     }));

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
+import { cn, getFaviconUrl } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 type Competitor = {
@@ -14,14 +14,6 @@ type Competitor = {
 type CompetitorPanelProps = {
   competitors: Competitor[];
 };
-
-function getLogoUrl(comp: Competitor) {
-  if (comp.website_url) {
-    return `https://www.google.com/s2/favicons?domain=${comp.website_url}&sz=32`;
-  }
-  const domain = comp.name.toLowerCase().replace(/\s+/g, '') + '.com';
-  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-}
 
 export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
   return (
@@ -73,7 +65,7 @@ export default function CompetitorPanel({ competitors }: CompetitorPanelProps) {
 
 function CompetitorLogo({ comp }: { comp: Competitor }) {
   const [failed, setFailed] = useState(false);
-  const logoUrl = getLogoUrl(comp);
+  const logoUrl = getFaviconUrl(comp.name, comp.website_url);
 
   if (failed) {
     return (

@@ -8,6 +8,7 @@ import { Tip } from "@/components/ui/tip";
 import { ButtonSpinner } from "@/components/ButtonSpinner";
 import PromptDetailModal, { type PromptDetail } from "@/components/PromptDetailModal";
 import { Button } from "@/components/ui/button";
+import { getFaviconUrl } from "@/lib/utils";
 
 const LOGO_SVG = "https://framerusercontent.com/images/r9wYEZlQeEIZBKytCeKUn5f1QGw.svg";
 
@@ -258,7 +259,7 @@ function CompetitorLogo({ name, websiteUrl }: { name: string; websiteUrl: string
 
   return (
     <img
-      src={`https://www.google.com/s2/favicons?domain=${websiteUrl}&sz=32`}
+      src={getFaviconUrl(name, websiteUrl)}
       alt={name}
       width={24}
       height={24}
