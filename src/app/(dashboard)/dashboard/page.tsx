@@ -30,7 +30,7 @@ type DashboardData = {
   totalAudits: number;
   avgScore: number;
   creditsRemaining: number;
-  completeAudits: any[];
+  completeAudits: { id: string; visibility_score: number; completed_at: string | null; status: string }[];
 };
 
 export default function DashboardPage() {
@@ -246,7 +246,7 @@ export default function DashboardPage() {
 
         {data.completeAudits.length === 0 ? (
           <div className="card p-10 text-center">
-            <p className="type-bodytext-text-muted">
+            <p className="type-body text-text-muted">
               No audits found. Start your first audit to see results here.
             </p>
           </div>
@@ -274,7 +274,7 @@ function StatCard({ label, value, icon }: { label: string; value: string | numbe
   );
 }
 
-function AuditRow({ audit, brandName }: { audit: any; brandName: string }) {
+function AuditRow({ audit, brandName }: { audit: DashboardData["completeAudits"][number]; brandName: string }) {
   const score = audit.visibility_score || 0;
   const scoreColor = score >= 70 ? "text-success" : score >= 40 ? "text-warning" : "text-error";
 

@@ -24,7 +24,6 @@ export async function GET(
       .maybeSingle();
 
     if (auditError) {
-      console.error('Error fetching audit status:', auditError);
       return NextResponse.json({ success: false, error: 'Database error while fetching audit' }, { status: 500 });
     }
 
@@ -83,7 +82,7 @@ export async function GET(
         .order('created_at', { ascending: true });
 
       if (resultsError) {
-        console.error('Error fetching audit results:', resultsError);
+        return NextResponse.json({ success: false, error: 'Failed to fetch audit results' }, { status: 500 });
       }
 
       // Fetch competitor URLs from brand_competitors
@@ -121,10 +120,9 @@ export async function GET(
       audit_id: id
     });
 
-  } catch (error: any) {
-    console.error('Audit Status API Error:', error);
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 }
     );
   }

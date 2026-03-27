@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
         });
 
       if (rpcError) {
-        console.error('Credit deduction RPC failed:', rpcError);
+        // Credit deduction failed — abort audit
         await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
         return NextResponse.json(
           { success: false, error: 'Gagal memproses kredit. Silakan coba lagi.' },
@@ -131,15 +131,13 @@ export async function POST(req: NextRequest) {
       status: 'running',
     });
 
-  } catch (error: any) {
-    console.error('Audit Runner API Error:', error);
-
+  } catch (error: unknown) {
     if (auditId) {
       await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
     }
 
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal Server Error' },
+      { success: false, error: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 }
     );
   }
@@ -272,7 +270,7 @@ async function processAuditInBackground(
           allRows.push(result.value.row);
           if (result.value.mentioned) totalBrandMentionCount++;
         } else {
-          console.error('Prompt processing failed:', result.reason);
+          // Individual prompt failed — continue with remaining results
         }
       }
 
@@ -283,7 +281,7 @@ async function processAuditInBackground(
 
       if (batchRows.length > 0) {
         const { error: insertErr } = await supabase.from('audit_results').insert(batchRows);
-        if (insertErr) console.error('Batch insert failed:', insertErr);
+        // insertErr is non-fatal — results may partially persist
       }
     }
 
@@ -330,23 +328,17 @@ async function processAuditInBackground(
       // Problem extraction failure should not block
     }
 
-  } catch (error) {
-    console.error('Background audit process failed:', error);
+  } catch {
     await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
 
     if (userId && orgId && creditsUsed > 0) {
-      const { error: refundError } = await supabase.rpc('refund_credits', {
+      await supabase.rpc('refund_credits', {
         p_org_id: orgId,
         p_amount: creditsUsed,
         p_actioned_by: userId,
         p_audit_id: auditId,
         p_description: 'Refund: audit failed',
       });
-      if (refundError) {
-        console.error('Credit refund failed:', refundError);
-      } else {
-        console.log(`Refunded ${creditsUsed} credits to org ${orgId} after audit failure`);
-      }
     }
   }
 }
