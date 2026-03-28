@@ -245,11 +245,13 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Monitoring status */}
+      {/* Monitoring status + toggle */}
       <MonitoringStatusBar
         enabled={data.monitoringEnabled}
         pausedAt={data.monitoringPausedAt}
         lastRunAt={data.lastMonitoringAt}
+        brandId={activeProjectId!}
+        onToggle={(enabled) => setData((d) => d ? { ...d, monitoringEnabled: enabled, monitoringPausedAt: null } : d)}
       />
 
       {/* Chart + Competitors row */}
@@ -329,16 +331,16 @@ function MonitoringStatusBar({
   enabled,
   pausedAt,
   lastRunAt,
+  brandId,
+  onToggle,
 }: {
   enabled: boolean;
   pausedAt: string | null;
   lastRunAt: string | null;
+  brandId: string;
+  onToggle: (enabled: boolean) => void;
 }) {
-  if (!enabled && !pausedAt) {
-    // Monitoring not activated — don't show anything
-    return null;
-  }
-
+  const [toggling, setToggling] = useState(false);
   const isPaused = enabled && pausedAt !== null;
 
   let lastRunLabel = "";
@@ -350,14 +352,62 @@ function MonitoringStatusBar({
     else lastRunLabel = `${Math.floor(hours / 24)} hari lalu`;
   }
 
+  async function handleToggle() {
+    setToggling(true);
+    try {
+      const res = await fetch(`/api/brands/${brandId}/monitoring`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !enabled }),
+      });
+      if (res.ok) {
+        onToggle(!enabled);
+      }
+    } finally {
+      setToggling(false);
+    }
+  }
+
+  const toggleButton = (
+    <button
+      onClick={handleToggle}
+      disabled={toggling}
+      className={cn(
+        "relative w-9 h-5 rounded-full border-none cursor-pointer transition-colors duration-200 shrink-0",
+        enabled ? "bg-brand" : "bg-border-default",
+        toggling && "opacity-50 cursor-not-allowed"
+      )}
+    >
+      <span
+        className={cn(
+          "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+          enabled ? "translate-x-[18px]" : "translate-x-0.5"
+        )}
+      />
+    </button>
+  );
+
   if (isPaused) {
     return (
       <div className="card flex items-center gap-3 px-4 py-3 border-warning/30 bg-warning/5">
         <IconPlayerPause size={16} className="text-warning shrink-0" />
-        <span className="type-caption text-text-muted">
+        <span className="type-caption text-text-muted flex-1">
           Monitoring dijeda — kredit tidak cukup.{" "}
           <Link href="/settings" className="text-brand underline">Tambah kredit</Link>
         </span>
+        {toggleButton}
+      </div>
+    );
+  }
+
+  if (!enabled) {
+    return (
+      <div className="card flex items-center gap-3 px-4 py-3">
+        <IconRadar size={16} className="text-text-muted shrink-0" />
+        <span className="type-caption text-text-muted flex-1">
+          Monitoring harian nonaktif · 1 kredit/prompt per hari
+        </span>
+        {toggleButton}
       </div>
     );
   }
@@ -365,11 +415,12 @@ function MonitoringStatusBar({
   return (
     <div className="card flex items-center gap-3 px-4 py-3 border-success/30 bg-success/5">
       <IconRadar size={16} className="text-success shrink-0" />
-      <span className="type-caption text-text-muted">
+      <span className="type-caption text-text-muted flex-1">
         Monitoring aktif
         {lastRunLabel && <> · Terakhir: {lastRunLabel}</>}
         {" "}· Berikutnya ~09:00 WIB
       </span>
+      {toggleButton}
     </div>
   );
 }
