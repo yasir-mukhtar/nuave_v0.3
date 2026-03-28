@@ -8,6 +8,7 @@ import {
   IconRadar,
 } from '@tabler/icons-react';
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 import { useActiveProject } from "@/hooks/useActiveProject";
 
 import { useRouter } from "next/navigation";
@@ -40,14 +41,14 @@ export default function Topbar() {
     }, 200);
   }
 
-  async function handleToggleMonitoring() {
+  async function handleToggleMonitoring(checked: boolean) {
     if (!activeProjectId || toggling) return;
     setToggling(true);
     try {
       const res = await fetch(`/api/brands/${activeProjectId}/monitoring`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: !monitoringEnabled }),
+        body: JSON.stringify({ enabled: checked }),
       });
       if (res.ok) {
         await refreshProjects();
@@ -152,35 +153,24 @@ export default function Topbar() {
             )}
           />
           <span className={cn(
-            "type-caption font-medium",
+            "text-[14px] font-medium leading-none",
             monitoringEnabled && !monitoringPaused ? "text-text-heading" : "text-text-muted"
           )}>
             Monitoring Harian
           </span>
 
-          <button
-            onClick={handleToggleMonitoring}
+          <Switch
+            checked={monitoringEnabled}
+            onCheckedChange={handleToggleMonitoring}
             disabled={toggling}
-            className={cn(
-              "relative w-9 h-5 rounded-full border-none cursor-pointer transition-colors duration-200 shrink-0",
-              monitoringEnabled ? "bg-brand" : "bg-border-default",
-              toggling && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            <span
-              className={cn(
-                "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200",
-                monitoringEnabled ? "translate-x-[18px]" : "translate-x-0.5"
-              )}
-            />
-          </button>
+          />
 
           <span className={cn(
-            "type-caption",
+            "text-[14px] font-medium leading-none",
             monitoringPaused
-              ? "text-warning font-medium"
+              ? "text-warning"
               : monitoringEnabled
-                ? "text-text-heading font-medium"
+                ? "text-text-heading"
                 : "text-text-muted"
           )}>
             {monitoringLabel}
