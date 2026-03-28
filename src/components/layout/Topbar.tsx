@@ -152,19 +152,9 @@ export default function Topbar() {
               monitoringEnabled && !monitoringPaused ? "text-success" : "text-text-muted"
             )}
           />
-          <span className={cn(
-            "text-[14px] font-medium leading-none",
-            monitoringEnabled && !monitoringPaused ? "text-text-heading" : "text-text-muted"
-          )}>
-            Monitoring Harian
+          <span className="text-[14px] font-medium leading-none text-text-muted">
+            Monitoring Harian:
           </span>
-
-          <Switch
-            checked={monitoringEnabled}
-            onCheckedChange={handleToggleMonitoring}
-            disabled={toggling}
-          />
-
           <span className={cn(
             "text-[14px] font-medium leading-none",
             monitoringPaused
@@ -175,6 +165,12 @@ export default function Topbar() {
           )}>
             {monitoringLabel}
           </span>
+
+          <Switch
+            checked={monitoringEnabled}
+            onCheckedChange={handleToggleMonitoring}
+            disabled={toggling}
+          />
         </div>
       )}
     </div>
