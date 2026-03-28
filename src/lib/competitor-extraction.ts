@@ -1,0 +1,217 @@
+/**
+ * Shared competitor extraction logic.
+ * Used by both /api/competitors/extract (HTTP) and /api/cron/monitoring (direct).
+ */
+
+import Anthropic from '@anthropic-ai/sdk';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+const BATCH_SIZE = 20;
+
+interface ExtractedCompetitor {
+  name: string;
+  website_url: string | null;
+}
+
+export async function extractCompetitorsForAudit(auditId: string): Promise<{ competitors_found: number }> {
+  const admin = createSupabaseAdminClient();
+
+  // Fetch audit
+  const { data: audit, error: auditError } = await admin
+    .from('audits')
+    .select('id, brand_id')
+    .eq('id', auditId)
+    .single();
+
+  if (auditError || !audit) {
+    throw new Error('Audit not found');
+  }
+
+  // Fetch brand
+  const { data: brand, error: brandError } = await admin
+    .from('brands')
+    .select('id, name, website_url, industry')
+    .eq('id', audit.brand_id)
+    .single();
+
+  if (brandError || !brand) {
+    throw new Error('Brand not found');
+  }
+
+  // Fetch all audit results
+  const { data: results, error: resultsError } = await admin
+    .from('audit_results')
+    .select('id, prompt_text, ai_response')
+    .eq('audit_id', auditId)
+    .order('created_at', { ascending: true });
+
+  if (resultsError || !results || results.length === 0) {
+    return { competitors_found: 0 };
+  }
+
+  // Fetch existing brand_competitors to preserve user-provided URLs
+  const { data: existingCompetitors } = await admin
+    .from('brand_competitors')
+    .select('id, name, website_url')
+    .eq('brand_id', audit.brand_id);
+
+  const existingMap = new Map<string, { id: string; website_url: string | null }>();
+  (existingCompetitors || []).forEach((c) => {
+    existingMap.set(c.name.toLowerCase(), { id: c.id, website_url: c.website_url });
+  });
+
+  // Process in batches
+  const resultCompetitors = new Map<string, ExtractedCompetitor[]>();
+
+  for (let i = 0; i < results.length; i += BATCH_SIZE) {
+    const batch = results.slice(i, i + BATCH_SIZE);
+
+    const batchData = batch.map((r) => ({
+      id: r.id,
+      prompt_text: r.prompt_text ?? '',
+      ai_response: r.ai_response ?? '',
+    }));
+
+    const knownNames = existingCompetitors?.map((c) => c.name) ?? [];
+
+    const prompt = `You are a competitor extraction engine. Analyze these AI-generated responses about "${brand.name}" and identify all competitor brands mentioned in each response.
+
+Brand being audited: ${brand.name}
+Brand website: ${brand.website_url ?? 'N/A'}
+Industry: ${brand.industry ?? 'General'}
+${knownNames.length > 0 ? `Known competitors (use these exact names if they appear): ${knownNames.join(', ')}` : ''}
+
+Audit responses:
+${JSON.stringify(batchData, null, 2)}
+
+For each result ID, return the competitor brands mentioned in that AI response.
+
+Rules:
+- Do NOT include "${brand.name}" itself as a competitor
+- Normalize company names (consistent capitalization, no trailing punctuation)
+- For website_url: provide the main domain only (e.g. "karcher.com", "nilfisk.com") if you can infer it. Use null if uncertain.
+- Only include actual competing brands/companies, not generic product categories or technologies
+- If no competitors are mentioned in a response, return an empty array for that ID
+
+Return a JSON object keyed by result ID:
+{
+  "{result_id}": [
+    { "name": "Competitor Name", "website_url": "competitor.com" }
+  ]
+}
+
+Return only valid JSON. No preamble, no markdown.`;
+
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const rawText = response.content[0].type === 'text' ? response.content[0].text : '';
+
+    let parsed: Record<string, ExtractedCompetitor[]>;
+    try {
+      parsed = JSON.parse(
+        rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      );
+    } catch {
+      continue;
+    }
+
+    for (const result of batch) {
+      const competitors = parsed[result.id];
+      if (competitors && Array.isArray(competitors) && competitors.length > 0) {
+        resultCompetitors.set(result.id, competitors);
+      }
+    }
+  }
+
+  // Build a lookup: lowercase name → properly-cased name
+  const properNameMap = new Map<string, string>();
+  for (const competitors of resultCompetitors.values()) {
+    for (const c of competitors) {
+      const key = c.name.toLowerCase();
+      if (!properNameMap.has(key)) properNameMap.set(key, c.name);
+    }
+  }
+
+  // Step 1: Update audit_results.competitor_mentions
+  for (const [resultId, competitors] of resultCompetitors) {
+    const names = competitors.map((c) => c.name);
+    await admin
+      .from('audit_results')
+      .update({ competitor_mentions: names })
+      .eq('id', resultId);
+  }
+
+  // Step 2: Upsert brand_competitors
+  const allCompetitors = new Map<string, string | null>();
+  for (const competitors of resultCompetitors.values()) {
+    for (const c of competitors) {
+      const key = c.name.toLowerCase();
+      if (!allCompetitors.has(key)) {
+        allCompetitors.set(key, c.website_url);
+      }
+    }
+  }
+
+  const competitorIdMap = new Map<string, string>();
+
+  for (const [lowerName, inferredUrl] of allCompetitors) {
+    const existing = existingMap.get(lowerName);
+
+    if (existing) {
+      if (!existing.website_url && inferredUrl) {
+        await admin
+          .from('brand_competitors')
+          .update({ website_url: inferredUrl })
+          .eq('id', existing.id);
+      }
+      competitorIdMap.set(lowerName, existing.id);
+    } else {
+      const { data: inserted } = await admin
+        .from('brand_competitors')
+        .insert({
+          brand_id: audit.brand_id,
+          name: properNameMap.get(lowerName) ?? lowerName,
+          website_url: inferredUrl,
+        })
+        .select('id')
+        .single();
+
+      if (inserted) {
+        competitorIdMap.set(lowerName, inserted.id);
+      }
+    }
+  }
+
+  // Step 3: Insert competitor_snapshots
+  const mentionCounts = new Map<string, number>();
+  for (const competitors of resultCompetitors.values()) {
+    const seen = new Set<string>();
+    for (const c of competitors) {
+      const key = c.name.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        mentionCounts.set(key, (mentionCounts.get(key) ?? 0) + 1);
+      }
+    }
+  }
+
+  const totalPrompts = results.length;
+  const snapshots = Array.from(mentionCounts.entries()).map(([lowerName, count]) => ({
+    audit_id: auditId,
+    competitor_id: competitorIdMap.get(lowerName) ?? null,
+    competitor_name: properNameMap.get(lowerName) ?? lowerName,
+    mention_count: count,
+    mention_frequency: count / totalPrompts,
+  }));
+
+  if (snapshots.length > 0) {
+    await admin.from('competitor_snapshots').insert(snapshots);
+  }
+
+  return { competitors_found: allCompetitors.size };
+}

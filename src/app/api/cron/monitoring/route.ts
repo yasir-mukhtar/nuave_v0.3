@@ -3,9 +3,9 @@ import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import {
   type PromptInput,
   processPromptBatches,
-  extractCompetitors,
   calculateVisibilityScore,
 } from '@/lib/audit-engine';
+import { extractCompetitorsForAudit } from '@/lib/competitor-extraction';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 min (Vercel Pro)
@@ -164,12 +164,9 @@ export async function GET(req: NextRequest) {
 
       const visibilityScore = calculateVisibilityScore(totalMentions, prompts.length);
 
-      // ── Extract competitors (non-fatal) ────────────────────
+      // ── Extract competitors (direct call, no HTTP) ─────────
       try {
-        const compResult = await extractCompetitors(audit.id);
-        if (!compResult.ok) {
-          summary.competitor_extraction_errors.push(`${brand.name}: ${compResult.error}`);
-        }
+        await extractCompetitorsForAudit(audit.id);
       } catch (err) {
         summary.competitor_extraction_errors.push(`${brand.name}: ${err instanceof Error ? err.message : 'unknown'}`);
       }
