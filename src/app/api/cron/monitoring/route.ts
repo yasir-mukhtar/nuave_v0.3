@@ -57,10 +57,10 @@ export async function GET(req: NextRequest) {
     const orgId = workspace?.org_id;
     if (!orgId) continue;
 
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+
     try {
-      // ── Dedup guard: skip if already monitored today ───────
-      const todayStart = new Date();
-      todayStart.setUTCHours(0, 0, 0, 0);
 
       const { data: existing } = await supabase
         .from('audits')
@@ -187,6 +187,31 @@ export async function GET(req: NextRequest) {
       summary.audits_created++;
 
     } catch {
+      // Refund credits if audit was created but processing failed
+      if (brand.created_by) {
+        const { data: failedAudits } = await supabase
+          .from('audits')
+          .select('id, credits_used')
+          .eq('brand_id', brand.id)
+          .eq('audit_type', 'monitoring')
+          .eq('status', 'running')
+          .gte('created_at', todayStart.toISOString())
+          .limit(1)
+          .maybeSingle();
+
+        if (failedAudits) {
+          await supabase.from('audits').update({ status: 'failed' }).eq('id', failedAudits.id);
+          if (failedAudits.credits_used > 0) {
+            await supabase.rpc('refund_credits', {
+              p_org_id: orgId,
+              p_amount: failedAudits.credits_used,
+              p_actioned_by: brand.created_by,
+              p_audit_id: failedAudits.id,
+              p_description: 'Refund: monitoring audit failed',
+            });
+          }
+        }
+      }
       summary.brands_failed++;
     }
   }

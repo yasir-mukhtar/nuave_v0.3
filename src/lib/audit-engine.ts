@@ -174,26 +174,6 @@ export async function processPromptBatches(
   return { allRows, totalMentions };
 }
 
-// ── Competitor extraction (internal API call) ──────────────────
-export async function extractCompetitors(auditId: string): Promise<{ ok: boolean; error?: string }> {
-  const internalBase = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : `http://localhost:${process.env.PORT || 3000}`;
-
-  const res = await fetch(`${internalBase}/api/competitors/extract`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ audit_id: auditId }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => 'unknown');
-    return { ok: false, error: `${res.status}: ${text}` };
-  }
-
-  return { ok: true };
-}
-
 // ── Visibility score calculation ───────────────────────────────
 export function calculateVisibilityScore(mentions: number, totalPrompts: number): number {
   return totalPrompts > 0 ? Math.round((mentions / totalPrompts) * 100) : 0;

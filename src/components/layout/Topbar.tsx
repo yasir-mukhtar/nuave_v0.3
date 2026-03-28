@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 
 export default function Topbar() {
   const router = useRouter();
-  const { projects, activeProjectId, setActiveProjectId, activeProject } = useActiveProject();
+  const { projects, activeProjectId, setActiveProjectId, activeProject, refreshProjects } = useActiveProject();
 
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -24,9 +24,8 @@ export default function Topbar() {
 
   // Monitoring state
   const monitoringEnabled = activeProject?.monitoring_enabled ?? false;
-  const monitoringPaused = activeProject?.monitoring_paused_at !== null && activeProject?.monitoring_paused_at !== undefined && monitoringEnabled;
+  const monitoringPaused = monitoringEnabled && activeProject?.monitoring_paused_at != null;
   const [toggling, setToggling] = useState(false);
-  const { refreshProjects } = useActiveProject();
 
   const MAX_LABEL_LEN = 28;
   const rawName = activeProject?.name ?? "Pilih proyek";

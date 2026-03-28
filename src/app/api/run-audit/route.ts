@@ -4,9 +4,9 @@ import { extractProblemsForAudit } from '@/lib/problems';
 import {
   type PromptInput,
   processPromptBatches,
-  extractCompetitors,
   calculateVisibilityScore,
 } from '@/lib/audit-engine';
+import { extractCompetitorsForAudit } from '@/lib/competitor-extraction';
 
 export async function POST(req: NextRequest) {
   let auditId: string | null = null;
@@ -159,7 +159,7 @@ async function processAuditInBackground(
 
     // Extract competitors before marking complete (so report page has data immediately)
     try {
-      await extractCompetitors(auditId);
+      await extractCompetitorsForAudit(auditId);
     } catch {
       // Competitor extraction failure should not block audit completion
     }
