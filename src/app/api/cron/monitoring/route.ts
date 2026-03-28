@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
     brands_skipped_no_prompts: 0,
     brands_failed: 0,
     audits_created: 0,
+    competitor_extraction_errors: [] as string[],
   };
 
   for (const brand of brands) {
@@ -165,9 +166,12 @@ export async function GET(req: NextRequest) {
 
       // ── Extract competitors (non-fatal) ────────────────────
       try {
-        await extractCompetitors(audit.id);
-      } catch {
-        // Non-fatal
+        const compResult = await extractCompetitors(audit.id);
+        if (!compResult.ok) {
+          summary.competitor_extraction_errors.push(`${brand.name}: ${compResult.error}`);
+        }
+      } catch (err) {
+        summary.competitor_extraction_errors.push(`${brand.name}: ${err instanceof Error ? err.message : 'unknown'}`);
       }
 
       // ── Mark complete ──────────────────────────────────────
