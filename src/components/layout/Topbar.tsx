@@ -1,34 +1,30 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Link from "next/link";
 import {
   IconSelector,
   IconCheck,
   IconPlus,
+  IconRadar,
 } from '@tabler/icons-react';
 import { cn } from "@/lib/utils";
 import { useActiveProject } from "@/hooks/useActiveProject";
 
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function Topbar() {
   const router = useRouter();
-  const pathname = usePathname();
   const { projects, activeProjectId, setActiveProjectId, activeProject } = useActiveProject();
 
-  // Derive page title from pathname
-  const pageTitle = (() => {
-    if (pathname === "/dashboard") return "Dashboard";
-    if (pathname?.startsWith("/prompt")) return "Prompt";
-    if (pathname?.startsWith("/content")) return "Konten";
-    if (pathname?.startsWith("/brand")) return "Brand";
-    if (pathname?.startsWith("/settings")) return "Pengaturan";
-    return "Dashboard";
-  })();
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Monitoring state
+  const monitoringEnabled = activeProject?.monitoring_enabled ?? false;
+  const monitoringPaused = activeProject?.monitoring_paused_at !== null && activeProject?.monitoring_paused_at !== undefined && monitoringEnabled;
+  const [toggling, setToggling] = useState(false);
+  const { refreshProjects } = useActiveProject();
 
   const MAX_LABEL_LEN = 28;
   const rawName = activeProject?.name ?? "Pilih proyek";
@@ -44,6 +40,23 @@ export default function Topbar() {
     }, 200);
   }
 
+  async function handleToggleMonitoring() {
+    if (!activeProjectId || toggling) return;
+    setToggling(true);
+    try {
+      const res = await fetch(`/api/brands/${activeProjectId}/monitoring`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: !monitoringEnabled }),
+      });
+      if (res.ok) {
+        await refreshProjects();
+      }
+    } finally {
+      setToggling(false);
+    }
+  }
+
   // Close dropdown on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -57,12 +70,16 @@ export default function Topbar() {
     }
   }, [open]);
 
+  // Monitoring status label
+  const monitoringLabel = monitoringPaused
+    ? "Dijeda"
+    : monitoringEnabled
+      ? "Aktif"
+      : "Nonaktif";
+
   return (
     <div className="flex items-center justify-between h-[52px] px-8 border-b border-border-light">
-      {/* Left: page title */}
-      <span className="type-title text-text-heading">{pageTitle}</span>
-
-      {/* Right: project switcher */}
+      {/* Left: project switcher */}
       <div ref={dropdownRef} className="relative">
         <button
           onClick={() => open ? closeDropdown() : setOpen(true)}
@@ -77,7 +94,7 @@ export default function Topbar() {
           <div
             className={cn(
               closing ? "popover-down-out" : "popover-down",
-              "absolute top-[calc(100%+4px)] right-0 min-w-[220px] bg-white border border-border-light rounded-sm shadow-app-modal z-30 overflow-hidden"
+              "absolute top-[calc(100%+4px)] left-0 min-w-[220px] bg-white border border-border-light rounded-sm shadow-app-modal z-30 overflow-hidden"
             )}
           >
             {/* Project list */}
@@ -124,6 +141,52 @@ export default function Topbar() {
           </div>
         )}
       </div>
+
+      {/* Right: monitoring toggle */}
+      {activeProjectId && (
+        <div className="flex items-center gap-2.5">
+          <IconRadar
+            size={16}
+            className={cn(
+              monitoringEnabled && !monitoringPaused ? "text-success" : "text-text-muted"
+            )}
+          />
+          <span className={cn(
+            "type-caption font-medium",
+            monitoringEnabled && !monitoringPaused ? "text-text-heading" : "text-text-muted"
+          )}>
+            Monitoring Harian
+          </span>
+
+          <button
+            onClick={handleToggleMonitoring}
+            disabled={toggling}
+            className={cn(
+              "relative w-9 h-5 rounded-full border-none cursor-pointer transition-colors duration-200 shrink-0",
+              monitoringEnabled ? "bg-brand" : "bg-border-default",
+              toggling && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            <span
+              className={cn(
+                "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+                monitoringEnabled ? "translate-x-[18px]" : "translate-x-0.5"
+              )}
+            />
+          </button>
+
+          <span className={cn(
+            "type-caption",
+            monitoringPaused
+              ? "text-warning font-medium"
+              : monitoringEnabled
+                ? "text-text-heading font-medium"
+                : "text-text-muted"
+          )}>
+            {monitoringLabel}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

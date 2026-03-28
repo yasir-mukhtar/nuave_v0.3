@@ -7,9 +7,6 @@ import {
   IconArrowRight,
   IconChartBar,
   IconClipboardCheck,
-  IconPlayerPause,
-  IconPlayerPlay,
-  IconRadar,
   IconWallet,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -35,9 +32,6 @@ type DashboardData = {
   avgScore: number;
   creditsRemaining: number;
   completeAudits: { id: string; visibility_score: number; completed_at: string | null; status: string; audit_type: string }[];
-  monitoringEnabled: boolean;
-  monitoringPausedAt: string | null;
-  lastMonitoringAt: string | null;
 };
 
 export default function DashboardPage() {
@@ -196,10 +190,6 @@ export default function DashboardPage() {
         creditsRemaining = creditsData.credits ?? 0;
       } catch {}
 
-      // Find the latest monitoring audit timestamp
-      const lastMonitoringAudit = completeAudits.find((a) => (a as any).audit_type === 'monitoring');
-      const lastMonitoringAt = lastMonitoringAudit?.completed_at ?? null;
-
       setData({
         firstName,
         brandName,
@@ -214,9 +204,6 @@ export default function DashboardPage() {
         avgScore,
         creditsRemaining,
         completeAudits: completeAudits as DashboardData["completeAudits"],
-        monitoringEnabled: activeProject?.monitoring_enabled ?? false,
-        monitoringPausedAt: activeProject?.monitoring_paused_at ?? null,
-        lastMonitoringAt,
       });
       setLoading(false);
     }
@@ -244,15 +231,6 @@ export default function DashboardPage() {
           <span className="text-text-heading font-medium">{data.brandName}</span>
         </p>
       </div>
-
-      {/* Monitoring status + toggle */}
-      <MonitoringStatusBar
-        enabled={data.monitoringEnabled}
-        pausedAt={data.monitoringPausedAt}
-        lastRunAt={data.lastMonitoringAt}
-        brandId={activeProjectId!}
-        onToggle={(enabled) => setData((d) => d ? { ...d, monitoringEnabled: enabled, monitoringPausedAt: null } : d)}
-      />
 
       {/* Chart + Competitors row */}
       <div className="grid grid-cols-[1fr_320px] gap-5 items-stretch">
@@ -323,104 +301,6 @@ function StatCard({ label, value, icon }: { label: string; value: string | numbe
         {label}
       </div>
       <div className="type-heading-sm font-bold text-text-heading">{value}</div>
-    </div>
-  );
-}
-
-function MonitoringStatusBar({
-  enabled,
-  pausedAt,
-  lastRunAt,
-  brandId,
-  onToggle,
-}: {
-  enabled: boolean;
-  pausedAt: string | null;
-  lastRunAt: string | null;
-  brandId: string;
-  onToggle: (enabled: boolean) => void;
-}) {
-  const [toggling, setToggling] = useState(false);
-  const isPaused = enabled && pausedAt !== null;
-
-  let lastRunLabel = "";
-  if (lastRunAt) {
-    const diff = Date.now() - new Date(lastRunAt).getTime();
-    const hours = Math.floor(diff / 3_600_000);
-    if (hours < 1) lastRunLabel = "baru saja";
-    else if (hours < 24) lastRunLabel = `${hours} jam lalu`;
-    else lastRunLabel = `${Math.floor(hours / 24)} hari lalu`;
-  }
-
-  async function handleToggle() {
-    setToggling(true);
-    try {
-      const res = await fetch(`/api/brands/${brandId}/monitoring`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: !enabled }),
-      });
-      if (res.ok) {
-        onToggle(!enabled);
-      }
-    } finally {
-      setToggling(false);
-    }
-  }
-
-  const toggleButton = (
-    <button
-      onClick={handleToggle}
-      disabled={toggling}
-      className={cn(
-        "relative w-9 h-5 rounded-full border-none cursor-pointer transition-colors duration-200 shrink-0",
-        enabled ? "bg-brand" : "bg-border-default",
-        toggling && "opacity-50 cursor-not-allowed"
-      )}
-    >
-      <span
-        className={cn(
-          "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200",
-          enabled ? "translate-x-[18px]" : "translate-x-0.5"
-        )}
-      />
-    </button>
-  );
-
-  if (isPaused) {
-    return (
-      <div className="card flex items-center gap-3 px-4 py-3 border-warning/30 bg-warning/5">
-        <IconPlayerPause size={16} className="text-warning shrink-0" />
-        <span className="type-caption text-text-muted flex-1">
-          Monitoring dijeda — kredit tidak cukup.{" "}
-          <Link href="/settings" className="text-brand underline">Tambah kredit</Link>
-        </span>
-        {toggleButton}
-      </div>
-    );
-  }
-
-  if (!enabled) {
-    return (
-      <div className="card flex items-center gap-3 px-4 py-3">
-        <IconRadar size={16} className="text-text-muted shrink-0" />
-        <span className="type-caption text-text-muted flex-1">
-          Monitoring harian nonaktif · 1 kredit/prompt per hari
-        </span>
-        {toggleButton}
-      </div>
-    );
-  }
-
-  return (
-    <div className="card flex items-center gap-3 px-4 py-3 border-success/30 bg-success/5">
-      <IconRadar size={16} className="text-success shrink-0" />
-      <span className="type-caption text-text-muted flex-1">
-        Monitoring aktif
-        {lastRunLabel && <> · Terakhir: {lastRunLabel}</>}
-        {" "}· Berikutnya ~09:00 WIB
-      </span>
-      {toggleButton}
     </div>
   );
 }
