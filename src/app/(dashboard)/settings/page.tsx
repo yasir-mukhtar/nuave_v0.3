@@ -16,7 +16,7 @@ import { IconPencil, IconCheck, IconX, IconArrowUpRight, IconReceipt, IconLoader
 import type { Organization } from '@/types';
 import { useOrgPlan } from '@/hooks/useOrgPlan';
 import { getPlanLabel } from '@/lib/plan-gate-client';
-import { isPaidPlan } from '@/lib/plan-limits';
+import { isPaidPlan, type PlanId } from '@/lib/plan-limits';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
@@ -417,7 +417,7 @@ function SettingsContent() {
                       </span>
                       <span className="type-caption text-text-muted">
                         {formatDate(ev.created_at)}
-                        {toPlan && ` · ${getPlanLabel(toPlan)}`}
+                        {toPlan && ` · ${getPlanLabel(toPlan as PlanId)}`}
                         {ev.midtrans_order_id && ` · ${ev.midtrans_order_id}`}
                       </span>
                     </div>
