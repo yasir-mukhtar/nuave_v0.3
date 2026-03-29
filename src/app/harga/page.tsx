@@ -26,20 +26,6 @@ type Tier = {
 
 const TIERS: Tier[] = [
   {
-    id: "free",
-    description: "Audit pertama gratis untuk melihat skor visibilitas AI Anda.",
-    cta: "Mulai gratis",
-    popular: false,
-    features: [
-      "1 brand",
-      "10 prompt",
-      "1 audit (saat daftar)",
-      "Skor visibilitas",
-      "Daftar masalah yang ditemukan",
-      "Nama kompetitor terdeteksi",
-    ],
-  },
-  {
     id: "starter",
     description: "Pantau visibilitas AI brand Anda setiap hari dan dapatkan rekomendasi.",
     cta: "Pilih Starter",
@@ -136,9 +122,9 @@ const FAQS = [
   },
 ];
 
-function formatPrice(amount: number): string {
-  if (amount === 0) return "Gratis";
-  return `Rp ${amount.toLocaleString("id-ID")}`;
+function formatPriceNumber(amount: number): string {
+  if (amount === 0) return "0";
+  return amount.toLocaleString("id-ID");
 }
 
 export default function HargaPage() {
@@ -253,7 +239,7 @@ export default function HargaPage() {
           Pilih paket yang<br />sesuai kebutuhan Anda
         </h1>
         <p className="type-body text-text-muted max-w-[520px] mx-auto mb-8 leading-relaxed">
-          Mulai gratis dengan 1 audit lengkap. Upgrade kapan saja untuk monitoring harian dan fitur premium.
+          Mulai dengan audit brand Anda, gratis.
         </p>
 
         {/* Annual toggle */}
@@ -273,21 +259,17 @@ export default function HargaPage() {
 
       {/* Pricing Cards */}
       <section className="max-w-[1120px] mx-auto px-6 pb-16">
-        <div className="grid grid-cols-4 gap-5">
+        <div className="grid grid-cols-3 gap-5">
           {TIERS.map((tier) => {
             const pricing = getPlanPricing(tier.id);
             const price = isAnnual ? pricing.annual : pricing.monthly;
             const isPopular = tier.popular;
+            const isActive = isLoggedIn && currentPlan === tier.id;
 
             return (
               <div
                 key={tier.id}
-                className={cn(
-                  "relative rounded-[var(--radius-xl)] px-6 py-7 flex flex-col",
-                  isPopular
-                    ? "bg-brand border border-brand shadow-[0_8px_32px_rgba(108,63,245,0.25)] scale-[1.02]"
-                    : "bg-white border border-border-default shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
-                )}
+                className="relative rounded-[6px] px-6 py-7 flex flex-col bg-white border border-border-default shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
               >
                 {isPopular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-brand text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-full border border-border-default shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
@@ -295,80 +277,63 @@ export default function HargaPage() {
                   </div>
                 )}
 
-                <p className={cn(
-                  "text-[13px] font-semibold m-0 mb-2 uppercase tracking-[0.05em]",
-                  isPopular ? "text-white/70" : "text-text-muted"
-                )}>
+                <p className="text-[13px] font-semibold m-0 mb-2 uppercase tracking-[0.05em] text-text-muted">
                   {getPlanLabel(tier.id)}
                 </p>
 
                 <div className="mb-1">
-                  <span className={cn(
-                    "text-[32px] font-bold",
-                    isPopular ? "text-white" : "text-text-heading"
-                  )}>
-                    {formatPrice(price)}
+                  <span className="text-[20px] font-bold text-text-heading">Rp</span>
+                  <span className="text-[32px] font-bold text-text-heading ml-1">
+                    {formatPriceNumber(price)}
                   </span>
                   {price > 0 && (
-                    <span className={cn(
-                      "text-[13px] ml-1",
-                      isPopular ? "text-white/60" : "text-text-muted"
-                    )}>
+                    <span className="text-[13px] ml-1 text-text-muted">
                       /bulan
                     </span>
                   )}
                 </div>
 
                 {isAnnual && price > 0 && (
-                  <p className={cn(
-                    "text-[12px] m-0 mb-4",
-                    isPopular ? "text-white/50" : "text-text-placeholder"
-                  )}>
+                  <p className="text-[12px] m-0 mb-4 text-text-placeholder">
                     Ditagih Rp {(price * 12).toLocaleString("id-ID")}/tahun
                   </p>
                 )}
                 {(!isAnnual || price === 0) && <div className="mb-4" />}
 
-                <p className={cn(
-                  "text-[13px] m-0 mb-6 leading-relaxed min-h-[40px]",
-                  isPopular ? "text-white/80" : "text-text-body"
-                )}>
+                <p className="text-[13px] m-0 mb-6 leading-relaxed min-h-[40px] text-text-body">
                   {tier.description}
                 </p>
 
-                <button
-                  onClick={() => handleSubscribe(tier.id)}
-                  disabled={subscribing || (isLoggedIn && currentPlan === tier.id)}
-                  className={cn(
-                    "block w-full text-center px-6 py-3 rounded-[var(--radius-md)] type-body font-semibold border-none cursor-pointer mb-7 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed",
-                    isPopular ? "bg-white text-brand" : "bg-brand text-white"
-                  )}
-                >
-                  {isLoggedIn && currentPlan === tier.id
-                    ? "Paket saat ini"
-                    : subscribing
-                      ? "Memproses..."
-                      : `${tier.cta} →`}
-                </button>
+                <div className="mt-auto mb-7">
+                  <button
+                    onClick={() => handleSubscribe(tier.id)}
+                    disabled={subscribing || isActive}
+                    className={cn(
+                      "block w-full text-center px-6 py-3 rounded-[6px] type-body font-semibold cursor-pointer transition-opacity",
+                      isActive
+                        ? "bg-[#F3F4F6] text-[#9CA3AF] border border-border-default cursor-not-allowed"
+                        : isPopular
+                          ? "bg-brand text-white border border-brand hover:opacity-90"
+                          : "bg-white text-text-heading border border-[#D1D5DB] hover:border-[#9CA3AF] hover:opacity-90"
+                    )}
+                  >
+                    {isActive
+                      ? "Paket saat ini"
+                      : subscribing
+                        ? "Memproses..."
+                        : `${tier.cta} →`}
+                  </button>
+                </div>
 
-                <div className={cn(
-                  "border-t pt-5 flex-1",
-                  isPopular ? "border-white/20" : "border-border-default"
-                )}>
+                <div className="border-t border-border-default pt-5 flex-1">
                   {tier.features.map((f, i) => (
                     <div key={i} className="flex items-start gap-2.5 mb-2.5">
                       <IconCheck
                         size={16}
                         stroke={2.5}
-                        className={cn(
-                          "shrink-0 mt-0.5",
-                          isPopular ? "text-white/90" : "text-success"
-                        )}
+                        className="shrink-0 mt-0.5 text-success"
                       />
-                      <span className={cn(
-                        "text-[13px] leading-snug",
-                        isPopular ? "text-white/85" : "text-text-body"
-                      )}>
+                      <span className="text-[13px] leading-snug text-text-body">
                         {f}
                       </span>
                     </div>
@@ -394,7 +359,7 @@ export default function HargaPage() {
                   <th className="text-left px-5 py-3.5 text-text-body font-semibold border-b border-border-default w-[240px]">
                     Fitur
                   </th>
-                  {PLAN_HIERARCHY.map((planId) => (
+                  {PLAN_HIERARCHY.filter((p) => p !== "free").map((planId) => (
                     <th
                       key={planId}
                       className="text-center px-4 py-3.5 text-text-body font-semibold border-b border-border-default"

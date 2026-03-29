@@ -30,16 +30,6 @@ const STATS = [
 
 const PRICING = [
   {
-    planId: "free" as const,
-    name: "Gratis",
-    price: "Rp 0",
-    period: null,
-    desc: "1 audit lengkap untuk melihat skor visibilitas AI Anda.",
-    popular: false,
-    features: ["1 brand", "10 prompt", "1 audit", "Skor visibilitas"],
-    cta: "Mulai gratis",
-  },
-  {
     planId: "starter" as const,
     name: "Starter",
     price: "Rp 149.000",
@@ -646,115 +636,88 @@ export default function Home() {
               Harga
             </h2>
             <p className="text-[16px] font-normal leading-[1.6em] text-[#6B7280] m-0">
-              Mulai gratis, upgrade kapan saja sesuai kebutuhan Anda.
+              Mulai dengan audit brand Anda, gratis.
             </p>
           </div>
 
           {/* Cards */}
-          <div className="grid grid-cols-4 gap-5">
-            {PRICING.map((pkg) => (
-              <div
-                key={pkg.name}
-                className={cn(
-                  "relative p-7 rounded-[12px] flex flex-col",
-                  pkg.popular
-                    ? "bg-brand border border-brand shadow-[0_8px_32px_rgba(108,63,245,0.25)]"
-                    : "bg-white border border-[#E5E7EB]"
-                )}
-              >
-                {/* Badge */}
-                {pkg.popular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-brand text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-full border border-[#E5E7EB] shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
-                    PALING POPULER
-                  </div>
-                )}
-
-                {/* Plan name */}
-                <p className={cn(
-                  "text-[13px] font-semibold m-0 mb-2 uppercase tracking-[0.05em]",
-                  pkg.popular ? "text-white/70" : "text-[#6B7280]"
-                )}>
-                  {pkg.name}
-                </p>
-
-                {/* Price */}
-                <div className="mb-1">
-                  <span className={cn(
-                    "text-[32px] font-bold",
-                    pkg.popular ? "text-white" : "text-[#111827]"
-                  )}>
-                    {pkg.price}
-                  </span>
-                  {pkg.period && (
-                    <span className={cn(
-                      "text-[13px] ml-1",
-                      pkg.popular ? "text-white/60" : "text-[#6B7280]"
-                    )}>
-                      {pkg.period}
-                    </span>
-                  )}
-                </div>
-
-                {/* Description */}
-                <p className={cn(
-                  "text-[13px] m-0 mt-3 mb-6 leading-relaxed min-h-[40px]",
-                  pkg.popular ? "text-white/80" : "text-[#6B7280]"
-                )}>
-                  {pkg.desc}
-                </p>
-
-                {/* Button */}
-                {isLoggedIn && currentPlan === pkg.planId ? (
-                  <span
-                    className={cn(
-                      "block w-full py-3 px-6 rounded-[8px] text-[14px] font-semibold text-center mb-6 opacity-50 cursor-not-allowed",
-                      pkg.popular
-                        ? "bg-white text-brand"
-                        : "btn-lp-purple text-white"
-                    )}
-                  >
-                    Paket saat ini
-                  </span>
-                ) : (
-                  <Link
-                    href={pkg.name === "Agency" ? "/support" : "/auth"}
-                    className={cn(
-                      "block w-full py-3 px-6 rounded-[8px] text-[14px] font-semibold no-underline text-center cursor-pointer mb-6",
-                      pkg.popular
-                        ? "bg-white text-brand hover:opacity-90 transition-opacity"
-                        : "btn-lp-purple text-white hover:opacity-90 transition-opacity"
-                    )}
-                  >
-                    {pkg.cta} →
-                  </Link>
-                )}
-
-                {/* Features */}
-                <div className={cn(
-                  "border-t pt-5 flex-1",
-                  pkg.popular ? "border-white/20" : "border-[#E5E7EB]"
-                )}>
-                  {pkg.features.map((f, i) => (
-                    <div key={i} className="flex items-start gap-2.5 mb-2.5">
-                      <IconCheck
-                        size={16}
-                        stroke={2.5}
-                        className={cn(
-                          "shrink-0 mt-0.5",
-                          pkg.popular ? "text-white/90" : "text-[#22C55E]"
-                        )}
-                      />
-                      <span className={cn(
-                        "text-[13px] leading-snug",
-                        pkg.popular ? "text-white/85" : "text-[#374151]"
-                      )}>
-                        {f}
-                      </span>
+          <div className="grid grid-cols-3 gap-5">
+            {PRICING.map((pkg) => {
+              const isActive = isLoggedIn && currentPlan === pkg.planId;
+              return (
+                <div
+                  key={pkg.name}
+                  className="relative p-7 rounded-[6px] flex flex-col bg-white border border-[#E5E7EB]"
+                >
+                  {/* Badge */}
+                  {pkg.popular && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-brand text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-full border border-[#E5E7EB] shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
+                      PALING POPULER
                     </div>
-                  ))}
+                  )}
+
+                  {/* Plan name */}
+                  <p className="text-[13px] font-semibold m-0 mb-2 uppercase tracking-[0.05em] text-[#6B7280]">
+                    {pkg.name}
+                  </p>
+
+                  {/* Price */}
+                  <div className="mb-1">
+                    <span className="text-[20px] font-bold text-[#111827]">Rp</span>
+                    <span className="text-[32px] font-bold text-[#111827] ml-1">
+                      {pkg.price.replace(/^Rp\s*/, '')}
+                    </span>
+                    {pkg.period && (
+                      <span className="text-[13px] ml-1 text-[#6B7280]">
+                        {pkg.period}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-[13px] m-0 mt-3 mb-6 leading-relaxed min-h-[40px] text-[#6B7280]">
+                    {pkg.desc}
+                  </p>
+
+                  {/* Button */}
+                  <div className="mt-auto mb-6">
+                    {isActive ? (
+                      <span className="block w-full py-3 px-6 rounded-[6px] text-[14px] font-semibold text-center bg-[#F3F4F6] text-[#9CA3AF] cursor-not-allowed border border-[#E5E7EB]">
+                        Paket saat ini
+                      </span>
+                    ) : (
+                      <Link
+                        href={pkg.name === "Agency" ? "/support" : "/auth"}
+                        className={cn(
+                          "block w-full py-3 px-6 rounded-[6px] text-[14px] font-semibold no-underline text-center cursor-pointer transition-opacity hover:opacity-90",
+                          pkg.popular
+                            ? "bg-brand text-white border border-brand"
+                            : "bg-white text-[#111827] border border-[#D1D5DB] hover:border-[#9CA3AF]"
+                        )}
+                      >
+                        {pkg.cta} →
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* Features */}
+                  <div className="border-t border-[#E5E7EB] pt-5 flex-1">
+                    {pkg.features.map((f, i) => (
+                      <div key={i} className="flex items-start gap-2.5 mb-2.5">
+                        <IconCheck
+                          size={16}
+                          stroke={2.5}
+                          className="shrink-0 mt-0.5 text-[#22C55E]"
+                        />
+                        <span className="text-[13px] leading-snug text-[#374151]">
+                          {f}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Link to full pricing page */}

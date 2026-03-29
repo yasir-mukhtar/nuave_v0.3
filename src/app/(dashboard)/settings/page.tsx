@@ -343,7 +343,7 @@ function SettingsContent() {
               </div>
 
               {orgPlan.cancelAtPeriodEnd && (
-                <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3">
+                <div className="rounded-[6px] bg-amber-50 border border-amber-200 p-3">
                   <p className="type-body text-amber-800 m-0">
                     Langganan akan berakhir pada {orgPlan.currentPeriodEnd ? formatDate(orgPlan.currentPeriodEnd) : '-'}.
                     {orgPlan.pendingPlan && ` Paket akan berubah ke ${getPlanLabel(orgPlan.pendingPlan)}.`}
