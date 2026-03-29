@@ -12,7 +12,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from '@/components/ui/navigation-menu';
-import { IconPencil, IconCheck, IconX, IconArrowUpRight, IconReceipt, IconLoader2 } from '@tabler/icons-react';
+import { IconPencil, IconCheck, IconX, IconArrowUpRight, IconReceipt, IconLoader2, IconDownload } from '@tabler/icons-react';
 import type { Organization } from '@/types';
 import { useOrgPlan } from '@/hooks/useOrgPlan';
 import { getPlanLabel } from '@/lib/plan-gate-client';
@@ -446,6 +446,7 @@ function SettingsContent() {
               {invoices.events.map((ev) => {
                 const amount = ev.payload?.gross_amount as string | undefined;
                 const toPlan = ev.payload?.to_plan as string | undefined;
+                const isPayment = ev.event_type === 'webhook_settlement' || ev.event_type === 'webhook_capture';
                 return (
                   <div key={ev.id} className="flex items-center justify-between py-3 border-b border-[var(--border-light)] last:border-b-0">
                     <div className="flex flex-col gap-0.5">
@@ -458,11 +459,23 @@ function SettingsContent() {
                         {ev.midtrans_order_id && ` · ${ev.midtrans_order_id}`}
                       </span>
                     </div>
-                    {amount && (
-                      <span className="type-body font-medium text-text-heading">
-                        {formatCurrency(amount)}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-3">
+                      {amount && (
+                        <span className="type-body font-medium text-text-heading">
+                          {formatCurrency(amount)}
+                        </span>
+                      )}
+                      {isPayment && (
+                        <a
+                          href={`/api/billing/invoice/${ev.id}`}
+                          download
+                          className="text-text-muted hover:text-text-heading transition-colors"
+                          title="Unduh kuitansi"
+                        >
+                          <IconDownload size={16} stroke={1.5} />
+                        </a>
+                      )}
+                    </div>
                   </div>
                 );
               })}
