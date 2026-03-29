@@ -30,7 +30,7 @@ const TIERS: Tier[] = [
     cta: "Mulai gratis",
     popular: false,
     features: [
-      "1 merek",
+      "1 brand",
       "10 prompt",
       "1 audit (saat daftar)",
       "Skor visibilitas",
@@ -40,11 +40,11 @@ const TIERS: Tier[] = [
   },
   {
     id: "starter",
-    description: "Pantau visibilitas AI merek Anda setiap hari dan dapatkan rekomendasi.",
+    description: "Pantau visibilitas AI brand Anda setiap hari dan dapatkan rekomendasi.",
     cta: "Pilih Starter",
     popular: false,
     features: [
-      "1 merek, 10 prompt",
+      "1 brand, 10 prompt",
       "Audit otomatis bulanan",
       "Monitoring harian",
       "3 kompetitor dengan data lengkap",
@@ -56,14 +56,14 @@ const TIERS: Tier[] = [
   },
   {
     id: "growth",
-    description: "Kelola beberapa merek dan bandingkan tren dengan kompetitor.",
+    description: "Kelola beberapa brand dan bandingkan tren dengan kompetitor.",
     cta: "Pilih Growth",
     popular: true,
     features: [
-      "3 merek, 30 prompt/merek",
+      "3 brand, 30 prompt/brand",
       "Audit otomatis bulanan",
       "Monitoring harian",
-      "10 kompetitor/merek",
+      "10 kompetitor/brand",
       "Rekomendasi lengkap",
       "Tren skor + perbandingan kompetitor",
       "10 konten/bulan",
@@ -72,11 +72,11 @@ const TIERS: Tier[] = [
   },
   {
     id: "agency",
-    description: "Untuk agensi yang mengelola banyak merek klien.",
+    description: "Untuk agensi yang mengelola banyak brand klien.",
     cta: "Hubungi kami",
     popular: false,
     features: [
-      "20 merek, 50 prompt/merek",
+      "20 brand, 50 prompt/brand",
       "Audit otomatis + manual (1×/hari)",
       "Monitoring harian",
       "Semua kompetitor (tanpa batas)",
@@ -94,7 +94,7 @@ const FEATURE_COMPARISON: {
   values: Record<PlanId, string | boolean>;
 }[] = [
   { label: "Merek", values: { free: "1", starter: "1", growth: "3", agency: "20" } },
-  { label: "Prompt per merek", values: { free: "10", starter: "10", growth: "30", agency: "50" } },
+  { label: "Prompt per brand", values: { free: "10", starter: "10", growth: "30", agency: "50" } },
   { label: "Audit otomatis bulanan", values: { free: false, starter: true, growth: true, agency: true } },
   { label: "Monitoring harian", values: { free: false, starter: true, growth: true, agency: true } },
   { label: "Audit manual", values: { free: false, starter: false, growth: false, agency: "1×/hari" } },

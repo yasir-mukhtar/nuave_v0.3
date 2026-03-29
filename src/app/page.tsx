@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { IconChevronDown, IconCoins } from '@tabler/icons-react';
+import { IconChevronDown, IconCheck } from '@tabler/icons-react';
 import { cn } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Footer from "@/components/Footer";
@@ -30,20 +30,40 @@ const STATS = [
 
 const PRICING = [
   {
-    name: "Lite",
-    desc: "Track prompt selama satu minggu",
-    credits: 50,
-    price: "Rp75.000",
-    highlight: false,
-    badge: null,
+    name: "Gratis",
+    price: "Rp 0",
+    period: null,
+    desc: "1 audit lengkap untuk melihat skor visibilitas AI Anda.",
+    popular: false,
+    features: ["1 brand", "10 prompt", "1 audit", "Skor visibilitas"],
+    cta: "Mulai gratis",
   },
   {
-    name: "Standar",
-    desc: "Track prompt selama satu bulan",
-    credits: 150,
-    price: "Rp200.000",
-    highlight: true,
-    badge: "Lebih Hemat",
+    name: "Starter",
+    price: "Rp 149.000",
+    period: "/bulan",
+    desc: "Pantau visibilitas AI brand Anda setiap hari.",
+    popular: false,
+    features: ["1 brand, 10 prompt", "Audit otomatis bulanan", "Monitoring harian", "3 kompetitor"],
+    cta: "Pilih Starter",
+  },
+  {
+    name: "Growth",
+    price: "Rp 499.000",
+    period: "/bulan",
+    desc: "Kelola beberapa brand dan bandingkan tren kompetitor.",
+    popular: true,
+    features: ["3 brand, 30 prompt/brand", "Monitoring harian", "10 kompetitor/brand", "10 konten/bulan"],
+    cta: "Pilih Growth",
+  },
+  {
+    name: "Agency",
+    price: "Rp 2.500.000",
+    period: "/bulan",
+    desc: "Untuk agensi yang mengelola banyak brand klien.",
+    popular: false,
+    features: ["20 brand, 50 prompt/brand", "Kompetitor tanpa batas", "Konten tanpa batas", "PDF white-label"],
+    cta: "Hubungi kami",
   },
 ];
 
@@ -494,7 +514,7 @@ export default function Home() {
                 bg: "/bg-purple.png",
                 number: "49%",
                 desc: "pencarian di ChatGPT meminta panduan dan rekomendasi",
-                chips: ["Sepatu lari merek lokal terbaik", "Klinik kecantikan terpercaya di Jakarta", "Aplikasi budgeting terbaik untuk orang awam"],
+                chips: ["Sepatu lari brand lokal terbaik", "Klinik kecantikan terpercaya di Jakarta", "Aplikasi budgeting terbaik untuk orang awam"],
               },
               {
                 bg: "/bg-orange.png",
@@ -599,7 +619,7 @@ export default function Home() {
 
       {/* ──── Pricing ──── */}
       <section id="harga" className="lp-pricing-section bg-white px-8 py-[72px]">
-        <div className="max-w-[740px] mx-auto">
+        <div className="max-w-[1120px] mx-auto">
 
           {/* Title + subtitle */}
           <div className="text-center mb-14">
@@ -607,61 +627,109 @@ export default function Home() {
               Harga
             </h2>
             <p className="text-[16px] font-normal leading-[1.6em] text-[#6B7280] m-0">
-              Nuave menggunakan sistem kredit yang lebih fleksibel dari sistem langganan.
+              Mulai gratis, upgrade kapan saja sesuai kebutuhan Anda.
             </p>
           </div>
 
           {/* Cards */}
-          <div className="lp-pricing-grid-inner grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-4 gap-5">
             {PRICING.map((pkg) => (
-              <div key={pkg.name} className="relative p-8 rounded-[12px] bg-white border border-[#E5E7EB] flex flex-col">
+              <div
+                key={pkg.name}
+                className={cn(
+                  "relative p-7 rounded-[12px] flex flex-col",
+                  pkg.popular
+                    ? "bg-brand border border-brand shadow-[0_8px_32px_rgba(108,63,245,0.25)]"
+                    : "bg-white border border-[#E5E7EB]"
+                )}
+              >
                 {/* Badge */}
-                {pkg.badge && (
-                  <div className="absolute top-4 right-4 bg-brand text-white text-[13px] font-medium px-3.5 py-[5px] rounded-full whitespace-nowrap">
-                    {pkg.badge}
+                {pkg.popular && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-brand text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-full border border-[#E5E7EB] shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
+                    PALING POPULER
                   </div>
                 )}
 
                 {/* Plan name */}
-                <p className="text-[20px] font-semibold text-[#111827] m-0 mb-2">
+                <p className={cn(
+                  "text-[13px] font-semibold m-0 mb-2 uppercase tracking-[0.05em]",
+                  pkg.popular ? "text-white/70" : "text-[#6B7280]"
+                )}>
                   {pkg.name}
                 </p>
 
+                {/* Price */}
+                <div className="mb-1">
+                  <span className={cn(
+                    "text-[32px] font-bold",
+                    pkg.popular ? "text-white" : "text-[#111827]"
+                  )}>
+                    {pkg.price}
+                  </span>
+                  {pkg.period && (
+                    <span className={cn(
+                      "text-[13px] ml-1",
+                      pkg.popular ? "text-white/60" : "text-[#6B7280]"
+                    )}>
+                      {pkg.period}
+                    </span>
+                  )}
+                </div>
+
                 {/* Description */}
-                <p className="text-[14px] font-normal text-[#6B7280] m-0 mb-6">
+                <p className={cn(
+                  "text-[13px] m-0 mt-3 mb-6 leading-relaxed min-h-[40px]",
+                  pkg.popular ? "text-white/80" : "text-[#6B7280]"
+                )}>
                   {pkg.desc}
                 </p>
 
-                {/* Price */}
-                <p className="text-[60px] font-medium tracking-[-2px] leading-[72px] text-[#111827] m-0 mb-6">
-                  {pkg.price}
-                </p>
-
-                {/* Credits */}
-                <div className="flex items-center gap-2 mb-8">
-                  <IconCoins size={18} stroke={1.5} className="text-[#6B7280]" />
-                  <span className="text-[16px] font-normal leading-[28px] text-[#374151]">
-                    {pkg.credits} kredit
-                  </span>
-                </div>
-
                 {/* Button */}
-                <button
-                  onClick={() => {
-                    sessionStorage.setItem('nuave_pending_package', pkg.name.toLowerCase());
-                    window.location.href = '/auth';
-                  }}
+                <Link
+                  href={pkg.name === "Agency" ? "/support" : "/auth"}
                   className={cn(
-                    "block w-full py-3.5 px-6 rounded-[8px] text-[14px] font-medium cursor-pointer mt-auto",
-                    pkg.highlight
-                      ? "btn-lp-purple text-white border-none"
-                      : "bg-white text-[#111827] border border-[#E5E7EB] hover:border-[#D1D5DB] transition-colors"
+                    "block w-full py-3 px-6 rounded-[8px] text-[14px] font-semibold no-underline text-center cursor-pointer mb-6",
+                    pkg.popular
+                      ? "bg-white text-brand hover:opacity-90 transition-opacity"
+                      : "btn-lp-purple text-white hover:opacity-90 transition-opacity"
                   )}
                 >
-                  Beli paket {pkg.name}
-                </button>
+                  {pkg.cta} →
+                </Link>
+
+                {/* Features */}
+                <div className={cn(
+                  "border-t pt-5 flex-1",
+                  pkg.popular ? "border-white/20" : "border-[#E5E7EB]"
+                )}>
+                  {pkg.features.map((f, i) => (
+                    <div key={i} className="flex items-start gap-2.5 mb-2.5">
+                      <IconCheck
+                        size={16}
+                        stroke={2.5}
+                        className={cn(
+                          "shrink-0 mt-0.5",
+                          pkg.popular ? "text-white/90" : "text-[#22C55E]"
+                        )}
+                      />
+                      <span className={cn(
+                        "text-[13px] leading-snug",
+                        pkg.popular ? "text-white/85" : "text-[#374151]"
+                      )}>
+                        {f}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
+          </div>
+
+          {/* Link to full pricing page */}
+          <div className="text-center mt-10">
+            <Link href="/harga" className="text-brand text-[14px] font-medium no-underline hover:underline">
+              Lihat perbandingan fitur lengkap →
+            </Link>
           </div>
         </div>
       </section>
