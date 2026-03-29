@@ -62,6 +62,7 @@ supabase/
 
 ## Critical Rules
 
+0. **Self-review after writing code:** After completing any code changes (new files, edits, or refactors), review your own work against `docs/REVIEW_PROMPT.md` before presenting it to the user. Focus on: security (injection, auth gaps, secrets exposure), performance (unnecessary re-renders, N+1 queries, memory leaks), multi-tenancy (every DB query scoped to tenant, RLS active), error handling (no swallowed errors, graceful failures), and TypeScript strictness (no unnecessary `any`). Fix any 🔴 Critical or 🟡 Important issues before finalizing. You do NOT need to output the full review table — just silently fix issues found.
 1. **Middleware location:** `src/middleware.ts` — Next.js ignores it at project root when using `src/` directory
 2. **Supabase SSR cookies:** `getAll`/`setAll` (v0.9+). Old `get`/`set`/`remove` silently fails
 3. **Auth checks:** Always `getUser()`, never `getSession()` — `getUser()` server-verifies, `getSession()` can be stale
