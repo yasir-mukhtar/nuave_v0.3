@@ -145,12 +145,20 @@ export default function HargaPage() {
   const router = useRouter();
   const [isAnnual, setIsAnnual] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<PlanId>('free');
   const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
       setIsLoggedIn(!!user);
+      if (user) {
+        // Fetch current plan to determine upgrade vs new subscription
+        fetch('/api/billing/status')
+          .then(r => r.json())
+          .then(data => { if (data.plan) setCurrentPlan(data.plan); })
+          .catch(() => {});
+      }
     });
   }, []);
 
@@ -173,7 +181,14 @@ export default function HargaPage() {
 
     setSubscribing(true);
     try {
-      const res = await fetch('/api/billing/create-subscription', {
+      // Use change-plan for users already on a paid plan (handles proration)
+      // Use create-subscription for free → paid
+      const isPlanChange = currentPlan !== 'free';
+      const endpoint = isPlanChange
+        ? '/api/billing/change-plan'
+        : '/api/billing/create-subscription';
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan: planId, cycle: isAnnual ? 'annual' : 'monthly' }),
@@ -189,6 +204,12 @@ export default function HargaPage() {
       // Redirect to Midtrans Snap payment page
       if (data.redirect_url) {
         window.location.href = data.redirect_url;
+      } else if (data.action === 'upgraded_free') {
+        // Prorated credit covered the full cost — no payment needed
+        router.push('/settings?tab=langganan');
+      } else if (data.action === 'downgrade_scheduled') {
+        alert(data.message);
+        router.push('/settings?tab=langganan');
       }
     } catch {
       alert('Terjadi kesalahan. Silakan coba lagi.');
