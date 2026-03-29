@@ -265,11 +265,9 @@ export default function HargaPage() {
           <span className={cn("type-body font-medium", isAnnual ? "text-text-heading" : "text-text-muted")}>
             Tahunan
           </span>
-          {isAnnual && (
-            <span className="bg-[#DCFCE7] text-success text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-              HEMAT 20%
-            </span>
-          )}
+          <span className="bg-[#DCFCE7] text-success text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+            HEMAT 20%
+          </span>
         </div>
       </section>
 
@@ -340,13 +338,17 @@ export default function HargaPage() {
 
                 <button
                   onClick={() => handleSubscribe(tier.id)}
-                  disabled={subscribing}
+                  disabled={subscribing || (isLoggedIn && currentPlan === tier.id)}
                   className={cn(
                     "block w-full text-center px-6 py-3 rounded-[var(--radius-md)] type-body font-semibold border-none cursor-pointer mb-7 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed",
                     isPopular ? "bg-white text-brand" : "bg-brand text-white"
                   )}
                 >
-                  {subscribing ? "Memproses..." : `${tier.cta} →`}
+                  {isLoggedIn && currentPlan === tier.id
+                    ? "Paket saat ini"
+                    : subscribing
+                      ? "Memproses..."
+                      : `${tier.cta} →`}
                 </button>
 
                 <div className={cn(

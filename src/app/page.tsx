@@ -30,6 +30,7 @@ const STATS = [
 
 const PRICING = [
   {
+    planId: "free" as const,
     name: "Gratis",
     price: "Rp 0",
     period: null,
@@ -39,6 +40,7 @@ const PRICING = [
     cta: "Mulai gratis",
   },
   {
+    planId: "starter" as const,
     name: "Starter",
     price: "Rp 149.000",
     period: "/bulan",
@@ -48,6 +50,7 @@ const PRICING = [
     cta: "Pilih Starter",
   },
   {
+    planId: "growth" as const,
     name: "Growth",
     price: "Rp 499.000",
     period: "/bulan",
@@ -57,6 +60,7 @@ const PRICING = [
     cta: "Pilih Growth",
   },
   {
+    planId: "agency" as const,
     name: "Agency",
     price: "Rp 2.500.000",
     period: "/bulan",
@@ -452,6 +456,21 @@ function HeroSection() {
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+      if (user) {
+        fetch('/api/billing/status')
+          .then(r => r.json())
+          .then(data => { if (data.plan) setCurrentPlan(data.plan); })
+          .catch(() => {});
+      }
+    });
+  }, []);
 
   return (
     <div className="lp-page min-h-screen bg-white">
@@ -685,17 +704,30 @@ export default function Home() {
                 </p>
 
                 {/* Button */}
-                <Link
-                  href={pkg.name === "Agency" ? "/support" : "/auth"}
-                  className={cn(
-                    "block w-full py-3 px-6 rounded-[8px] text-[14px] font-semibold no-underline text-center cursor-pointer mb-6",
-                    pkg.popular
-                      ? "bg-white text-brand hover:opacity-90 transition-opacity"
-                      : "btn-lp-purple text-white hover:opacity-90 transition-opacity"
-                  )}
-                >
-                  {pkg.cta} →
-                </Link>
+                {isLoggedIn && currentPlan === pkg.planId ? (
+                  <span
+                    className={cn(
+                      "block w-full py-3 px-6 rounded-[8px] text-[14px] font-semibold text-center mb-6 opacity-50 cursor-not-allowed",
+                      pkg.popular
+                        ? "bg-white text-brand"
+                        : "btn-lp-purple text-white"
+                    )}
+                  >
+                    Paket saat ini
+                  </span>
+                ) : (
+                  <Link
+                    href={pkg.name === "Agency" ? "/support" : "/auth"}
+                    className={cn(
+                      "block w-full py-3 px-6 rounded-[8px] text-[14px] font-semibold no-underline text-center cursor-pointer mb-6",
+                      pkg.popular
+                        ? "bg-white text-brand hover:opacity-90 transition-opacity"
+                        : "btn-lp-purple text-white hover:opacity-90 transition-opacity"
+                    )}
+                  >
+                    {pkg.cta} →
+                  </Link>
+                )}
 
                 {/* Features */}
                 <div className={cn(
