@@ -350,9 +350,9 @@ function SettingsContent() {
                     Akses berlanjut hingga akhir periode billing. Data Anda tidak akan dihapus.
                   </p>
                   <Button
-                    variant="destructive"
+                    variant="ghost"
                     size="sm"
-                    className="w-fit"
+                    className="w-fit text-destructive hover:text-destructive hover:bg-transparent p-0 h-auto"
                     onClick={async () => {
                       if (!confirm('Yakin ingin membatalkan langganan? Akses berlanjut hingga akhir periode.')) return;
                       const res = await fetch('/api/billing/cancel', { method: 'POST' });
