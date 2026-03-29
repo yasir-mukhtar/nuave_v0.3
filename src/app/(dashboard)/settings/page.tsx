@@ -18,6 +18,15 @@ import { useOrgPlan } from '@/hooks/useOrgPlan';
 import { getPlanLabel } from '@/lib/plan-gate-client';
 import { isPaidPlan, type PlanId } from '@/lib/plan-limits';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 import Link from 'next/link';
 
 interface BillingEvent {
@@ -97,6 +106,8 @@ function SettingsContent() {
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<{ events: BillingEvent[]; refunds: RefundRequest[] } | null>(null);
   const [invoicesLoading, setInvoicesLoading] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const orgPlan = useOrgPlan();
   const tabParam = searchParams.get('tab') as SectionId | null;
   const [activeTab, setActiveTab] = useState<SectionId>(
@@ -353,16 +364,42 @@ function SettingsContent() {
                     variant="ghost"
                     size="sm"
                     className="w-fit text-destructive hover:text-destructive hover:bg-transparent p-0 h-auto"
-                    onClick={async () => {
-                      if (!confirm('Yakin ingin membatalkan langganan? Akses berlanjut hingga akhir periode.')) return;
-                      const res = await fetch('/api/billing/cancel', { method: 'POST' });
-                      if (res.ok) {
-                        window.location.reload();
-                      }
-                    }}
+                    onClick={() => setCancelDialogOpen(true)}
                   >
                     Batalkan langganan
                   </Button>
+
+                  <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                    <DialogContent className="sm:max-w-[400px]">
+                      <DialogHeader>
+                        <DialogTitle>Batalkan langganan?</DialogTitle>
+                        <DialogDescription>
+                          Akses berlanjut hingga akhir periode billing. Data Anda tidak akan dihapus.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline" size="sm">Kembali</Button>
+                        </DialogClose>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={cancelling}
+                          onClick={async () => {
+                            setCancelling(true);
+                            const res = await fetch('/api/billing/cancel', { method: 'POST' });
+                            setCancelling(false);
+                            if (res.ok) {
+                              setCancelDialogOpen(false);
+                              window.location.reload();
+                            }
+                          }}
+                        >
+                          {cancelling ? 'Membatalkan...' : 'Ya, batalkan'}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               )}
             </>
