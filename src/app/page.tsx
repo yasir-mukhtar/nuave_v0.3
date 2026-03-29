@@ -651,7 +651,7 @@ export default function Home() {
                 >
                   {/* Badge */}
                   {pkg.popular && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-brand text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-full border border-[#E5E7EB] shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-[#111827] text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-[6px] border border-[#E5E7EB] shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
                       PALING POPULER
                     </div>
                   )}
@@ -695,7 +695,7 @@ export default function Home() {
                             : "bg-white text-[#111827] border border-[#D1D5DB] hover:border-[#9CA3AF]"
                         )}
                       >
-                        {pkg.cta} →
+                        {pkg.cta}
                       </Link>
                     )}
                   </div>

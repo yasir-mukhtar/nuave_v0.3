@@ -272,7 +272,7 @@ export default function HargaPage() {
                 className="relative rounded-[6px] px-6 py-7 flex flex-col bg-white border border-border-default shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
               >
                 {isPopular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-brand text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-full border border-border-default shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-text-heading text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-[6px] border border-border-default shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
                     PALING POPULER
                   </div>
                 )}
@@ -321,7 +321,7 @@ export default function HargaPage() {
                       ? "Paket saat ini"
                       : subscribing
                         ? "Memproses..."
-                        : `${tier.cta} →`}
+                        : `${tier.cta}`}
                   </button>
                 </div>
 
