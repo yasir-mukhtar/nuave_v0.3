@@ -3,6 +3,7 @@ export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
+import { getOrgPlan, checkRecheck } from '@/lib/plan-gate';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 const OPENAI_MODEL = 'gpt-4o-2024-11-20';
@@ -104,34 +105,17 @@ export async function POST(request: Request) {
     const promptText = auditResult.prompt_text;
     const originalAiResponse = auditResult.ai_response ?? '';
 
-    // Look up org_id via brands → workspaces → org_id
-    const { data: workspace } = await admin
-      .from('workspaces')
-      .select('org_id')
-      .eq('id', brand.workspace_id)
-      .single();
-
-    if (!workspace?.org_id) {
+    // Plan-based access check (fail closed)
+    const orgPlan = await getOrgPlan(admin, user.id);
+    if (!orgPlan) {
       return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
-
-    // Deduct 1 credit
-    const { data: newBalance, error: rpcError } = await admin
-      .rpc('deduct_credits', {
-        p_org_id: workspace.org_id,
-        p_amount: 1,
-        p_actioned_by: user.id,
-        p_audit_id: null,
-        p_description: 'Recheck masalah',
-      });
-
-    if (rpcError) {
-      console.error('deduct_credits RPC error:', rpcError);
-      return NextResponse.json({ error: 'Credit deduction failed' }, { status: 500 });
-    }
-
-    if (newBalance === -1) {
-      return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
+    const access = checkRecheck(orgPlan);
+    if (!access.allowed) {
+      return NextResponse.json(
+        { error: access.reason, upgradeTarget: access.upgradeTarget },
+        { status: 403 }
+      );
     }
 
     // Re-run the original prompt against GPT-4o with web search
@@ -249,7 +233,7 @@ Return only valid JSON:
       new_status: newStatus,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Recheck error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' },

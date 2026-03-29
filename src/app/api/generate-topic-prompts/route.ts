@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { getOrgPlanById, checkCreatePrompt } from "@/lib/plan-gate";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -37,6 +38,29 @@ export async function POST(request: NextRequest) {
           });
         }
         return NextResponse.json({ success: true, prompts: result, cached: true });
+      }
+    }
+
+    // Plan-based prompt limit check (before AI generation to avoid wasting tokens)
+    if (brand_id) {
+      const { data: brandRow } = await supabase
+        .from('brands')
+        .select('workspace_id, workspaces!inner(org_id)')
+        .eq('id', brand_id)
+        .single();
+
+      const wsData = brandRow?.workspaces as unknown as { org_id: string } | null;
+      if (wsData?.org_id) {
+        const orgPlan = await getOrgPlanById(supabase, wsData.org_id);
+        if (orgPlan) {
+          const promptAccess = await checkCreatePrompt(supabase, orgPlan, brand_id);
+          if (!promptAccess.allowed) {
+            return NextResponse.json(
+              { success: false, error: promptAccess.reason, upgradeTarget: promptAccess.upgradeTarget },
+              { status: 403 }
+            );
+          }
+        }
       }
     }
 

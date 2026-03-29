@@ -3,6 +3,7 @@
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
+import { getOrgPlan, checkCreatePrompt } from "@/lib/plan-gate";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -80,6 +81,25 @@ export async function POST(request: NextRequest) {
     } catch (err) {
       console.error("Failed to persist brand profile:", err);
       // Non-fatal, continue with prompt generation
+    }
+  }
+
+  // Plan-based prompt limit check (fail closed)
+  if (brand_id && user) {
+    const adminForCheck = createSupabaseAdminClient();
+    const orgPlan = await getOrgPlan(adminForCheck, user.id);
+    if (!orgPlan) {
+      return NextResponse.json(
+        { success: false, error: 'Organization not found' },
+        { status: 404 }
+      );
+    }
+    const access = await checkCreatePrompt(adminForCheck, orgPlan, brand_id);
+    if (!access.allowed) {
+      return NextResponse.json(
+        { success: false, error: access.reason, upgradeTarget: access.upgradeTarget },
+        { status: 403 }
+      );
     }
   }
 

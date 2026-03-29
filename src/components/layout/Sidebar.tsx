@@ -8,7 +8,7 @@ import {
   IconMessageDots,
   IconArticle,
   IconRosetteAsterisk,
-  IconCoins,
+  IconSparkles,
   IconArrowUpRight,
   IconSelector,
   IconMail,
@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 
 type SidebarProps = {
-  credits: number;
+  planLabel: string;
   userName: string;
   userEmail: string;
   workspaceName: string;
@@ -49,7 +49,7 @@ function getFaviconUrl(websiteUrl?: string): string | null {
   }
 }
 
-export function Sidebar({ credits, userName, userEmail, workspaceName, projectName, websiteUrl }: SidebarProps) {
+export function Sidebar({ planLabel, userName, userEmail, workspaceName, projectName, websiteUrl }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -202,17 +202,16 @@ export function Sidebar({ credits, userName, userEmail, workspaceName, projectNa
           </Link>
         </div>
 
-        {/* Credits row */}
-        <Link href="/dashboard/credits" className="group h-5 flex items-center justify-between no-underline">
+        {/* Plan row */}
+        <Link href="/settings?tab=langganan" className="group h-5 flex items-center justify-between no-underline">
           <div className="flex items-center gap-1.5">
-            <IconCoins size={16} stroke={1.5} className="text-[#533afd]" />
+            <IconSparkles size={16} stroke={1.5} className="text-[#533afd]" />
             <span className="type-body">
-              <span className="text-[#533afd] font-semibold">{credits}</span>
-              <span className="text-text-muted transition-colors group-hover:text-foreground"> kredit</span>
+              <span className="text-text-muted transition-colors group-hover:text-foreground">Paket: </span>
+              <span className="text-[#533afd] font-semibold capitalize">{planLabel}</span>
             </span>
           </div>
           <div className="flex items-center gap-0.5 type-body font-medium text-text-muted transition-colors group-hover:text-foreground">
-            Beli
             <IconArrowUpRight size={16} stroke={1.5} />
           </div>
         </Link>

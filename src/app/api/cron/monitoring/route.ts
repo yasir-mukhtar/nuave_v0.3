@@ -6,6 +6,7 @@ import {
   calculateVisibilityScore,
 } from '@/lib/audit-engine';
 import { extractCompetitorsForAudit } from '@/lib/competitor-extraction';
+import { type PlanId, getPlanLimits } from '@/lib/plan-limits';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 min (Vercel Pro)
@@ -44,12 +45,15 @@ export async function GET(req: NextRequest) {
     brands_found: brands.length,
     brands_processed: 0,
     brands_skipped_dedup: 0,
-    brands_paused_no_credits: 0,
+    brands_skipped_free_plan: 0,
     brands_skipped_no_prompts: 0,
     brands_failed: 0,
     audits_created: 0,
     competitor_extraction_errors: [] as string[],
   };
+
+  // Cache org plans + status to avoid repeated lookups
+  const orgPlanCache = new Map<string, { plan: PlanId; skip: boolean }>();
 
   for (const brand of brands) {
     // Supabase !inner join returns a single object (not array) for 1:1 FK
@@ -61,7 +65,35 @@ export async function GET(req: NextRequest) {
     todayStart.setUTCHours(0, 0, 0, 0);
 
     try {
+      // ── Plan check: skip free-tier and inactive orgs ────────
+      let cached = orgPlanCache.get(orgId);
+      if (!cached) {
+        const { data: org } = await supabase
+          .from('organizations')
+          .select('plan, subscription_status')
+          .eq('id', orgId)
+          .single();
 
+        if (!org) continue;
+        const skip =
+          org.subscription_status === 'expired' ||
+          org.subscription_status === 'cancelled';
+        cached = { plan: org.plan as PlanId, skip };
+        orgPlanCache.set(orgId, cached);
+      }
+
+      if (cached.skip) {
+        summary.brands_skipped_free_plan++;
+        continue;
+      }
+
+      const limits = getPlanLimits(cached.plan);
+      if (!limits.dailyMonitoring) {
+        summary.brands_skipped_free_plan++;
+        continue;
+      }
+
+      // ── Dedup: skip if already ran today ───────────────────
       const { data: existing } = await supabase
         .from('audits')
         .select('id')
@@ -89,23 +121,6 @@ export async function GET(req: NextRequest) {
         continue;
       }
 
-      // ── Check credits ──────────────────────────────────────
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('credits_balance')
-        .eq('id', orgId)
-        .single();
-
-      if (!org || org.credits_balance < prompts.length) {
-        // Auto-pause: insufficient credits
-        await supabase
-          .from('brands')
-          .update({ monitoring_paused_at: new Date().toISOString() })
-          .eq('id', brand.id);
-        summary.brands_paused_no_credits++;
-        continue;
-      }
-
       // ── Create monitoring audit ────────────────────────────
       const { data: audit, error: auditError } = await supabase
         .from('audits')
@@ -115,7 +130,7 @@ export async function GET(req: NextRequest) {
           status: 'pending',
           total_prompts: prompts.length,
           brand_mention_count: 0,
-          credits_used: prompts.length,
+          credits_used: 0,
           audit_type: 'monitoring',
         })
         .select('id')
@@ -123,26 +138,6 @@ export async function GET(req: NextRequest) {
 
       if (auditError || !audit) {
         summary.brands_failed++;
-        continue;
-      }
-
-      // ── Deduct credits ─────────────────────────────────────
-      const { data: newBalance } = await supabase.rpc('deduct_credits', {
-        p_org_id: orgId,
-        p_amount: prompts.length,
-        p_actioned_by: brand.created_by,
-        p_audit_id: audit.id,
-        p_description: `Monitoring: ${prompts.length} prompts`,
-      });
-
-      if (newBalance === -1) {
-        // Race condition: credits depleted between check and deduction
-        await supabase.from('audits').update({ status: 'failed' }).eq('id', audit.id);
-        await supabase
-          .from('brands')
-          .update({ monitoring_paused_at: new Date().toISOString() })
-          .eq('id', brand.id);
-        summary.brands_paused_no_credits++;
         continue;
       }
 
@@ -187,30 +182,19 @@ export async function GET(req: NextRequest) {
       summary.audits_created++;
 
     } catch {
-      // Refund credits if audit was created but processing failed
-      if (brand.created_by) {
-        const { data: failedAudits } = await supabase
-          .from('audits')
-          .select('id, credits_used')
-          .eq('brand_id', brand.id)
-          .eq('audit_type', 'monitoring')
-          .eq('status', 'running')
-          .gte('created_at', todayStart.toISOString())
-          .limit(1)
-          .maybeSingle();
+      // Mark any in-progress audit as failed
+      const { data: failedAudit } = await supabase
+        .from('audits')
+        .select('id')
+        .eq('brand_id', brand.id)
+        .eq('audit_type', 'monitoring')
+        .eq('status', 'running')
+        .gte('created_at', todayStart.toISOString())
+        .limit(1)
+        .maybeSingle();
 
-        if (failedAudits) {
-          await supabase.from('audits').update({ status: 'failed' }).eq('id', failedAudits.id);
-          if (failedAudits.credits_used > 0) {
-            await supabase.rpc('refund_credits', {
-              p_org_id: orgId,
-              p_amount: failedAudits.credits_used,
-              p_actioned_by: brand.created_by,
-              p_audit_id: failedAudits.id,
-              p_description: 'Refund: monitoring audit failed',
-            });
-          }
-        }
+      if (failedAudit) {
+        await supabase.from('audits').update({ status: 'failed' }).eq('id', failedAudit.id);
       }
       summary.brands_failed++;
     }

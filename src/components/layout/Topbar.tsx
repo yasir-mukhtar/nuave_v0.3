@@ -9,14 +9,19 @@ import {
 } from '@tabler/icons-react';
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useActiveProject } from "@/hooks/useActiveProject";
+import { useOrgPlan } from "@/hooks/useOrgPlan";
+import { getPlanLabel } from "@/lib/plan-gate-client";
+import { isPaidPlan } from "@/lib/plan-limits";
 
 import { useRouter } from "next/navigation";
 
 export default function Topbar() {
   const router = useRouter();
   const { projects, activeProjectId, setActiveProjectId, activeProject, refreshProjects } = useActiveProject();
+  const { plan } = useOrgPlan();
 
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -143,45 +148,54 @@ export default function Topbar() {
         )}
       </div>
 
-      {/* Right: monitoring toggle */}
-      {activeProjectId && (
-        <div className="flex items-center gap-2.5">
-          <IconRadar
-            size={16}
-            className={cn(
-              monitoringEnabled && !monitoringPaused ? "text-success" : "text-text-muted"
-            )}
-          />
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="text-[14px] font-medium leading-none text-text-muted type-col-header--hint cursor-default">
-                  Monitoring Harian:
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                Pengujian prompt setiap pukul 09:00. Membutuhkan 1 kredit/prompt.
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <span className={cn(
-            "text-[14px] font-medium leading-none",
-            monitoringPaused
-              ? "text-warning"
-              : monitoringEnabled
-                ? "text-text-heading"
-                : "text-text-muted"
-          )}>
-            {monitoringLabel}
-          </span>
+      {/* Right: plan badge + monitoring toggle */}
+      <div className="flex items-center gap-4">
+        <Badge
+          variant={isPaidPlan(plan) ? 'default' : 'secondary'}
+          className="text-[11px] uppercase tracking-wide"
+        >
+          {getPlanLabel(plan)}
+        </Badge>
 
-          <Switch
-            checked={monitoringEnabled}
-            onCheckedChange={handleToggleMonitoring}
-            disabled={toggling}
-          />
-        </div>
-      )}
+        {activeProjectId && isPaidPlan(plan) && (
+          <div className="flex items-center gap-2.5">
+            <IconRadar
+              size={16}
+              className={cn(
+                monitoringEnabled && !monitoringPaused ? "text-success" : "text-text-muted"
+              )}
+            />
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-[14px] font-medium leading-none text-text-muted type-col-header--hint cursor-default">
+                    Monitoring Harian:
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Pengujian prompt setiap pukul 09:00 WIB secara otomatis.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <span className={cn(
+              "text-[14px] font-medium leading-none",
+              monitoringPaused
+                ? "text-warning"
+                : monitoringEnabled
+                  ? "text-text-heading"
+                  : "text-text-muted"
+            )}>
+              {monitoringLabel}
+            </span>
+
+            <Switch
+              checked={monitoringEnabled}
+              onCheckedChange={handleToggleMonitoring}
+              disabled={toggling}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

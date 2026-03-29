@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
+import { getOrgPlan, checkRecommendations } from '@/lib/plan-gate';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -20,38 +21,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Look up org_id via organization_members (same pattern as /api/user/credits)
-    const { data: omData } = await serverSupabase
-      .from('organization_members')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .maybeSingle();
-
-    if (!omData?.org_id) {
-      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
-    }
-
-    // Admin client for recommendation queries and RPC (SECURITY DEFINER)
+    // Admin client for recommendation queries
     const supabase = createSupabaseAdminClient();
 
-    // Deduct 1 credit atomically before proceeding
-    const { data: newBalance, error: rpcError } = await supabase
-      .rpc('deduct_credits', {
-        p_org_id: omData.org_id,
-        p_amount: 1,
-        p_actioned_by: user.id,
-        p_audit_id: null,
-        p_description: 'Recommendation reveal',
-      });
-
-    if (rpcError) {
-      console.error('deduct_credits RPC error:', rpcError);
-      return NextResponse.json({ error: 'Credit deduction failed' }, { status: 500 });
+    // Plan-based access check (fail closed)
+    const orgPlan = await getOrgPlan(supabase, user.id);
+    if (!orgPlan) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
     }
-
-    if (newBalance === -1) {
-      return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
+    const access = checkRecommendations(orgPlan);
+    if (!access.allowed) {
+      return NextResponse.json(
+        { error: access.reason, upgradeTarget: access.upgradeTarget },
+        { status: 403 }
+      );
     }
 
     // v3: join recommendations → brands → workspaces for auth check
@@ -138,7 +121,7 @@ Be specific, actionable, and ready to use. No preamble.`;
       .from('recommendations')
       .update({
         suggested_copy,
-        credits_used: 1,
+        credits_used: 0,
         updated_at: new Date().toISOString(),
       })
       .eq('id', recommendation_id);
@@ -150,7 +133,7 @@ Be specific, actionable, and ready to use. No preamble.`;
 
     return NextResponse.json({ suggested_copy });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Reveal API Error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' },

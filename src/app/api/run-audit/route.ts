@@ -7,6 +7,7 @@ import {
   calculateVisibilityScore,
 } from '@/lib/audit-engine';
 import { extractCompetitorsForAudit } from '@/lib/competitor-extraction';
+import { getOrgPlan, checkRunAudit } from '@/lib/plan-gate';
 
 export async function POST(req: NextRequest) {
   let auditId: string | null = null;
@@ -41,21 +42,27 @@ export async function POST(req: NextRequest) {
       brandName = brand?.name || 'the brand';
     }
 
-    // STEP 0.5 — Resolve org_id for credit operations (v3: credits on org, not user)
+    // STEP 0.5 — Plan-based access check
     let orgId: string | null = null;
     if (user) {
-      const { data: om } = await supabase
-        .from('organization_members')
-        .select('org_id')
-        .eq('user_id', user.id)
-        .limit(1)
-        .maybeSingle();
-      orgId = om?.org_id ?? null;
+      const orgPlan = await getOrgPlan(supabase, user.id);
+      if (!orgPlan) {
+        return NextResponse.json(
+          { success: false, error: 'Organization not found' },
+          { status: 404 }
+        );
+      }
+      orgId = orgPlan.orgId;
+      const access = await checkRunAudit(supabase, orgPlan, brand_id);
+      if (!access.allowed) {
+        return NextResponse.json(
+          { success: false, error: access.reason, upgradeTarget: access.upgradeTarget },
+          { status: 403 }
+        );
+      }
     }
 
-    const creditsNeeded = prompts.length;
-
-    // STEP 1 — Create audit record (status: pending until credits confirmed)
+    // STEP 1 — Create audit record
     const { data: audit, error: auditError } = await supabase
       .from('audits')
       .insert({
@@ -64,7 +71,7 @@ export async function POST(req: NextRequest) {
         status: 'pending',
         total_prompts: prompts.length,
         brand_mention_count: 0,
-        credits_used: creditsNeeded,
+        credits_used: 0,
         audit_type: 'manual',
       })
       .select('id')
@@ -76,34 +83,6 @@ export async function POST(req: NextRequest) {
 
     auditId = audit.id;
 
-    // STEP 2 — Atomic credit deduction (v3: org-scoped, audit_id linked)
-    if (user && orgId) {
-      const { data: newBalance, error: rpcError } = await supabase
-        .rpc('deduct_credits', {
-          p_org_id: orgId,
-          p_amount: creditsNeeded,
-          p_actioned_by: user.id,
-          p_audit_id: auditId,
-          p_description: `Audit: ${creditsNeeded} prompts`,
-        });
-
-      if (rpcError) {
-        await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
-        return NextResponse.json(
-          { success: false, error: 'Gagal memproses kredit. Silakan coba lagi.' },
-          { status: 500 }
-        );
-      }
-
-      if (newBalance === -1) {
-        await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
-        return NextResponse.json(
-          { success: false, error: `Kredit tidak cukup. Anda butuh ${creditsNeeded} kredit.` },
-          { status: 402 }
-        );
-      }
-    }
-
     // STEP 3 — Mark audit as running and kick off background processing
     await supabase.from('audits').update({ status: 'running' }).eq('id', auditId);
 
@@ -111,10 +90,7 @@ export async function POST(req: NextRequest) {
       auditId!,
       brand_id,
       prompts,
-      brandName,
-      user?.id ?? null,
-      orgId,
-      creditsNeeded
+      brandName
     );
 
     // Use waitUntil if available (Edge Runtime)
@@ -145,10 +121,7 @@ async function processAuditInBackground(
   auditId: string,
   brandId: string,
   prompts: PromptInput[],
-  brandName: string,
-  userId: string | null,
-  orgId: string | null,
-  creditsUsed: number
+  brandName: string
 ) {
   const supabase = createSupabaseAdminClient();
 
@@ -183,15 +156,5 @@ async function processAuditInBackground(
 
   } catch {
     await supabase.from('audits').update({ status: 'failed' }).eq('id', auditId);
-
-    if (userId && orgId && creditsUsed > 0) {
-      await supabase.rpc('refund_credits', {
-        p_org_id: orgId,
-        p_amount: creditsUsed,
-        p_actioned_by: userId,
-        p_audit_id: auditId,
-        p_description: 'Refund: audit failed',
-      });
-    }
   }
 }

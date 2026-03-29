@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
   // Handle post-login redirects with ?package or ?next params
   if (pkg) {
-    return NextResponse.redirect(`${origin}/dashboard/credits?package=${pkg}`);
+    return NextResponse.redirect(`${origin}/harga`);
   }
   if (next && next.startsWith('/')) {
     return NextResponse.redirect(`${origin}${next}`);

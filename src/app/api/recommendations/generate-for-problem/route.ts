@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
+import { getOrgPlan, checkRecommendations } from '@/lib/plan-gate';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -92,6 +93,19 @@ export async function POST(request: Request) {
       }
     }
 
+    // Plan-based access check (fail closed, before idempotency to prevent info leakage)
+    const orgPlan = await getOrgPlan(admin, user.id);
+    if (!orgPlan) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+    }
+    const access = checkRecommendations(orgPlan);
+    if (!access.allowed) {
+      return NextResponse.json(
+        { error: access.reason, upgradeTarget: access.upgradeTarget },
+        { status: 403 }
+      );
+    }
+
     // Idempotency: check if recommendations already exist for this problem
     const { data: existingRecs } = await admin
       .from('recommendations')
@@ -104,36 +118,6 @@ export async function POST(request: Request) {
         { error: 'Recommendations already generated for this problem' },
         { status: 409 }
       );
-    }
-
-    // Look up org_id via brands → workspaces → org_id
-    const { data: workspace } = await admin
-      .from('workspaces')
-      .select('org_id')
-      .eq('id', brand.workspace_id)
-      .single();
-
-    if (!workspace?.org_id) {
-      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
-    }
-
-    // Deduct 5 credits before generation
-    const { data: newBalance, error: rpcError } = await admin
-      .rpc('deduct_credits', {
-        p_org_id: workspace.org_id,
-        p_amount: 5,
-        p_actioned_by: user.id,
-        p_audit_id: null,
-        p_description: 'Rekomendasi per masalah',
-      });
-
-    if (rpcError) {
-      console.error('deduct_credits RPC error:', rpcError);
-      return NextResponse.json({ error: 'Credit deduction failed' }, { status: 500 });
-    }
-
-    if (newBalance === -1) {
-      return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 });
     }
 
     // Generate recommendations via Claude
@@ -223,7 +207,7 @@ Return only valid JSON. No preamble, no markdown.`;
 
     return NextResponse.json({ recommendations_generated: recommendationsGenerated, problem_id });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Generate-for-problem error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' },

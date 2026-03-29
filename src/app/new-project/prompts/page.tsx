@@ -128,20 +128,6 @@ export default function PromptsPage() {
   const [loading, setLoading] = useState(false);
   const [loadingPrompts, setLoadingPrompts] = useState(true);
   const [error, setError] = useState("");
-  const [credits, setCredits] = useState<number | null>(null);
-
-  // Fetch user credits
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/user/credits");
-        const data = await res.json();
-        if (typeof data.credits === "number") setCredits(data.credits);
-      } catch {
-        // Credits unknown — don't block
-      }
-    })();
-  }, []);
 
   // Load topics from session and fetch AI-generated prompts (sessionStorage cache → DB cache → AI)
   useEffect(() => {
@@ -243,8 +229,6 @@ export default function PromptsPage() {
     (sum, g) => sum + g.prompts.filter((p) => p.checked).length,
     0
   );
-  const insufficientCredits = credits !== null && credits < totalSelected;
-
   const toggleExpand = (groupId: string) => {
     setTopicGroups((prev) =>
       prev.map((g) => (g.id === groupId ? { ...g, expanded: !g.expanded } : g))
@@ -292,7 +276,7 @@ export default function PromptsPage() {
     group.prompts.filter((p) => p.checked).length;
 
   const handleSubmit = async () => {
-    if (totalSelected === 0 || loading || insufficientCredits) return;
+    if (totalSelected === 0 || loading) return;
     setLoading(true);
     setError("");
 
@@ -360,7 +344,7 @@ export default function PromptsPage() {
     }
   };
 
-  const canSubmit = totalSelected > 0 && !loading && !insufficientCredits;
+  const canSubmit = totalSelected > 0 && !loading;
 
   return (
     <WizardLayout
@@ -382,7 +366,7 @@ export default function PromptsPage() {
           Topik
         </span>
         <span className="font-body text-[13px] leading-[18px] text-text-muted">
-          {totalSelected} dari {totalPrompts} prompt dipilih · {totalSelected} kredit
+          {totalSelected} dari {totalPrompts} prompt dipilih
         </span>
       </div>
 
@@ -543,15 +527,6 @@ export default function PromptsPage() {
           Pilih minimal 1 prompt untuk menjalankan audit
         </p>
       )}
-      {insufficientCredits && (
-        <p className="font-body text-[13px] leading-[18px] text-error mb-3">
-          Kredit tidak cukup. Anda butuh {totalSelected} kredit.{" "}
-          <a href="/dashboard/credits" className="text-brand underline">
-            Tambah kredit
-          </a>
-        </p>
-      )}
-
       {/* Error message */}
       {error && (
         <p className="font-body text-[13px] leading-[18px] text-error mb-3">
@@ -566,7 +541,7 @@ export default function PromptsPage() {
         </Button>
         <Button variant="brand" size="lg" className="w-full" disabled={!canSubmit} onClick={handleSubmit}>
           {loading && <ButtonSpinner size={16} />}
-          {loading ? "Memproses..." : `Jalankan Audit — ${totalSelected} kredit`}
+          {loading ? "Memproses..." : `Jalankan Audit — ${totalSelected} prompt`}
         </Button>
       </div>
     </WizardLayout>

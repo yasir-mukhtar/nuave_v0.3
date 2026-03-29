@@ -6,7 +6,9 @@ import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import LowCreditsBanner from "@/components/LowCreditsBanner";
+import PlanUpgradeBanner from "@/components/PlanUpgradeBanner";
+import { useOrgPlan } from "@/hooks/useOrgPlan";
+import { getPlanLabel } from "@/lib/plan-gate-client";
 import { ActiveWorkspaceProvider, useActiveWorkspace } from "@/hooks/useActiveWorkspace";
 import { ActiveProjectProvider, useActiveProject } from "@/hooks/useActiveProject";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,9 +18,10 @@ type DashboardLayoutProps = {
 };
 
 function DashboardLayoutInner({ children }: DashboardLayoutProps) {
-  const [credits, setCredits] = useState(0);
   const [userName, setUserName] = useState("User");
   const [userEmail, setUserEmail] = useState("");
+  const { plan } = useOrgPlan();
+  const planLabel = getPlanLabel(plan);
   const { activeWorkspace } = useActiveWorkspace();
   const { activeProject, projects } = useActiveProject();
   const workspaceName = activeWorkspace?.name ?? "Select Workspace";
@@ -39,7 +42,6 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
       if (user) {
         setUserEmail(user.email ?? "");
 
-        // v3: user name from users table; credits from organizations via membership
         const { data: userData } = await supabase
           .from('users')
           .select('full_name')
@@ -49,17 +51,6 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
         if (userData) {
           setUserName(userData.full_name ?? "User");
         }
-
-        // v3: credits live on organizations, not users
-        const { data: omData } = await supabase
-          .from('organization_members')
-          .select('organizations(credits_balance)')
-          .eq('user_id', user.id)
-          .limit(1)
-          .maybeSingle();
-
-        const org = omData?.organizations as unknown as { credits_balance: number } | null;
-        if (org) setCredits(org.credits_balance ?? 0);
       }
     }
 
@@ -68,10 +59,10 @@ function DashboardLayoutInner({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden" data-lenis-prevent>
-      <LowCreditsBanner />
+      <PlanUpgradeBanner />
       <div className="flex min-h-0 flex-1">
         <Sidebar
-          credits={credits}
+          planLabel={planLabel}
           userName={userName}
           userEmail={userEmail}
           workspaceName={workspaceName}

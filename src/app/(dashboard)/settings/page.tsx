@@ -12,24 +12,20 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from '@/components/ui/navigation-menu';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from '@/components/ui/table';
-import { IconPencil, IconCheck, IconX, IconDownload } from '@tabler/icons-react';
-import type { Organization, CreditTransaction } from '@/types';
+import { IconPencil, IconCheck, IconX, IconArrowUpRight } from '@tabler/icons-react';
+import type { Organization } from '@/types';
+import { useOrgPlan } from '@/hooks/useOrgPlan';
+import { getPlanLabel } from '@/lib/plan-gate-client';
+import { isPaidPlan } from '@/lib/plan-limits';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
-type SectionId = 'profil' | 'workspace' | 'kredit' | 'pembelian';
+type SectionId = 'profil' | 'workspace' | 'langganan';
 
 const sections: { id: SectionId; label: string }[] = [
   { id: 'profil', label: 'Profil' },
   { id: 'workspace', label: 'Workspace' },
-  { id: 'kredit', label: 'Kredit' },
-  { id: 'pembelian', label: 'Pembelian' },
+  { id: 'langganan', label: 'Langganan' },
 ];
 
 function formatDate(dateStr: string): string {
@@ -40,90 +36,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function openReceiptWindow(txn: CreditTransaction, orgName: string) {
-  const w = window.open('', '_blank', 'width=600,height=700');
-  if (!w) return;
-
-  const date = new Date(txn.created_at);
-  const formattedDate = date.toLocaleDateString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  });
-  const formattedTime = date.toLocaleTimeString('id-ID', {
-    hour: '2-digit', minute: '2-digit',
-  });
-  const receiptNo = `NV-${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}-${txn.id.slice(0, 8).toUpperCase()}`;
-
-  w.document.write(`<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="utf-8" />
-  <title>Kwitansi ${receiptNo}</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #111827; padding: 48px; max-width: 560px; margin: 0 auto; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
-    .brand { font-size: 20px; font-weight: 700; }
-    .receipt-label { font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
-    .divider { height: 1px; background: #e5e7eb; margin: 24px 0; }
-    .row { display: flex; justify-content: space-between; padding: 8px 0; }
-    .label { color: #6b7280; font-size: 14px; }
-    .value { font-size: 14px; font-weight: 500; text-align: right; }
-    .footer { margin-top: 48px; font-size: 12px; color: #9ca3af; text-align: center; }
-    .print-btn { display: block; margin: 32px auto 0; padding: 10px 24px; background: #533AFD; color: #fff; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
-    .print-btn:hover { background: #3d2bc7; }
-    @media print { .print-btn { display: none; } }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <div class="brand">nuave</div>
-      <div style="font-size:13px; color:#6b7280; margin-top:2px;">nuave.ai</div>
-    </div>
-    <div style="text-align:right;">
-      <div class="receipt-label">Kwitansi</div>
-      <div style="font-size:14px; font-weight:600; margin-top:2px;">${receiptNo}</div>
-    </div>
-  </div>
-
-  <div class="row">
-    <span class="label">Tanggal</span>
-    <span class="value">${formattedDate}, ${formattedTime}</span>
-  </div>
-  <div class="row">
-    <span class="label">Organisasi</span>
-    <span class="value">${orgName}</span>
-  </div>
-  <div class="row">
-    <span class="label">Deskripsi</span>
-    <span class="value">${txn.description || 'Pembelian kredit'}</span>
-  </div>
-  <div class="row">
-    <span class="label">Jumlah kredit</span>
-    <span class="value">${txn.amount} kredit</span>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="row">
-    <span class="label">Saldo setelah transaksi</span>
-    <span class="value">${txn.balance_after ?? '-'} kredit</span>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="footer">
-    Dokumen ini dibuat secara otomatis oleh nuave.ai<br/>
-    ID Transaksi: ${txn.id}
-  </div>
-
-  <button class="print-btn" onclick="window.print()">Cetak / Simpan PDF</button>
-</body>
-</html>`);
-  w.document.close();
-}
-
-const validTabs: SectionId[] = ['profil', 'workspace', 'kredit', 'pembelian'];
+const validTabs: SectionId[] = ['profil', 'workspace', 'langganan'];
 
 export default function SettingsPage() {
   return (
@@ -144,8 +57,8 @@ function SettingsContent() {
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [saving, setSaving] = useState(false);
-  const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const orgPlan = useOrgPlan();
   const tabParam = searchParams.get('tab') as SectionId | null;
   const [activeTab, setActiveTab] = useState<SectionId>(
     tabParam && validTabs.includes(tabParam) ? tabParam : 'profil'
@@ -168,7 +81,7 @@ function SettingsContent() {
 
       const { data: omData } = await supabase
         .from('organization_members')
-        .select('org_id, organizations(id, name, slug, plan, credits_balance, created_at, updated_at)')
+        .select('org_id, organizations(id, name, slug, plan, credits_balance, subscription_status, billing_cycle, plan_started_at, current_period_start, current_period_end, cancel_at_period_end, cancelled_at, pending_plan, created_at, updated_at)')
         .eq('user_id', authUser.id)
         .limit(1)
         .maybeSingle();
@@ -183,16 +96,6 @@ function SettingsContent() {
           .eq('id', activeWorkspaceId)
           .maybeSingle();
         if (ws) setWorkspaceName(ws.name);
-      }
-
-      if (orgRow) {
-        const { data: txns } = await supabase
-          .from('credit_transactions')
-          .select('*')
-          .eq('org_id', orgRow.id)
-          .order('created_at', { ascending: false })
-          .limit(50);
-        if (txns) setTransactions(txns as CreditTransaction[]);
       }
 
       setLoading(false);
@@ -223,13 +126,6 @@ function SettingsContent() {
     setEditingName(false);
     setDraftName('');
   }
-
-  const txnTypeLabel: Record<string, string> = {
-    purchase: 'Pembelian',
-    deduction: 'Pemakaian',
-    bonus: 'Bonus',
-    refund: 'Pengembalian',
-  };
 
   if (loading) {
     return (
@@ -328,102 +224,104 @@ function SettingsContent() {
         </div>
       )}
 
-      {/* ── Kredit ──────────────────────────────────────── */}
-      {activeTab === 'kredit' && (
+      {/* ── Langganan ──────────────────────────────────── */}
+      {activeTab === 'langganan' && (
         <div className="card flex flex-col gap-5">
-          <div className="flex items-baseline gap-2">
-            <span className="type-heading-sm text-[var(--purple)] font-bold">{org?.credits_balance ?? 0}</span>
-            <span className="type-body text-text-muted">kredit tersisa</span>
+          {/* Current plan */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
+              <span className="type-caption font-medium text-text-muted">Paket saat ini</span>
+              <div className="flex items-center gap-2">
+                <span className="type-heading-sm text-text-heading">
+                  {getPlanLabel(orgPlan.plan)}
+                </span>
+                <Badge
+                  variant={isPaidPlan(orgPlan.plan) ? 'default' : 'secondary'}
+                  className="text-[10px] uppercase"
+                >
+                  {orgPlan.subscriptionStatus === 'active' ? 'Aktif' : orgPlan.subscriptionStatus}
+                </Badge>
+              </div>
+            </div>
+            <Button variant="brand" size="sm" asChild>
+              <Link href="/harga">
+                {isPaidPlan(orgPlan.plan) ? 'Ubah paket' : 'Upgrade'}
+                <IconArrowUpRight size={14} />
+              </Link>
+            </Button>
           </div>
 
           <div className="h-px bg-[var(--border-light)]" />
 
-          <div className="flex flex-col gap-3">
-            <span className="type-title text-text-heading">Riwayat kredit</span>
-            {transactions.length === 0 ? (
-              <p className="type-body text-text-muted m-0">Belum ada transaksi.</p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="type-caption font-medium">Tanggal</TableHead>
-                    <TableHead className="type-caption font-medium">Tipe</TableHead>
-                    <TableHead className="type-caption font-medium">Keterangan</TableHead>
-                    <TableHead className="type-caption font-medium text-right">Jumlah</TableHead>
-                    <TableHead className="type-caption font-medium text-right">Saldo</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.map((txn) => (
-                    <TableRow key={txn.id}>
-                      <TableCell className="type-body text-text-body whitespace-nowrap">
-                        {formatDate(txn.created_at)}
-                      </TableCell>
-                      <TableCell className="type-body text-text-body">
-                        {txnTypeLabel[txn.type] ?? txn.type}
-                      </TableCell>
-                      <TableCell className="type-body text-text-muted">
-                        {txn.description || '-'}
-                      </TableCell>
-                      <TableCell className={`type-body text-right font-medium ${txn.amount > 0 ? 'text-[var(--green)]' : 'text-text-body'}`}>
-                        {txn.amount > 0 ? '+' : ''}{txn.amount}
-                      </TableCell>
-                      <TableCell className="type-body text-right text-text-body">
-                        {txn.balance_after ?? '-'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-        </div>
-      )}
+          {/* Subscription details (paid plans only) */}
+          {isPaidPlan(orgPlan.plan) && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <span className="type-caption font-medium text-text-muted">Siklus billing</span>
+                  <span className="type-body text-text-heading capitalize">
+                    {org?.billing_cycle === 'annual' ? 'Tahunan' : 'Bulanan'}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="type-caption font-medium text-text-muted">Periode berakhir</span>
+                  <span className="type-body text-text-heading">
+                    {orgPlan.currentPeriodEnd
+                      ? formatDate(orgPlan.currentPeriodEnd)
+                      : '-'}
+                  </span>
+                </div>
+              </div>
 
-      {/* ── Pembelian & Kwitansi ────────────────────────── */}
-      {activeTab === 'pembelian' && (
-        <div className="card flex flex-col gap-3">
-          {transactions.filter((t) => t.type === 'purchase').length === 0 ? (
-            <p className="type-body text-text-muted m-0">Belum ada pembelian.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="type-caption font-medium">Tanggal</TableHead>
-                  <TableHead className="type-caption font-medium">Keterangan</TableHead>
-                  <TableHead className="type-caption font-medium text-right">Kredit</TableHead>
-                  <TableHead className="type-caption font-medium text-right">Kwitansi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions
-                  .filter((t) => t.type === 'purchase')
-                  .map((txn) => (
-                    <TableRow key={txn.id}>
-                      <TableCell className="type-body text-text-body whitespace-nowrap">
-                        {formatDate(txn.created_at)}
-                      </TableCell>
-                      <TableCell className="type-body text-text-body">
-                        {txn.description || 'Pembelian kredit'}
-                      </TableCell>
-                      <TableCell className="type-body text-right font-medium text-[var(--green)]">
-                        +{txn.amount}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openReceiptWindow(txn, org?.name ?? '')}
-                          className="gap-1.5"
-                        >
-                          <IconDownload size={14} stroke={2} />
-                          Unduh
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
+              {orgPlan.cancelAtPeriodEnd && (
+                <div className="rounded-md bg-amber-50 border border-amber-200 px-4 py-3">
+                  <p className="type-body text-amber-800 m-0">
+                    Langganan akan berakhir pada {orgPlan.currentPeriodEnd ? formatDate(orgPlan.currentPeriodEnd) : '-'}.
+                    {orgPlan.pendingPlan && ` Paket akan berubah ke ${getPlanLabel(orgPlan.pendingPlan)}.`}
+                  </p>
+                </div>
+              )}
+
+              <div className="h-px bg-[var(--border-light)]" />
+
+              {/* Cancel button */}
+              {!orgPlan.cancelAtPeriodEnd && (
+                <div className="flex flex-col gap-1">
+                  <span className="type-caption font-medium text-text-muted">Batalkan langganan</span>
+                  <p className="type-body text-text-muted m-0 mb-2">
+                    Akses berlanjut hingga akhir periode billing. Data Anda tidak akan dihapus.
+                  </p>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="w-fit"
+                    onClick={async () => {
+                      if (!confirm('Yakin ingin membatalkan langganan? Akses berlanjut hingga akhir periode.')) return;
+                      const res = await fetch('/api/billing/cancel', { method: 'POST' });
+                      if (res.ok) {
+                        window.location.reload();
+                      }
+                    }}
+                  >
+                    Batalkan langganan
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Free plan upgrade prompt */}
+          {!isPaidPlan(orgPlan.plan) && (
+            <div className="rounded-md bg-brand/5 border border-brand/20 px-4 py-4 flex flex-col gap-2">
+              <p className="type-body text-brand font-medium m-0">
+                Upgrade untuk monitoring harian, audit bulanan, dan fitur premium.
+              </p>
+              <Button variant="brand" size="sm" asChild className="w-fit">
+                <Link href="/harga">
+                  Lihat paket →
+                </Link>
+              </Button>
+            </div>
           )}
         </div>
       )}

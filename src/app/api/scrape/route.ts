@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
+import { getOrgPlan, checkCreateBrand } from "@/lib/plan-gate";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -75,6 +76,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "website_url must be a valid URL" }, { status: 400 });
   }
 
+  // Authenticate and check plan BEFORE any AI calls to avoid wasting tokens
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const adminClient = createSupabaseAdminClient();
+
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Not authenticated. Please sign in and try again.' },
+      { status: 401 }
+    );
+  }
+
+  const orgPlan = await getOrgPlan(adminClient, user.id);
+  if (!orgPlan) {
+    return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+  }
+  const brandAccess = await checkCreateBrand(adminClient, orgPlan);
+  if (!brandAccess.allowed) {
+    return NextResponse.json(
+      { error: brandAccess.reason, upgradeTarget: brandAccess.upgradeTarget },
+      { status: 403 }
+    );
+  }
+
   let websiteContent: string | null = null;
   try {
     const content = await fetchWebsiteContent(website_url);
@@ -138,18 +163,7 @@ Respond with JSON only, same format as before.`;
     profile.differentiators = ensureStringArray(profile.differentiators);
     profile.competitors = ensureStringArray(profile.competitors);
 
-    const supabase = await createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    const adminClient = createSupabaseAdminClient();
     const brandId = randomUUID();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Not authenticated. Please sign in and try again.' },
-        { status: 401 }
-      );
-    }
 
     // Resolve workspace from DB — never trust client-provided workspace_id
     const { data: wm } = await adminClient

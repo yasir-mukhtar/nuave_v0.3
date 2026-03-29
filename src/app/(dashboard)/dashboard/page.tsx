@@ -16,6 +16,9 @@ import VisibilityChart from "@/components/dashboard/VisibilityChart";
 import CompetitorPanel from "@/components/dashboard/CompetitorPanel";
 import MentionPanel from "@/components/dashboard/MentionPanel";
 import ActionItemPanel from "@/components/dashboard/ActionItemPanel";
+import { PlanGate } from "@/components/PlanGate";
+import { useOrgPlan } from "@/hooks/useOrgPlan";
+import { getPlanLabel } from "@/lib/plan-gate-client";
 import { cn } from "@/lib/utils";
 
 type DashboardData = {
@@ -30,13 +33,14 @@ type DashboardData = {
   latestAuditId?: string;
   totalAudits: number;
   avgScore: number;
-  creditsRemaining: number;
+  planLabel: string;
   completeAudits: { id: string; visibility_score: number; completed_at: string | null; status: string; audit_type: string }[];
 };
 
 export default function DashboardPage() {
   const router = useRouter();
   const { activeProjectId, activeProject, loading: wsLoading } = useActiveProject();
+  const { plan, loading: planLoading } = useOrgPlan();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -182,13 +186,8 @@ export default function DashboardPage() {
         }));
       }
 
-      // v3: credits live on organizations, fetch via API
-      let creditsRemaining = 0;
-      try {
-        const creditsRes = await fetch("/api/user/credits");
-        const creditsData = await creditsRes.json();
-        creditsRemaining = creditsData.credits ?? 0;
-      } catch {}
+      // Plan label for stats display
+      const planLabel = getPlanLabel(plan);
 
       setData({
         firstName,
@@ -202,7 +201,7 @@ export default function DashboardPage() {
         latestAuditId,
         totalAudits,
         avgScore,
-        creditsRemaining,
+        planLabel,
         completeAudits: completeAudits as DashboardData["completeAudits"],
       });
       setLoading(false);
@@ -234,45 +233,51 @@ export default function DashboardPage() {
 
       {/* Chart + Competitors row */}
       <div className="grid grid-cols-[1fr_320px] gap-5 items-stretch">
-        <VisibilityChart
-          data={data.chartData}
-          latestScore={data.latestScore}
-          brandName={data.brandName}
-          brandWebsiteUrl={data.brandWebsiteUrl}
-          competitors={data.competitors}
-        />
-        <CompetitorPanel competitors={data.competitors} />
+        <PlanGate plan={plan} feature="trend_chart" loading={planLoading}>
+          <VisibilityChart
+            data={data.chartData}
+            latestScore={data.latestScore}
+            brandName={data.brandName}
+            brandWebsiteUrl={data.brandWebsiteUrl}
+            competitors={data.competitors}
+          />
+        </PlanGate>
+        <PlanGate plan={plan} feature="competitor_data" loading={planLoading}>
+          <CompetitorPanel competitors={data.competitors} />
+        </PlanGate>
       </div>
 
       {/* Mention + Action Item row */}
       <div className="grid grid-cols-2 gap-5 auto-rows-[480px]">
         <MentionPanel mentions={data.mentions} auditId={data.latestAuditId} brandName={data.brandName} />
-        <ActionItemPanel items={data.actionItems} auditId={data.latestAuditId} />
+        <PlanGate plan={plan} feature="recommendations" loading={planLoading}>
+          <ActionItemPanel items={data.actionItems} auditId={data.latestAuditId} />
+        </PlanGate>
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-3 gap-5">
         <StatCard
-          label="Total Audits"
+          label="Total Audit"
           value={data.totalAudits}
           icon={<IconClipboardCheck size={20} className="text-brand" />}
         />
         <StatCard
-          label="Average Score"
+          label="Rata-rata Skor"
           value={`${data.avgScore}%`}
           icon={<IconChartBar size={20} className="text-brand" />}
         />
         <StatCard
-          label="Credits Remaining"
-          value={data.creditsRemaining}
+          label="Paket"
+          value={data.planLabel}
           icon={<IconWallet size={20} className="text-brand" />}
         />
       </div>
 
-      {/* Recent Audits */}
+      {/* Audit Terbaru */}
       <div>
         <h2 className="mb-4">
-          Recent Audits
+          Audit Terbaru
         </h2>
 
         {data.completeAudits.length === 0 ? (

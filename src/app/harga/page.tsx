@@ -1,106 +1,151 @@
 "use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft, IconCheck, IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 import Footer from "@/components/Footer";
+import {
+  type PlanId,
+  PLAN_HIERARCHY,
+  getPlanLimits,
+  getPlanPricing,
+} from "@/lib/plan-limits";
+import { getPlanLabel } from "@/lib/plan-gate-client";
 
-const PACKAGES = [
+type Tier = {
+  id: PlanId;
+  description: string;
+  cta: string;
+  popular: boolean;
+  features: string[];
+};
+
+const TIERS: Tier[] = [
+  {
+    id: "free",
+    description: "Audit pertama gratis untuk melihat skor visibilitas AI Anda.",
+    cta: "Mulai gratis",
+    popular: false,
+    features: [
+      "1 merek",
+      "10 prompt",
+      "1 audit (saat daftar)",
+      "Skor visibilitas",
+      "Daftar masalah yang ditemukan",
+      "Nama kompetitor terdeteksi",
+    ],
+  },
   {
     id: "starter",
-    name: "Starter",
-    price: "Rp 75.000",
-    credits: 50,
+    description: "Pantau visibilitas AI merek Anda setiap hari dan dapatkan rekomendasi.",
+    cta: "Pilih Starter",
     popular: false,
-    description: "Cocok untuk bisnis yang ingin mencoba AEO pertama kali.",
     features: [
-      "50 kredit",
-      "5× audit lengkap (10 prompt)",
-      "Analisis kompetitor",
-      "Rekomendasi konten web (×50)",
-      "Laporan PDF gratis",
-      "Kredit tidak kadaluarsa",
+      "1 merek, 10 prompt",
+      "Audit otomatis bulanan",
+      "Monitoring harian",
+      "3 kompetitor dengan data lengkap",
+      "Rekomendasi lengkap",
+      "Tren skor visibilitas",
+      "1 konten/bulan",
+      "Ekspor PDF",
     ],
   },
   {
     id: "growth",
-    name: "Growth",
-    price: "Rp 199.000",
-    credits: 150,
+    description: "Kelola beberapa merek dan bandingkan tren dengan kompetitor.",
+    cta: "Pilih Growth",
     popular: true,
-    description: "Untuk bisnis yang aktif membangun visibilitas AI mereka.",
     features: [
-      "150 kredit",
-      "15× audit lengkap (10 prompt)",
-      "Analisis kompetitor",
-      "Rekomendasi konten web (×150)",
-      "Generate artikel blog (×75)",
-      "Laporan PDF gratis",
-      "Kredit tidak kadaluarsa",
+      "3 merek, 30 prompt/merek",
+      "Audit otomatis bulanan",
+      "Monitoring harian",
+      "10 kompetitor/merek",
+      "Rekomendasi lengkap",
+      "Tren skor + perbandingan kompetitor",
+      "10 konten/bulan",
+      "Ekspor PDF",
     ],
   },
   {
     id: "agency",
-    name: "Agency",
-    price: "Rp 599.000",
-    credits: 500,
+    description: "Untuk agensi yang mengelola banyak merek klien.",
+    cta: "Hubungi kami",
     popular: false,
-    description: "Untuk agensi yang mengelola banyak merek klien sekaligus.",
     features: [
-      "500 kredit",
-      "50× audit lengkap (10 prompt)",
-      "Analisis kompetitor",
-      "Rekomendasi konten web (×500)",
-      "Generate artikel blog (×250)",
-      "Laporan PDF gratis",
-      "Kredit tidak kadaluarsa",
-      "Cocok untuk 5–20 klien",
+      "20 merek, 50 prompt/merek",
+      "Audit otomatis + manual (1×/hari)",
+      "Monitoring harian",
+      "Semua kompetitor (tanpa batas)",
+      "Rekomendasi lengkap",
+      "Tren skor + perbandingan kompetitor",
+      "Konten tanpa batas",
+      "PDF white-label",
+      "Dukungan prioritas",
     ],
   },
 ];
 
-const CREDIT_USAGE = [
-  { action: "Jalankan audit (10 prompt)", credits: "10 kredit" },
-  { action: "Tambah 10 prompt ke audit", credits: "10 kredit" },
-  { action: "Rekomendasi konten web", credits: "1 kredit" },
-  { action: "Generate artikel blog", credits: "2 kredit" },
-  { action: "Re-analisis website", credits: "3 kredit" },
-  { action: "Ekspor laporan PDF", credits: "Gratis" },
+const FEATURE_COMPARISON: {
+  label: string;
+  values: Record<PlanId, string | boolean>;
+}[] = [
+  { label: "Merek", values: { free: "1", starter: "1", growth: "3", agency: "20" } },
+  { label: "Prompt per merek", values: { free: "10", starter: "10", growth: "30", agency: "50" } },
+  { label: "Audit otomatis bulanan", values: { free: false, starter: true, growth: true, agency: true } },
+  { label: "Monitoring harian", values: { free: false, starter: true, growth: true, agency: true } },
+  { label: "Audit manual", values: { free: false, starter: false, growth: false, agency: "1×/hari" } },
+  { label: "Kompetitor dilacak", values: { free: "0", starter: "3", growth: "10", agency: "Tanpa batas" } },
+  { label: "Data & tren kompetitor", values: { free: false, starter: true, growth: true, agency: true } },
+  { label: "Perbandingan tren kompetitor", values: { free: false, starter: false, growth: true, agency: true } },
+  { label: "Rekomendasi", values: { free: false, starter: true, growth: true, agency: true } },
+  { label: "Konten per bulan", values: { free: "0", starter: "1", growth: "10", agency: "Tanpa batas" } },
+  { label: "Ekspor PDF", values: { free: false, starter: true, growth: true, agency: true } },
+  { label: "PDF white-label", values: { free: false, starter: false, growth: false, agency: true } },
+  { label: "Dukungan prioritas", values: { free: false, starter: false, growth: false, agency: true } },
 ];
 
 const FAQS = [
   {
-    q: "Apa itu kredit?",
-    a: "Kredit adalah satuan yang digunakan untuk mengakses fitur Nuave. Setiap tindakan seperti menjalankan audit atau membuat artikel blog menggunakan sejumlah kredit. Pengguna baru mendapat 10 kredit gratis saat mendaftar.",
+    q: "Apa bedanya audit bulanan dan monitoring harian?",
+    a: "Audit bulanan menjalankan semua prompt Anda secara lengkap dan menghasilkan analisis masalah + rekomendasi. Monitoring harian memantau skor visibilitas tanpa analisis mendalam — seperti mengecek suhu tubuh setiap hari.",
   },
   {
-    q: "Apakah kredit saya kadaluarsa?",
-    a: "Tidak. Kredit yang Anda beli tidak memiliki masa kadaluarsa selama akun Anda aktif. Gunakan sesuai kebutuhan bisnis Anda.",
+    q: "Apakah saya bisa upgrade atau downgrade kapan saja?",
+    a: "Ya. Upgrade langsung aktif dengan perhitungan prorata. Downgrade berlaku di akhir periode billing yang sedang berjalan.",
   },
   {
-    q: "Metode pembayaran apa saja yang tersedia?",
-    a: "Kami menerima transfer bank virtual account (BCA, BNI, BRI, Mandiri), GoPay, OVO, QRIS, Indomaret, dan Alfamart — semua melalui Midtrans.",
+    q: "Apa yang terjadi dengan data saya jika saya downgrade?",
+    a: "Data Anda tetap aman. Merek dan prompt yang melebihi batas paket baru akan dibekukan (tidak dihapus) — Anda dapat mengaksesnya kembali setelah upgrade.",
   },
   {
-    q: "Apakah ada biaya langganan bulanan?",
-    a: "Tidak. Nuave menggunakan model bayar-per-penggunaan berbasis kredit. Anda hanya membayar saat membutuhkan, tanpa komitmen bulanan.",
+    q: "Metode pembayaran apa yang tersedia?",
+    a: "Transfer bank (BCA, BNI, BRI, Mandiri), GoPay, OVO, QRIS, Indomaret, Alfamart, dan kartu kredit/debit — semua melalui Midtrans.",
   },
   {
-    q: "Bagaimana jika kredit saya habis?",
-    a: "Anda dapat membeli kredit tambahan kapan saja dari halaman dashboard. Tidak ada penalti atau biaya tambahan.",
+    q: "Apakah ada refund?",
+    a: "Paket bulanan: akses berlanjut hingga akhir periode, tidak ada refund. Paket tahunan: refund prorata untuk bulan yang belum digunakan. Pembatalan dalam 48 jam pertama mendapat refund penuh.",
   },
   {
-    q: "Apakah tersedia refund?",
-    a: "Refund hanya diproses untuk kasus teknis seperti kredit tidak masuk setelah pembayaran berhasil, atau duplikasi transaksi. Lihat Syarat & Ketentuan kami untuk detail lengkap.",
+    q: "Apakah hemat 20% tahunan benar-benar sepadan?",
+    a: "Ya — jika Anda berencana menggunakan Nuave lebih dari 3 bulan. AEO adalah permainan jangka panjang, hasilnya terlihat dalam 2-3 bulan. Paket tahunan memastikan monitoring konsisten.",
   },
 ];
 
+function formatPrice(amount: number): string {
+  if (amount === 0) return "Gratis";
+  return `Rp ${amount.toLocaleString("id-ID")}`;
+}
+
 export default function HargaPage() {
   const router = useRouter();
+  const [isAnnual, setIsAnnual] = useState(false);
 
   return (
     <div className="min-h-screen bg-white">
-
       {/* Navbar */}
       <header className="sticky top-0 z-[100] bg-white/95 backdrop-blur-[8px] border-b border-border-default px-8 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 no-underline">
@@ -109,155 +154,208 @@ export default function HargaPage() {
         </Link>
       </header>
 
-      {/* Hero */}
+      {/* Back button */}
       <section className="bg-surface border-b border-border-default px-8 py-12">
         <div className="max-w-[800px] mx-auto">
-          <div className="mb-5">
-            <button
-              onClick={() => {
-                if (window.history.length > 1) {
-                  router.back();
-                } else {
-                  router.push("/");
-                }
-              }}
-              className="inline-flex items-center gap-1.5 type-caption text-text-muted bg-transparent border-none p-0 cursor-pointer hover:text-text-body transition-colors"
-            >
-              <IconArrowLeft size={16} stroke={1.5} /> Kembali
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              if (window.history.length > 1) router.back();
+              else router.push("/");
+            }}
+            className="inline-flex items-center gap-1.5 type-caption text-text-muted bg-transparent border-none p-0 cursor-pointer hover:text-text-body transition-colors"
+          >
+            <IconArrowLeft size={16} stroke={1.5} /> Kembali
+          </button>
         </div>
       </section>
 
-      <section className="text-center px-6 pt-16 pb-12">
+      {/* Hero */}
+      <section className="text-center px-6 pt-16 pb-10">
         <div className="inline-flex items-center gap-1.5 bg-[var(--purple-light)] border border-[#C4B5FD] rounded-full px-3.5 py-1 text-[12px] font-medium text-brand mb-6">
           <span className="w-1.5 h-1.5 rounded-full bg-brand" />
-          Bayar sekali, pakai kapan saja
+          Langganan bulanan atau tahunan
         </div>
         <h1 className="text-[40px] m-0 mb-4 leading-[1.2]">
-          Harga yang sederhana,<br />tanpa langganan
+          Pilih paket yang<br />sesuai kebutuhan Anda
         </h1>
-        <p className="type-body text-text-muted max-w-[480px] mx-auto mb-2 leading-relaxed">
-          Beli kredit saat butuh. Mulai gratis dengan 10 kredit — cukup untuk 1 audit lengkap.
+        <p className="type-body text-text-muted max-w-[520px] mx-auto mb-8 leading-relaxed">
+          Mulai gratis dengan 1 audit lengkap. Upgrade kapan saja untuk monitoring harian dan fitur premium.
         </p>
+
+        {/* Annual toggle */}
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <span className={cn("type-body font-medium", !isAnnual ? "text-text-heading" : "text-text-muted")}>
+            Bulanan
+          </span>
+          <Switch checked={isAnnual} onCheckedChange={setIsAnnual} />
+          <span className={cn("type-body font-medium", isAnnual ? "text-text-heading" : "text-text-muted")}>
+            Tahunan
+          </span>
+          {isAnnual && (
+            <span className="bg-[#DCFCE7] text-success text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+              HEMAT 20%
+            </span>
+          )}
+        </div>
       </section>
 
       {/* Pricing Cards */}
-      <section className="max-w-[1040px] mx-auto px-6 pb-16">
-        <div className="grid grid-cols-3 gap-6">
-          {PACKAGES.map((pkg) => (
-            <div key={pkg.id} className={cn(
-              "relative rounded-[var(--radius-xl)] px-7 py-8",
-              pkg.popular
-                ? "bg-brand border border-brand shadow-[0_8px_32px_rgba(108,63,245,0.25)] scale-[1.03]"
-                : "bg-white border border-border-default shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
-            )}>
-              {pkg.popular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-brand text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-full border border-border-default shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
-                  ⭐ PALING POPULER
-                </div>
-              )}
+      <section className="max-w-[1120px] mx-auto px-6 pb-16">
+        <div className="grid grid-cols-4 gap-5">
+          {TIERS.map((tier) => {
+            const pricing = getPlanPricing(tier.id);
+            const price = isAnnual ? pricing.annual : pricing.monthly;
+            const isPopular = tier.popular;
 
-              <p className={cn(
-                "text-[13px] font-semibold m-0 mb-2 uppercase tracking-[0.05em]",
-                pkg.popular ? "text-white/70" : "text-text-muted"
-              )}>
-                {pkg.name}
-              </p>
-              <p className={cn(
-                "text-[32px] font-bold m-0 mb-1",
-                pkg.popular ? "text-white" : "text-text-heading"
-              )}>
-                {pkg.price}
-              </p>
-              <p className={cn(
-                "text-[13px] m-0 mb-5",
-                pkg.popular ? "text-white/60" : "text-text-muted"
-              )}>
-                {pkg.credits} kredit
-              </p>
-              <p className={cn(
-                "text-[13px] m-0 mb-6 leading-relaxed",
-                pkg.popular ? "text-white/80" : "text-text-body"
-              )}>
-                {pkg.description}
-              </p>
-
-              <button
-                onClick={() => {
-                  sessionStorage.setItem('nuave_pending_package', pkg.id);
-                  window.location.href = '/auth';
-                }}
+            return (
+              <div
+                key={tier.id}
                 className={cn(
-                  "block w-full text-center px-6 py-3 rounded-[var(--radius-md)] type-body font-semibold border-none cursor-pointer mb-7 hover:opacity-90 transition-opacity",
-                  pkg.popular ? "bg-white text-brand" : "bg-brand text-white"
+                  "relative rounded-[var(--radius-xl)] px-6 py-7 flex flex-col",
+                  isPopular
+                    ? "bg-brand border border-brand shadow-[0_8px_32px_rgba(108,63,245,0.25)] scale-[1.02]"
+                    : "bg-white border border-border-default shadow-[0_1px_2px_rgba(0,0,0,0.05)]"
                 )}
               >
-                Beli {pkg.name} →
-              </button>
-
-              <div className={cn(
-                "border-t pt-6",
-                pkg.popular ? "border-white/20" : "border-border-default"
-              )}>
-                {pkg.features.map((f, i) => (
-                  <div key={i} className="flex items-start gap-2.5 mb-2.5">
-                    <span className={cn(
-                      "font-bold text-[14px] shrink-0 mt-px",
-                      pkg.popular ? "text-white/90" : "text-success"
-                    )}>✓</span>
-                    <span className={cn(
-                      "text-[13px] leading-snug",
-                      pkg.popular ? "text-white/85" : "text-text-body"
-                    )}>{f}</span>
+                {isPopular && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-brand text-[11px] font-bold tracking-[0.05em] px-3.5 py-1 rounded-full border border-border-default shadow-[0_1px_4px_rgba(0,0,0,0.08)] whitespace-nowrap">
+                    PALING POPULER
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+                )}
 
-        {/* Free trial note */}
-        <p className="text-center type-caption text-text-muted mt-8">
-          Belum yakin?{" "}
-          <Link href="/" className="text-brand font-medium no-underline hover:opacity-80 transition-opacity">
-            Mulai dengan 10 kredit gratis →
-          </Link>
-          {" "}Tidak perlu kartu kredit.
-        </p>
+                <p className={cn(
+                  "text-[13px] font-semibold m-0 mb-2 uppercase tracking-[0.05em]",
+                  isPopular ? "text-white/70" : "text-text-muted"
+                )}>
+                  {getPlanLabel(tier.id)}
+                </p>
+
+                <div className="mb-1">
+                  <span className={cn(
+                    "text-[32px] font-bold",
+                    isPopular ? "text-white" : "text-text-heading"
+                  )}>
+                    {formatPrice(price)}
+                  </span>
+                  {price > 0 && (
+                    <span className={cn(
+                      "text-[13px] ml-1",
+                      isPopular ? "text-white/60" : "text-text-muted"
+                    )}>
+                      /bulan
+                    </span>
+                  )}
+                </div>
+
+                {isAnnual && price > 0 && (
+                  <p className={cn(
+                    "text-[12px] m-0 mb-4",
+                    isPopular ? "text-white/50" : "text-text-placeholder"
+                  )}>
+                    Ditagih Rp {(price * 12).toLocaleString("id-ID")}/tahun
+                  </p>
+                )}
+                {(!isAnnual || price === 0) && <div className="mb-4" />}
+
+                <p className={cn(
+                  "text-[13px] m-0 mb-6 leading-relaxed min-h-[40px]",
+                  isPopular ? "text-white/80" : "text-text-body"
+                )}>
+                  {tier.description}
+                </p>
+
+                <button
+                  onClick={() => {
+                    if (tier.id === "free") {
+                      router.push("/auth");
+                    } else if (tier.id === "agency") {
+                      router.push("/support");
+                    } else {
+                      router.push("/auth");
+                    }
+                  }}
+                  className={cn(
+                    "block w-full text-center px-6 py-3 rounded-[var(--radius-md)] type-body font-semibold border-none cursor-pointer mb-7 hover:opacity-90 transition-opacity",
+                    isPopular ? "bg-white text-brand" : "bg-brand text-white"
+                  )}
+                >
+                  {tier.cta} →
+                </button>
+
+                <div className={cn(
+                  "border-t pt-5 flex-1",
+                  isPopular ? "border-white/20" : "border-border-default"
+                )}>
+                  {tier.features.map((f, i) => (
+                    <div key={i} className="flex items-start gap-2.5 mb-2.5">
+                      <IconCheck
+                        size={16}
+                        stroke={2.5}
+                        className={cn(
+                          "shrink-0 mt-0.5",
+                          isPopular ? "text-white/90" : "text-success"
+                        )}
+                      />
+                      <span className={cn(
+                        "text-[13px] leading-snug",
+                        isPopular ? "text-white/85" : "text-text-body"
+                      )}>
+                        {f}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
-      {/* Credit Usage Table */}
+      {/* Feature Comparison Table */}
       <section className="bg-surface border-t border-b border-border-default px-6 py-16">
-        <div className="max-w-[640px] mx-auto">
-          <h2 className="text-center mb-2">
-            Berapa kredit yang dibutuhkan?
-          </h2>
+        <div className="max-w-[900px] mx-auto">
+          <h2 className="text-center mb-2">Perbandingan fitur</h2>
           <p className="type-body text-text-muted text-center mb-8">
-            Setiap tindakan menggunakan kredit sesuai tabel berikut.
+            Detail lengkap setiap paket.
           </p>
           <div className="border border-border-default rounded-[var(--radius-lg)] overflow-hidden bg-white">
             <table className="w-full border-collapse type-body">
               <thead>
                 <tr className="bg-surface">
-                  <th className="text-left px-5 py-3.5 text-text-body font-semibold border-b border-border-default">Tindakan</th>
-                  <th className="text-right px-5 py-3.5 text-text-body font-semibold border-b border-border-default">Kredit</th>
+                  <th className="text-left px-5 py-3.5 text-text-body font-semibold border-b border-border-default w-[240px]">
+                    Fitur
+                  </th>
+                  {PLAN_HIERARCHY.map((planId) => (
+                    <th
+                      key={planId}
+                      className="text-center px-4 py-3.5 text-text-body font-semibold border-b border-border-default"
+                    >
+                      {getPlanLabel(planId)}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {CREDIT_USAGE.map((row, i) => (
-                  <tr key={i} className={cn(i < CREDIT_USAGE.length - 1 && "border-b border-border-default")}>
-                    <td className="px-5 py-3.5 text-text-heading font-medium">{row.action}</td>
-                    <td className="px-5 py-3.5 text-right">
-                      <span className={cn(
-                        "text-[12px] font-semibold px-2.5 py-[3px] rounded-full",
-                        row.credits === "Gratis"
-                          ? "bg-[#DCFCE7] text-success"
-                          : "bg-[var(--purple-light)] text-brand"
-                      )}>
-                        {row.credits}
-                      </span>
-                    </td>
+                {FEATURE_COMPARISON.map((row, i) => (
+                  <tr
+                    key={i}
+                    className={cn(i < FEATURE_COMPARISON.length - 1 && "border-b border-border-default")}
+                  >
+                    <td className="px-5 py-3 text-text-heading font-medium">{row.label}</td>
+                    {PLAN_HIERARCHY.map((planId) => {
+                      const val = row.values[planId];
+                      return (
+                        <td key={planId} className="px-4 py-3 text-center">
+                          {val === true ? (
+                            <IconCheck size={16} stroke={2.5} className="text-success mx-auto" />
+                          ) : val === false ? (
+                            <IconX size={16} stroke={2} className="text-text-placeholder mx-auto" />
+                          ) : (
+                            <span className="type-body font-medium text-text-heading">{val}</span>
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
@@ -269,9 +367,7 @@ export default function HargaPage() {
       {/* Payment Methods */}
       <section className="px-6 py-16 text-center">
         <div className="max-w-[640px] mx-auto">
-          <h2 className="mb-2">
-            Metode pembayaran
-          </h2>
+          <h2 className="mb-2">Metode pembayaran</h2>
           <p className="type-body text-text-muted mb-8">
             Pembayaran diproses secara aman melalui Midtrans.
           </p>
@@ -288,9 +384,7 @@ export default function HargaPage() {
       {/* FAQ */}
       <section className="bg-surface border-t border-border-default px-6 py-16">
         <div className="max-w-[640px] mx-auto">
-          <h2 className="text-center mb-10">
-            Pertanyaan yang sering ditanya
-          </h2>
+          <h2 className="text-center mb-10">Pertanyaan yang sering ditanya</h2>
           <div className="flex flex-col gap-4">
             {FAQS.map((faq, i) => (
               <div key={i} className="bg-white border border-border-default rounded-[var(--radius-lg)] px-6 py-5">
@@ -309,9 +403,12 @@ export default function HargaPage() {
             Mulai audit AI pertama Anda — gratis
           </h2>
           <p className="type-body text-text-muted mb-7">
-            Daftar sekarang dan dapatkan 10 kredit gratis. Tidak perlu kartu kredit.
+            Daftar sekarang dan jalankan audit lengkap pertama tanpa biaya.
           </p>
-          <Link href="/" className="inline-block bg-brand text-white type-body font-semibold no-underline px-8 py-3.5 rounded-[var(--radius-md)] hover:opacity-90 transition-opacity">
+          <Link
+            href="/auth"
+            className="inline-block bg-brand text-white type-body font-semibold no-underline px-8 py-3.5 rounded-[var(--radius-md)] hover:opacity-90 transition-opacity"
+          >
             Coba gratis sekarang →
           </Link>
         </div>

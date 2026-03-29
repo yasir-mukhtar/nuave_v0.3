@@ -14,14 +14,25 @@ export type User = {
 };
 
 // ── Organizations ─────────────────────────────────────────────
-export type OrgPlan = 'free' | 'pro' | 'enterprise';
+export type OrgPlan = 'free' | 'starter' | 'growth' | 'agency';
+export type BillingCycle = 'monthly' | 'annual';
+export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'cancelled' | 'expired';
 
 export type Organization = {
   id: string;
   name: string;
   slug: string;
   plan: OrgPlan;
-  credits_balance: number;
+  credits_balance: number; // kept for metering, no longer gates features
+  subscription_id: string | null;
+  billing_cycle: BillingCycle;
+  plan_started_at: string | null;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  cancelled_at: string | null;
+  subscription_status: SubscriptionStatus;
+  pending_plan: OrgPlan | null;
   created_at: string;
   updated_at: string;
 };
@@ -133,7 +144,7 @@ export type Audit = {
   total_prompts: number | null;
   brand_mention_count: number | null;
   credits_used: number;
-  audit_type: 'manual' | 'monitoring';
+  audit_type: 'manual' | 'monitoring' | 'monthly_auto';
   created_at: string;
   completed_at: string | null;
 };
@@ -281,5 +292,5 @@ export type CreditTransaction = {
 // ── Composite / Join helpers ──────────────────────────────────
 // Workspace with its org membership info (used in useActiveWorkspace)
 export type WorkspaceWithOrg = Workspace & {
-  organizations: Pick<Organization, 'id' | 'name' | 'plan' | 'credits_balance'>;
+  organizations: Pick<Organization, 'id' | 'name' | 'plan' | 'credits_balance' | 'subscription_status' | 'current_period_end' | 'cancel_at_period_end' | 'pending_plan'>;
 };
