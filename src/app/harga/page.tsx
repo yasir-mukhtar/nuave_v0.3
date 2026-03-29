@@ -145,7 +145,7 @@ export default function HargaPage() {
   const router = useRouter();
   const [isAnnual, setIsAnnual] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState<PlanId>('free');
+  const [currentPlan, setCurrentPlan] = useState<PlanId | null>(null);
   const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
@@ -183,7 +183,7 @@ export default function HargaPage() {
     try {
       // Use change-plan for users already on a paid plan (handles proration)
       // Use create-subscription for free → paid
-      const isPlanChange = currentPlan !== 'free';
+      const isPlanChange = currentPlan !== null && currentPlan !== 'free';
       const endpoint = isPlanChange
         ? '/api/billing/change-plan'
         : '/api/billing/create-subscription';
