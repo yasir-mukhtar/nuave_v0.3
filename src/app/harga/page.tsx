@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconArrowLeft, IconCheck, IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import Footer from "@/components/Footer";
 import {
   type PlanId,
@@ -143,6 +144,58 @@ function formatPrice(amount: number): string {
 export default function HargaPage() {
   const router = useRouter();
   const [isAnnual, setIsAnnual] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+    });
+  }, []);
+
+  async function handleSubscribe(planId: PlanId) {
+    if (!isLoggedIn) {
+      // Not logged in — send to auth, then back to pricing
+      router.push(`/auth?next=/harga`);
+      return;
+    }
+
+    if (planId === 'free') {
+      router.push('/dashboard');
+      return;
+    }
+
+    if (planId === 'agency') {
+      router.push('/support');
+      return;
+    }
+
+    setSubscribing(true);
+    try {
+      const res = await fetch('/api/billing/create-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planId, cycle: isAnnual ? 'annual' : 'monthly' }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || 'Gagal membuat langganan');
+        return;
+      }
+
+      // Redirect to Midtrans Snap payment page
+      if (data.redirect_url) {
+        window.location.href = data.redirect_url;
+      }
+    } catch {
+      alert('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setSubscribing(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -265,21 +318,14 @@ export default function HargaPage() {
                 </p>
 
                 <button
-                  onClick={() => {
-                    if (tier.id === "free") {
-                      router.push("/auth");
-                    } else if (tier.id === "agency") {
-                      router.push("/support");
-                    } else {
-                      router.push("/auth");
-                    }
-                  }}
+                  onClick={() => handleSubscribe(tier.id)}
+                  disabled={subscribing}
                   className={cn(
-                    "block w-full text-center px-6 py-3 rounded-[var(--radius-md)] type-body font-semibold border-none cursor-pointer mb-7 hover:opacity-90 transition-opacity",
+                    "block w-full text-center px-6 py-3 rounded-[var(--radius-md)] type-body font-semibold border-none cursor-pointer mb-7 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed",
                     isPopular ? "bg-white text-brand" : "bg-brand text-white"
                   )}
                 >
-                  {tier.cta} →
+                  {subscribing ? "Memproses..." : `${tier.cta} →`}
                 </button>
 
                 <div className={cn(
