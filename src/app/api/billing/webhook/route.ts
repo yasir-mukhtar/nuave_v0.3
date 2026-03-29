@@ -24,7 +24,9 @@ export async function POST(req: NextRequest) {
 
     // ── Verify signature ─────────────────────────────────────
     if (!verifyMidtransSignature(order_id, status_code, gross_amount, signature_key)) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
+      console.error('Webhook signature verification failed', { order_id, status_code });
+      // Return 200 so Midtrans doesn't retry — but don't process the event
+      return NextResponse.json({ status: 'invalid_signature' });
     }
 
     const supabase = createSupabaseAdminClient();
