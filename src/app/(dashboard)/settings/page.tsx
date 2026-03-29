@@ -12,13 +12,50 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from '@/components/ui/navigation-menu';
-import { IconPencil, IconCheck, IconX, IconArrowUpRight } from '@tabler/icons-react';
+import { IconPencil, IconCheck, IconX, IconArrowUpRight, IconReceipt, IconLoader2 } from '@tabler/icons-react';
 import type { Organization } from '@/types';
 import { useOrgPlan } from '@/hooks/useOrgPlan';
 import { getPlanLabel } from '@/lib/plan-gate-client';
 import { isPaidPlan } from '@/lib/plan-limits';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+
+interface BillingEvent {
+  id: string;
+  event_type: string;
+  midtrans_order_id: string | null;
+  payload: Record<string, unknown>;
+  created_at: string;
+}
+
+interface RefundRequest {
+  id: string;
+  amount: number;
+  status: string;
+  reason: string;
+  created_at: string;
+}
+
+function formatEventLabel(type: string): string {
+  switch (type) {
+    case 'webhook_settlement':
+    case 'webhook_capture':
+      return 'Pembayaran berhasil';
+    case 'subscription_cancelled':
+      return 'Langganan dibatalkan';
+    case 'plan_upgrade':
+      return 'Upgrade paket';
+    case 'plan_downgrade_scheduled':
+      return 'Downgrade dijadwalkan';
+    default:
+      return type.replace(/_/g, ' ');
+  }
+}
+
+function formatCurrency(amount: number | string): string {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+}
 
 type SectionId = 'profil' | 'workspace' | 'langganan';
 
@@ -58,6 +95,8 @@ function SettingsContent() {
   const [draftName, setDraftName] = useState('');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [invoices, setInvoices] = useState<{ events: BillingEvent[]; refunds: RefundRequest[] } | null>(null);
+  const [invoicesLoading, setInvoicesLoading] = useState(false);
   const orgPlan = useOrgPlan();
   const tabParam = searchParams.get('tab') as SectionId | null;
   const [activeTab, setActiveTab] = useState<SectionId>(
@@ -103,6 +142,25 @@ function SettingsContent() {
 
     load();
   }, [activeWorkspaceId]);
+
+  useEffect(() => {
+    if (activeTab !== 'langganan') return;
+    let cancelled = false;
+    async function fetchInvoices() {
+      setInvoicesLoading(true);
+      try {
+        const res = await fetch('/api/billing/invoices');
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled) setInvoices(data);
+        }
+      } finally {
+        if (!cancelled) setInvoicesLoading(false);
+      }
+    }
+    fetchInvoices();
+    return () => { cancelled = true; };
+  }, [activeTab]);
 
   async function saveWorkspaceName() {
     if (!activeWorkspaceId || !draftName.trim()) return;
@@ -321,6 +379,75 @@ function SettingsContent() {
                   Lihat paket →
                 </Link>
               </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Riwayat Transaksi ─────────────────────────────── */}
+      {activeTab === 'langganan' && (
+        <div className="card flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <IconReceipt size={18} className="text-text-muted" />
+            <span className="type-body font-medium text-text-heading">Riwayat Transaksi</span>
+          </div>
+
+          {invoicesLoading && (
+            <div className="flex items-center justify-center py-6">
+              <IconLoader2 size={20} className="animate-spin text-text-muted" />
+            </div>
+          )}
+
+          {!invoicesLoading && invoices && invoices.events.length === 0 && invoices.refunds.length === 0 && (
+            <p className="type-body text-text-muted m-0 py-4 text-center">
+              Belum ada transaksi.
+            </p>
+          )}
+
+          {!invoicesLoading && invoices && (invoices.events.length > 0 || invoices.refunds.length > 0) && (
+            <div className="flex flex-col">
+              {invoices.events.map((ev) => {
+                const amount = ev.payload?.gross_amount as string | undefined;
+                const toPlan = ev.payload?.to_plan as string | undefined;
+                return (
+                  <div key={ev.id} className="flex items-center justify-between py-3 border-b border-[var(--border-light)] last:border-b-0">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="type-body text-text-heading">
+                        {formatEventLabel(ev.event_type)}
+                      </span>
+                      <span className="type-caption text-text-muted">
+                        {formatDate(ev.created_at)}
+                        {toPlan && ` · ${getPlanLabel(toPlan)}`}
+                        {ev.midtrans_order_id && ` · ${ev.midtrans_order_id}`}
+                      </span>
+                    </div>
+                    {amount && (
+                      <span className="type-body font-medium text-text-heading">
+                        {formatCurrency(amount)}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+
+              {invoices.refunds.map((r) => (
+                <div key={r.id} className="flex items-center justify-between py-3 border-b border-[var(--border-light)] last:border-b-0">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="type-body text-text-heading">Refund</span>
+                    <span className="type-caption text-text-muted">
+                      {formatDate(r.created_at)} · {r.reason}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={r.status === 'processed' ? 'default' : 'secondary'} className="text-[10px] uppercase">
+                      {r.status}
+                    </Badge>
+                    <span className="type-body font-medium text-text-heading">
+                      {formatCurrency(r.amount)}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
