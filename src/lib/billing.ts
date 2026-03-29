@@ -225,6 +225,11 @@ export async function createSnapTransaction(params: {
         email: params.customerEmail,
         first_name: params.customerName,
       },
+      callbacks: {
+        finish: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://nuave.ai'}/settings?tab=langganan`,
+        error: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://nuave.ai'}/harga`,
+        pending: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://nuave.ai'}/settings?tab=langganan`,
+      },
     }),
     });
   } finally {
