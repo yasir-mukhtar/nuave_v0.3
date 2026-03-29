@@ -1,12 +1,12 @@
 # CLAUDE.md — Nuave Project Context
 
-> Last updated: March 24, 2026
+> Last updated: March 29, 2026
 
 ## What is Nuave?
 
 **Nuave** (nuave.ai) — AEO (Answer Engine Optimization) SaaS for Indonesian/Malaysian SMBs.
 Measures how often AI tools mention a brand, delivers a 0–100 Visibility Score, generates content fixes.
-Credits-based (not subscription). Free credits earned by completing brand profile (not auto-granted). IDR pricing via Midtrans.
+Subscription-based with 4 tiers (Free/Starter/Growth/Agency). IDR pricing via Midtrans. Free tier includes 1 full audit on signup (no credits needed).
 
 ---
 
@@ -35,7 +35,7 @@ Credits-based (not subscription). Free credits earned by completing brand profil
 src/
 ├── app/
 │   ├── (dashboard)/        # Route group with sidebar layout — dashboard, prompt, content, brand pages
-│   ├── api/                # scrape, generate-prompts, run-audit, audit/[id]/status, recommendations, credits/claim-welcome
+│   ├── api/                # scrape, generate-prompts, run-audit, audit/[id]/status, recommendations, billing/*, cron/*
 │   ├── audit/[id]/         # running, results, recommendations screens
 │   ├── auth/               # Login page + OAuth callback
 │   ├── onboarding/         # analyze, profile, prompts screens
@@ -45,17 +45,19 @@ src/
 │   ├── support/            # Contact form (sends email via Resend)
 │   ├── globals.css         # Design tokens + component classes
 │   └── page.tsx            # Landing page (Bahasa Indonesia)
-├── components/             # Sidebar, Topbar, Footer, PromptDetailModal, dashboard panels
-├── hooks/                  # useActiveWorkspace, useCreditsBalance
+├── components/             # Sidebar, Topbar, Footer, PlanGate, PlanUpgradeBanner, UpgradeCTA, dashboard panels
+├── hooks/                  # useActiveWorkspace, useOrgPlan, useActiveProject
 ├── lib/supabase/
 │   ├── server.ts           # createSupabaseServerClient() + createSupabaseAdminClient()
 │   └── client.ts           # createSupabaseBrowserClient()
 ├── middleware.ts           # Auth middleware (MUST be in src/, not project root)
 └── styles/tokens.css       # CSS design tokens
 docs/
-└── data-architecture-v3.md # Full architecture decisions and rationale
+├── data-architecture-v3.md # Full architecture decisions and rationale
+└── REVIEW_PROMPT.md        # Code review guideline — self-review required before presenting code
 supabase/
-└── schema_v3.sql           # Current schema — source of truth
+├── schema_v3.sql           # Base schema — source of truth
+└── migration_subscription.sql # Subscription model migration (plan tiers, billing tables, RLS)
 ```
 
 ---
@@ -79,8 +81,9 @@ supabase/
 14. **No lucide-react:** Package has been removed. Use `@tabler/icons-react` exclusively
 15. **CSS layers:** Never add unlayered `*`, `body`, or element selectors to globals.css — they override Tailwind utilities. Always use `@layer base`
 16. **Schema v3:** Table names have changed. Use `brands` (not `projects`), `brand_competitors` (not `competitors[]`), `topics` table (not `topics JSONB`), `competitor_snapshots` (not `competitor_analysis`), `content_assets` (not `blog_posts`). See data model below.
-17. **Credits on org:** `credits_balance` lives on `organizations`, not `users`. Use `deduct_credits(org_id, ...)` and `refund_credits(org_id, ...)` DB functions. Never update credits directly.
-18. **Free credits:** NOT auto-granted on signup. User must complete brand profile → call `POST /api/credits/claim-welcome` → calls `claim_welcome_credits()` DB function. Idempotent.
+17. **Plan enforcement:** All feature gating uses `plan-limits.ts` (config) + `plan-gate.ts` (server checks) + `plan-gate-client.ts` (UI gating). Plans: `free | starter | growth | agency`. Plan checks must **fail closed** — if `getOrgPlan()` returns null, return 404, never proceed.
+18. **Billing:** Subscription managed via `/api/billing/*` endpoints. Midtrans Snap for payments. Webhook at `/api/billing/webhook` (signature-verified, idempotent). Rate limited: 5 billing actions/user/hour. `subscription-lifecycle` cron runs daily for downgrade execution + grace period expiry.
+19. **Free tier:** Gets 1 full audit on signup (no credits/payment needed). Gated by checking `audits WHERE brand_id AND status='complete' count > 0`. Competitor names visible but data locked. Recommendations titles visible but details locked.
 
 ---
 
@@ -91,16 +94,9 @@ Unauthenticated → redirect to `/auth?next=<path>`
 
 **Signup flow (v3):**
 1. Google OAuth → `handle_new_user()` trigger fires automatically
-2. Creates: `users` row → `organizations` (0 credits) → `workspaces` (default) → `organization_members` (owner) → `workspace_members` (admin)
-3. Redirect to `/onboarding/analyze`
-
-**Free credit claim flow:**
-1. User completes brand profile → `brands.onboarding_completed_at` is set
-2. "Claim free audit" button appears in the prompt review screen
-3. Button calls `POST /api/credits/claim-welcome`
-4. API checks: authenticated + `onboarding_completed_at IS NOT NULL` + not yet claimed
-5. Calls `claim_welcome_credits(org_id, user_id)` DB function (idempotent)
-6. 10 credits added to `organizations.credits_balance`
+2. Creates: `users` row → `organizations` (plan=free) → `workspaces` (default) → `organization_members` (owner) → `workspace_members` (admin)
+3. Redirect to `/new-project?new=1`
+4. User goes through onboarding wizard → first audit runs free (plan-gated, not credit-gated)
 
 ---
 
@@ -111,28 +107,30 @@ Unauthenticated → redirect to `/auth?next=<path>`
 ### Hierarchy
 
 ```
-organizations                    ← billing root, credit pool (credits_balance here)
+organizations                    ← billing root, subscription owner
   ├── organization_members       ← roles: owner | admin | member | viewer
+  ├── billing_events             ← Midtrans webhook log + subscription events
+  ├── refund_requests            ← refund requests with approval flow
   └── workspaces                 ← team boundaries (1 auto-created "My Workspace" for SME)
         ├── workspace_members    ← assigns org members to workspace with scoped role
         └── brands               ← one brand being tracked (was: projects)
               ├── topics         ← content strategy pillars (was: projects.topics JSONB)
               │     └── prompts  ← topic_id nullable = uncategorized prompt
               ├── brand_competitors  ← (was: projects.competitors TEXT[])
-              ├── audits         ← time-series measurement events
+              ├── audits         ← time-series: manual | monitoring | monthly_auto
               │     ├── audit_results
               │     └── competitor_snapshots  ← (was: competitor_analysis)
               ├── recommendations    ← brand-level persistent backlog (NOT audit-level)
               └── content_assets    ← (was: blog_posts, broader type system)
 
-credit_transactions              ← org-scoped ledger, records actioned_by + audit_id
+credit_transactions              ← org-scoped ledger (legacy, kept for metering history)
 ```
 
 ### Key tables
 
 | Table | Purpose | Key columns |
 |---|---|---|
-| `organizations` | Billing root | `credits_balance`, `plan` (free/pro/enterprise) |
+| `organizations` | Billing root | `plan` (free/starter/growth/agency), `subscription_status`, `billing_cycle`, `current_period_end`, `pending_plan` |
 | `organization_members` | Org RBAC | `role` (owner/admin/member/viewer), `invited_by` |
 | `workspaces` | Team boundaries | `org_id`, `name`, `slug` |
 | `workspace_members` | Workspace RBAC | `role` (admin/member/viewer) |
@@ -145,7 +143,9 @@ credit_transactions              ← org-scoped ledger, records actioned_by + au
 | `competitor_snapshots` | Per-audit competitor data | `audit_id`, `competitor_id` (SET NULL), `competitor_name` (denormalized) |
 | `recommendations` | Persistent brand backlog | `brand_id`, `source_audit_id`, `last_seen_audit_id`, `status` |
 | `content_assets` | Content deliverables | `brand_id`, `type`, `status`, `origin_recommendation_id` |
-| `credit_transactions` | Credit ledger | `org_id`, `actioned_by`, `audit_id`, `type`, `amount` |
+| `billing_events` | Midtrans webhook log | `org_id`, `event_type`, `midtrans_order_id`, `payload` |
+| `refund_requests` | Refund tracking | `org_id`, `requested_by`, `amount`, `status` |
+| `credit_transactions` | Legacy credit ledger | `org_id`, `actioned_by`, `audit_id`, `type`, `amount` |
 
 ### Recommendations status lifecycle
 ```
@@ -173,9 +173,20 @@ effective_role(workspace_id) -- returns 'owner'|'admin'|'member'|'viewer'|'none'
 
 ### DB functions (SECURITY DEFINER — call via API, never direct from client)
 ```sql
-deduct_credits(org_id, amount, actioned_by, audit_id?, description?)
-refund_credits(org_id, amount, actioned_by, audit_id?, description?)
-claim_welcome_credits(org_id, actioned_by)  -- returns: balance | -1 (not found) | -2 (already claimed)
+deduct_credits(org_id, amount, actioned_by, audit_id?, description?)  -- legacy, kept for metering
+refund_credits(org_id, amount, actioned_by, audit_id?, description?)  -- legacy, kept for metering
+-- claim_welcome_credits() has been DROPPED — no longer needed with subscription model
+```
+
+### Plan enforcement architecture
+```
+src/lib/plan-limits.ts      ← Central config: limits, pricing, hierarchy for all 4 tiers
+src/lib/plan-gate.ts        ← Server-side: getOrgPlan(), checkRunAudit(), checkCreateBrand(), etc.
+src/lib/plan-gate-client.ts ← Client-side: canAccess(plan, feature) for UI gating
+src/lib/billing.ts          ← Proration math, refund calc, Midtrans Snap API helpers
+src/lib/rate-limit.ts       ← In-memory rate limiter for billing endpoints
+src/hooks/useOrgPlan.ts     ← React hook returning plan + limits + subscription status
+src/components/PlanGate.tsx  ← UI wrapper: shows children or lock overlay based on plan
 ```
 
 ---
@@ -190,7 +201,8 @@ claim_welcome_credits(org_id, actioned_by)  -- returns: balance | -1 (not found)
 
 ## Recommendations
 
-Two-step freemium: free titles on page load (cached in Supabase), paid reveal (1 credit) for `suggested_copy`.
+Free tier: titles visible but details + suggested_copy locked behind upgrade CTA.
+Paid tiers: full access, no per-action credit cost (included in subscription).
 Types: `technical` (subtype: meta/schema/structure) · `web_copy` · `content` (subtype: blog/page).
 Recommendations are **brand-level** — persist across audits. New audit upserts existing, doesn't duplicate.
 
@@ -244,7 +256,7 @@ tokens.css (source of truth) → @theme inline in globals.css → Tailwind utili
 
 ## Environment Variables
 
-`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`
+`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `MIDTRANS_SERVER_KEY`, `MIDTRANS_IS_PRODUCTION`, `CRON_SECRET`
 
 ## sessionStorage Keys
 
@@ -254,15 +266,13 @@ tokens.css (source of truth) → @theme inline in globals.css → Tailwind utili
 
 ## Not Yet Built
 
-- Run `supabase/schema_v3.sql` on new Supabase project + update env vars
-- Update all API routes for v3 schema (brands, topics, competitors, recommendations, credits)
-- Update TypeScript types (`src/types/index.ts`) for v3 tables
-- `POST /api/credits/claim-welcome` endpoint
+- Content asset generation UI (blog posts, page copy) — backend exists, no UI
+- PDF report export (standard + white-label for Agency)
+- Multi-org switcher UI (enterprise)
 - Org/workspace management UI (enterprise)
-- Midtrans credit purchase integration
-- Content asset generation (blog posts, page copy)
-- PDF report export
-- Multi-org switcher UI
+- Monthly-audit cron scalability (currently sequential — needs job queue for 100+ orgs)
+- Email notifications for subscription events (payment failure, plan change, etc.)
+- Midtrans recurring subscription (currently one-time Snap payments — need recurring billing setup)
 
 ---
 
@@ -278,7 +288,10 @@ AI: Claude claude-sonnet-4-5-20250929 + GPT-4o (web_search)
 Middleware: src/middleware.ts (NOT root) | Auth: getUser() not getSession()
 Supabase client: createSupabaseBrowserClient() | Admin: createSupabaseAdminClient()
 CSS layers: all base resets must be in @layer base — unlayered styles override Tailwind
+Billing: Subscription-based (Free/Starter/Growth/Agency). Plan enforcement via plan-limits.ts +
+  plan-gate.ts. Midtrans Snap for payments. billing_events + refund_requests tables.
+  Credits system removed (legacy tables kept for metering). useOrgPlan hook for UI.
 Schema v3: brands(not projects), topics table, brand_competitors table, competitor_snapshots,
-  content_assets(not blog_posts), recommendations are brand-level(not audit-level),
-  credits on organizations(not users). See docs/data-architecture-v3.md
+  content_assets(not blog_posts), recommendations are brand-level(not audit-level).
+  See docs/data-architecture-v3.md + supabase/migration_subscription.sql
 ```

@@ -1,7 +1,8 @@
 # Nuave — Data Architecture v3
-**Status:** Approved · Ready for Implementation
+**Status:** Implemented
 **Replaces:** `supabase/schema.sql` (v2)
 **Date:** 2026-03-24
+**Updated:** 2026-03-29 — Subscription migration applied (`supabase/migration_subscription.sql`). Plan values changed from `free|pro|enterprise` to `free|starter|growth|agency`. New columns on `organizations`: `subscription_id`, `billing_cycle`, `plan_started_at`, `current_period_start/end`, `cancel_at_period_end`, `cancelled_at`, `subscription_status`, `pending_plan`. New tables: `billing_events`, `refund_requests`. `claim_welcome_credits()` dropped. Credits system no longer gates features (plan-based gating via `src/lib/plan-gate.ts`).
 
 ---
 
